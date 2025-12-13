@@ -1,0 +1,217 @@
+좋아요. 지금 말한 구조가 “서비스처럼 보이는” 핵심이에요.
+
+* **공용 페이지**: 로그인 없이 접근 (차트/분석/마켓/뉴스 등)
+* **개인화 페이지**: 로그인해야 접근 (포트폴리오/손익, 내 시그널 히스토리, 즐겨찾기 등)
+* **회원가입/로그인**: 구글 같은 “대형 포털 OAuth”로 간편 로그인
+* **Supabase Auth + RLS**로 개인 데이터 분리/보안
+
+아래는 **Next.js(App Router) + Supabase** 기준으로 “바로 붙일 수 있는” 구현 로드맵입니다.
+
+---
+
+## 1) Supabase에서 해야 할 설정 (Auth)
+
+### A. OAuth Provider 켜기
+
+Supabase 대시보드 → **Authentication → Providers**
+
+* **Google**: Enabled
+* (선택) **GitHub**도 많이 씁니다(설정 쉬움)
+
+> 참고: 한국 “대형 포털(네이버/카카오)”은 Supabase에서 기본 버튼으로 바로 되는 경우가 제한적이라, 보통 **OIDC(가능하면)** 또는 “커스텀 OAuth(서버 중계)”가 필요할 수 있어요.
+> 일단 **Google + GitHub**로 시작하면 제품 완성도가 확 올라갑니다.
+
+### B. Redirect URL 등록
+
+Authentication → URL Configuration
+
+* Site URL: `http://localhost:3000` (개발)
+* Redirect URLs:
+
+  * `http://localhost:3000/auth/callback`
+  * 배포 후: `https://도메인/auth/callback`
+
+---
+
+## 2) Next.js에서 Supabase Auth 연결 방식 (권장: SSR 세션 기반)
+
+### 설치
+
+```bash
+npm i @supabase/supabase-js @supabase/ssr
+```
+
+### 환경변수 (.env.local)
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+```
+
+---
+
+## 3) 로그인/회원가입 페이지 만들기
+
+### `/app/auth/login/page.tsx` (예시)
+
+* 구글 버튼 누르면 OAuth 로그인
+* 로그인되면 개인화 페이지로 이동
+
+(구현 포인트만)
+
+* `supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: ... }})`
+
+---
+
+## 4) Auth Callback 라우트 만들기 (필수)
+
+### `/app/auth/callback/route.ts`
+
+OAuth 리다이렉트로 돌아왔을 때 “코드 교환” 처리해서 세션 쿠키를 잡아주는 엔드포인트가 필요합니다.
+이거 없으면 “로그인 된 것 같은데 새로고침하면 풀리는” 문제가 자주 생겨요.
+
+---
+
+## 5) “개인화 페이지는 로그인 필수”로 막기
+
+가장 깔끔한 방식 2개 중 하나로 가면 됩니다.
+
+### ✅ 방식 A: middleware.ts로 보호 (추천)
+
+* `/portfolio`, `/account`, `/private/*` 같은 경로를 로그인 없으면 `/auth/login`으로 리다이렉트
+
+예:
+
+* public: `/`, `/analysis`, `/market`, `/news`
+* private: `/portfolio`, `/settings`, `/watchlist`
+
+### ✅ 방식 B: 각 private page에서 서버 체크
+
+* `app/portfolio/page.tsx`에서 세션 없으면 redirect
+
+둘 다 가능하지만, **사용자 경험**은 A가 좋아요(페이지 로딩 전에 차단).
+
+---
+
+## 6) “회원 정보 받은 걸 토대로 개인화” (profiles 테이블)
+
+Supabase Auth는 기본적으로 `auth.users`를 관리합니다.
+개인화(닉네임/선호 코인/알림 설정 등)는 별도 테이블이 정석입니다.
+
+### `profiles` 테이블 추천
+
+```sql
+create table public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  display_name text,
+  created_at timestamptz not null default now()
+);
+
+alter table public.profiles enable row level security;
+
+create policy "profiles_select_own"
+on public.profiles for select
+using (auth.uid() = id);
+
+create policy "profiles_upsert_own"
+on public.profiles for insert
+with check (auth.uid() = id);
+
+create policy "profiles_update_own"
+on public.profiles for update
+using (auth.uid() = id);
+```
+
+그리고 로그인 직후(또는 첫 개인화 페이지 진입 시)
+profiles에 row가 없으면 자동 생성(upsert)하는 흐름을 넣으면 됩니다.
+
+---
+
+## 7) “손익 평가 페이지(포트폴리오)”를 개인화 페이지로 만들기
+
+아까 말한 `trades` 테이블 설계에 **user_id = auth.uid()** 연결하면 완성입니다.
+
+### trades 테이블 + RLS (핵심)
+
+```sql
+create table public.trades (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  symbol text not null,
+  side text not null check (side in ('BUY','SELL')),
+  qty numeric not null check (qty > 0),
+  price numeric not null check (price > 0),
+  fee numeric default 0,
+  executed_at timestamptz not null default now(),
+  note text,
+  created_at timestamptz not null default now()
+);
+
+create index trades_user_symbol_idx on public.trades(user_id, symbol);
+
+alter table public.trades enable row level security;
+
+create policy "trades_select_own"
+on public.trades for select
+using (auth.uid() = user_id);
+
+create policy "trades_insert_own"
+on public.trades for insert
+with check (auth.uid() = user_id);
+
+create policy "trades_update_own"
+on public.trades for update
+using (auth.uid() = user_id);
+
+create policy "trades_delete_own"
+on public.trades for delete
+using (auth.uid() = user_id);
+```
+
+그럼 이제 `/portfolio` 페이지는:
+
+1. 로그인된 유저만 접근
+2. 그 유저의 trades만 조회
+3. Binance 현재가 불러와서 손익 계산
+4. 개인별 결과 표시
+
+---
+
+## 8) 당신 프로젝트에 딱 맞는 페이지 분리 제안
+
+### Public
+
+* `/` (차트 + 분석)
+* `/analysis/[symbol]`
+* `/market`
+* `/news`
+
+### Private (로그인 필요)
+
+* `/portfolio` (매수평단/손익/자산)
+* `/alerts` (내 시그널 알림 기록)
+* `/watchlist` (즐겨찾기 코인)
+* `/settings` (개인화 설정)
+
+---
+
+## 다음으로 내가 바로 “복붙 가능한 코드 세트”로 만들어줄 수 있는 것
+
+원하면 다음 4개를 한 번에 드릴게요(그대로 붙이면 동작하는 형태로):
+
+1. `lib/supabase/server.ts` / `lib/supabase/client.ts` (SSR 세션 세팅)
+2. `/app/auth/login/page.tsx` (구글 로그인 버튼 UI)
+3. `/app/auth/callback/route.ts` (콜백 처리)
+4. `middleware.ts` (개인화 라우트 접근 차단)
+
+그리고 이어서:
+
+* `/app/portfolio/page.tsx` + `AddTradeModal` + 손익 계산 함수까지
+
+---
+
+지금 바로 진행하려면, 딱 한 가지만 내 기준으로 정해서 진행할게요(질문이라기보다 “추천 결정”):
+
+* **OAuth는 우선 Google로 시작** (추가로 GitHub도 넣을지 여부만 나중에)
+
+원하면 다음 답변에서 **파일별로 “그대로 복붙” 가능한 코드**를 바로 출력할게요.

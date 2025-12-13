@@ -1,0 +1,262 @@
+좋아요. 아래는 **“Twelve Data API 실전 사용 매뉴얼 (코딩 적용용)”**입니다.
+👉 *지금 만들고 있는 주식 차트/포트폴리오 웹앱에 바로 붙일 수 있는 수준*으로 정리했습니다.
+
+---
+
+# 📘 Twelve Data API 사용 매뉴얼 (개발자용)
+
+## 1. 언제 Twelve Data를 쓰는가
+
+다음 조건이면 Twelve Data가 **무료 대비 최고 효율**입니다.
+
+* 미국 주식 실시간/근실시간 가격
+* 캔들 차트 (1분~1일)
+* 개인 프로젝트 / MVP / 프로토타입
+* 비용 0원 유지
+
+---
+
+## 2. 기본 개념 정리 (중요)
+
+### 🔑 API Key
+
+* 모든 요청에 `apikey` 필수
+* **절대 프론트엔드에 직접 노출 X**
+* 서버(API Route)에서 호출 권장
+
+### 📊 Credit 개념
+
+* 무료 플랜 기준
+
+  * **분당 8 credits**
+  * **하루 800 credits**
+* 대부분의 API는 **1 호출 = 1 credit**
+* `time_series`는 파라미터에 따라 더 소모될 수 있음
+
+➡️ **캐시 필수 (1~5분)**
+
+---
+
+## 3. 가장 많이 쓰는 API 4종
+
+### ① 현재 가격 (Quote)
+
+```http
+GET https://api.twelvedata.com/quote
+```
+
+**용도**
+
+* 현재가
+* 전일 대비 등락
+* 종목 헤더 정보
+
+**예시**
+
+```bash
+https://api.twelvedata.com/quote?symbol=AAPL&apikey=KEY
+```
+
+**응답 핵심 필드**
+
+```json
+{
+  "symbol": "AAPL",
+  "price": "193.42",
+  "change": "-1.23",
+  "percent_change": "-0.63",
+  "open": "195.00",
+  "high": "196.10",
+  "low": "192.80"
+}
+```
+
+---
+
+### ② 캔들 차트 (Time Series)
+
+```http
+GET https://api.twelvedata.com/time_series
+```
+
+**용도**
+
+* 차트의 핵심
+* 일봉 / 분봉 / 주봉
+
+**주요 파라미터**
+
+| 파라미터       | 설명                     |
+| ---------- | ---------------------- |
+| symbol     | 종목                     |
+| interval   | `1min`, `5min`, `1day` |
+| outputsize | 캔들 개수                  |
+| timezone   | `America/New_York`     |
+
+**예시**
+
+```bash
+https://api.twelvedata.com/time_series?symbol=AAPL&interval=1day&outputsize=100&apikey=KEY
+```
+
+**응답 구조**
+
+```json
+{
+  "values": [
+    {
+      "datetime": "2025-12-12",
+      "open": "194.2",
+      "high": "196.3",
+      "low": "193.1",
+      "close": "193.4",
+      "volume": "53123421"
+    }
+  ]
+}
+```
+
+---
+
+### ③ 여러 종목 한 번에 (멀티 심볼)
+
+```http
+GET https://api.twelvedata.com/quote?symbol=AAPL,MSFT,GOOGL
+```
+
+**장점**
+
+* 종목별 호출 줄임 → credit 절약
+* 포트폴리오 페이지에 최적
+
+---
+
+### ④ 심볼 검색 (자동완성)
+
+```http
+GET https://api.twelvedata.com/symbol_search
+```
+
+**예시**
+
+```bash
+https://api.twelvedata.com/symbol_search?symbol=tesla&apikey=KEY
+```
+
+---
+
+## 4. Next.js 기준 실제 코드 적용
+
+### 4-1. 환경변수
+
+```bash
+# .env.local
+TWELVEDATA_API_KEY=your_api_key
+```
+
+---
+
+### 4-2. API Route (프록시 + 키 보호)
+
+```ts
+// app/api/stock/quote/route.ts
+import { NextResponse } from 'next/server';
+
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const symbol = searchParams.get('symbol');
+
+  const res = await fetch(
+    `https://api.twelvedata.com/quote?symbol=${symbol}&apikey=${process.env.TWELVEDATA_API_KEY}`,
+    { next: { revalidate: 60 } } // 60초 캐시
+  );
+
+  const data = await res.json();
+  return NextResponse.json(data);
+}
+```
+
+---
+
+### 4-3. 프론트엔드에서 호출
+
+```ts
+const res = await fetch(`/api/stock/quote?symbol=AAPL`);
+const data = await res.json();
+```
+
+➡️ **이 구조가 제일 안전 + 효율적**
+
+---
+
+## 5. 차트 라이브러리와 연결 (예: TradingView / Recharts)
+
+### 캔들 데이터 변환 예시
+
+```ts
+const candles = data.values.map(v => ({
+  time: new Date(v.datetime).getTime() / 1000,
+  open: Number(v.open),
+  high: Number(v.high),
+  low: Number(v.low),
+  close: Number(v.close),
+}));
+```
+
+---
+
+## 6. 무료 플랜에서 반드시 지켜야 할 규칙
+
+### ✅ DO
+
+* 1~5분 캐시
+* 멀티 심볼 사용
+* 필요할 때만 호출
+
+### ❌ DON'T
+
+* 페이지 로드마다 API 호출
+* 프론트에서 직접 호출
+* 실시간(초 단위) 갱신
+
+---
+
+## 7. 에러 처리 패턴 (중요)
+
+```ts
+if (data.status === 'error') {
+  console.error(data.message);
+  // fallback: 마지막 캐시 데이터 사용
+}
+```
+
+자주 나오는 에러:
+
+* `API limit reached`
+* `Invalid API key`
+* `Symbol not supported`
+
+---
+
+## 8. 추천 아키텍처 요약
+
+```
+[Client]
+   ↓
+[Next.js API Route]
+   ↓ (캐시)
+[Twelve Data]
+```
+
+➡️ 나중에 **Finnhub / 유료 API로 교체해도 구조 그대로 유지 가능**
+
+---
+
+## 9. 다음 단계 추천
+
+원하시면 바로 이어서:
+1️⃣ **주식 차트 전용 데이터 Provider 추상화 코드**
+2️⃣ **포트폴리오 손익 계산 로직 (매수가 기준)**
+3️⃣ **Supabase + 사용자별 캐시 구조**
+
+중에서 뭐부터 할지 말해줘.

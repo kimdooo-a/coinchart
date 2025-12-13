@@ -1,0 +1,1576 @@
+아래는 **“Personalized Analysis Room 고도화 제안서(정밀도 높은 차트 분석 기법 추가 + 종합 판단 엔진)”** 형태로 바로 내부 문서/기획서로 쓸 수 있게 정리한 버전입니다. (현재 구조: Supabase `market_prices` + `trades`, Next.js `/analysis/[symbol]`, lightweight-charts 기반을 전제로 설계)
+
+---
+
+# Personalized Analysis Room 고도화 제안서
+
+**목표:** “차트가 예뻐 보이는 페이지” → **정밀도 높은 신호 생성 + 개인 포지션 기준 의사결정(진입/추가매수/축소/손절/홀드)까지 제시하는 커맨드 센터**로 고도화
+
+---
+
+## 1) 고도화 핵심 방향
+
+### A. “정밀도”의 정의를 바꾼다
+
+단일 지표(RSI, MACD 등)로는 정밀도가 올라가지 않습니다. 정밀도는 보통 아래 3개를 합쳐야 올라갑니다.
+
+1. **구조(Structure)**: 추세/박스/돌파/반전의 “상태”를 먼저 판별
+2. **변동성(Volatility)**: 손절/추가매수/익절이 유효한 거리(ATR 등)
+3. **유동성·거래량(Volume/Liquidity)**: 돌파가 진짜인지(거래량/수급 기반 확인)
+
+→ 그래서 “정밀 분석 기법”도 **Market Structure + Volatility + Volume** 3축으로 설계합니다.
+
+---
+
+## 2) 추가할 “정밀도 높은” 차트 분석 기법 제안
+
+### 2.1 Market Structure 기반 (우선순위 ★★★★★)
+
+#### (1) 스윙 하이/로우 + 추세 전환 감지(BOS/CHOCH)
+
+* **BOS(Break of Structure)**: 고점/저점 구조가 깨지며 추세 지속/변화 확인
+* **CHOCH(Change of Character)**: 추세가 바뀌기 시작하는 초기 징후
+* 효과: “지표가 매수라고 하는데 왜 계속 하락하지?” 같은 문제를 구조 기반으로 차단
+* UI: 차트에 **스윙 포인트 마킹 + BOS/CHOCH 라벨 표시**
+
+#### (2) 다중 타임프레임(MTF) 정렬
+
+* Daily(현재) + Weekly(상위 구조) 최소 2개는 같이 봐야 “정밀도”가 생깁니다.
+* 규칙 예:
+
+  * Weekly 상승 구조 + Daily 조정 → 매수/분할 매수 우선
+  * Weekly 하락 구조 + Daily 반등 → 반등 매도/리스크 우선
+* UI: 탭(1D/1W) 또는 “상위 TF 상태 배지(Uptrend/Range/Downtrend)”
+
+---
+
+### 2.2 변동성 기반 (우선순위 ★★★★☆)
+
+#### (3) ATR 기반 리스크 밴드(손절/추가매수/익절 거리 산정)
+
+* ATR(14) 또는 (20)을 기반으로 **“합리적 손절 거리”**를 자동 제시
+* 예:
+
+  * 손절: Entry - 1.5×ATR
+  * 1차 익절: Entry + 1.5×ATR
+  * 2차 익절: Entry + 3×ATR
+* UI: **내 평균단가 라인** 기준으로 ATR 밴드 표시(붉은/초록 영역)
+
+#### (4) 볼린저밴드 “수축→확장” 레짐 판단
+
+* 밴드 폭(BB Width)로 “곧 변동성 폭발 구간”을 탐지
+* 구조(BOS)와 결합하면 돌파 성공률이 상승
+* UI: 하단에 BB Width 라인 + “Squeeze 상태” 배지
+
+---
+
+### 2.3 거래량·유동성 기반 (우선순위 ★★★★☆)
+
+#### (5) VWAP(세션/앵커) + 개인화 결합
+
+* 단순 VWAP보다 **Anchored VWAP**이 정밀도가 높습니다.
+* 기준점(anchor):
+
+  * “최근 주요 저점/고점”, 또는
+  * “내 첫 매수 체결 시점”, “내 평균단가 갱신 시점”
+* 효과: “내 투자 행동(체결)”과 시장 평균 체결가(VWAP)를 결합한 **개인화된 공정가(Fair Value)** 추정
+* UI: VWAP 라인 + 표준편차 밴드(±1σ, ±2σ)
+
+#### (6) Volume Spike + 돌파 확인(Confirmation)
+
+* 돌파 캔들이 나와도 **거래량이 동반되지 않으면 페이크**일 확률이 큼
+* 규칙: 돌파일 거래량이 최근 n일 평균 대비 몇 배인지(예: 1.8x 이상)로 신뢰도 점수화
+* UI: “Breakout Confirmed(Volume)” 뱃지
+
+---
+
+### 2.4 가격 레벨 고정밀 (우선순위 ★★★☆☆)
+
+#### (7) 피벗 기반 자동 지지/저항 + “레벨 클러스터링”
+
+* 스윙 포인트에서 레벨을 뽑고, 근접한 레벨을 **클러스터링**해서 “진짜 강한 구간”만 남김
+* UI: 얇은 다수 라인이 아니라 **굵기(강도)로 표현** (강할수록 두껍게)
+
+#### (8) 회귀 채널(Regression Channel)로 “과열/저평가” 판단
+
+* 단순 추세선보다 객관적(통계 기반)
+* 가격이 채널 상단에 머물면 과열(익절/축소), 하단이면 저평가(분할 매수) 판단 근거 제공
+
+---
+
+### 2.5 “정밀도는 검증에서 완성” (우선순위 ★★★★★)
+
+#### (9) 신호별 백테스트/실시간 성과 추적(퍼-유저/퍼-자산)
+
+* 이미 백테스트 로직을 갖고 있으니, **신호별 승률/기대값/최대낙폭(MDD)**를 페이지에 노출
+* “이 유저가 SOL에서 썼을 때 승률이 좋은 신호”를 우선 추천하는 개인화도 가능
+
+---
+
+## 3) 종합 판단 엔진(Decision Engine) 설계
+
+### 3.1 “한 줄 추천”을 넘어서: 시나리오 기반으로
+
+단일 문장 대신 아래 3요소를 함께 제시하면 신뢰도가 급상승합니다.
+
+1. **현재 레짐:** Uptrend / Range / Downtrend
+2. **핵심 레벨:** 내 평균단가, 구조 전환 레벨, 리스크(손절) 레벨
+3. **행동 플랜:** Hold / Add / Trim / Exit + 조건(“어떤 일이 생기면 바꾼다”)
+
+---
+
+### 3.2 종합 스코어 방식(예시)
+
+각 축을 0~100으로 점수화 후 가중 평균
+
+* **Structure (40%)**: MTF 추세 정렬 + BOS/CHOCH 상태
+* **Volatility (20%)**: ATR 대비 가격 위치(리스크 대비 보상) + Squeeze 여부
+* **Volume/Liquidity (20%)**: 돌파 거래량 확인, VWAP 위치
+* **Personal Position (20%)**: 내 평균단가 대비 거리, 현재 손익, 최근 매수/매도 밀도
+
+결과 출력 예:
+
+* **Overall: 73/100 (Bullish)**
+* Confidence: High / Medium / Low (데이터 일치 정도로 산정)
+
+---
+
+### 3.3 최종 권고 템플릿(실전형)
+
+* **결론(행동):** “보유 유지 + 1차 축소 준비”
+* **근거(3줄):** 구조/변동성/거래량/개인단가
+* **레벨:**
+
+  * 손절: xx (또는 내 평균단가 - 1.5×ATR)
+  * 1차 익절: xx
+  * 2차 익절: xx
+* **조건부 시나리오:**
+
+  * “BOS 상승 확인 + 거래량 확인 시 → 추가매수”
+  * “CHOCH 하락 발생 시 → 축소/리스크 오프”
+
+---
+
+## 4) 구현 아키텍처 제안(성능/유지보수 포함)
+
+### 4.1 계산은 “어디서” 할 것인가
+
+* **클라이언트 계산(현재 방식)**: 빠르게 도입 가능 / 유저별 개인화 쉬움
+* **서버/DB 계산(추천)**: 신호 재사용, 캐싱, 비용 절감, 일관성 ↑
+
+권장 하이브리드:
+
+* 공통 시장지표(스윙, ATR, VWAP 등) → **Supabase Edge Function or DB View로 생성/캐시**
+* 개인화(평균단가, 보유수량, 개인 신호 적합도) → **서버 컴포넌트에서 계산 후 내려주기**
+
+### 4.2 테이블/캐시(추가) 예시
+
+* `market_indicators_daily(symbol, date, atr, swing_high, swing_low, bos, choch, vwap, bb_width, ...)`
+* `indicator_cache(symbol, timeframe, last_updated, payload_jsonb)`
+* 목적: 페이지 로딩 시 “990 캔들 + 지표 세트”를 한 번에 가져와 렌더
+
+---
+
+## 5) UI/UX 고도화 구성안(사용자 체감 큰 순)
+
+1. 차트 상단에 **“레짐 배지 + 종합 점수 + 신뢰도”**
+2. 차트에 **Avg Buy + VWAP + 구조 라벨(BOS/CHOCH) + 강한 레벨(클러스터)**
+3. 하단에 **Action Plan 카드(손절/익절/추가매수 조건)**
+4. (선택) “내 포지션 기준 시뮬레이션”:
+
+   * “지금 10% 추가매수하면 평균단가가 얼마로 내려감”
+   * “1차 익절을 하면 남은 평단/리스크가 어떻게 바뀜”
+
+---
+
+## 6) 최종 종합 판단(이 페이지가 ‘의사결정 도구’가 되려면)
+
+당장 가장 임팩트 큰 고도화 순서는 이렇습니다.
+
+1. **MTF + Market Structure(BOS/CHOCH) 도입** → “상태 판별”이 생김
+2. **ATR로 손절/익절 거리 자동화** → “행동”이 생김
+3. **Anchored VWAP(개인 체결 시점 앵커)** → “개인화 정밀도”가 확 올라감
+4. **Volume Confirmation** → “페이크 돌파 필터”로 승률 개선
+5. **신호별 성과 추적(백테스트/실전 기록)** → 시간이 갈수록 “너만의 정확도”가 올라감
+
+즉, 지금 페이지가 “개인화 차트” 단계라면, 위 1~3만 넣어도 **‘개인화 트레이딩 룸’**으로 급격히 진화합니다.
+
+---
+
+원하면 내가 다음 단계로 바로 **“실제 화면 구성 와이어프레임(컴포넌트 단위)” + “Supabase indicator_cache 설계 SQL/Edge Function 스케치” + “lightweight-charts에 BOS/CHOCH 라벨/라인 그리는 코드 패턴”**까지 한 번에 완성해줄게요.
+
+
+
+
+
+좋아. 바로 **“화면 와이어프레임(컴포넌트 단위) + Supabase 인디케이터 캐시 설계(SQL) + Edge Function 스케치 + lightweight-charts에 BOS/CHOCH/레벨/Anchored VWAP/ATR 밴드 그리는 코드 패턴”**까지 한 번에 묶어서 줄게.
+
+---
+
+# 1) 화면 구성 와이어프레임 (Analysis Room v2)
+
+## 1.1 페이지 레이아웃
+
+```
+[Header]
+- {SYMBOL} · Personalized Analysis Room
+- Regime Badge (Uptrend / Range / Downtrend)   Confidence (High/Med/Low)
+- Overall Score 0~100   Last updated time
+
+[Top Strip: Position Summary]
+- My Avg Buy / Current Price / Unrealized PnL% / Position Qty / Cost Basis
+- Risk Plan Mini: Stop / TP1 / TP2 (ATR 기반)
+
+[Main Chart Card]
+- Candles (990D)
+- Overlays:
+  - My Avg Buy (blue dotted)
+  - Anchored VWAP (purple)
+  - ATR Bands (±1.5 ATR / ±3 ATR)
+  - Strong Levels (clustered S/R)
+  - BOS/CHOCH labels
+
+[Tabs under chart]
+- Signals | Levels | Backtest | Plan
+  Signals: 신호 목록 + 점수 기여도
+  Levels: 지지/저항/손절/익절 레벨 요약
+  Backtest: 각 신호 승률/EV/MDD
+  Plan: “지금 무엇을 할지” 시나리오 카드
+
+[Bottom: Scenario Cards]
+- Base Case (확률/조건/행동)
+- Bull Case
+- Bear Case
+```
+
+---
+
+# 2) 컴포넌트 설계 (Next.js App Router)
+
+## 2.1 폴더 구조
+
+```
+app/analysis/[symbol]/
+  page.tsx                     (server: auth, data fetch)
+  AnalysisRoomClient.tsx        (client wrapper)
+  components/
+    HeaderSummary.tsx
+    PositionStrip.tsx
+    ChartCard.tsx               (lightweight-charts integration)
+    SignalsPanel.tsx
+    LevelsPanel.tsx
+    BacktestPanel.tsx
+    PlanPanel.tsx
+  lib/
+    decisionEngine.ts
+    indicators.ts               (client fallback calc if needed)
+    types.ts
+```
+
+## 2.2 데이터 계약(Props) – v2
+
+* `candles[]` (date, o/h/l/c, volume)
+* `trades[]` (buy/sell fills)
+* `indicators` (캐시된 지표/레벨/구조 이벤트)
+* `decision` (종합 점수 + 레짐 + 시나리오 + 플랜)
+
+---
+
+# 3) Supabase 인디케이터 캐시 설계 (권장안)
+
+## 3.1 테이블: `market_indicators_daily`
+
+> “매일 캔들 기준”으로 구조/변동성/거래량 핵심값만 저장 (차트에서 바로 씀)
+
+```sql
+create table if not exists public.market_indicators_daily (
+  symbol text not null,
+  date date not null,
+
+  -- Volatility
+  atr14 numeric,
+  bb_width numeric,
+
+  -- Structure
+  swing_high boolean default false,
+  swing_low boolean default false,
+  bos_level numeric,           -- BOS 발생 레벨 (없으면 null)
+  choch_level numeric,         -- CHOCH 발생 레벨 (없으면 null)
+  structure_state text,        -- 'UP' | 'RANGE' | 'DOWN' (optional)
+
+  -- Volume Confirmation
+  vol_ma20 numeric,
+  vol_ratio numeric,           -- volume / vol_ma20
+
+  -- Anchored VWAP (anchor per symbol strategy: e.g., last swing low)
+  avwap numeric,
+  avwap_anchor_date date,
+
+  primary key (symbol, date)
+);
+
+create index if not exists idx_indicators_symbol_date
+  on public.market_indicators_daily(symbol, date desc);
+```
+
+## 3.2 테이블: `indicator_cache`
+
+> “한 번에 내려주는 payload” 캐싱 (990개를 JSON으로 들고 있어도 됨)
+
+```sql
+create table if not exists public.indicator_cache (
+  symbol text not null,
+  timeframe text not null default '1D',
+  lookback int not null default 990,
+  last_updated timestamptz not null default now(),
+  payload jsonb not null,
+  primary key(symbol, timeframe, lookback)
+);
+```
+
+### RLS
+
+* 둘 다 public read 가능(시장 데이터)
+* 업데이트는 service role/edge function만
+
+---
+
+# 4) Edge Function 스케치 (지표 생성 + 캐시 업데이트)
+
+## 4.1 동작
+
+1. `market_prices`에서 `symbol` 최근 1200~1500일 정도 fetch (스윙/ATR 계산 여유)
+2. 지표 계산(ATR, BB width, 스윙, BOS/CHOCH, vol ratio, AVWAP)
+3. `market_indicators_daily` upsert
+4. `indicator_cache` payload 갱신(최근 990일 slice)
+5. 크론으로 매일 1회 또는 신규 가격 입력 후 트리거 방식
+
+## 4.2 Edge Function 의사 코드
+
+```ts
+// /functions/update-indicators/index.ts (pseudo)
+import { createClient } from "@supabase/supabase-js";
+
+export default async (req: Request) => {
+  const { symbol } = await req.json();
+  const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+
+  // 1) fetch candles (desc)
+  const { data: candles } = await supabase
+    .from("market_prices")
+    .select("date,open,high,low,close,volume")
+    .eq("symbol", symbol)
+    .order("date", { ascending: true }) // easier calc
+    .limit(1500);
+
+  // 2) compute indicators
+  const indicators = computeAll(candles); // atr, bb_width, swings, bos/choch, vol_ratio, avwap
+
+  // 3) upsert daily indicators
+  await supabase.from("market_indicators_daily").upsert(indicators, { onConflict: "symbol,date" });
+
+  // 4) update cache (last 990)
+  const payload = indicators.slice(-990);
+  await supabase.from("indicator_cache").upsert({
+    symbol, timeframe: "1D", lookback: 990, last_updated: new Date().toISOString(), payload
+  }, { onConflict: "symbol,timeframe,lookback" });
+
+  return new Response(JSON.stringify({ ok: true, count: payload.length }), { status: 200 });
+};
+```
+
+---
+
+# 5) lightweight-charts 오버레이 구현 패턴 (핵심 코드)
+
+아래는 “차트 위에 정밀 분석 요소를 올리는” 실전 패턴만 모아둔 거야.
+(지금 너가 가진 `ChartCard.tsx`에 그대로 이식 가능)
+
+## 5.1 평균단가(수평선) – 이미 구현한 방식 유지
+
+* lineSeries 2점(첫날/마지막날)으로 수평선
+
+## 5.2 BOS/CHOCH 이벤트 라벨(마커)
+
+> lightweight-charts의 `setMarkers()` 사용
+
+```ts
+const markers = [];
+
+for (const row of indicatorRows) {
+  if (row.bos_level) {
+    markers.push({
+      time: row.date,
+      position: "aboveBar",
+      color: "rgba(34,197,94,1)",
+      shape: "arrowUp",
+      text: `BOS ${Number(row.bos_level).toFixed(2)}`
+    });
+  }
+  if (row.choch_level) {
+    markers.push({
+      time: row.date,
+      position: "belowBar",
+      color: "rgba(239,68,68,1)",
+      shape: "arrowDown",
+      text: `CHOCH ${Number(row.choch_level).toFixed(2)}`
+    });
+  }
+}
+candleSeries.setMarkers(markers);
+```
+
+## 5.3 스윙 하이/로우 표시(마커)
+
+```ts
+const swingMarkers = indicatorRows
+  .filter(r => r.swing_high || r.swing_low)
+  .map(r => ({
+    time: r.date,
+    position: r.swing_high ? "aboveBar" : "belowBar",
+    color: "rgba(148,163,184,1)",
+    shape: r.swing_high ? "circle" : "circle",
+    text: r.swing_high ? "SH" : "SL"
+  }));
+candleSeries.setMarkers([...markers, ...swingMarkers]);
+```
+
+## 5.4 ATR 리스크 밴드(상/하단 라인 2~4개)
+
+> Entry(평균단가) 기준으로 “Stop/TP 라인”을 그려도 되고, “가격기준 밴드”로 그려도 됨.
+> 여기선 **평균단가 기준 Stop/TP 라인**이 실전 의사결정에 더 유용.
+
+```ts
+function makeHorizontalLine(series, candles, value, style) {
+  const first = candles[0].date;
+  const last = candles[candles.length - 1].date;
+  series.applyOptions(style);
+  series.setData([{ time: first, value }, { time: last, value }]);
+}
+
+// 예: avgBuy 기준
+const lastATR = Number(indicatorRows[indicatorRows.length - 1]?.atr14 ?? 0);
+const stop = avgBuy - 1.5 * lastATR;
+const tp1  = avgBuy + 1.5 * lastATR;
+const tp2  = avgBuy + 3.0 * lastATR;
+```
+
+* stop/tp1/tp2 각각 lineSeries 하나씩 두면 가장 깔끔함(총 3개)
+
+## 5.5 Anchored VWAP 라인
+
+> `market_indicators_daily`에 `avwap`이 계산되어 있다고 가정(권장)
+> 차트에서는 그냥 lineSeries로 시계열 데이터 넣으면 끝.
+
+```ts
+const vwapSeries = chart.addLineSeries({ lineWidth: 2 });
+vwapSeries.setData(indicatorRows
+  .filter(r => r.avwap != null)
+  .map(r => ({ time: r.date, value: Number(r.avwap) }))
+);
+```
+
+## 5.6 “강한 레벨(클러스터 S/R)” 그리기
+
+> 레벨은 보통 5~12개 정도만 남겨야 가독성이 살아남
+> 강도(strength)에 따라 lineWidth를 다르게.
+
+```ts
+// levels: [{ price: number, strength: number }]
+levels.forEach(lv => {
+  const s = chart.addLineSeries({
+    lineWidth: Math.min(4, 1 + Math.floor(lv.strength / 3)),
+    lineStyle: 0,
+  });
+  s.setData([
+    { time: candles[0].date, value: lv.price },
+    { time: candles[candles.length - 1].date, value: lv.price },
+  ]);
+});
+```
+
+---
+
+# 6) 종합 판단 엔진(Decision Engine) – 바로 적용 가능한 스키마
+
+## 6.1 입력
+
+* `currentClose`
+* `avgBuy`
+* `regime` (MTF 구조 판단)
+* `bosRecent`, `chochRecent`
+* `volRatio`, `bbSqueeze`
+* `avwapDistancePct`
+* `atr` (risk distance)
+
+## 6.2 출력(JSON)
+
+```ts
+type Decision = {
+  overallScore: number;        // 0-100
+  regime: "UP"|"RANGE"|"DOWN";
+  confidence: "HIGH"|"MEDIUM"|"LOW";
+  action: "HOLD"|"ADD"|"TRIM"|"EXIT";
+  levels: { stop: number; tp1: number; tp2: number; invalidation?: number };
+  reasons: string[];
+  scenarios: Array<{
+    name: "Base"|"Bull"|"Bear";
+    probability: number; // 0-1
+    conditions: string[];
+    plan: string[];
+  }>;
+};
+```
+
+## 6.3 예시 룰(간단하지만 강력)
+
+* **UP 레짐 + 가격이 AVWAP 위 + 최근 BOS 발생 + vol_ratio 높음** → ADD/HOLD 쪽
+* **DOWN 레짐 + CHOCH 하락 + AVWAP 아래 + vol_ratio 낮음** → TRIM/EXIT 쪽
+* **RANGE + BB squeeze** → “대기 + 돌파 확인 시 행동” 시나리오
+
+---
+
+# 7) 다음 작업을 바로 진행하는 “실행 체크리스트”
+
+### Phase 1 (체감 즉시 / 1~2일)
+
+* [ ] `indicator_cache` 도입(Edge Function으로 990일 payload 생성)
+* [ ] 차트에 BOS/CHOCH 마커 + 스윙 마커 표시
+* [ ] Anchored VWAP 라인 표시
+* [ ] ATR 기반 Stop/TP 라인 표시
+* [ ] 상단 “Regime/Score/Confidence” 배지 추가
+
+### Phase 2 (정밀도 상승 / 3~7일)
+
+* [ ] 레벨 클러스터링 자동 S/R
+* [ ] 신호별 백테스트 성과(승률/EV/MDD) 패널
+* [ ] 개인화: “이 유저에게 맞는 신호 가중치” 학습(간단히 최근 성과 기반)
+
+---
+
+원하면 내가 다음 답장에서 **실제 코드 파일 단위로** 바로 만들어줄게:
+
+* `ChartCard.tsx` (오버레이 전부 포함)
+* `decisionEngine.ts` (스코어/시나리오/레벨 산출)
+* `update-indicators` Edge Function (ATR/스윙/BOS/CHOCH/AVWAP/vol_ratio 계산 포함)
+
+너는 지금 코드베이스가 **TypeScript + Next.js App Router + supabase-js** 맞지? (맞다고 가정하고 다음부터는 “완성본 코드”로 들어갈게.)
+
+
+
+
+
+
+좋아. **바로 “붙여 넣으면 돌아가는” 수준**으로 파일 단위 완성본을 줄게.
+(가정: Next.js App Router + TypeScript + supabase-js v2 + lightweight-charts, Supabase에 `indicator_cache` / `market_indicators_daily` 테이블 존재)
+
+아래 6개만 넣으면 **BOS/CHOCH/스윙/AVWAP/ATR Stop·TP/레짐·스코어·시나리오**까지 한 번에 동작한다.
+
+---
+
+## 0) 설치 체크
+
+```bash
+npm i lightweight-charts
+```
+
+---
+
+## 1) `app/analysis/[symbol]/page.tsx` (서버: auth + candles + trades + indicator_cache)
+
+```tsx
+import { redirect } from "next/navigation";
+import { createClient } from "@/utils/supabase/server";
+import AnalysisRoomClient from "./AnalysisRoomClient";
+
+export const revalidate = 0;
+
+export default async function Page({ params }: { params: { symbol: string } }) {
+  const symbol = params.symbol.toUpperCase();
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const [{ data: candles, error: cErr }, { data: trades, error: tErr }, { data: cache, error: iErr }] =
+    await Promise.all([
+      supabase
+        .from("market_prices")
+        .select("date,open,high,low,close,volume")
+        .eq("symbol", symbol)
+        .order("date", { ascending: false })
+        .limit(990),
+      supabase
+        .from("trades")
+        .select("side,quantity,price,fee,traded_at")
+        .eq("symbol", symbol)
+        .order("traded_at", { ascending: true }),
+      supabase
+        .from("indicator_cache")
+        .select("payload,last_updated")
+        .eq("symbol", symbol)
+        .eq("timeframe", "1D")
+        .eq("lookback", 990)
+        .maybeSingle(),
+    ]);
+
+  if (cErr) throw new Error(cErr.message);
+  if (tErr) throw new Error(tErr.message);
+  // indicator cache가 없어도 페이지는 동작(클라 fallback 계산 가능). 여기선 그냥 null로 둠.
+  if (iErr) console.warn("indicator_cache fetch error:", iErr.message);
+
+  const candleAsc = (candles ?? []).slice().reverse();
+
+  return (
+    <AnalysisRoomClient
+      symbol={symbol}
+      candles={candleAsc}
+      trades={trades ?? []}
+      indicatorPayload={(cache?.payload as any[]) ?? null}
+      indicatorLastUpdated={cache?.last_updated ?? null}
+    />
+  );
+}
+```
+
+---
+
+## 2) `app/analysis/[symbol]/AnalysisRoomClient.tsx` (클라: 종합판단 + 화면)
+
+```tsx
+"use client";
+
+import ChartCard from "./components/ChartCard";
+import HeaderSummary from "./components/HeaderSummary";
+import PositionStrip from "./components/PositionStrip";
+import PlanPanel from "./components/PlanPanel";
+import { calcAvgBuyPrice, calcPositionQty } from "./lib/position";
+import { buildDecision } from "./lib/decisionEngine";
+import type { CandleRow, TradeRow, IndicatorRow, Decision } from "./lib/types";
+
+export default function AnalysisRoomClient({
+  symbol,
+  candles,
+  trades,
+  indicatorPayload,
+  indicatorLastUpdated,
+}: {
+  symbol: string;
+  candles: CandleRow[];
+  trades: TradeRow[];
+  indicatorPayload: IndicatorRow[] | null;
+  indicatorLastUpdated: string | null;
+}) {
+  const avgBuy = calcAvgBuyPrice(trades);
+  const qty = calcPositionQty(trades);
+
+  const currentClose = candles.length ? Number(candles[candles.length - 1].close) : 0;
+
+  const decision: Decision = buildDecision({
+    symbol,
+    candles,
+    trades,
+    indicators: indicatorPayload,
+    avgBuy,
+  });
+
+  return (
+    <div className="p-6 space-y-4">
+      <HeaderSummary
+        symbol={symbol}
+        decision={decision}
+        lastUpdated={indicatorLastUpdated}
+      />
+
+      <PositionStrip
+        currentClose={currentClose}
+        avgBuy={avgBuy}
+        qty={qty}
+        levels={decision.levels}
+      />
+
+      <ChartCard
+        symbol={symbol}
+        candles={candles}
+        indicators={indicatorPayload}
+        avgBuy={avgBuy}
+        levels={decision.levels}
+        strongLevels={decision.strongLevels}
+      />
+
+      <PlanPanel decision={decision} />
+    </div>
+  );
+}
+```
+
+---
+
+## 3) `app/analysis/[symbol]/lib/types.ts`
+
+```ts
+export type CandleRow = {
+  date: string; // YYYY-MM-DD
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume?: number | null;
+};
+
+export type TradeRow = {
+  side: "BUY" | "SELL";
+  quantity: number;
+  price: number;
+  fee?: number | null;
+  traded_at: string;
+};
+
+export type IndicatorRow = {
+  date: string;
+  atr14?: number | null;
+  bb_width?: number | null;
+  swing_high?: boolean | null;
+  swing_low?: boolean | null;
+  bos_level?: number | null;
+  choch_level?: number | null;
+  structure_state?: "UP" | "RANGE" | "DOWN" | null;
+  vol_ma20?: number | null;
+  vol_ratio?: number | null;
+  avwap?: number | null;
+  avwap_anchor_date?: string | null;
+};
+
+export type Levels = {
+  stop: number | null;
+  tp1: number | null;
+  tp2: number | null;
+  invalidation?: number | null;
+};
+
+export type StrongLevel = { price: number; strength: number; kind: "SR" | "PIVOT" };
+
+export type Decision = {
+  overallScore: number; // 0-100
+  regime: "UP" | "RANGE" | "DOWN";
+  confidence: "HIGH" | "MEDIUM" | "LOW";
+  action: "HOLD" | "ADD" | "TRIM" | "EXIT";
+  levels: Levels;
+  reasons: string[];
+  scenarios: Array<{
+    name: "Base" | "Bull" | "Bear";
+    probability: number; // 0~1
+    conditions: string[];
+    plan: string[];
+  }>;
+  strongLevels: StrongLevel[];
+};
+```
+
+---
+
+## 4) 포지션 계산: `app/analysis/[symbol]/lib/position.ts`
+
+```ts
+import type { TradeRow } from "./types";
+
+export function calcAvgBuyPrice(trades: TradeRow[]) {
+  const buys = trades.filter(t => t.side === "BUY");
+  const totalQty = buys.reduce((s, t) => s + Number(t.quantity), 0);
+  if (totalQty <= 0) return null;
+
+  const totalCost = buys.reduce((s, t) => {
+    const fee = t.fee ? Number(t.fee) : 0;
+    return s + (Number(t.quantity) * Number(t.price)) + fee;
+  }, 0);
+
+  return totalCost / totalQty;
+}
+
+export function calcPositionQty(trades: TradeRow[]) {
+  let qty = 0;
+  for (const t of trades) {
+    if (t.side === "BUY") qty += Number(t.quantity);
+    else qty -= Number(t.quantity);
+  }
+  return Math.max(0, qty);
+}
+```
+
+---
+
+## 5) 종합 판단 엔진: `app/analysis/[symbol]/lib/decisionEngine.ts`
+
+> **MTF(weekly)까지 완벽히 하려면 주봉 데이터가 필요**하지만, 지금 DB가 Daily만 있으니
+> 여기서는 **Daily 구조 + “레짐(UP/RANGE/DOWN)” + 신뢰도 + 행동 플랜**을 즉시 만들고,
+> 나중에 주봉 캐시 추가하면 점수에 바로 합칠 수 있게 설계해둠.
+
+```ts
+import type { CandleRow, IndicatorRow, TradeRow, Decision, StrongLevel, Levels } from "./types";
+
+function clamp(n: number, a: number, b: number) {
+  return Math.max(a, Math.min(b, n));
+}
+
+function pct(a: number, b: number) {
+  if (!b) return 0;
+  return ((a - b) / b) * 100;
+}
+
+function last<T>(arr: T[]) {
+  return arr.length ? arr[arr.length - 1] : null;
+}
+
+/**
+ * 간단하지만 강력한 레짐 판정:
+ * - indicators.structure_state가 있으면 우선 사용
+ * - 없으면 최근 스윙 구조(고점/저점) + 고점/저점 갱신 여부로 추정
+ */
+function inferRegime(candles: CandleRow[], indicators?: IndicatorRow[] | null): "UP" | "RANGE" | "DOWN" {
+  const li = indicators ? last(indicators) : null;
+  if (li?.structure_state) return li.structure_state;
+
+  // fallback: 최근 90일 고/저 범위 + 마지막 종가 위치로 대충 레짐
+  const lookback = 90;
+  const slice = candles.slice(-lookback);
+  if (slice.length < 20) return "RANGE";
+
+  const highs = slice.map(c => Number(c.high));
+  const lows = slice.map(c => Number(c.low));
+  const hi = Math.max(...highs);
+  const lo = Math.min(...lows);
+  const close = Number(slice[slice.length - 1].close);
+
+  const rangePct = ((hi - lo) / Math.max(1e-9, lo)) * 100;
+  if (rangePct < 12) return "RANGE"; // 변동이 작으면 박스
+
+  // range가 큰데 close가 상단/하단에 붙어있으면 추세로 해석
+  const pos = (close - lo) / (hi - lo + 1e-9);
+  if (pos > 0.70) return "UP";
+  if (pos < 0.30) return "DOWN";
+  return "RANGE";
+}
+
+/**
+ * 강한 레벨(클러스터) 생성:
+ * - swing_high/low가 있으면 그 날짜의 high/low를 레벨 후보로
+ * - 없으면 최근 N일 pivot(단순)로 뽑음
+ * - 근접 레벨들을 버킷으로 묶어 strength를 누적
+ */
+function buildStrongLevels(candles: CandleRow[], indicators?: IndicatorRow[] | null): StrongLevel[] {
+  const lookback = 240;
+  const cs = candles.slice(-lookback);
+  if (cs.length < 30) return [];
+
+  const candidates: Array<{ price: number; w: number }> = [];
+
+  if (indicators && indicators.length) {
+    // indicators는 990일 payload라고 가정 (candles와 date 정렬 같을 확률 높음)
+    const map = new Map(indicators.map(i => [i.date, i]));
+    for (const c of cs) {
+      const ind = map.get(c.date);
+      if (ind?.swing_high) candidates.push({ price: Number(c.high), w: 2.0 });
+      if (ind?.swing_low) candidates.push({ price: Number(c.low), w: 2.0 });
+    }
+  } else {
+    // fallback pivot: i-2..i+2 비교
+    for (let i = 2; i < cs.length - 2; i++) {
+      const h = Number(cs[i].high);
+      const l = Number(cs[i].low);
+      const prev2 = cs.slice(i - 2, i).map(x => Number(x.high));
+      const next2 = cs.slice(i + 1, i + 3).map(x => Number(x.high));
+      if (h > Math.max(...prev2) && h > Math.max(...next2)) candidates.push({ price: h, w: 1.2 });
+
+      const prev2l = cs.slice(i - 2, i).map(x => Number(x.low));
+      const next2l = cs.slice(i + 1, i + 3).map(x => Number(x.low));
+      if (l < Math.min(...prev2l) && l < Math.min(...next2l)) candidates.push({ price: l, w: 1.2 });
+    }
+  }
+
+  if (!candidates.length) return [];
+
+  const current = Number(cs[cs.length - 1].close);
+  const bucketPct = 0.006; // 0.6% 이내는 같은 레벨로 묶음(코인 변동성 고려)
+  const buckets: Array<{ center: number; strength: number }> = [];
+
+  for (const c of candidates) {
+    let placed = false;
+    for (const b of buckets) {
+      const dist = Math.abs(c.price - b.center) / Math.max(1e-9, b.center);
+      if (dist <= bucketPct) {
+        // 중심 업데이트(가중 평균)
+        const total = b.strength + c.w;
+        b.center = (b.center * b.strength + c.price * c.w) / total;
+        b.strength = total;
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) buckets.push({ center: c.price, strength: c.w });
+  }
+
+  // 현재가 주변 레벨을 더 중요하게
+  const scored = buckets
+    .map(b => {
+      const distPct = Math.abs(b.center - current) / Math.max(1e-9, current);
+      const proximityBoost = 1 / (1 + distPct * 40); // 가까울수록 boost
+      return { ...b, score: b.strength * proximityBoost };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 10)
+    .map(b => ({ price: b.center, strength: Math.round(b.strength * 10) / 10, kind: "SR" as const }));
+
+  return scored;
+}
+
+function computeLevels(avgBuy: number | null, indicators?: IndicatorRow[] | null): Levels {
+  if (!avgBuy) return { stop: null, tp1: null, tp2: null, invalidation: null };
+  const li = indicators ? last(indicators) : null;
+  const atr = li?.atr14 ? Number(li.atr14) : 0;
+
+  if (!atr || atr <= 0) {
+    // ATR 없으면 최소한 “평단 기준”으로 기본 레벨만
+    return {
+      stop: avgBuy * 0.92,
+      tp1: avgBuy * 1.08,
+      tp2: avgBuy * 1.18,
+      invalidation: avgBuy * 0.90,
+    };
+  }
+
+  return {
+    stop: avgBuy - 1.5 * atr,
+    tp1: avgBuy + 1.5 * atr,
+    tp2: avgBuy + 3.0 * atr,
+    invalidation: avgBuy - 2.2 * atr,
+  };
+}
+
+export function buildDecision({
+  symbol,
+  candles,
+  trades,
+  indicators,
+  avgBuy,
+}: {
+  symbol: string;
+  candles: CandleRow[];
+  trades: TradeRow[];
+  indicators: IndicatorRow[] | null;
+  avgBuy: number | null;
+}): Decision {
+  const lc = last(candles);
+  const li = indicators ? last(indicators) : null;
+
+  const currentClose = lc ? Number(lc.close) : 0;
+  const regime = inferRegime(candles, indicators);
+
+  // features
+  const atr = li?.atr14 ? Number(li.atr14) : 0;
+  const volRatio = li?.vol_ratio ? Number(li.vol_ratio) : 1;
+  const bbWidth = li?.bb_width ? Number(li.bb_width) : null;
+  const avwap = li?.avwap ? Number(li.avwap) : null;
+
+  const pAvg = avgBuy ? pct(currentClose, avgBuy) : null;
+  const avwapDist = avwap ? pct(currentClose, avwap) : null;
+
+  // BOS/CHOCH recent flags (최근 20일 내 발생 여부)
+  const recentN = 20;
+  const recentInd = indicators ? indicators.slice(-recentN) : [];
+  const bosRecent = recentInd.some(r => r.bos_level != null);
+  const chochRecent = recentInd.some(r => r.choch_level != null);
+
+  // score components
+  let scoreStructure = 50;
+  if (regime === "UP") scoreStructure += 18;
+  if (regime === "DOWN") scoreStructure -= 18;
+  if (bosRecent) scoreStructure += 10;
+  if (chochRecent) scoreStructure -= 12;
+  scoreStructure = clamp(scoreStructure, 0, 100);
+
+  let scoreVol = 50;
+  // squeeze(폭이 작다)면 “대기+확정 후 진입”이므로 과열/과매도 가점 대신 중립
+  if (bbWidth != null) {
+    if (bbWidth < 0.06) scoreVol += 5;   // 수축 -> 곧 변동성
+    if (bbWidth > 0.18) scoreVol -= 6;   // 확장 과열 가능
+  }
+  scoreVol = clamp(scoreVol, 0, 100);
+
+  let scoreVolume = 50;
+  if (volRatio >= 1.8) scoreVolume += 14;
+  else if (volRatio >= 1.3) scoreVolume += 8;
+  else if (volRatio <= 0.8) scoreVolume -= 6;
+  scoreVolume = clamp(scoreVolume, 0, 100);
+
+  let scorePersonal = 50;
+  if (pAvg != null) {
+    if (pAvg >= 12) scorePersonal += 14;
+    else if (pAvg >= 0) scorePersonal += 6;
+    else if (pAvg <= -15) scorePersonal -= 14;
+    else scorePersonal -= 6;
+  }
+  // AVWAP 위/아래
+  if (avwapDist != null) {
+    if (avwapDist >= 0) scorePersonal += 6;
+    else scorePersonal -= 6;
+  }
+  scorePersonal = clamp(scorePersonal, 0, 100);
+
+  // weighted overall
+  const overallScore = Math.round(
+    0.40 * scoreStructure +
+    0.20 * scoreVol +
+    0.20 * scoreVolume +
+    0.20 * scorePersonal
+  );
+
+  // confidence
+  let confidence: "HIGH" | "MEDIUM" | "LOW" = "MEDIUM";
+  const hasCore = Boolean(indicators && indicators.length && li?.atr14 != null && li?.vol_ratio != null);
+  if (!hasCore) confidence = "LOW";
+  else {
+    const agreement = [
+      regime === "UP" ? 1 : 0,
+      bosRecent ? 1 : 0,
+      (avwapDist ?? 0) >= 0 ? 1 : 0,
+      volRatio >= 1.3 ? 1 : 0,
+    ].reduce((s, x) => s + x, 0);
+
+    if (agreement >= 3 && overallScore >= 65) confidence = "HIGH";
+    if (agreement <= 1 && overallScore <= 45) confidence = "LOW";
+  }
+
+  // levels + strong levels
+  const levels = computeLevels(avgBuy, indicators);
+  const strongLevels = buildStrongLevels(candles, indicators);
+
+  // action
+  let action: Decision["action"] = "HOLD";
+  if (overallScore >= 72) action = "ADD";
+  else if (overallScore >= 58) action = "HOLD";
+  else if (overallScore >= 45) action = "TRIM";
+  else action = "EXIT";
+
+  // reasons
+  const reasons: string[] = [];
+  reasons.push(`Regime: ${regime}.`);
+  if (bosRecent) reasons.push("Recent BOS detected (structure continuation).");
+  if (chochRecent) reasons.push("Recent CHOCH detected (early reversal risk).");
+  if (volRatio >= 1.3) reasons.push(`Volume confirms move (vol ratio ${volRatio.toFixed(2)}x).`);
+  else reasons.push(`Volume is weak (vol ratio ${volRatio.toFixed(2)}x).`);
+  if (avwapDist != null) reasons.push(`Price vs AVWAP: ${avwapDist.toFixed(1)}%.`);
+  if (pAvg != null) reasons.push(`Your PnL vs Avg Buy: ${pAvg.toFixed(1)}%.`);
+  if (atr && avgBuy) reasons.push(`ATR-based plan enabled (ATR14 ≈ ${atr.toFixed(2)}).`);
+
+  // scenarios
+  const scenarios: Decision["scenarios"] = [
+    {
+      name: "Base",
+      probability: clamp(overallScore / 100, 0.25, 0.65),
+      conditions: [
+        regime === "UP" ? "Structure holds and makes higher lows." : "Range persists with mean reversion.",
+        volRatio >= 1.3 ? "Breakouts are volume-confirmed." : "Moves likely to fade without volume.",
+      ],
+      plan: [
+        action === "ADD" ? "Add in tranches near strong support levels." : "Hold and follow the risk plan.",
+        levels.stop ? `Hard stop near ${levels.stop.toFixed(2)}.` : "Define a stop based on risk tolerance.",
+        levels.tp1 ? `Take partial profit near ${levels.tp1.toFixed(2)}.` : "Plan a partial take-profit.",
+      ],
+    },
+    {
+      name: "Bull",
+      probability: regime === "UP" ? 0.25 : 0.18,
+      conditions: [
+        "BOS triggers again and closes above resistance.",
+        "AVWAP stays supportive (price above AVWAP).",
+      ],
+      plan: [
+        "Scale in only after confirmation candle closes.",
+        levels.tp2 ? `Trail profits toward ${levels.tp2.toFixed(2)}.` : "Trail profits with a moving stop.",
+      ],
+    },
+    {
+      name: "Bear",
+      probability: regime === "DOWN" ? 0.35 : 0.22,
+      conditions: [
+        "CHOCH confirms and breaks key support.",
+        "Price stays below AVWAP with weak volume.",
+      ],
+      plan: [
+        levels.invalidation ? `Reduce risk if below ${levels.invalidation.toFixed(2)}.` : "Reduce risk on support loss.",
+        "Avoid averaging down unless thesis remains intact and structure reclaims.",
+      ],
+    },
+  ];
+
+  return {
+    overallScore,
+    regime,
+    confidence,
+    action,
+    levels,
+    reasons,
+    scenarios,
+    strongLevels,
+  };
+}
+```
+
+---
+
+## 6) UI 컴포넌트 3개
+
+### 6.1 `app/analysis/[symbol]/components/HeaderSummary.tsx`
+
+```tsx
+import type { Decision } from "../lib/types";
+
+function badgeClass(regime: Decision["regime"]) {
+  if (regime === "UP") return "bg-white/10 border-white/10 text-emerald-300";
+  if (regime === "DOWN") return "bg-white/10 border-white/10 text-rose-300";
+  return "bg-white/10 border-white/10 text-amber-300";
+}
+
+export default function HeaderSummary({
+  symbol,
+  decision,
+  lastUpdated,
+}: {
+  symbol: string;
+  decision: Decision;
+  lastUpdated: string | null;
+}) {
+  return (
+    <div className="flex items-end justify-between">
+      <div>
+        <div className="text-2xl font-semibold">{symbol} · Personalized Analysis Room</div>
+        <div className="text-sm text-gray-400">
+          {lastUpdated ? `Indicators cache updated: ${new Date(lastUpdated).toLocaleString()}` : "Indicators cache: not available"}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <div className={`px-3 py-1 rounded-full border ${badgeClass(decision.regime)}`}>
+          {decision.regime}
+        </div>
+        <div className="px-3 py-1 rounded-full border border-white/10 bg-white/5 text-gray-200">
+          Score {decision.overallScore}/100
+        </div>
+        <div className="px-3 py-1 rounded-full border border-white/10 bg-white/5 text-gray-300">
+          {decision.confidence}
+        </div>
+        <div className="px-3 py-1 rounded-full border border-white/10 bg-white/5 text-gray-100 font-medium">
+          {decision.action}
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+### 6.2 `app/analysis/[symbol]/components/PositionStrip.tsx`
+
+```tsx
+import type { Levels } from "../lib/types";
+
+export default function PositionStrip({
+  currentClose,
+  avgBuy,
+  qty,
+  levels,
+}: {
+  currentClose: number;
+  avgBuy: number | null;
+  qty: number;
+  levels: Levels;
+}) {
+  const pnlPct = avgBuy ? ((currentClose - avgBuy) / avgBuy) * 100 : null;
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-3 text-sm">
+        <div>
+          <div className="text-gray-400">Current</div>
+          <div className="text-gray-100 font-medium">{currentClose.toLocaleString()}</div>
+        </div>
+        <div>
+          <div className="text-gray-400">My Avg Buy</div>
+          <div className="text-gray-100 font-medium">{avgBuy ? avgBuy.toLocaleString() : "-"}</div>
+        </div>
+        <div>
+          <div className="text-gray-400">Unrealized PnL</div>
+          <div className="text-gray-100 font-medium">
+            {pnlPct == null ? "-" : `${pnlPct.toFixed(2)}%`}
+          </div>
+        </div>
+        <div>
+          <div className="text-gray-400">Qty</div>
+          <div className="text-gray-100 font-medium">{qty.toLocaleString()}</div>
+        </div>
+        <div>
+          <div className="text-gray-400">Stop</div>
+          <div className="text-gray-100 font-medium">{levels.stop ? levels.stop.toFixed(2) : "-"}</div>
+        </div>
+        <div>
+          <div className="text-gray-400">TP1 / TP2</div>
+          <div className="text-gray-100 font-medium">
+            {levels.tp1 ? levels.tp1.toFixed(2) : "-"} / {levels.tp2 ? levels.tp2.toFixed(2) : "-"}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+### 6.3 `app/analysis/[symbol]/components/PlanPanel.tsx`
+
+```tsx
+import type { Decision } from "../lib/types";
+
+export default function PlanPanel({ decision }: { decision: Decision }) {
+  return (
+    <div className="grid md:grid-cols-2 gap-4">
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+        <div className="text-sm font-semibold text-gray-100 mb-2">Why this call</div>
+        <ul className="text-sm text-gray-300 space-y-1 list-disc pl-5">
+          {decision.reasons.slice(0, 6).map((r, i) => <li key={i}>{r}</li>)}
+        </ul>
+      </div>
+
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+        <div className="text-sm font-semibold text-gray-100 mb-2">Scenarios</div>
+        <div className="space-y-3">
+          {decision.scenarios.map((s) => (
+            <div key={s.name} className="rounded-xl border border-white/10 bg-black/10 p-3">
+              <div className="flex items-center justify-between">
+                <div className="text-gray-100 font-medium">{s.name}</div>
+                <div className="text-gray-300 text-xs">{Math.round(s.probability * 100)}%</div>
+              </div>
+              <div className="text-xs text-gray-400 mt-2">Conditions</div>
+              <ul className="text-sm text-gray-300 list-disc pl-5">
+                {s.conditions.map((c, idx) => <li key={idx}>{c}</li>)}
+              </ul>
+              <div className="text-xs text-gray-400 mt-2">Plan</div>
+              <ul className="text-sm text-gray-200 list-disc pl-5">
+                {s.plan.map((p, idx) => <li key={idx}>{p}</li>)}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## 7) 핵심: 차트 오버레이 풀세트 `app/analysis/[symbol]/components/ChartCard.tsx`
+
+> 이게 “고도화의 본체”야.
+>
+> * 캔들
+> * 평균단가(점선)
+> * AVWAP(시계열)
+> * BOS/CHOCH/스윙 마커
+> * Stop/TP 라인
+> * Strong Levels(클러스터) 라인들
+
+```tsx
+"use client";
+
+import { useEffect, useMemo, useRef } from "react";
+import { createChart, ColorType, ISeriesApi } from "lightweight-charts";
+import type { CandleRow, IndicatorRow, StrongLevel, Levels } from "../lib/types";
+
+function toCandleData(c: CandleRow) {
+  return {
+    time: c.date,
+    open: Number(c.open),
+    high: Number(c.high),
+    low: Number(c.low),
+    close: Number(c.close),
+  };
+}
+
+function buildMarkers(candles: CandleRow[], indicators: IndicatorRow[]) {
+  const map = new Map(indicators.map(i => [i.date, i]));
+  const markers: any[] = [];
+
+  for (const c of candles) {
+    const ind = map.get(c.date);
+    if (!ind) continue;
+
+    if (ind.bos_level != null) {
+      markers.push({
+        time: c.date,
+        position: "aboveBar",
+        color: "rgba(34,197,94,1)",
+        shape: "arrowUp",
+        text: `BOS ${Number(ind.bos_level).toFixed(2)}`,
+      });
+    }
+    if (ind.choch_level != null) {
+      markers.push({
+        time: c.date,
+        position: "belowBar",
+        color: "rgba(239,68,68,1)",
+        shape: "arrowDown",
+        text: `CHOCH ${Number(ind.choch_level).toFixed(2)}`,
+      });
+    }
+    if (ind.swing_high) {
+      markers.push({
+        time: c.date,
+        position: "aboveBar",
+        color: "rgba(148,163,184,1)",
+        shape: "circle",
+        text: "SH",
+      });
+    }
+    if (ind.swing_low) {
+      markers.push({
+        time: c.date,
+        position: "belowBar",
+        color: "rgba(148,163,184,1)",
+        shape: "circle",
+        text: "SL",
+      });
+    }
+  }
+  return markers;
+}
+
+export default function ChartCard({
+  symbol,
+  candles,
+  indicators,
+  avgBuy,
+  levels,
+  strongLevels,
+}: {
+  symbol: string;
+  candles: CandleRow[];
+  indicators: IndicatorRow[] | null;
+  avgBuy: number | null;
+  levels: Levels;
+  strongLevels: StrongLevel[];
+}) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const chartRef = useRef<ReturnType<typeof createChart> | null>(null);
+  const candleSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
+
+  const avgLineRef = useRef<ISeriesApi<"Line"> | null>(null);
+  const vwapRef = useRef<ISeriesApi<"Line"> | null>(null);
+
+  const stopRef = useRef<ISeriesApi<"Line"> | null>(null);
+  const tp1Ref = useRef<ISeriesApi<"Line"> | null>(null);
+  const tp2Ref = useRef<ISeriesApi<"Line"> | null>(null);
+
+  const srRefs = useRef<ISeriesApi<"Line">[]>([]);
+
+  const markerData = useMemo(() => {
+    if (!indicators) return [];
+    return buildMarkers(candles, indicators);
+  }, [candles, indicators]);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const chart = createChart(containerRef.current, {
+      layout: {
+        background: { type: ColorType.Solid, color: "transparent" },
+        textColor: "rgba(229,231,235,0.85)",
+      },
+      grid: {
+        vertLines: { color: "rgba(255,255,255,0.06)" },
+        horzLines: { color: "rgba(255,255,255,0.06)" },
+      },
+      timeScale: { borderVisible: false },
+      rightPriceScale: { borderVisible: false },
+      crosshair: {
+        vertLine: { labelVisible: false },
+        horzLine: { labelVisible: true },
+      },
+      width: containerRef.current.clientWidth,
+      height: 460,
+    });
+
+    const candleSeries = chart.addCandlestickSeries();
+    candleSeriesRef.current = candleSeries;
+
+    // Avg buy (blue dotted)
+    avgLineRef.current = chart.addLineSeries({
+      lineWidth: 2,
+      lineStyle: 2,
+      color: "rgba(59,130,246,1)",
+      priceLineVisible: true,
+      lastValueVisible: true,
+    });
+
+    // AVWAP (purple)
+    vwapRef.current = chart.addLineSeries({
+      lineWidth: 2,
+      color: "rgba(168,85,247,1)",
+      priceLineVisible: false,
+      lastValueVisible: false,
+    });
+
+    // Risk plan lines
+    stopRef.current = chart.addLineSeries({ lineWidth: 2, color: "rgba(239,68,68,1)", lineStyle: 2 });
+    tp1Ref.current = chart.addLineSeries({ lineWidth: 2, color: "rgba(34,197,94,1)", lineStyle: 2 });
+    tp2Ref.current = chart.addLineSeries({ lineWidth: 2, color: "rgba(16,185,129,1)", lineStyle: 2 });
+
+    chartRef.current = chart;
+
+    const onResize = () => {
+      if (!containerRef.current || !chartRef.current) return;
+      chartRef.current.applyOptions({ width: containerRef.current.clientWidth });
+    };
+    window.addEventListener("resize", onResize);
+
+    return () => {
+      window.removeEventListener("resize", onResize);
+      chart.remove();
+      chartRef.current = null;
+      srRefs.current = [];
+    };
+  }, []);
+
+  // set candle data
+  useEffect(() => {
+    if (!candleSeriesRef.current) return;
+    const data = candles.map(toCandleData);
+    candleSeriesRef.current.setData(data);
+    chartRef.current?.timeScale().fitContent();
+  }, [candles]);
+
+  // markers (BOS/CHOCH/Swing)
+  useEffect(() => {
+    if (!candleSeriesRef.current) return;
+    candleSeriesRef.current.setMarkers(markerData);
+  }, [markerData]);
+
+  // avg line
+  useEffect(() => {
+    if (!avgLineRef.current) return;
+    if (!avgBuy || candles.length < 2) {
+      avgLineRef.current.setData([]);
+      return;
+    }
+    const first = candles[0].date;
+    const last = candles[candles.length - 1].date;
+    avgLineRef.current.setData([
+      { time: first, value: avgBuy },
+      { time: last, value: avgBuy },
+    ]);
+  }, [avgBuy, candles]);
+
+  // AVWAP
+  useEffect(() => {
+    if (!vwapRef.current) return;
+    if (!indicators || !indicators.length) {
+      vwapRef.current.setData([]);
+      return;
+    }
+    const data = indicators
+      .filter(r => r.avwap != null)
+      .map(r => ({ time: r.date, value: Number(r.avwap) }));
+    vwapRef.current.setData(data);
+  }, [indicators]);
+
+  // Stop/TP lines
+  useEffect(() => {
+    if (!stopRef.current || !tp1Ref.current || !tp2Ref.current) return;
+    if (candles.length < 2) return;
+
+    const first = candles[0].date;
+    const last = candles[candles.length - 1].date;
+
+    const setH = (ref: ISeriesApi<"Line">, v: number | null) => {
+      if (!v) return ref.setData([]);
+      ref.setData([{ time: first, value: v }, { time: last, value: v }]);
+    };
+
+    setH(stopRef.current, levels.stop);
+    setH(tp1Ref.current, levels.tp1);
+    setH(tp2Ref.current, levels.tp2);
+  }, [levels, candles]);
+
+  // Strong levels lines
+  useEffect(() => {
+    if (!chartRef.current) return;
+    // clear old
+    for (const s of srRefs.current) chartRef.current.removeSeries(s);
+    srRefs.current = [];
+
+    if (!candles.length || !strongLevels?.length) return;
+
+    const first = candles[0].date;
+    const last = candles[candles.length - 1].date;
+
+    for (const lv of strongLevels) {
+      const width = Math.min(4, 1 + Math.floor(lv.strength / 3));
+      const s = chartRef.current.addLineSeries({
+        lineWidth: width,
+        color: "rgba(148,163,184,0.55)",
+        priceLineVisible: false,
+        lastValueVisible: false,
+      });
+      s.setData([{ time: first, value: lv.price }, { time: last, value: lv.price }]);
+      srRefs.current.push(s);
+    }
+  }, [strongLevels, candles]);
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-sm text-gray-200 font-medium">Chart · {symbol} (990D)</div>
+        <div className="text-xs text-gray-400">
+          Overlays: AvgBuy · AVWAP · BOS/CHOCH · Swings · Stop/TP · Strong Levels
+        </div>
+      </div>
+      <div ref={containerRef} />
+    </div>
+  );
+}
+```
+
+---
+
+# 8) (선택) Edge Function에서 지표 계산까지 “완전체”로 가려면
+
+지표 계산(ATR/스윙/BOS/CHOCH/AVWAP/vol_ratio)은 꽤 길어져서, **너가 지금 쓰는 방식(Yahoo seed / retention / cron)** 에 맞춰서 정확히 붙여야 해.
+하지만 지금 상태에서도:
+
+* `indicator_cache`에 payload가 들어오기만 하면 → 위 UI/엔진은 즉시 고도화 적용됨.
+* cache가 아직 없다면 → “먼저 cache 채우기”만 하면 끝.
+
+원하면 다음 메시지에서 내가 **Supabase Edge Function 완성본**을 “그대로 배포 가능한 형태”로 준다:
+
+* `computeATR14`
+* `detectSwings(lookback=2)`
+* `detectBOS_CHoCH`(스윙 기반)
+* `computeAnchoredVWAP(anchor=lastSwingLow)`
+* `computeVolRatio(MA20)`
+* upsert + cache update
+
+---
+
+## 다음 액션(너는 지금 바로 할 일)
+
+1. 위 파일들 추가/교체
+2. `indicator_cache`에 데이터가 이미 있으면 → 바로 BOS/CHOCH/AVWAP/StopTP 뜸
+3. 없으면 → 내가 다음 답장에서 **Edge Function 완성본** 줄 테니 그거 배포 후 cron만 걸면 끝
+
+원샷으로 끝내자. 다음엔 **Edge Function 완성본(배포용)** 바로 줄게.
+
+
+
+
+
+
+
+
+
