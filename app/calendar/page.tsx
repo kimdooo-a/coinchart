@@ -190,13 +190,11 @@ export default function CalendarPage() {
 
     return (
         <main className="min-h-screen bg-black text-white p-4 md:p-8 flex flex-col items-center">
+            {/* Spacer for GlobalHeader */}
+            <div className="h-24 w-full" aria-hidden="true" />
+
             <header className="w-full max-w-4xl mb-8 flex flex-col gap-4 border-b border-gray-800 pb-6">
                 <div className="flex items-center justify-between">
-                    <Link href="/" className="hover:opacity-80 transition-opacity">
-                        <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 bg-clip-text text-transparent">
-                            &larr; {t.common.back}
-                        </h1>
-                    </Link>
                     <h2 className="text-2xl font-bold">📅 {t.calendar.title}</h2>
                 </div>
             </header>

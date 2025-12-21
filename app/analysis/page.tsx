@@ -36,16 +36,17 @@ export default function AnalysisPage() {
 
     return (
         <main className="min-h-screen bg-black text-white p-4 md:p-8">
+            {/* Spacer for GlobalHeader */}
+            <div className="h-24 w-full" aria-hidden="true" />
+
             <div className="max-w-7xl mx-auto space-y-6 md:space-y-8">
 
                 {/* Header */}
                 <header className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-800 pb-6 shadow-sm">
                     <div className="w-full">
-                        <Link href="/" className="hover:opacity-80 transition-opacity block w-fit">
-                            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 bg-clip-text text-transparent flex items-center gap-2 cursor-pointer drop-shadow-sm">
-                                ❤️ 사랑하는 나의 마누라를 위해 ❤️
-                            </h1>
-                        </Link>
+                        <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 bg-clip-text text-transparent flex items-center gap-2 drop-shadow-sm">
+                            ❤️ 사랑하는 나의 마누라를 위해 ❤️
+                        </h1>
                         <div className="text-sm text-gray-500 mt-1 font-medium">{t.subtitle}</div>
                     </div>
                 </header>

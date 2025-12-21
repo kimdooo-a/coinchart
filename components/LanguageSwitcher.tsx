@@ -3,8 +3,14 @@
 import React from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 
+import { usePathname } from 'next/navigation';
+
 export const LanguageSwitcher = () => {
     const { lang, toggleLang } = useLanguage();
+    const pathname = usePathname();
+
+    // Hide global switcher on home page (/)
+    if (pathname === '/') return null;
 
     return (
         <button

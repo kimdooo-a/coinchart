@@ -3,7 +3,9 @@ import { NextResponse } from 'next/server';
 
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
-    const symbol = searchParams.get('symbol');
+    const symbolParam = searchParams.get('symbol');
+    // Normalize BRK-B to BRK.B for Twelve Data
+    const symbol = symbolParam === 'BRK-B' ? 'BRK.B' : symbolParam;
 
     if (!symbol) {
         return NextResponse.json({ error: 'Symbol is required' }, { status: 400 });

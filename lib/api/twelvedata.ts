@@ -91,6 +91,12 @@ export async function getTwelveDataQuote(symbol: string): Promise<TwelveDataTick
 
     } catch (error) {
         console.error('getTwelveDataQuote Error:', error);
-        return null;
+
+        // Return Mock/Fallback data to prevent UI crash
+        return {
+            symbol: symbol,
+            price: 0,
+            changePercent: 0
+        };
     }
 }

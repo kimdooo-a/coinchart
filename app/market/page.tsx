@@ -357,15 +357,14 @@ export default function MarketPage() {
 
     return (
         <main className="min-h-screen bg-black text-white p-4 md:p-8 flex flex-col items-center">
-            <header className="w-full max-w-6xl mb-8 flex flex-col md:flex-row items-center justify-between border-b border-gray-800 pb-6 gap-6">
-                <div className="flex items-center gap-4">
-                    <Link href="/" className="hover:opacity-80 transition-opacity">
-                        <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 bg-clip-text text-transparent">
-                            &larr; {t.common.back}
-                        </h1>
-                    </Link>
-                    <h2 className="text-2xl font-bold">{t.market.title}</h2>
-                </div>
+            {/* Spacer for GlobalHeader (1.5x height) */}
+            <div className="h-24 w-full" aria-hidden="true" />
+
+            {/* Header Removed - Managed by GlobalHeader */}
+            <div className="w-full max-w-6xl mb-8 flex items-center justify-between">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 bg-clip-text text-transparent">
+                    {t.market.title}
+                </h2>
 
                 {/* Basis Toggle */}
                 <div className="bg-gray-800 p-1 rounded-lg flex">
@@ -382,7 +381,7 @@ export default function MarketPage() {
                         {t.market.realtimeBasis}
                     </button>
                 </div>
-            </header>
+            </div>
 
             {loading ? (
                 <div className="w-full max-w-4xl h-96 bg-gray-900 rounded-3xl animate-pulse"></div>

@@ -25,15 +25,15 @@ export async function GET() {
             console.error('Exchange rate fetch failed, using fallback');
         }
 
-        // 2. Fetch Upbit Prices (KRW)
-        const upbitSymbols = 'KRW-BTC,KRW-ETH,KRW-SOL,KRW-XRP,KRW-BCH,KRW-DOGE';
-        const upbitRes = await fetch(`https://api.upbit.com/v1/ticker?markets=${upbitSymbols}`, {
+        // 2. Fetch Bithumb Prices (KRW)
+        const bithumbRes = await fetch('https://api.bithumb.com/public/ticker/ALL_KRW', {
             cache: 'no-store',
             headers
         });
 
-        if (!upbitRes.ok) throw new Error(`Upbit API Failed: ${upbitRes.status}`);
-        const upbitData = await upbitRes.json();
+        if (!bithumbRes.ok) throw new Error(`Bithumb API Failed: ${bithumbRes.status}`);
+        const bithumbJson = await bithumbRes.json();
+        const bithumbData = bithumbJson.data;
 
         // 3. Fetch Binance Prices (USDT)
         const binanceSymbols = '["BTCUSDT","ETHUSDT","SOLUSDT","XRPUSDT","BCHUSDT","DOGEUSDT"]';
@@ -50,11 +50,13 @@ export async function GET() {
         const coins = ['BTC', 'ETH', 'SOL', 'XRP', 'BCH', 'DOGE'];
 
         for (const coin of coins) {
-            const upbitItem = upbitData.find((item: any) => item.market === `KRW-${coin}`);
+            const bithumbItem = bithumbData[coin];
+            // Bithumb Item Structure: { opening_price, closing_price, min_price, max_price, ... }
+
             const binanceItem = binanceData.find((item: any) => item.symbol === `${coin}USDT`);
 
-            if (upbitItem && binanceItem) {
-                const krwPrice = upbitItem.trade_price;
+            if (bithumbItem && binanceItem) {
+                const krwPrice = parseFloat(bithumbItem.closing_price); // Bithumb returns string
                 const usdPrice = parseFloat(binanceItem.price);
                 const globalKrwPrice = usdPrice * exchangeRate;
 

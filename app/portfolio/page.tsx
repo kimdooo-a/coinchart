@@ -186,21 +186,16 @@ export default function PortfolioPage() {
 
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-gray-100 p-8">
+            {/* Spacer for GlobalHeader */}
+            <div className="h-24 w-full" aria-hidden="true" />
+
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
+                {/* Header (Simplified) */}
                 <header className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-800 pb-6">
-                    <div>
-                        <div className="flex items-center gap-4 mb-2">
-                            <a href="/" className="text-gray-400 hover:text-white transition-colors">
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                                </svg>
-                            </a>
-                            <h1 className="text-3xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
-                                {t.portfolio.title}
-                            </h1>
-                        </div>
-                    </div>
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
+                        {t.portfolio.title}
+                    </h1>
                     <div className="flex items-center gap-4">
                         {user && (
                             <div className="flex items-center gap-2 text-sm text-gray-400">
@@ -208,21 +203,6 @@ export default function PortfolioPage() {
                                 {user.email}
                             </div>
                         )}
-                        {/* Language Toggle */}
-                        <div className="bg-gray-800 p-1 rounded-lg flex items-center">
-                            <button
-                                onClick={() => setLang('ko')}
-                                className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${lang === 'ko' ? 'bg-blue-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
-                            >
-                                KR (한글)
-                            </button>
-                            <button
-                                onClick={() => setLang('en')}
-                                className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${lang === 'en' ? 'bg-indigo-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
-                            >
-                                us ENG
-                            </button>
-                        </div>
                     </div>
                 </header>
 

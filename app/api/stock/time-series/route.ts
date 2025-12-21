@@ -6,7 +6,9 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
-    const symbol = searchParams.get('symbol');
+    const symbolParam = searchParams.get('symbol');
+    // Normalize BRK-B to BRK.B for DB query
+    const symbol = symbolParam === 'BRK-B' ? 'BRK.B' : symbolParam;
     const intervalParam = searchParams.get('interval') || '1day';
     const outputsize = parseInt(searchParams.get('outputsize') || '365');
 

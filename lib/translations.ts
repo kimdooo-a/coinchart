@@ -6,6 +6,37 @@ export const TRANSLATIONS = {
             titleSuffix: "마누라를 위해",
             subtitle: "당신만을 위한 24시간 인공지능 투자 비서가 준비되었습니다.\n복잡한 차트는 제게 맡기고, 당신은 성공적인 투자의 기쁨만 누리세요.",
             footer: "© 2024. 사랑을 담아 남편이 만듦.",
+            heroTitle: "프랙탈 지능으로 완성하는<br />고급 암호화폐 분석",
+            heroSubtitle: "패턴을 식별하고 시장 움직임을 예측하며, AI 기반의 기관급 도구로 포트폴리오를 관리하세요.",
+            startAnalysis: "분석 시작하기",
+            viewSignals: "시그널 보기",
+        },
+        menu: {
+            coin: "코인",
+            stock: "미국 주식",
+            info: "정보",
+            service: "서비스",
+
+            coinAnalysis: "코인 분석",
+            marketMood: "시장 심리",
+            aiSignal: "AI 시그널",
+
+            stockAnalysis: "주식 분석",
+            stockMarketMood: "시장 심리 (주식)",
+
+            news: "뉴스",
+            calendar: "경제 일정",
+            history: "코인 역사",
+
+            portfolio: "포트폴리오",
+            contact: "문의하기",
+            terms: "이용약관"
+        },
+        dashboard: {
+            badge: "시장 개요",
+            title: "암호화폐 시장 인텔리전스",
+            subtitle: "AI가 제공하는 고급 차트, 프랙탈 분석, 그리고 실시간 시그널.",
+            disclaimer: "본 서비스는 투자 보조 도구이며, 모든 투자 결정의 책임은 사용자에게 있습니다.",
         },
         cards: {
             analysis: { title: "코인 분석", desc: "전문가급 보조지표와 인공지능이\n실시간으로 매수/매도 타이밍을 분석해 드립니다." },
@@ -145,6 +176,37 @@ export const TRANSLATIONS = {
             titleSuffix: "Wife",
             subtitle: "Your personal 24/7 AI investment assistant is ready.\nLeave the complex charts to me, and enjoy the fruits of successful investing.",
             footer: "© 2024. Made with love by Your Husband.",
+            heroTitle: "Advanced Crypto Analysis <br /> with Fractal Intelligence",
+            heroSubtitle: "Identify patterns, predict market movements, and manage your portfolio with institutional-grade tools powered by AI.",
+            startAnalysis: "Start Analysis",
+            viewSignals: "View Signals",
+        },
+        menu: {
+            coin: "Coin",
+            stock: "US Stock",
+            info: "Info",
+            service: "Service",
+
+            coinAnalysis: "Coin Analysis",
+            marketMood: "Market Mood",
+            aiSignal: "AI Signal",
+
+            stockAnalysis: "Stock Analysis",
+            stockMarketMood: "Market Mood (Stock)",
+
+            news: "News",
+            calendar: "Calendar",
+            history: "History",
+
+            portfolio: "Portfolio",
+            contact: "Contact",
+            terms: "Terms"
+        },
+        dashboard: {
+            badge: "Market Overview",
+            title: "Crypto Market Intelligence",
+            subtitle: "Advanced charting, fractal analysis, and real-time signals powered by AI.",
+            disclaimer: "This service is an investment aid, and all investment decisions are the sole responsibility of the user.",
         },
         cards: {
             analysis: { title: "Coin Analysis", desc: "Expert-grade indicators and AI\nanalyze buy/sell timings in real-time." },

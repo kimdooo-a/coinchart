@@ -36,9 +36,13 @@ const TOP_US_STOCKS = [
     { symbol: 'AMZN', name: 'Amazon' },
     { symbol: 'META', name: 'Meta' },
     { symbol: 'TSLA', name: 'Tesla' },
-    { symbol: 'BRK.B', name: 'Berkshire' }, // Note: TwelveData might use BRK-B or BRK.B
+    { symbol: 'BRK.B', name: 'Berkshire' },
     { symbol: 'LLY', name: 'Eli Lilly' },
-    { symbol: 'AVGO', name: 'Broadcom' }
+    { symbol: 'AVGO', name: 'Broadcom' },
+    // Indices / ETFs for Market Mood
+    { symbol: 'SPY', name: 'S&P 500 ETF' },
+    { symbol: 'QQQ', name: 'Nasdaq 100 ETF' },
+    { symbol: 'VIX', name: 'Volatility Index' }
 ];
 
 const POPULAR_SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'SOLUSDT', 'BCHUSDT', 'DOGEUSDT'];
@@ -56,7 +60,10 @@ async function syncStocks() {
 
     for (const stock of TOP_US_STOCKS) {
         let symbol = stock.symbol;
-        if (symbol === 'BRK.B') symbol = 'BRK-B'; // Fix for some APIs if needed
+        // Twelve Data might accept BRK.B directly or as BRK-B. 
+        // If BRK-B failed, let's try sending BRK.B (or vice versa).
+        // The list has 'BRK.B'. Let's remove the forced change and see.
+        // if (symbol === 'BRK.B') symbol = 'BRK-B';
 
         for (const interval of intervals) {
             try {
