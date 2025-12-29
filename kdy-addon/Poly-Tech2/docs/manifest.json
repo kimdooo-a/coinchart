@@ -1,0 +1,52 @@
+{
+  "system_name": "Poly-Tech2 Document Library",
+  "version": "1.0.0",
+  "description": "Standardized 8-Tier Document Structure for Poly-Agent Orchestration.",
+  "injection_priority": [
+    "00_CONSTITUTION",
+    "10_LAWS",
+    "80_RUNTIME_CONTRACTS"
+  ],
+  "directories": {
+    "00_CONSTITUTION": {
+      "description": "Immutable principles and high-level role definitions.",
+      "read_only": true,
+      "inject": "ALWAYS"
+    },
+    "10_LAWS": {
+      "description": "Enforceable rules and process standards.",
+      "read_only": true,
+      "inject": "ON_TASK_START"
+    },
+    "20_REGULATIONS": {
+      "description": "Project-specific guidelines and adjustments.",
+      "read_only": false,
+      "inject": "ON_DEMAND"
+    },
+    "30_CASELAW": {
+      "description": "Historical implementation records and lessons learned.",
+      "read_only": false,
+      "inject": "ON_ERROR"
+    },
+    "40_RESEARCH_LIBRARY": {
+      "description": "Raw research, summaries, and rule candidates.",
+      "read_only": false,
+      "inject": "NEVER"
+    },
+    "50_TEMPLATES": {
+      "description": "Reusable code and document templates.",
+      "read_only": true,
+      "inject": "ON_SCAFFOLD"
+    },
+    "60_PROTOCOLS": {
+      "description": "Machine-readable schemas and formats.",
+      "read_only": true,
+      "inject": "ON_DEMAND"
+    },
+    "80_RUNTIME_CONTRACTS": {
+      "description": "Active agent configurations (CLAUDE.md, .cursorrules).",
+      "read_only": false,
+      "inject": "CONTEXT_WINDOW"
+    }
+  }
+}

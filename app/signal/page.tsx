@@ -32,11 +32,9 @@ export default function SignalPage() {
     }, []);
 
     return (
-        <main className="min-h-screen bg-black text-white p-4 md:p-8 flex flex-col items-center">
-            {/* Spacer for GlobalHeader */}
-            <div className="h-24 w-full" aria-hidden="true" />
+        <main className="flex-1 w-full pt-20 pb-12 px-4 md:px-6 flex flex-col items-center">
 
-            <header className="w-full max-w-4xl mb-8 flex items-center justify-between border-b border-gray-800 pb-6">
+            <header className="w-full max-w-4xl mb-8 flex items-center justify-between border-b border-border pb-6">
                 <div>
                     <h2 className="text-2xl font-bold">📡 {t.signal.title}</h2>
                 </div>
@@ -61,10 +59,10 @@ export default function SignalPage() {
                             <motion.div
                                 animate={{ rotate: 360 }}
                                 transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-                                className="absolute inset-0 rounded-full border-t-4 border-blue-500"
+                                className="absolute inset-0 rounded-full border-t-4 border-primary"
                             ></motion.div>
-                            <div className="absolute inset-0 flex items-center justify-center font-bold text-blue-500 text-xs">
-                                AI SCAN
+                            <div className="absolute inset-0 flex items-center justify-center font-bold text-primary text-xs">
+                                SIGNAL SCAN
                             </div>
                         </div>
                         <p className="text-gray-400 animate-pulse text-lg">{t.signal.scanning}</p>
@@ -74,7 +72,7 @@ export default function SignalPage() {
                         {/* Signal Card List would go here */}
                     </div>
                 ) : (
-                    <div className="text-center p-12 bg-gray-900/50 rounded-3xl border border-gray-800 backdrop-blur-sm max-w-lg">
+                    <div className="text-center p-12 bg-card/50 rounded-3xl border border-border backdrop-blur-sm max-w-lg">
                         <div className="text-6xl mb-6">🔭</div>
                         <h3 className="text-2xl font-bold mb-4 text-gray-200">{t.signal.noSignalsTitle}</h3>
                         <p className="text-gray-400 leading-relaxed">

@@ -1,0 +1,7 @@
+# MCP Profile: Default
+# A standard set of tools for general development
+description: "Core tools including filesystem and web fetcher"
+extends: []
+servers:
+  - fetch
+  - filesystem

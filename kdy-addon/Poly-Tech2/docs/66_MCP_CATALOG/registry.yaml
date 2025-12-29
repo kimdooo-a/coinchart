@@ -1,0 +1,35 @@
+# Poly-Tech2 MCP Server Registry
+version: "1.1.0"
+
+servers:
+  - id: "fetch"
+    name: "Web Fetcher"
+    description: "Converts URLs to Markdown for LLM consumption"
+    definition_path: "./servers/fetch.yaml"
+    tags: ["utility", "web", "read-only"]
+
+  - id: "filesystem"
+    name: "Secure Filesystem"
+    description: "Access to project files (Scoped)"
+    definition_path: "./servers/filesystem.yaml"
+    tags: ["core", "system", "essential"]
+
+  - id: "github"
+    name: "GitHub Integration"
+    description: "Issues, PRs, and Repo Search"
+    definition_path: "./servers/github.yaml"
+    env_keys: ["GITHUB_PERSONAL_ACCESS_TOKEN"]
+    tags: ["git", "external", "collaboration"]
+
+  - id: "sqlite"
+    name: "SQLite Connector"
+    description: "Local Database Querying"
+    definition_path: "./servers/sqlite.yaml"
+    tags: ["database", "local", "query"]
+
+  - id: "brave"
+    name: "Brave Search"
+    description: "Internet Search capability"
+    definition_path: "./servers/brave.yaml"
+    env_keys: ["BRAVE_API_KEY"]
+    tags: ["web", "search", "external"]

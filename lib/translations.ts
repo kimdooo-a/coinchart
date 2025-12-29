@@ -4,12 +4,12 @@ export const TRANSLATIONS = {
             headerTitle: "Premium Crypto Advisor",
             titlePrefix: "사랑하는 나의",
             titleSuffix: "마누라를 위해",
-            subtitle: "당신만을 위한 24시간 인공지능 투자 비서가 준비되었습니다.\n복잡한 차트는 제게 맡기고, 당신은 성공적인 투자의 기쁨만 누리세요.",
+            subtitle: "당신만을 위한 24시간 시장 분석 도우미가 준비되었습니다.\n복잡한 차트는 제게 맡기고, 당신은 성공적인 투자의 기쁨만 누리세요.",
             footer: "© 2024. 사랑을 담아 남편이 만듦.",
             heroTitle: "프랙탈 지능으로 완성하는<br />고급 암호화폐 분석",
-            heroSubtitle: "패턴을 식별하고 시장 움직임을 예측하며, AI 기반의 기관급 도구로 포트폴리오를 관리하세요.",
-            startAnalysis: "분석 시작하기",
-            viewSignals: "시그널 보기",
+            heroSubtitle: "패턴을 식별하고 시장 움직임을 분석하며, 통계 기반의 기관급 도구로 포트폴리오를 관리하세요.",
+            startAnalysis: "코인분석 시작하기",
+            viewSignals: "미국 주식 분석 보기",
         },
         menu: {
             coin: "코인",
@@ -19,7 +19,7 @@ export const TRANSLATIONS = {
 
             coinAnalysis: "코인 분석",
             marketMood: "시장 심리",
-            aiSignal: "AI 시그널",
+            aiSignal: "시그널",
 
             stockAnalysis: "주식 분석",
             stockMarketMood: "시장 심리 (주식)",
@@ -39,14 +39,14 @@ export const TRANSLATIONS = {
             disclaimer: "본 서비스는 투자 보조 도구이며, 모든 투자 결정의 책임은 사용자에게 있습니다.",
         },
         cards: {
-            analysis: { title: "코인 분석", desc: "전문가급 보조지표와 인공지능이\n실시간으로 매수/매도 타이밍을 분석해 드립니다." },
+            analysis: { title: "코인 분석", desc: "전문가급 보조지표와 통계적으로\n실시간으로 매수/매도 타이밍을 분석해 드립니다." },
             market: { title: "코인 시장 심리", desc: "지금 시장은 공포일까요, 탐욕일까요?\n남들이 무서워할 때 기회를 잡으세요." },
-            news: { title: "AI 뉴스 브리핑", desc: "매일 쏟아지는 소식 중 핵심만 쏙쏙!\n인공지능이 호재와 악재를 가려드립니다." },
+            news: { title: "AI 뉴스 브리핑", desc: "매일 쏟아지는 소식 중 핵심만 쏙쏙!\n심리 분석으로 분류합니다." },
             signal: { title: "코인 급등 포착", desc: "24시간 시장을 감시하는 AI 레이더.\n급등/급락 시그널을 놓치지 마세요." },
             calendar: { title: "경제 캘린더", desc: "FOMC, CPI 등 시장을 뒤흔드는\n중요 경제 일정을 미리 대비하세요." },
             history: { title: "코인 대서사시", desc: "비트코인 탄생부터 지금까지, 주요 코인들의\n역사적 순간들을 타임라인으로 여행하세요." },
             portfolio: { title: "나만의 포트폴리오", desc: "거래 내역과 자산을 한눈에 관리하고\nAI 비서와 함께 성공 투자를 기록하세요." },
-            stock: { title: "미국 주식 분석", desc: "S&P 500 주요 종목들을 실시간으로 분석.\n월가 데이터 기반 AI 주가 예측." },
+            stock: { title: "미국 주식 분석", desc: "S&P 500 주요 종목들을 실시간으로 분석.\n월가 데이터 기반 통계적 패턴 분석." },
         },
         // Common
         common: {
@@ -66,9 +66,10 @@ export const TRANSLATIONS = {
             altLabel_realtime: "알트코인 (실시간 분석)",
             btcDesc_daily: "매일 오전 9시 업데이트되는 공식 공포/탐욕 지수입니다.",
             btcDesc_realtime: "현재 비트코인의 24시간 가격 변동을 바탕으로 실시간 계산된 지수입니다.",
-            altDesc_daily: "비트코인 대비 알트코인의 상대적 강세를 반영한 AI 분석 지표입니다.",
+            altDesc_daily: "비트코인 대비 알트코인의 상대적 강세를 반영한 알고리즘 분석 지표입니다.",
             altDesc_realtime: "주요 알트코인들의 24시간 등락폭을 종합하여 실시간 분석했습니다.",
             detailTitle: "코인별 상세 심리 분석",
+            detailStockTitle: "주요 주식 상세 심리 분석",
         },
         news: {
             title: "AI 뉴스 브리핑",
@@ -81,7 +82,7 @@ export const TRANSLATIONS = {
             lastScan: "마지막 스캔",
             scanning: "스캔 중...",
             noSignalsTitle: "현재 특이사항 없음",
-            noSignalsDesc: "주요 코인들의 흐름이 안정적입니다.\nAI가 24시간 감시 중이니 잠시 후에 다시 확인해주세요.",
+            noSignalsDesc: "주요 코인들의 흐름이 일반적입니다.\n시스템이 24시간 감시 중이니 잠시 후에 다시 확인해주세요.",
             footer: "* 본 알림은 단순 참고용이며 투자 권유가 아닙니다. AI는 과거 데이터를 기반으로 패턴을 분석할 뿐, 미래의 수익을 보장하지 않습니다."
         },
         calendar: {
@@ -112,7 +113,11 @@ export const TRANSLATIONS = {
             return: "수익률",
             avg: "평단가",
             shares: "수량",
-            total: "합계"
+            total: "합계",
+            subtitle: "보유 자산 내역과 투자 성과를 한눈에 관리하세요",
+            pl: "평가 손익",
+            date: "날짜",
+            type: "종류"
         },
         analysis: {
             title: "분석실",
@@ -128,7 +133,7 @@ export const TRANSLATIONS = {
             // Fractal
             fractalTitle: "프랙탈 패턴 엔진",
             similarity: "패턴 유사도",
-            prediction: "AI 예측",
+            prediction: "패턴 분석",
             confidence: "신뢰도",
             similarPatternDate: "유사 패턴 발생 시기",
             fractalDesc: "지난 3년 데이터를 분석해 가장 유사했던 과거 흐름을 찾았습니다.",
@@ -164,9 +169,37 @@ export const TRANSLATIONS = {
             downward: "하락세",
             band: "밴드 내",
 
-            upper: "상단",
-            middle: "중심",
-            lower: "하단"
+            upper: "Upper",
+            middle: "Center",
+            lower: "Lower"
+        },
+        admin: {
+            title: "관리자 대시보드",
+            accessDenied: "접근 거부",
+            accessDeniedMsg: "이 페이지를 볼 수 있는 권한이 없습니다.",
+            checking: "권한 확인 중...",
+            newsControl: "뉴스 크롤러 제어",
+            newsDesc: "뉴스 크롤러를 수동으로 실행합니다. URL을 기준으로 중복은 무시됩니다.",
+            marketControl: "시장 데이터 제어",
+            marketDesc: "시스템에 등록된 모든 코인 및 주식 종목의 최신 가격을 업데이트합니다. (2000일 이상 된 데이터 삭제)",
+            userManagement: "사용자 관리",
+            triggerCrawler: "크롤러 실행 (한국어)",
+            updatePrices: "시장가 업데이트",
+            refresh: "새로고침",
+            processing: "처리 중...",
+            table: {
+                email: "이메일",
+                created: "가입일",
+                lastSign: "마지막 접속",
+                action: "작업",
+                delete: "삭제",
+                noUsers: "사용자를 찾을 수 없습니다."
+            },
+            status: {
+                ready: "준비됨...",
+                success: "성공",
+                error: "오류"
+            }
         }
     },
     en: {
@@ -177,9 +210,9 @@ export const TRANSLATIONS = {
             subtitle: "Your personal 24/7 AI investment assistant is ready.\nLeave the complex charts to me, and enjoy the fruits of successful investing.",
             footer: "© 2024. Made with love by Your Husband.",
             heroTitle: "Advanced Crypto Analysis <br /> with Fractal Intelligence",
-            heroSubtitle: "Identify patterns, predict market movements, and manage your portfolio with institutional-grade tools powered by AI.",
-            startAnalysis: "Start Analysis",
-            viewSignals: "View Signals",
+            heroSubtitle: "Identify patterns, analyze market movements, and manage your portfolio with institutional-grade statistical tools.",
+            startAnalysis: "Start Coin Analysis",
+            viewSignals: "View US Stock Analysis",
         },
         menu: {
             coin: "Coin",
@@ -189,7 +222,7 @@ export const TRANSLATIONS = {
 
             coinAnalysis: "Coin Analysis",
             marketMood: "Market Mood",
-            aiSignal: "AI Signal",
+            aiSignal: "Signal",
 
             stockAnalysis: "Stock Analysis",
             stockMarketMood: "Market Mood (Stock)",
@@ -216,7 +249,7 @@ export const TRANSLATIONS = {
             calendar: { title: "Economic Calendar", desc: "Prepare for market-moving events\nlike FOMC and CPI in advance." },
             history: { title: "Crypto Saga", desc: "From Bitcoin's birth to now,\ntravel through historic moments of major coins." },
             portfolio: { title: "My Portfolio", desc: "Track your assets and trade history,\nand record your success with AI assistant." },
-            stock: { title: "US Stock Analysis", desc: "Real-time analysis of S&P 500 stocks.\nWall St. data-driven AI price prediction." },
+            stock: { title: "US Stock Analysis", desc: "Real-time analysis of S&P 500 stocks.\nWall St. data-driven statistical pattern analysis." },
         },
         // Common
         common: {
@@ -239,6 +272,7 @@ export const TRANSLATIONS = {
             altDesc_daily: "AI metric reflecting Altcoin strength relative to Bitcoin.",
             altDesc_realtime: "Real-time analysis aggregating 24H fluctuations of major Altcoins.",
             detailTitle: "Detailed Sentiment by Coin",
+            detailStockTitle: "Detailed Sentiment by Stock",
         },
         news: {
             title: "AI News Briefing",
@@ -251,7 +285,7 @@ export const TRANSLATIONS = {
             lastScan: "Last Scan",
             scanning: "Scanning...",
             noSignalsTitle: "All Quiet",
-            noSignalsDesc: "Major coins are stable.\nAI is monitoring 24/7, please check back later.",
+            noSignalsDesc: "Major coins show normal flow.\nSystem is monitoring 24/7, please check back later.",
             footer: "* This is for reference only, not investment advice. AI analyzes past patterns and does not guarantee future results."
         },
         calendar: {
@@ -282,7 +316,11 @@ export const TRANSLATIONS = {
             return: "Return",
             avg: "Avg",
             shares: "Shares",
-            total: "Total"
+            total: "Total",
+            subtitle: "Manage your holdings and track performance",
+            pl: "P&L",
+            date: "Date",
+            type: "Type"
         },
         analysis: {
             title: "Analysis Room",
@@ -298,7 +336,7 @@ export const TRANSLATIONS = {
             // Fractal
             fractalTitle: "Fractal Pattern Engine",
             similarity: "Similarity Found",
-            prediction: "AI Prediction",
+            prediction: "Pattern Analysis",
             confidence: "Confidence",
             similarPatternDate: "Similar pattern detected on",
             fractalDesc: "Based on similar market moves in the past 3 years.",
@@ -337,6 +375,34 @@ export const TRANSLATIONS = {
             upper: "Upper",
             middle: "Middle",
             lower: "Lower"
+        },
+        admin: {
+            title: "Admin Dashboard",
+            accessDenied: "Access Denied",
+            accessDeniedMsg: "You are not authorized to view this page.",
+            checking: "Checking permissions...",
+            newsControl: "News Crawler Control",
+            newsDesc: "Manually trigger the news crawler. Duplicates will be strictly ignored based on URL.",
+            marketControl: "Market Data Control",
+            marketDesc: "Update latest prices for all supported coins and stocks in the system. (Deletes data > 2000 days)",
+            userManagement: "User Management",
+            triggerCrawler: "Trigger Crawler (Korean)",
+            updatePrices: "Update Market Prices",
+            refresh: "Refresh",
+            processing: "Processing...",
+            table: {
+                email: "Email",
+                created: "Created At",
+                lastSign: "Last Sign In",
+                action: "Action",
+                delete: "Delete",
+                noUsers: "No users found"
+            },
+            status: {
+                ready: "Ready...",
+                success: "Success",
+                error: "Error"
+            }
         }
     }
 };

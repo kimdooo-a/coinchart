@@ -1,0 +1,13 @@
+{
+    "mcpServers": {
+        "{{ID}}": {
+            "command": "{{COMMAND}}",
+            "args": [
+                "{{ARGS}}"
+            ],
+            "env": {
+                "{{ENV_KEY}}": "${{ENV_KEY}}"
+            }
+        }
+    }
+}

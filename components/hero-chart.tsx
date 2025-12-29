@@ -1,8 +1,8 @@
 "use client";
 
-import { createChart, ColorType, CrosshairMode, IChartApi, AreaSeries, CandlestickSeries } from "lightweight-charts";
+import { createChart, ColorType, CrosshairMode, IChartApi, CandlestickSeries } from "lightweight-charts";
 import React, { useEffect, useRef } from "react";
-import { getKlines, subscribeToKlines, CandleData } from "@/lib/api/binance";
+import { subscribeToKlines, CandleData } from "@/lib/api/binance";
 
 export const HeroChart = () => {
     const chartContainerRef = useRef<HTMLDivElement>(null);
@@ -16,7 +16,7 @@ export const HeroChart = () => {
         { label: 'ETH', value: 'ETHUSDT' },
         { label: 'XRP', value: 'XRPUSDT' },
         { label: 'SOL', value: 'SOLUSDT' },
-        { label: 'BCH', value: 'BCHUSDT' },
+        { label: 'BCH', value: 'BCH' },
         { label: 'DOGE', value: 'DOGEUSDT' },
     ];
 
@@ -62,19 +62,17 @@ export const HeroChart = () => {
             wickDownColor: "#ef5350",
         });
 
-        const areaSeries = chart.addSeries(AreaSeries, {
-            topColor: "rgba(38, 166, 154, 0.56)",
-            bottomColor: "rgba(38, 166, 154, 0.04)",
-            lineColor: "rgba(38, 166, 154, 1)",
-            lineWidth: 2,
-        });
-
         let isMounted = true;
         let wsCleanup: (() => void) | undefined;
 
         const fetchData = async () => {
             try {
-                const klines = await getKlines(symbol, '1d', 365);
+                // STEP 4-4B: API Route 프록시 + TTL 캐시 사용 (Binance 직접 호출 제거)
+                const res = await fetch(`/api/klines?symbol=${symbol}&interval=1d&limit=365`);
+                if (!res.ok) {
+                    throw new Error(`API Route error: ${res.statusText}`);
+                }
+                const klines = await res.json() as CandleData[];
 
                 if (!isMounted) return;
 
@@ -86,13 +84,7 @@ export const HeroChart = () => {
                     close: k.close,
                 }));
 
-                const areaData = klines.map((k) => ({
-                    time: k.time as any,
-                    value: k.close,
-                }));
-
                 candlestickSeries.setData(candleData);
-                areaSeries.setData(areaData);
 
                 chart.timeScale().fitContent();
 
@@ -107,7 +99,6 @@ export const HeroChart = () => {
                             low: data.low,
                             close: data.close,
                         });
-                        areaSeries.update({ time: data.time as any, value: data.close });
                     });
                 }
             } catch (error) {
@@ -147,8 +138,8 @@ export const HeroChart = () => {
                             className={`
                                 px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300
                                 ${symbol === coin.value
-                                    ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)] scale-105'
-                                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                    ? 'bg-primary text-primary-foreground shadow-[0_0_15px_rgba(255,87,51,0.5)] scale-105'
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                                 }
                             `}
                         >

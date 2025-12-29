@@ -25,7 +25,12 @@ export const DetailedChart = ({ data, avgPrice, symbol }: DetailedChartProps) =>
         if (!chartContainerRef.current) return
 
         const handleResize = () => {
-            chartRef.current?.applyOptions({ width: chartContainerRef.current!.clientWidth })
+            if (chartContainerRef.current && chartRef.current) {
+                chartRef.current.applyOptions({
+                    width: chartContainerRef.current.clientWidth,
+                    height: chartContainerRef.current.clientHeight
+                })
+            }
         }
 
         const chart = createChart(chartContainerRef.current, {
@@ -34,7 +39,7 @@ export const DetailedChart = ({ data, avgPrice, symbol }: DetailedChartProps) =>
                 textColor: '#DDD',
             },
             width: chartContainerRef.current.clientWidth,
-            height: 500,
+            height: chartContainerRef.current.clientHeight, // Use container height
             grid: {
                 vertLines: { color: '#333' },
                 horzLines: { color: '#333' },
@@ -85,12 +90,12 @@ export const DetailedChart = ({ data, avgPrice, symbol }: DetailedChartProps) =>
     }, [data, avgPrice])
 
     return (
-        <div className="w-full relative">
+        <div className="w-full h-full relative">
             <div className="absolute top-4 left-4 z-10 bg-black/50 p-2 rounded backdrop-blur-sm border border-gray-700">
                 <h3 className="text-white font-bold">{symbol} Analysis</h3>
                 <p className="text-xs text-gray-400">Daily Candles (3 Years)</p>
             </div>
-            <div ref={chartContainerRef} className="w-full rounded-xl overflow-hidden border border-gray-800 shadow-2xl" />
+            <div ref={chartContainerRef} className="w-full h-full rounded-xl overflow-hidden border border-gray-800 shadow-2xl" />
         </div>
     )
 }

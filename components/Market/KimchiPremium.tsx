@@ -41,7 +41,7 @@ export default function KimchiPremium() {
     };
 
     return (
-        <div className="bg-gray-900 border border-gray-800 rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
+        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
             {/* Decor */}
             <div className="absolute top-0 right-0 p-8 opacity-5 font-black text-8xl pointer-events-none select-none">
                 K-PREMIUM
@@ -67,7 +67,7 @@ export default function KimchiPremium() {
             <div className="overflow-x-auto relative z-10">
                 <table className="w-full text-left border-collapse">
                     <thead>
-                        <tr className="text-gray-500 text-sm border-b border-gray-800">
+                        <tr className="text-gray-400 text-xs font-semibold uppercase tracking-wider border-b border-gray-800">
                             <th className="py-3 pl-2">Coin</th>
                             <th className="py-3 text-right">Premium</th>
                             <th className="py-3 text-right hidden md:table-cell">Upbit (KRW)</th>
@@ -87,20 +87,20 @@ export default function KimchiPremium() {
                         ) : (
                             data.map((item) => (
                                 <tr key={item.symbol} className="border-b border-gray-800/50 hover:bg-white/5 transition-colors">
-                                    <td className="py-4 pl-2 font-bold text-lg">{item.symbol}</td>
-                                    <td className="py-4 text-right">
-                                        <span className={`px-3 py-1 rounded-full text-sm font-bold ${item.premium > 5 ? 'bg-red-900/50 text-red-500' :
-                                                item.premium > 2 ? 'bg-orange-900/50 text-orange-500' :
-                                                    item.premium < 0 ? 'bg-blue-900/50 text-blue-400' :
-                                                        'bg-green-900/50 text-green-500'
+                                    <td className="py-3 pl-2 font-bold text-base">{item.symbol}</td>
+                                    <td className="py-3 text-right">
+                                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${item.premium > 5 ? 'bg-red-900/50 text-red-500' :
+                                            item.premium > 2 ? 'bg-orange-900/50 text-orange-500' :
+                                                item.premium < 0 ? 'bg-blue-900/50 text-blue-400' :
+                                                    'bg-green-900/50 text-green-500'
                                             }`}>
                                             {item.premium > 0 ? '+' : ''}{item.premium.toFixed(2)}%
                                         </span>
                                     </td>
-                                    <td className="py-4 text-right font-mono text-gray-300 hidden md:table-cell">
+                                    <td className="py-3 text-right font-mono text-gray-300 hidden md:table-cell">
                                         ₩{formatPrice(item.krwPrice)}
                                     </td>
-                                    <td className="py-4 text-right font-mono text-gray-500 hidden md:table-cell">
+                                    <td className="py-3 text-right font-mono text-gray-500 hidden md:table-cell">
                                         ${item.usdPrice.toFixed(2)}
                                     </td>
                                 </tr>

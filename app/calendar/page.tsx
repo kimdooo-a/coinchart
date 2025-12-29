@@ -139,11 +139,11 @@ export default function CalendarPage() {
                 <div className="flex justify-between items-center mb-6">
                     <button
                         onClick={() => setCurrentDate(new Date(year, month - 1, 1))}
-                        className="p-2 hover:bg-gray-800 rounded-full"
+                        className="p-2 hover:bg-muted rounded-full text-foreground"
                     >
                         &larr;
                     </button>
-                    <h3 className="text-2xl font-bold">
+                    <h3 className="text-2xl font-bold text-foreground">
                         {lang === 'ko'
                             ? `${year}년 ${month + 1}월`
                             : new Date(year, month).toLocaleString('en-US', { month: 'long', year: 'numeric' })
@@ -151,14 +151,14 @@ export default function CalendarPage() {
                     </h3>
                     <button
                         onClick={() => setCurrentDate(new Date(year, month + 1, 1))}
-                        className="p-2 hover:bg-gray-800 rounded-full"
+                        className="p-2 hover:bg-muted rounded-full text-foreground"
                     >
                         &rarr;
                     </button>
                 </div>
 
                 <div className="grid grid-cols-7 gap-2 text-center mb-2">
-                    {weekDays.map(d => <div key={d} className="text-gray-500 font-bold text-sm">{d}</div>)}
+                    {weekDays.map(d => <div key={d} className="text-muted-foreground font-bold text-sm">{d}</div>)}
                 </div>
 
                 <div className="grid grid-cols-7 gap-2">
@@ -169,14 +169,14 @@ export default function CalendarPage() {
                         const isToday = new Date().toDateString() === d.toDateString();
 
                         return (
-                            <div key={i} className={`aspect-square border border-gray-800 rounded-xl p-1 flex flex-col justify-between hover:bg-gray-900 transition-colors relative ${isToday ? 'bg-gray-900 border-blue-500' : ''}`}>
-                                <span className={`text-sm font-bold ${d.getDay() === 0 ? 'text-red-500' : 'text-gray-300'}`}>
+                            <div key={i} className={`aspect-square border border-border rounded-xl p-1 flex flex-col justify-between hover:bg-muted/50 transition-colors relative ${isToday ? 'bg-muted border-primary' : ''}`}>
+                                <span className={`text-sm font-bold ${d.getDay() === 0 ? 'text-destructive' : 'text-foreground'}`}>
                                     {d.getDate()}
                                 </span>
                                 {dayEvents.length > 0 && (
                                     <div className="flex gap-1 justify-center">
                                         {dayEvents.map((e, idx) => (
-                                            <div key={idx} className={`w-2 h-2 rounded-full ${e.impact === 'high' ? 'bg-red-500' : 'bg-yellow-500'}`}></div>
+                                            <div key={idx} className={`w-2 h-2 rounded-full ${e.impact === 'high' ? 'bg-destructive' : 'bg-yellow-500'}`}></div>
                                         ))}
                                     </div>
                                 )}
@@ -189,39 +189,39 @@ export default function CalendarPage() {
     };
 
     return (
-        <main className="min-h-screen bg-black text-white p-4 md:p-8 flex flex-col items-center">
+        <main className="min-h-screen bg-background text-foreground p-4 md:p-8 flex flex-col items-center">
             {/* Spacer for GlobalHeader */}
             <div className="h-24 w-full" aria-hidden="true" />
 
-            <header className="w-full max-w-4xl mb-8 flex flex-col gap-4 border-b border-gray-800 pb-6">
+            <header className="w-full max-w-4xl mb-8 flex flex-col gap-4 border-b border-border pb-6">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-bold">📅 {t.calendar.title}</h2>
+                    <h2 className="text-2xl font-bold text-foreground">📅 {t.calendar.title}</h2>
                 </div>
             </header>
 
             <div className="w-full max-w-4xl grid md:grid-cols-2 gap-12">
                 {/* Calendar View */}
-                <div className="bg-gray-900/50 p-6 rounded-3xl border border-gray-800">
+                <div className="bg-card p-6 rounded-3xl border border-border">
                     {generateCalendar(currentDate)}
                 </div>
 
                 {/* Event List */}
                 <div className="space-y-6">
-                    <h3 className="text-2xl font-bold text-gray-400">
+                    <h3 className="text-2xl font-bold text-muted-foreground">
                         {lang === 'ko'
                             ? `${currentDate.getMonth() + 1}월 주요 일정`
                             : `${new Date(currentDate).toLocaleString('en-US', { month: 'long' })}'s Major Events`
                         }
                     </h3>
                     {monthEvents.length === 0 ? (
-                        <p className="text-gray-500">{t.calendar.noEvents}</p>
+                        <p className="text-muted-foreground">{t.calendar.noEvents}</p>
                     ) : (
                         monthEvents.map((event, idx) => (
-                            <div key={idx} className="flex items-center gap-4 bg-gray-900 p-4 rounded-xl border border-gray-800">
-                                <div className={`w-1 h-12 rounded-full ${event.impact === 'high' ? 'bg-red-500' : 'bg-yellow-500'}`}></div>
+                            <div key={idx} className="flex items-center gap-4 bg-card p-4 rounded-xl border border-border">
+                                <div className={`w-1 h-12 rounded-full ${event.impact === 'high' ? 'bg-destructive' : 'bg-yellow-500'}`}></div>
                                 <div>
-                                    <div className="text-xs text-gray-500 mb-1">{event.date} • {event.country}</div>
-                                    <div className="text-lg font-bold">
+                                    <div className="text-xs text-muted-foreground mb-1">{event.date} • {event.country}</div>
+                                    <div className="text-lg font-bold text-foreground">
                                         {lang === 'ko' ? event.titleKo : event.titleEn}
                                     </div>
                                 </div>
@@ -231,7 +231,7 @@ export default function CalendarPage() {
                 </div>
             </div>
 
-            <div className="mt-8 text-center text-xs text-gray-600">
+            <div className="mt-8 text-center text-xs text-muted-foreground">
                 {t.calendar.footer}
             </div>
         </main>

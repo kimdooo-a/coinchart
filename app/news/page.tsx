@@ -75,9 +75,7 @@ export default function NewsPage() {
     };
 
     return (
-        <main className="min-h-screen bg-black text-white p-4 md:p-8 flex flex-col items-center">
-            {/* Spacer for GlobalHeader */}
-            <div className="h-24 w-full" aria-hidden="true" />
+        <main className="flex-1 w-full pt-20 pb-12 px-4 md:px-6 flex flex-col items-center">
 
             <header className="w-full max-w-4xl mb-8 flex flex-col gap-4 border-b border-gray-800 pb-6">
                 <div className="flex items-center justify-between">

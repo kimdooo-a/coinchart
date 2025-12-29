@@ -1,0 +1,6 @@
+# MCP Profile: Minimal
+# Lightest possible setup. Good for simple tasks or restricted environments.
+description: "Essential tools only."
+servers:
+  - filesystem
+  - fetch

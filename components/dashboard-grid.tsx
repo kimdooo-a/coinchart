@@ -110,6 +110,38 @@ export default function DashboardGrid({
 
     const cards: DashboardCardProps[] = [
         {
+            title: t.cards.analysis.title,
+            description: t.cards.analysis.desc,
+            href: "/analysis",
+            colSpan: "lg:col-span-3",
+            content: (
+                <div className="relative flex-1 min-h-[160px] flex items-center justify-center overflow-hidden bg-black/20">
+                    <GlassIcon
+                        icon={BarChart2}
+                        gradientFrom="from-purple-500"
+                        gradientTo="to-pink-500"
+                        glowColor="bg-purple-500"
+                    />
+                </div>
+            )
+        },
+        {
+            title: t.cards.stock.title,
+            description: t.cards.stock.desc,
+            href: "/stock",
+            colSpan: "lg:col-span-3",
+            content: (
+                <div className="relative flex-1 min-h-[160px] flex items-center justify-center overflow-hidden bg-black/20">
+                    <GlassIcon
+                        icon={Landmark}
+                        gradientFrom="from-indigo-500"
+                        gradientTo="to-violet-500"
+                        glowColor="bg-indigo-500"
+                    />
+                </div>
+            )
+        },
+        {
             title: t.cards.market.title,
             description: t.cards.market.desc,
             href: "/market",
@@ -154,38 +186,6 @@ export default function DashboardGrid({
                         gradientFrom="from-blue-500"
                         gradientTo="to-cyan-500"
                         glowColor="bg-blue-500"
-                    />
-                </div>
-            )
-        },
-        {
-            title: t.cards.analysis.title,
-            description: t.cards.analysis.desc,
-            href: "/analysis",
-            colSpan: "lg:col-span-3",
-            content: (
-                <div className="relative flex-1 min-h-[160px] flex items-center justify-center overflow-hidden bg-black/20">
-                    <GlassIcon
-                        icon={BarChart2}
-                        gradientFrom="from-purple-500"
-                        gradientTo="to-pink-500"
-                        glowColor="bg-purple-500"
-                    />
-                </div>
-            )
-        },
-        {
-            title: t.cards.stock.title,
-            description: t.cards.stock.desc,
-            href: "/stock",
-            colSpan: "lg:col-span-3",
-            content: (
-                <div className="relative flex-1 min-h-[160px] flex items-center justify-center overflow-hidden bg-black/20">
-                    <GlassIcon
-                        icon={Landmark}
-                        gradientFrom="from-indigo-500"
-                        gradientTo="to-violet-500"
-                        glowColor="bg-indigo-500"
                     />
                 </div>
             )
@@ -267,7 +267,7 @@ export default function DashboardGrid({
                     aria-hidden="true"
                     className="absolute left-1/2 -translate-x-1/2 top-0 z-[-5] pointer-events-none"
                 >
-                    <div className="aspect-video rounded-full bg-linear-to-tl blur-[100px] from-blue-500/70 to-cyan-400/70 opacity-30 dark:from-indigo-500 dark:to-purple-400 dark:opacity-20 h-[718px] w-[855px]"></div>
+                    <div className="aspect-video rounded-full bg-gradient-to-tl blur-[100px] from-primary/20 to-orange-600/10 opacity-50 h-[718px] w-[855px]"></div>
                 </div>
 
                 {/* Cards Grid */}

@@ -1,0 +1,13 @@
+# MCP Server: Filesystem
+# Provides secure access to specific local directories
+# NOTE: Arguments must be injected effectively by the adapter based on the project root
+type: stdio
+command: npx
+args:
+  - -y
+  - "@modelcontextprotocol/server-filesystem"
+  - "{{PROJECT_ROOT}}"
+env_keys: []
+security:
+  network: "none"
+  filesystem: "read-write"

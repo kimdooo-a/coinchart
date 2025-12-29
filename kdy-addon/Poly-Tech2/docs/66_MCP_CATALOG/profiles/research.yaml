@@ -1,0 +1,6 @@
+# MCP Profile: Research
+# For Internet Analysis and Browsing.
+description: "Tools for searching and reading the web."
+servers:
+  - fetch
+  - brave

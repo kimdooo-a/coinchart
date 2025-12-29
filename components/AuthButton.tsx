@@ -35,7 +35,7 @@ export const AuthButton = () => {
     if (loading) return null
 
     return (
-        <div className="fixed top-4 right-36 z-50 flex items-center gap-3">
+        <div className="flex items-center gap-3">
             {user ? (
                 <div className="flex items-center gap-3 bg-gray-900/80 backdrop-blur-md border border-gray-700 rounded-full pl-4 pr-2 py-1 shadow-lg">
                     <div className="flex flex-col items-end hidden md:flex">

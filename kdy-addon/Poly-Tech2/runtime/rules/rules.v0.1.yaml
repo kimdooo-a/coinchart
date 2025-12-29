@@ -1,0 +1,232 @@
+dsl_version: "0.1"
+
+rules:
+  # ===========================================================================
+  # R0: Category A Standard Execution (Safe)
+  # ===========================================================================
+  - rule_id: "R0_CAT_A_EXEC"
+    priority: 100 # High priority for simple tasks
+    trigger:
+      kind: "bus_input"
+      match:
+        command_types: ["exec"]
+    guards:
+      category_in: ["A"]
+    actions:
+      - type: "write_processing_lock"
+        lock_key: "exec_{{msg_id}}"
+      
+      - type: "run_cmd"
+        cmd: "{{msg_run_0}}"
+        cwd: "."
+        timeout_sec: 60
+        
+      - type: "write_bus"
+        channel: "output"
+        template: "Executed Safe Category A ID: {{msg_id}}"
+        
+      - type: "release_lock"
+        lock_key: "exec_{{msg_id}}"
+
+  # ===========================================================================
+
+  # R1: Phase 0 Bootstrap Guard
+  # ===========================================================================
+  - rule_id: "R1_BOOTSTRAP_GUARD"
+    priority: 10
+    trigger:
+      kind: "bus_input"
+      match:
+        command_types: ["task", "exec"]
+        # Assuming we can inspect payload content or tags for 'bootstrap' intent
+        # For this draft, we assume a specific title or tag pattern
+    guards:
+      # If not Phase 0...
+      phase_in: [1, 2, 3, 4] 
+    actions:
+      # ...and trying to bootstrap (logic implied by trigger matching), REJECT.
+      # Note: Real implementation might need Negation logic in Guards (e.g. phase_not: 0)
+      # Since DSL v0.1 only has 'phase_in', we define this rule to catch 
+      # bootstrap commands occurring in non-0 phases.
+      
+      - type: "write_bus"
+        channel: "error"
+        template: |
+          ERROR: Bootstrap actions are forbidden outside of Phase 0.
+          Current Phase: {{context.phase}}
+          Command ID: {{msg_id}}
+          Guidance: Reset system or request explicit re-bootstrap approval via 90_AMENDMENTS.
+
+  # ===========================================================================
+  # R2: Lint on TypeScript Changes (Phase 2 Only)
+  # ===========================================================================
+  - rule_id: "R2_LINT_TS"
+    priority: 50
+    trigger:
+      kind: "fs_event"
+      match:
+        # Adjusted to standard src/ structure; can be refined per project
+        paths: ["src/**/*.ts", "app/**/*.ts", "lib/**/*.ts"]
+        event_types: ["modified", "created"]
+    guards:
+      phase_in: [2]
+      require_lock: false # handled by action
+    actions:
+      - type: "write_processing_lock"
+        lock_key: "lint_{{path_slug}}"
+      
+      - type: "run_cmd"
+        cmd: "npm run lint"
+        cwd: "." # Root relative
+        timeout_sec: 60
+      
+      - type: "write_bus"
+        channel: "output"
+        template: |
+          Lint Action Completed for {{path}}
+          Result: {{cmd_result}}
+      
+      - type: "release_lock"
+        lock_key: "lint_{{path_slug}}"
+    on_error:
+      - type: "write_bus"
+        channel: "error"
+        template: |
+          Lint Failed for {{path}}
+          Error: {{error_msg}}
+      - type: "release_lock"
+        lock_key: "lint_{{path_slug}}"
+
+  # ===========================================================================
+  # R3: Test on Test File Changes (Phase 2 Only)
+  # ===========================================================================
+  - rule_id: "R3_TEST_SPEC"
+    priority: 50
+    trigger:
+      kind: "fs_event"
+      match:
+        paths: ["**/*.test.ts", "**/*.spec.ts"]
+        event_types: ["modified", "created"]
+    guards:
+      phase_in: [2]
+    actions:
+      - type: "write_processing_lock"
+        lock_key: "test_{{path_slug}}"
+      
+      - type: "run_cmd"
+        cmd: "npm test" # Or specific test file runner if supported
+        cwd: "."
+        timeout_sec: 120
+      
+      - type: "write_bus"
+        channel: "output"
+        template: "Test finished for {{path}}. Status: {{cmd_exit_code}}"
+      
+      - type: "release_lock"
+        lock_key: "test_{{path_slug}}"
+    on_error:
+      - type: "write_bus"
+        channel: "error"
+        template: "Test execution failed for {{path}}"
+      - type: "release_lock"
+        lock_key: "test_{{path_slug}}"
+
+  # ===========================================================================
+  # R4: Category B/C Approval (Strict)
+  # ===========================================================================
+  - rule_id: "R4_CAT_B_C_GUARD"
+    priority: 20
+    trigger:
+      kind: "bus_input"
+      match:
+        command_types: ["exec", "task"]
+    guards:
+      category_in: ["B", "C"]
+      approval:
+        mode: "none" # Meaning: Does NOT currently have approval logged
+    actions:
+      # Block execution, route to Approval
+      - type: "request_approval"
+        channel: "input"
+        to: "antigravity" # C implies Human check too, handled by Agile Policy in real usage
+        payload_template: |
+          Requesting approval for Category {{msg_category}} change.
+          Title: {{msg_title}}
+          Source: {{msg_id}}
+          
+      - type: "write_bus"
+        channel: "processing"
+        template: "Paused execution of {{msg_id}} waiting for approval."
+
+  # ===========================================================================
+  # R4a: Category B/C Execution (Approved)
+  # ===========================================================================
+  - rule_id: "R4_CAT_B_C_EXEC"
+    priority: 15 # Runs if R4_CAT_B_C_GUARD passes (i.e., approval assumption met?)
+    # NOTE: In a stateless DSL, 'approval' guard checks external state.
+    # If approval.mode == 'single' or 'dual' is satisfied, this rule matches.
+    trigger:
+      kind: "bus_input"
+      match:
+        command_types: ["exec", "task"]
+    guards:
+      category_in: ["B", "C"]
+      approval:
+        mode: "single" # Has at least one approval
+        authorities: ["antigravity", "human"]
+    actions:
+      - type: "write_processing_lock"
+        lock_key: "exec_{{msg_id}}"
+      
+      # We assume the message payload has 'run' commands
+      # The DSL interpreter maps msg.run list to run_cmd actions
+      - type: "run_cmd"
+        cmd: "{{msg_run_0}}" # Conceptual placeholder for iterating commands
+        cwd: "."
+        timeout_sec: 300
+      
+      - type: "write_bus"
+        channel: "output"
+        template: "Executed Category {{msg_category}} task {{msg_id}}"
+        
+      - type: "release_lock"
+        lock_key: "exec_{{msg_id}}"
+
+  # ===========================================================================
+  # R5: Emergency D (Retroactive)
+  # ===========================================================================
+  - rule_id: "R5_EMERGENCY_D"
+    priority: 5
+    trigger:
+      kind: "bus_input"
+      match:
+        command_types: ["exec", "task"]
+    guards:
+      category_in: ["D"]
+    actions:
+      # 1. Execute Immediately
+      - type: "write_processing_lock"
+        lock_key: "emergency_{{msg_id}}"
+      
+      - type: "run_cmd"
+        cmd: "{{msg_run_0}}"
+        cwd: "."
+        timeout_sec: 60
+        
+      # 2. Retroactive Approval Request
+      - type: "request_approval"
+        channel: "input"
+        to: "human"
+        payload_template: |
+          [RETROACTIVE] Emergency D executed.
+          ID: {{msg_id}}
+          Command: {{msg_run_0}}
+          Please review impacts.
+
+      - type: "write_bus"
+        channel: "output"
+        template: "Emergency execution completed. Review requested."
+
+      - type: "release_lock"
+        lock_key: "emergency_{{msg_id}}"
+

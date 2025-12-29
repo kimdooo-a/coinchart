@@ -1,0 +1,372 @@
+﻿폴리 에이전트 오케스트레이션: Cursor IDE를 활용한 인터랙티브 리드 개발자 아키텍처 및 구현 가이드
+1. 서론: 소프트웨어 엔지니어링의 구조적 전환과 폴리 에이전트 시스템
+현대 소프트웨어 엔지니어링은 단일 인간 개발자의 인지적 한계를 넘어서는 복잡성과 규모의 도전에 직면해 있다. 이러한 상황에서 인공지능(AI)의 역할은 단순한 코드 자동 완성(Autocomplete) 기능을 제공하는 '보조자(Copilot)'의 단계를 지나, 독자적인 계획 수립과 실행 능력을 갖춘 '자율 에이전트(Autonomous Agent)'로 진화하고 있다. 특히 Google의 Antigravity와 Anthropic의 Claude Code와 같은 도구들의 등장은 개발 환경을 '에이전트 중심(Agent-First)'으로 재편하고 있으며, 이는 개발자가 직접 코드를 작성하는 것보다 에이전트들의 작업을 지휘하고 조율하는 역량이 더욱 중요해지는 시대를 예고한다.3 이러한 패러다임의 변화 속에서 '폴리 에이전트 오케스트레이션(Poly-Agentic Orchestration)'은 서로 다른 특화된 능력을 가진 다수의 AI 에이전트를 하나의 통합된 워크플로우로 묶어내는 핵심 기술 아키텍처로 부상하고 있다.
+본 연구 보고서는 현재 가장 강력한 사용자 경험(UX)과 컨텍스트 인식 능력을 보유한 Cursor IDE를 이 오케스트레이션의 중심인 '인터랙티브 리드 개발자(Interactive Lead Developer)'로 설정하는 아키텍처를 제안한다. 이는 Cursor가 단순히 코드를 편집하는 도구가 아니라, 프로젝트의 기술적 비전을 수립하고, 하위 에이전트(Antigravity, Claude Code)에게 임무를 위임하며, 그 결과물인 아티팩트(Artifacts)를 검증하여 최종적으로 통합하는 '미션 컨트롤(Mission Control)' 역할을 수행함을 의미한다.3
+이 보고서는 15,000단어 분량의 심층 분석을 통해 폴리 에이전트 시스템 구축을 위한 구체적인 환경 설정(Configuration), 페르소나 정의를 위한 .cursorrules 프롬프트 엔지니어링, 에이전트 간 신경망 역할을 하는 MCP(Model Context Protocol)의 구현, 그리고 이질적인 에이전트 간의 비동기 협업 워크플로우를 최적화하는 방안을 포괄적으로 다룬다. 특히 '바이브 코딩(Vibe Coding)'이라 불리는 새로운 개발 트렌드가 가져오는 기회와 위험 요소를 분석하고 6, 이를 통제 가능한 엔지니어링 프로세스로 승화시키기 위한 기술적 해법을 제시한다.
+________________
+2. 폴리 에이전트 오케스트레이션 아키텍처 프레임워크
+2.1 아키텍처 계층 구조 및 역할 정의
+성공적인 폴리 에이전트 시스템은 각 구성 요소의 역할이 명확히 정의되고, 상호 간의 통신 프로토콜이 확립된 계층적 구조를 필요로 한다. 본 연구에서는 효율적인 오케스트레이션을 위해 3계층 아키텍처(Three-Tier Architecture)를 제안한다. 이 구조는 인간 개발자의 의도(Intent)가 구체적인 기계 명령으로 변환되고, 실행 결과가 다시 인간에게 피드백되는 루프를 최적화하도록 설계되었다.
+계층 (Layer)
+	구성 요소 (Component)
+	핵심 역할 (Primary Role)
+	주요 기능 및 책임
+	제1계층: 지휘 통제
+	Cursor IDE
+	인터랙티브 리드 개발자
+	프로젝트 아키텍처 설계, 기술 명세(Spec) 정의, 하위 에이전트 작업 검토 및 승인, 실시간 디버깅, 인간과의 인터페이스
+	제2계층: 자율 실행
+	Antigravity
+	프로젝트 매니저 / 자율 팟
+	장기 실행 과제(Long-running Task) 계획 및 수행, 웹 브라우징을 통한 정보 수집, 멀티 파일 생성 및 수정, 아티팩트 생성
+	제2계층: 자율 실행
+	Claude Code
+	신속 대응팀 (CLI)
+	터미널 기반 백그라운드 작업 처리, Git 조작, 테스트 자동화, 린팅(Linting), CI/CD 파이프라인 제어
+	제3계층: 공유 컨텍스트
+	MCP & File System
+	신경망 및 데이터 저장소
+	에이전트 간 상태(State) 공유, 도구(Tools) 및 자원(Resources) 표준화 접근, 파일 잠금 및 변경 감지, 지식 그래프 관리
+	이 아키텍처의 핵심은 Cursor IDE가 전체 시스템의 두뇌 역할을 수행한다는 점이다. Cursor는 사용자의 추상적인 요구사항("로그인 페이지를 더 현대적으로 만들어줘")을 구체적인 기술적 지시사항("Antigravity는 Material UI 라이브러리를 사용하여 컴포넌트를 설계하고, Claude Code는 관련 테스트 코드를 작성하라")으로 변환하는 번역기이자 감독관이다.8
+2.2 '인터랙티브 리드 개발자'로서의 기술적 요구사항
+Cursor가 단순한 코드 생성기를 넘어 리드 개발자로서 기능하기 위해서는 기존의 IDE 사용 방식과는 차별화된 기술적 접근이 필요하다. 첫째, **전역적 컨텍스트 인식(Global Context Awareness)**이 필수적이다. Cursor는 현재 열려 있는 파일뿐만 아니라, .antigravity 폴더 내에 저장된 타 에이전트의 작업 계획서(Plan)와 CLAUDE.md에 정의된 프로젝트 규칙을 모두 이해하고 있어야 한다.2 이는 대규모 컨텍스트 윈도우를 효율적으로 활용하는 전략과 직결된다.
+둘째, **비동기 변화에 대한 적응성(Adaptability to Asynchronous Changes)**이다. Antigravity나 Claude Code가 백그라운드에서 수십 개의 파일을 동시에 수정할 때, Cursor는 이를 실시간으로 감지하고 충돌 없이 사용자 인터페이스에 반영해야 한다. 이는 파일 시스템 워처(Watcher)의 정밀한 튜닝과 Git 워크트리(Worktree) 활용을 요구한다.11
+셋째, **엄격한 페르소나 및 정책 강제(Strict Persona & Policy Enforcement)**이다. 리드 개발자는 주니어 개발자(하위 에이전트)의 코드를 무조건 수용하지 않는다. .cursorrules를 통해 정의된 아키텍처 원칙, 보안 가이드라인, 코딩 스타일을 기준으로 결과물을 비판적으로 검토하고 수정을 지시할 수 있는 권한과 판단 능력을 갖춰야 한다.13
+________________
+3. Cursor IDE의 리드 개발자 모드 설정 (Deep Configuration)
+Cursor를 단순한 편집기에서 미션 컨트롤 센터로 변모시키기 위해서는 기본 설정을 넘어선 심층적인 구성이 요구된다. 이는 특히 VS Code 기반의 유산(Legacy)과 에이전트 특화 기능 간의 충돌을 방지하고, 다중 에이전트 환경에서의 데이터 무결성을 보장하는 데 초점을 맞춘다.
+3.1 설정의 분리 전략: .cursor/settings.json vs .vscode/settings.json
+일반적으로 VS Code 사용자는 .vscode/settings.json을 통해 프로젝트 설정을 공유한다. 그러나 폴리 에이전트 환경에서는 인간 개발자를 위한 설정과 AI 에이전트(Cursor)를 위한 설정을 명확히 분리해야 한다. Cursor는 .cursor/settings.json 파일을 통해 프로젝트별로 특화된 AI 동작 방식을 정의할 수 있는 기능을 제공하거나, 혹은 사용자 수준의 설정과 프로젝트 수준의 설정을 오버라이드하는 전략을 취해야 한다.15
+연구 결과, 가장 효과적인 전략은 .cursor 디렉토리를 AI 에이전트 전용의 '구성 데이터베이스'로 활용하는 것이다. 다음은 리드 개발자 역할을 수행하기 위해 최적화된 설정 파일의 예시와 그에 대한 심층 분석이다.
+3.1.1 프로젝트 격리 및 에이전트 모드 활성화
+
+
+JSON
+
+
+
+
+//.cursor/settings.json (Conceptual Configuration for Lead Developer Role)
+{
+ "cursor.general.agentMode": "architect", // 아키텍처 중심 모드 (가상 설정)
+ "cursor.ai.contextWindow": 200000,       // 가능한 최대 컨텍스트 확보
+ "cursor.ai.reasoningModel": "o1-preview", // 복잡한 추론 및 계획 수립용 모델
+ "cursor.ai.autoApply": false,            // 리드 개발자는 검토 없이 코드를 적용하지 않음
+
+ // 파일 감시(File Watcher) 최적화: 타 에이전트 작업 영역 포함 및 배제
+ "files.watcherExclude": {
+   "**/.git/objects/**": true,
+   "**/.git/subtree-cache/**": true,
+   "**/node_modules/**": true,
+   "**/.claude/history/**": true,         // Claude Code의 내부 DB는 감시 제외
+   "**/.antigravity/logs/**": true,       // 단순 로그 제외
+   "**/.antigravity/artifacts/*.json": false // 중요: Antigravity 아티팩트는 감시 필수
+ },
+
+ // 동시성 제어 및 파일 안전망
+ "files.autoSave": "onFocusChange",       // 에이전트 작업 중 자동 저장 충돌 방지
+ "files.participants.timeout": 120000,    // 대규모 리팩토링 시 타임아웃 연장
+ "editor.multiCursorModifier": "ctrlCmd", // 멀티 커서 설정 [17]
+
+ // MCP 및 외부 도구 연동 설정
+ "cursor.mcp.enable": true,
+ "cursor.mcp.strictMode": true,           // 승인되지 않은 도구 사용 차단
+
+ // VS Code 설정 오버라이드 (Cursor 전용)
+ "cursor.overrides": {
+   "editor.codeActionsOnSave": {
+     "source.fixAll.eslint": false        // 린팅은 Claude Code에게 위임 (충돌 방지)
+   },
+   "python.languageServer": "Pylance"     // 강력한 타입 체크 활성화
+ }
+}
+
+이 설정에서 주목할 점은 files.watcherExclude의 전략적 구성이다. 일반적인 개발 환경에서는 .git이나 숨김 폴더를 모두 무시하지만, 리드 개발자 Cursor는 Antigravity가 생성하는 계획서(artifacts/*.json)나 결과물 파일을 실시간으로 인지해야 하므로 이를 명시적으로 감시 대상에 포함(false)시켜야 한다.3 반면, Claude Code가 생성하는 방대한 히스토리 파일이나 임시 데이터는 시스템 리소스 낭비를 막기 위해 제외한다.
+3.2 외부 변경 감지 및 파일 시스템 안정성 확보
+폴리 에이전트 환경의 가장 치명적인 위험 요소는 '경쟁 조건(Race Condition)'이다. 예를 들어, Claude Code가 백그라운드 터미널에서 git checkout을 통해 브랜치를 변경하거나 대규모 리팩토링을 수행하는 동안, Cursor가 해당 파일들을 메모리에 로드하고 있다면 데이터가 덮어씌워지거나 유실될 수 있다.18
+이를 해결하기 위한 기술적 방안은 다음과 같다:
+1. Git Worktree를 활용한 물리적 격리: 가장 확실한 방법은 에이전트별로 별도의 작업 디렉토리를 할당하는 것이다. Git의 Worktree 기능을 사용하면 동일한 저장소를 공유하면서도 서로 다른 브랜치를 독립적인 디렉토리에서 체크아웃하여 작업할 수 있다.11
+   * Cursor는 메인 워크트리에서 작업하며 전체를 조망한다.
+   * Claude Code는 .cursor/worktrees/agent-claude와 같은 별도 경로에서 파일 조작을 수행한다.
+   * 작업이 완료되면 Merge를 통해 메인 워크트리로 통합한다.
+2. Strict Mode 및 파일 잠금: Cursor의 보안 설정을 통해 워크스페이스 외부의 파일 접근을 차단하고(security.json), 중요 파일에 대해서는 운영체제 수준의 파일 잠금(File Locking)이나 MCP를 통한 논리적 잠금을 구현한다.20
+3. 파일 워처(File Watcher) 튜닝: 리눅스 환경에서는 fs.inotify.max_user_watches 값을 대폭 상향 조정해야 하며, 윈도우나 WSL 환경에서는 폴링(Polling) 간격을 조정하여 CPU 점유율 폭주를 막으면서도 변경 사항을 놓치지 않도록 설정해야 한다.12
+3.3 터미널 통합 및 쉘(Shell) 환경 구성
+리드 개발자 Cursor는 직접 코드를 수정하는 것뿐만 아니라, 터미널 명령을 통해 하위 에이전트를 제어한다. 따라서 터미널 통합 설정이 중요하다.
+* Shell Integration: Cursor 터미널에서 실행되는 명령의 성공/실패 여부를 Cursor가 인지할 수 있도록 쉘 통합 기능을 활성화한다.
+* 백그라운드 태스크 모니터링: Claude Code를 Ctrl+B로 백그라운드에서 실행할 때 23, 해당 프로세스의 상태(PID, 실행 중 여부)를 확인할 수 있는 커스텀 스크립트나 대시보드를 Cursor 내에 구성하는 것이 좋다. 이는 후술할 MCP를 통해 구현 가능하다.
+________________
+4..cursorrules 프롬프트 엔지니어링: 리드 개발자 페르소나 구축
+Cursor의 강력함은 .cursorrules 파일을 통해 AI의 행동 양식을 정의할 수 있다는 점에 있다. 리드 개발자 역할을 수행하기 위해, 이 파일은 단순한 지침서를 넘어선 '인지적 프레임워크(Cognitive Framework)'를 제공해야 한다.13
+4.1 페르소나 정의: "엄격한 아키텍트(Strict Architect)"
+리드 개발자 페르소나는 다음과 같은 핵심 심리적/행동적 특성을 가져야 한다:
+1. 방어적 사고(Defensive Mindset): 코드를 생성하기 전에 잠재적인 부작용, 보안 취약점, 성능 저하 가능성을 먼저 검토한다.
+2. 질문 우선(Ask-First Protocol): 사용자의 지시가 모호하거나 기존 아키텍처 원칙에 위배될 경우, 즉시 실행하지 않고 명확화를 요구하거나 대안을 제시한다.
+3. 위임 전략(Delegation Strategy): 자신이 직접 처리하기 비효율적인 반복 작업이나 대규모 변경은 Claude Code나 Antigravity에게 위임할 것을 제안한다.
+4. 문서화 강박(Documentation Obsession): 모든 변경 사항에 대해 문서(README, CHANGELOG, 주석) 업데이트를 필수적으로 수행한다.
+4.2 계층적 규칙 구조 (Rule Layering Strategy)
+단일 파일에 모든 규칙을 담는 것은 AI의 주의력을 분산시킨다. 따라서 규칙을 전역(Global), 프로젝트(Project), 워크플로우(Workflow) 단위로 계층화하여 관리해야 한다.13
+* 레벨 1: 전역 규칙 (~/.cursorrules): 모든 프로젝트에 적용되는 기본 페르소나. (예: "항상 한국어로 답변하되, 기술 용어는 영어를 병기한다.", "코드는 간결함보다 가독성을 우선한다.")
+* 레벨 2: 프로젝트 규칙 (.cursor/rules/ARCHITECTURE.md): 해당 프로젝트의 기술 스택, 폴더 구조, 라이브러리 제약 사항.
+* 레벨 3: 에이전트 협업 규칙 (.cursor/rules/AGENTS.md): 타 에이전트와의 소통 방식 및 아티팩트 해석 방법.
+4.3.cursorrules 작성 예시: 리드 개발자 모드
+다음은 리드 개발자 페르소나를 구현하기 위한 실제 .cursorrules 파일의 구성 예시이다.
+#.cursorrules: Interactive Lead Developer Persona
+1. Identity & Role
+당신은 이 프로젝트의 **리드 소프트웨어 아키텍트(Lead Software Architect)**이자 **기술 프로젝트 관리자(TPM)**입니다.
+당신의 목표는 단순한 코드 작성이 아니라, 견고하고 확장 가능하며 유지보수 용이한 시스템을 구축하는 것입니다.
+당신은 인간 사용자 및 자율 에이전트(Antigravity, Claude Code)와 협업하며 전체 오케스트레이션을 담당합니다.
+2. Prime Directives (핵심 원칙)
+2.1 Architectural Integrity (아키텍처 무결성)
+* 모든 구현 전에 반드시 ARCHITECTURE.md와 TECH_SPEC.md를 먼저 읽고 숙지하십시오.
+* 사용자의 요청이 기존 디자인 패턴이나 아키텍처 원칙과 충돌할 경우, **즉시 중단(STOP)**하고 위험 요소를 경고하십시오.
+* 새로운 라이브러리 추가는 package.json 분석 후 중복이 없을 때만 제안하며, 반드시 사용자의 명시적 승인을 받으십시오.
+2.2 Agent Orchestration Protocol (에이전트 조율 프로토콜)
+* Detection (감지): 작업 시작 전 .antigravity/artifacts/ 및 .claude/history/를 스캔하여 타 에이전트의 진행 상황을 파악하십시오.
+* Delegation (위임): 작업이 다음 조건에 해당하면 직접 수행하기보다 Claude Code CLI 사용을 제안하십시오:
+   * 5개 이상의 파일에 영향을 미치는 리팩토링
+   * 전체 테스트 스위트 실행 (npm test)
+   * 복잡한 Git 브랜치 조작 및 병합
+   * 예시: "이 작업은 20개 파일의 수정이 필요합니다. 터미널에서 claude code '...'를 실행하여 백그라운드에서 처리하는 것을 권장합니다."
+* Review (검토): 타 에이전트가 생성한 코드나 아티팩트는 '주니어 개발자'의 작업물로 간주하고, 엄격하게 로직, 보안, 스타일을 검토하십시오.
+2.3 "Vibe Coding" Interpretation (바이브 코딩 해석)
+* 사용자가 "더 부드럽게 만들어줘", "요즘 스타일로 해줘"와 같이 추상적인 'Vibe'를 요청할 경우, 이를 구체적인 기술 명세로 변환하십시오.
+   * "더 부드럽게" -> "CSS transition 0.3s ease-in-out 적용, 스켈레톤 로딩 추가"
+   * 변환된 명세를 사용자에게 확인받은 후 구현을 시작하십시오.6
+3. Workflow Enforcement
+* Context Loading: @focus 태그가 붙은 파일과 최상위 CONTEXT.md는 항상 프롬프트 컨텍스트에 포함하십시오.
+* MCP Usage: 프로젝트 상태나 의존성 그래프 확인이 필요할 때는 추측하지 말고 반드시 sqlite_db 또는 knowledge_graph MCP 도구를 사용해 조회하십시오.
+이러한 규칙은 Cursor가 단순한 답변 기계가 아니라, 능동적으로 사고하고 판단하는 파트너로 행동하도록 강제한다. 특히 'Vibe Coding' 섹션은 최근 유행하는 추상적 개발 요청을 엔지니어링의 영역으로 끌어들이는 중요한 장치이다.25
+________________
+5. 신경망 구축: MCP (Model Context Protocol) 구현 및 활용
+MCP는 Cursor가 로컬 시스템, 데이터베이스, 그리고 다른 에이전트의 내부 상태(State)와 연결되는 표준화된 인터페이스이다.21 폴리 에이전트 시스템에서 MCP는 각 에이전트가 고립된 섬(Silo)이 되지 않고, 데이터를 공유하며 협업할 수 있게 하는 '신경망' 역할을 수행한다.
+5.1 MCP 아키텍처 및 서버 구성
+효과적인 오케스트레이션을 위해 다음과 같은 세 가지 핵심 MCP 서버를 구축하고 연동해야 한다.
+
+
+서버 유형
+	역할
+	구현 기술
+	주요 기능
+	FileSystem MCP
+	물리적 파일 접근 및 조작
+	Node.js / TypeScript
+	프로젝트 파일 구조 탐색, 타 에이전트 작업 디렉토리 안전 접근, 파일 검색 및 읽기 27
+	SQLite MCP
+	상태(State) 및 메타데이터 저장
+	Python / FastMCP
+	에이전트 작업 로그, 사용자 선호도, 장기 기억(Memory), 티켓/이슈 관리 28
+	Agent Bridge MCP
+	에이전트 간 통신 중계
+	Python (Custom)
+	실시간 상태 모니터링, 메시지 큐, 파일 잠금 해제 요청, 알림 브로드캐스팅
+	5.2 Cursor 내 MCP 설정 (.cursor/mcp.json)
+Cursor가 이 서버들과 통신하기 위해서는 .cursor/mcp.json 파일에 정확한 연결 정보를 명시해야 한다. 로컬 개발 환경에서는 stdio 방식을 사용하여 프로세스를 직접 실행하는 것이 지연 시간을 최소화하는 데 유리하다.30
+
+
+JSON
+
+
+
+
+//.cursor/mcp.json (Detailed Implementation)
+{
+ "mcpServers": {
+   // 1. 프로젝트 상태 관리를 위한 로컬 SQLite 서버
+   "project-memory": {
+     "command": "uv", // Python 패키지 관리자 'uv'를 사용한 빠른 실행
+     "args": [
+       "run",
+       "mcp-server-sqlite",
+       "--db-path",
+       "${workspaceFolder}/.cursor/poly_agent_memory.db"
+     ],
+     "env": {
+       "PYTHONUNBUFFERED": "1" // 실시간 로그 출력을 위해 버퍼링 비활성화
+     }
+   },
+   // 2. 파일 시스템 접근을 위한 표준 서버
+   "filesystem": {
+     "command": "npx",
+     "args": [
+       "-y",
+       "@modelcontextprotocol/server-filesystem",
+       "${workspaceFolder}", // 프로젝트 루트 접근 권한
+       "${workspaceFolder}/.antigravity", // Antigravity 아티팩트 폴더 접근 권한
+       "${workspaceFolder}/.claude" // Claude Code 데이터 폴더 접근 권한
+     ]
+   },
+   // 3. 커스텀 에이전트 브리지 (Agent Bridge)
+   "agent-bridge": {
+     "command": "python",
+     "args": ["${workspaceFolder}/tools/mcp_agent_bridge.py"],
+     "disabled": false
+   }
+ }
+}
+
+5.3 사용자 정의 MCP 서버: 'Agent Bridge' 구현 가이드
+기존의 상용 MCP 서버로는 다중 에이전트 간의 복잡한 상태 동기화를 처리하기 어렵다. 따라서 Python의 FastMCP 라이브러리를 활용하여 커스텀 'Agent Bridge' 서버를 구현하는 것이 필수적이다. 이 서버는 파일 잠금 문제를 우회하고, 각 에이전트가 현재 어떤 작업을 수행 중인지 중앙에서 관리한다.31
+구현 예시 (Python):
+
+
+Python
+
+
+
+
+# tools/mcp_agent_bridge.py
+from mcp.server.fastmcp import FastMCP
+import sqlite3
+import json
+import os
+from datetime import datetime
+
+# 서버 초기화
+mcp = FastMCP("AgentBridge", dependencies=["sqlite3"])
+DB_PATH = "./.cursor/poly_agent_memory.db"
+
+# 데이터베이스 초기화 (테이블 생성)
+def init_db():
+   with sqlite3.connect(DB_PATH) as conn:
+       conn.execute("""
+           CREATE TABLE IF NOT EXISTS agent_logs (
+               id INTEGER PRIMARY KEY AUTOINCREMENT,
+               agent_name TEXT NOT NULL,
+               action_type TEXT NOT NULL,
+               details TEXT,
+               status TEXT,
+               timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+           )
+       """)
+       conn.execute("""
+           CREATE TABLE IF NOT EXISTS file_locks (
+               file_path TEXT PRIMARY KEY,
+               locked_by TEXT,
+               lock_time DATETIME DEFAULT CURRENT_TIMESTAMP
+           )
+       """)
+
+# 도구(Tool) 정의: 에이전트 활동 로깅
+@mcp.tool()
+def log_agent_activity(agent_name: str, action: str, details: str, status: str = "IN_PROGRESS"):
+   """
+   Logs significant activities from autonomous agents (Antigravity, Claude Code).
+   Usage: log_agent_activity("Claude", "Refactor", "Optimizing utils.py", "STARTED")
+   """
+   try:
+       with sqlite3.connect(DB_PATH) as conn:
+           conn.execute(
+               "INSERT INTO agent_logs (agent_name, action_type, details, status) VALUES (?,?,?,?)",
+               (agent_name, action, details, status)
+           )
+       return f"Successfully logged action for {agent_name}"
+   except Exception as e:
+       return f"Error logging activity: {str(e)}"
+
+# 리소스(Resource) 정의: 에이전트 상태 조회
+@mcp.resource("agent://status/active")
+def get_active_agents() -> str:
+   """Returns a list of agents currently performing tasks."""
+   with sqlite3.connect(DB_PATH) as conn:
+       cursor = conn.execute(
+           "SELECT agent_name, action_type, timestamp FROM agent_logs WHERE status = 'IN_PROGRESS' ORDER BY timestamp DESC"
+       )
+       active_tasks = [{"agent": row, "task": row[1], "started_at": row[2]} for row in cursor.fetchall()]
+   return json.dumps(active_tasks, indent=2)
+
+if __name__ == "__main__":
+   init_db()
+   mcp.run()
+
+이 코드는 단순해 보이지만 강력한 기능을 수행한다. Cursor는 get_active_agents 리소스를 통해 현재 Claude Code나 Antigravity가 백그라운드에서 작업 중인지 확인할 수 있으며, 다른 에이전트들도 log_agent_activity 툴을 호출하여 자신의 상태를 알릴 수 있다. 이는 파일 시스템을 직접 감시하는 것보다 훨씬 안정적이고 리소스 효율적인 동기화 방식이다.33
+________________
+6. 에이전트 오케스트레이션: Claude Code 및 Antigravity와의 협업 워크플로우
+이제 준비된 인프라(설정, 규칙, MCP) 위에서 실제로 타 에이전트들과 협업하는 구체적인 워크플로우를 설계한다.
+6.1 Claude Code: 전술적 실행 및 백그라운드 처리
+Claude Code는 CLI 기반으로 동작하며, Cursor가 터미널을 통해 명령을 내리면 이를 신속하게 수행하는 '전술팀'이다.
+6.1.1 협업 워크플로우: "계획 후 위임(Plan & Delegate)"
+1. 계획 수립 (Cursor): 사용자가 "전체 프로젝트의 로깅 시스템을 Winston으로 교체해줘"라고 요청하면, Cursor는 리드 개발자로서 영향을 받는 파일 목록과 변경 전략을 담은 REFACTOR_PLAN.md를 작성한다.
+2. 명령 생성 및 실행 (Cursor -> Claude): Cursor는 터미널에 다음과 같은 명령어를 제안한다.
+Bash
+claude code -p "Read REFACTOR_PLAN.md. Execute the plan step-by-step. Run 'npm test' after each file modification to ensure no regressions." --print-architecture
+
+3. 백그라운드 전환 (User): 사용자는 터미널에서 Ctrl+B를 입력하여 Claude Code를 백그라운드 프로세스로 전환한다.23 이로써 Cursor의 메인 인터페이스는 잠기지 않고 다른 작업을 계속할 수 있다.
+4. 완료 알림 (Claude -> User): Claude Code가 작업을 마치면 시스템 알림을 보내거나 소리를 재생하도록 훅(Hook)을 설정한다.34
+   * ~/.claude/config.json 예시:
+JSON
+"commands": {
+ "after_response": "afplay /System/Library/Sounds/Glass.aiff" // macOS 알림음
+}
+
+   5. 검증 및 통합 (Cursor): Cursor는 변경된 파일들의 Diff를 확인하고, REFACTOR_PLAN.md의 체크리스트가 모두 완료되었는지 MCP를 통해 검증한 후 커밋한다.
+6.2 Antigravity: 전략적 자율 개발 및 아티팩트 관리
+Antigravity는 더 긴 호흡의 작업(웹 사이트 구축, 복잡한 모듈 개발)을 수행하는 '전략팀'이다. 여기서는 '아티팩트(Artifacts)'가 소통의 핵심 매개체가 된다.
+6.2.1 협업 워크플로우: "임무 부여 및 감리(Assign & Audit)"
+   1. 임무 할당 (Cursor/User -> Antigravity): 사용자는 Antigravity의 'Manager Surface'에서 "사용자 대시보드 모듈 신규 개발"이라는 임무(Mission)를 생성한다.4
+   2. 아티팩트 생성 (Antigravity): Antigravity 에이전트는 작업을 분석하여 Implementation Plan, Task List 등의 아티팩트를 생성하고 .antigravity/ 폴더에 저장한다.3
+   3. 실시간 모니터링 및 개입 (Cursor):
+   * Cursor는 .cursor/settings.json에 설정된 대로 .antigravity 폴더의 변화를 감지한다.
+   * 리드 개발자 Cursor는 생성된 Implementation Plan을 읽고(MCP Filesystem 서버 활용), 아키텍처 원칙에 위배되는 내용이 있는지 검사한다.
+   * 문제 발견 시, 사용자를 통해 피드백을 주거나 Antigravity가 읽을 수 있는 FEEDBACK.md 파일을 해당 폴더에 생성한다.
+   4. 결과물 통합: Antigravity가 코드 생성을 완료하면, Cursor는 이를 바로 메인 코드베이스에 합치지 않고, 별도의 브랜치나 격리된 폴더에서 코드 리뷰를 수행한다. 이 과정에서 'Vibe Coding'으로 인해 발생할 수 있는 비표준 코드나 보안 취약점을 집중적으로 점검한다.
+________________
+7. 동기화 및 충돌 해결 전략 (Synchronization & Conflict Resolution)
+다수의 에이전트가 동시에 파일 시스템에 접근할 때 발생하는 데이터 무결성 문제는 폴리 에이전트 시스템의 가장 큰 난제이다. 이를 해결하기 위한 기술적 전략을 제시한다.
+7.1 Git Worktree를 이용한 물리적 격리
+가장 강력한 충돌 방지책은 Git Worktree이다.11
+   * 구조:
+   * /project/main (Cursor 작업 영역)
+   * /project/.agent-worktrees/claude (Claude Code 작업 영역)
+   * /project/.agent-worktrees/antigravity (Antigravity 작업 영역)
+   * 프로세스: 각 에이전트는 자신만의 워크트리에서 작업하고 커밋을 생성한다. 작업이 완료되면 메인 워크트리에서 git merge를 수행한다. 이렇게 하면 파일 잠금 문제나 에디터가 파일을 다시 로드하는 문제를 원천적으로 차단할 수 있다.
+7.2 Cursor의 자동 되돌리기(Auto-Revert) 방지
+Cursor가 외부에서 변경된 파일을 감지했을 때, 이를 '저장되지 않은 변경 사항'으로 오인하여 롤백하는 현상이 보고되고 있다.18 이를 방지하기 위해:
+   1. 자동 저장 설정 변경: files.autoSave를 off 또는 onFocusChange로 설정하여, 에이전트가 작업 중일 때 Cursor가 덮어쓰지 않도록 한다.
+   2. Dirty File Protection: 작업 중인 파일(Dirty State)이 외부에서 변경되면 VS Code/Cursor는 충돌 해결 대화상자를 띄운다. 리드 개발자 모드에서는 이를 에이전트의 변경 사항을 우선순위로 두도록(Accept External Changes) 워크플로우를 교육해야 한다.
+________________
+8. 결론 및 미래 전망: Vibe Coding 시대의 리드 개발자
+8.1 연구 요약
+본 보고서는 Cursor IDE를 '인터랙티브 리드 개발자'로 격상시키기 위한 포괄적인 아키텍처를 수립했다.
+   1. **격리된 설정(.cursor/settings.json)**과 **엄격한 규칙(.cursorrules)**을 통해 Cursor에게 프로젝트를 감독할 권한과 책임을 부여했다.
+   2. MCP를 도입하여 로컬 파일 시스템, 데이터베이스, 타 에이전트 간의 유기적인 신경망을 구축했다.
+   3. Claude Code와 Antigravity를 각각 전술적 실행과 전략적 개발을 담당하는 하위 조직으로 편제하고, Git Worktree와 아티팩트 기반의 협업 프로토콜을 정립했다.
+이러한 구조 하에서 인간 개발자는 더 이상 코드의 세부 구현에 매몰되지 않고, 에이전트들이 생성한 결과물의 'Vibe'와 'Quality'를 판단하는 최종 결정권자(Director)로서의 역할을 수행하게 된다.
+8.2 시사점 및 전망
+'Vibe Coding' 트렌드는 소프트웨어 개발의 진입 장벽을 획기적으로 낮추고 있지만, 동시에 유지보수 불가능한 '스파게티 코드'의 양산과 보안 위협을 증가시키고 있다.7 본 연구에서 제안한 '리드 개발자 에이전트' 모델은 이러한 부작용을 통제할 수 있는 가장 현실적인 대안이다.
+향후 IDE는 단순한 텍스트 편집기를 넘어, 수십 개의 전문화된 AI 에이전트가 상주하며 협업하는 **'AI 네이티브 플랫폼'**으로 진화할 것이다. Cursor의 발전 방향 역시 MCP와 같은 표준 프로토콜을 통해 외부 생태계와의 연결성을 강화하는 쪽으로 나아갈 것이며, 개발자는 이러한 변화를 선도적으로 수용하여 자신의 생산성을 10배, 100배로 확장하는 '슈퍼 개발자'로 거듭나야 한다.
+참고 자료
+   1. Claude Code: Best practices for agentic coding - Anthropic, 12월 22, 2025에 액세스, https://www.anthropic.com/engineering/claude-code-best-practices
+   2. Getting Started with Google Antigravity, 12월 22, 2025에 액세스, https://codelabs.developers.google.com/getting-started-google-antigravity
+   3. Build with Google Antigravity, our new agentic development platform, 12월 22, 2025에 액세스, https://developers.googleblog.com/build-with-google-antigravity-our-new-agentic-development-platform/
+   4. How to Set Up and Use Google Antigravity - Codecademy, 12월 22, 2025에 액세스, https://www.codecademy.com/article/how-to-set-up-and-use-google-antigravity
+   5. Cursor for Vibe Coding: A Complete Guide | by YouWare - Medium, 12월 22, 2025에 액세스, https://youware.medium.com/cursor-for-vibe-coding-a-complete-guide-b0863d4a2330
+   6. Vibe coding - Wikipedia, 12월 22, 2025에 액세스, https://en.wikipedia.org/wiki/Vibe_coding
+   7. Tutorial : Getting Started with Google Antigravity | by Romin Irani - Medium, 12월 22, 2025에 액세스, https://medium.com/google-cloud/tutorial-getting-started-with-google-antigravity-b5cc74c103c2
+   8. Installing Antigravity IDE | AI Native Software Development, 12월 22, 2025에 액세스, https://ai-native.panaversity.org/docs/AI-Tool-Landscape/ai-native-ides/installing-antigravity
+   9. Artifacts - Google Antigravity Documentation, 12월 22, 2025에 액세스, https://antigravity.google/docs/artifacts
+   10. Parallel Agents | Cursor Docs, 12월 22, 2025에 액세스, https://cursor.com/docs/configuration/worktrees
+   11. Fixing Cursor IDE Performance Issues (Windows, WSL, and Linux) - Vincent Schmalbach, 12월 22, 2025에 액세스, https://www.vincentschmalbach.com/fixing-cursor-ide-high-gpu-usage-and-ui-freezing-issues/
+   12. Rules | Cursor Docs, 12월 22, 2025에 액세스, https://cursor.com/docs/context/rules
+   13. Best Practices: .cursorrules - How To - Cursor - Community Forum, 12월 22, 2025에 액세스, https://forum.cursor.com/t/best-practices-cursorrules/41775
+   14. Cursor-specific overrides to .vscode/settings.json - Feature Requests - Cursor - Community Forum, 12월 22, 2025에 액세스, https://forum.cursor.com/t/cursor-specific-overrides-to-vscode-settings-json/118861
+   15. Project-based JSON Settings for Cursor - Feature Requests, 12월 22, 2025에 액세스, https://forum.cursor.com/t/project-based-json-settings-for-cursor/46179
+   16. Bug Report: Cursor Randomly Deleted and Reverted Project Files · Issue #3897 - GitHub, 12월 22, 2025에 액세스, https://github.com/cursor/cursor/issues/3897
+   17. Changes being reverted - Bug Reports - Cursor - Community Forum, 12월 22, 2025에 액세스, https://forum.cursor.com/t/changes-being-reverted/145225
+   18. Cursor Agent Unauthorised System Access - Bug Reports, 12월 22, 2025에 액세스, https://forum.cursor.com/t/cursor-agent-unauthorised-system-access/127803
+   19. Lightning Talk: Lessons from Building with the Model Context Protocol (MCP), 12월 22, 2025에 액세스, https://www.youtube.com/watch?v=xXvxnEdMSxY
+   20. Cursor Freezing: - Bug Reports, 12월 22, 2025에 액세스, https://forum.cursor.com/t/cursor-freezing/51293
+   21. background commands · ruvnet/claude-flow Wiki - GitHub, 12월 22, 2025에 액세스, https://github.com/ruvnet/claude-flow/wiki/background-commands
+   22. Vibe Coding with Cursor | DoltHub Blog, 12월 22, 2025에 액세스, https://www.dolthub.com/blog/2025-03-29-vibin/
+   23. Vibe Coding Explained: Tools and Guides | Google Cloud, 12월 22, 2025에 액세스, https://cloud.google.com/discover/what-is-vibe-coding
+   24. Understanding MCP servers - Model Context Protocol, 12월 22, 2025에 액세스, https://modelcontextprotocol.io/docs/learn/server-concepts
+   25. Connect to local MCP servers - Model Context Protocol, 12월 22, 2025에 액세스, https://modelcontextprotocol.io/docs/develop/connect-local-servers
+   26. MCP SQLite Server by johnnyoshika - Glama, 12월 22, 2025에 액세스, https://glama.ai/mcp/servers/@johnnyoshika/mcp-server-sqlite-npx
+   27. Breaking Isolation: A Practical Guide to Building an MCP Server with SQLite - Felix Pappe, 12월 22, 2025에 액세스, https://felix-pappe.medium.com/breaking-isolation-a-practical-guide-to-building-an-mcp-server-with-sqlite-68c800a25d42
+   28. Model Context Protocol (MCP) | Cursor Docs, 12월 22, 2025에 액세스, https://cursor.com/docs/context/mcp
+   29. Build Your Own Model Context Protocol Server | by C. L. Beard | BrainScriblr | Nov, 2025, 12월 22, 2025에 액세스, https://medium.com/brainscriblr/build-your-own-model-context-protocol-server-0207625472d0
+   30. Build MCP Server - AI Engineering Academy, 12월 22, 2025에 액세스, https://aiengineering.academy/Agents/MCP/CreateMCPServe/
+   31. Ask Human MCP Server: The Developer's Bridge to Smarter AI Agents, 12월 22, 2025에 액세스, https://skywork.ai/skypage/en/ask-human-mcp-server-smarter-ai/1981246505823948800
+   32. Simple way to get notified when claude code finishes : r/ClaudeAI - Reddit, 12월 22, 2025에 액세스, https://www.reddit.com/r/ClaudeAI/comments/1lfvz30/simple_way_to_get_notified_when_claude_code/
+   33. Using terminal-notifier in Claude Code to get custom notifications - Andrea Grandi, 12월 22, 2025에 액세스, https://www.andreagrandi.it/posts/using-terminal-notifier-claude-code-custom-notifications/
+   34. Vibe coding is not the same as AI-Assisted engineering. | by Addy Osmani - Medium, 12월 22, 2025에 액세스, https://medium.com/@addyosmani/vibe-coding-is-not-the-same-as-ai-assisted-engineering-3f81088d5b98

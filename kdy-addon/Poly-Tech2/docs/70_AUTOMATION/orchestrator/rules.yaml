@@ -1,0 +1,24 @@
+# rules.yaml - Routing Logic for L10_ROUTING_ACT
+
+rules:
+  - name: "Test Files"
+    pattern: "**/*.test.ts"
+    target_agent: "Claude Code"
+    action: "run_test"
+    latency: "batch"
+
+  - name: "Documentation"
+    pattern: "**/*.md"
+    target_agent: "Antigravity"
+    action: "index_knowledge"
+    latency: "long-term"
+
+  - name: "UI Components"
+    pattern: "**/*.tsx"
+    target_agent: "Interface"
+    action: "notify_user"
+    latency: "real-time"
+
+default:
+  target_agent: "Specialist"
+  action: "log_unknown"

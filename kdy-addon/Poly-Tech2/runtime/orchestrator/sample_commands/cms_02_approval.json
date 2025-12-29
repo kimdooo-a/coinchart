@@ -1,0 +1,13 @@
+{
+    "msg_id": "TEST_CMD_002_APPROVE",
+    "msg_type": "COMMAND",
+    "command_type": "exec",
+    "category": "B",
+    "title": "Critical Update",
+    "run": [
+        "echo Should NOT run without approval"
+    ],
+    "context": {
+        "phase": 2
+    }
+}

@@ -1,0 +1,156 @@
+name: Observe Release & Monitor Health
+
+on:
+  # Trigger after the Deploy workflow completes
+  workflow_run:
+    workflows: ["Auto Deploy Release to Production"]
+    types:
+      - completed
+  
+  # Scheduled uptime check (every 15 minutes)
+  schedule:
+    - cron: '*/15 * * * *'
+
+  # Manual trigger for testing
+  workflow_dispatch:
+
+jobs:
+  # ===========================
+  # PROCESS DEPLOYMENT RESULT
+  # ===========================
+  process_deployment:
+    name: Process Deployment Result
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_run'
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download Deployment Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: artifacts
+
+      - name: Parse & Log Deployment KPIs
+        id: kpi
+        run: |
+          echo "Processing deployment artifacts..."
+          
+          # Check if artifacts exist
+          if [ -f "artifacts/deployment-info/deployment_info.json" ]; then
+            echo "Found deployment_info.json"
+            cat artifacts/deployment-info/deployment_info.json
+            
+            # Extract basic info
+            DEPLOY_URL=$(jq -r .deployment_url artifacts/deployment-info/deployment_info.json)
+            RELEASE_TAG=$(jq -r .release_tag artifacts/deployment-info/deployment_info.json)
+            echo "DEPLOY_URL=$DEPLOY_URL" >> $GITHUB_ENV
+            echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
+          else
+            echo "No deployment info found."
+          fi
+          
+          # Check status based on workflow conclusion
+          CONCLUSION="${{ github.event.workflow_run.conclusion }}"
+          echo "Workflow Conclusion: $CONCLUSION"
+          echo "CONCLUSION=$CONCLUSION" >> $GITHUB_ENV
+
+      - name: Collect KPI
+        run: npm run kpi:collect artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload KPI Artifact to Release
+        if: env.RELEASE_TAG != ''
+        run: |
+          echo "Uploading KPI for $RELEASE_TAG..."
+          gh release upload "$RELEASE_TAG" artifacts/release_kpi.json --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Send Slack Notification (Optional)
+        if: env.SLACK_WEBHOOK_URL != ''
+        run: |
+          echo "Sending Slack notification..."
+          
+          STATUS_EMOJI="✅"
+          if [ "$CONCLUSION" != "success" ]; then
+             STATUS_EMOJI="❌"
+          fi
+          
+          PAYLOAD="{\"text\":\"$STATUS_EMOJI *Deployment Completed*\nRelease: $RELEASE_TAG\nStatus: $CONCLUSION\nURL: $DEPLOY_URL\"}"
+          
+          curl -X POST -H 'Content-type: application/json' \
+            --data "$PAYLOAD" \
+            "$SLACK_WEBHOOK_URL" || echo "Failed to send Slack alert (continuing)"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Open Issue on Failure
+        if: github.event.workflow_run.conclusion == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runUrl = '${{ github.event.workflow_run.html_url }}';
+            const release = process.env.RELEASE_TAG || 'unknown';
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🚨 Deployment Failed: ${release}`,
+              body: `### Deployment Failure\n\nThe deployment workflow for **${release}** has failed.\n\n[View Workflow Logs](${runUrl})\n\nPlease investigate immediately.`
+            });
+
+  # ===========================
+  # SCHEDULED UPTIME CHECK
+  # ===========================
+  uptime_check:
+    name: Production Uptime Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Get Production URL
+        id: get_url
+        run: |
+          npm install -g vercel@latest
+          
+          # Get current prod url
+          DEPLOYMENT_URL=$(vercel list --prod --json \
+            --token=${{ secrets.VERCEL_TOKEN }} \
+            --scope=${{ secrets.VERCEL_ORG_ID }} 2>/dev/null | \
+            node -e "const data = JSON.parse(require('fs').readFileSync(0, 'utf-8')); console.log(data[0]?.url || '')")
+            
+          echo "URL: $DEPLOYMENT_URL"
+          echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+
+      - name: Run Healthcheck
+        if: steps.get_url.outputs.url != ''
+        run: |
+          URL="${{ steps.get_url.outputs.url }}"
+          echo "Checking health of $URL..."
+          
+          HEALTH_CHECK_URL="$URL" npm run healthcheck
+        env:
+          HEALTH_CHECK_URL: ${{ steps.get_url.outputs.url }}
+
+      - name: Notify on Downtime (Optional)
+        if: failure() && env.SLACK_WEBHOOK_URL != ''
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\"🚨 *Production Downtime Detected*\nURL: ${{ steps.get_url.outputs.url }}\nStatus: Check Failed\"}" \
+            "$SLACK_WEBHOOK_URL" || echo "Failed to send Slack alert"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

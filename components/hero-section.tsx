@@ -7,49 +7,27 @@ import Link from 'next/link';
 import { HeroChart } from "@/components/hero-chart";
 import { useLanguage } from "@/context/LanguageContext";
 import { TRANSLATIONS } from "@/lib/translations";
+import { NewsRotator } from "@/components/news-rotator";
 
 interface HeroSectionProps {
     mode?: "light" | "dark";
 }
 
-const COLORS = {
-    light: {
-        bg: "#FFFFFF",
-        text: "#1F1F1F",
-        textSec: "#6B7280",
-        card: "#F5F5F5",
-        cardHover: "#EBEBEB",
-        border: "#E5E5E5",
-        editorBg: "#FFFFFF",
-        chromeBg: "#FAFAFA",
-        ansiGreen: "#22C55E",
-        ansiRed: "#EF4444",
-    },
-    dark: {
-        bg: "#0A0A0A",
-        text: "#E4E4E4",
-        textSec: "#9CA3AF",
-        card: "#1A1A1A",
-        cardHover: "#262626",
-        border: "#2A2A2A",
-        editorBg: "#1E1E1E",
-        chromeBg: "#171717",
-        ansiGreen: "#4ADE80",
-        ansiRed: "#F87171",
-    },
-} as const;
-
 export default function HeroSection({ mode = "dark" }: HeroSectionProps) {
     const { lang } = useLanguage();
     const t = TRANSLATIONS[lang];
-    const colors = COLORS[mode];
-    const isDark = mode === "dark";
 
     return (
-        <section style={{ backgroundColor: colors.bg, color: colors.text }} className="min-h-screen relative overflow-hidden">
+        <section className="min-h-screen relative overflow-hidden bg-background text-foreground">
+            {/* Ambient Background with Brand Colors */}
+            <div className="absolute inset-0 z-0 pointer-events-none">
+                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-background via-background to-background/50" />
+                <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-primary/10 blur-[120px]" />
+                <div className="absolute bottom-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/5 blur-[120px]" />
+            </div>
 
             {/* Main Content */}
-            <div className="container mx-auto px-4 py-32 md:px-8 text-center">
+            <div className="container relative z-10 mx-auto px-4 py-32 md:px-8 text-center">
                 {/* Hero Text */}
                 <div className="mb-12 max-w-4xl mx-auto">
                     <h1
@@ -63,23 +41,15 @@ export default function HeroSection({ mode = "dark" }: HeroSectionProps) {
 
                     <div className="flex items-center justify-center gap-4">
                         <Link
-                            href="/market"
-                            className="inline-flex items-center gap-2 rounded-full px-8 py-3 text-base font-medium transition-transform hover:scale-105"
-                            style={{
-                                backgroundColor: isDark ? colors.text : colors.bg,
-                                color: isDark ? colors.bg : colors.text,
-                            }}
+                            href="/analysis"
+                            className="inline-flex items-center gap-2 rounded-full px-8 py-3 text-base font-medium transition-transform hover:scale-105 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
                         >
                             {t.main.startAnalysis}
                             <span>→</span>
                         </Link>
                         <Link
-                            href="/signal"
-                            className="inline-flex items-center gap-2 rounded-full px-8 py-3 text-base font-medium border transition-transform hover:scale-105 hover:bg-muted/10"
-                            style={{
-                                borderColor: colors.border,
-                                color: colors.text,
-                            }}
+                            href="/stock"
+                            className="inline-flex items-center gap-2 rounded-full px-8 py-3 text-base font-medium border border-input text-foreground transition-transform hover:scale-105 hover:bg-accent hover:text-accent-foreground"
                         >
                             {t.main.viewSignals}
                         </Link>
@@ -91,13 +61,7 @@ export default function HeroSection({ mode = "dark" }: HeroSectionProps) {
                     initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 0.2 }}
-                    className="relative overflow-hidden rounded-xl mx-auto max-w-6xl shadow-2xl"
-                    style={{
-                        height: "min(600px, 60vh)",
-                        minHeight: "400px",
-                        background: `linear-gradient(135deg, ${colors.card} 0%, ${colors.bg} 100%)`,
-                        border: `1px solid ${colors.border}`,
-                    }}
+                    className="relative overflow-hidden mx-auto max-w-6xl shadow-2xl bg-card border border-border h-[min(600px,60vh)] min-h-[400px] rounded-2xl"
                 >
                     {/* Abstract Chart Background - kept as subtle enhancement */}
                     <div className="absolute inset-0 opacity-10 pointer-events-none">
@@ -107,6 +71,16 @@ export default function HeroSection({ mode = "dark" }: HeroSectionProps) {
                     {/* Real Chart Component */}
                     <HeroChart />
 
+                </motion.div>
+
+                {/* Investment Quotes (Small) */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.4 }}
+                    className="mt-8"
+                >
+                    <NewsRotator />
                 </motion.div>
             </div>
         </section>

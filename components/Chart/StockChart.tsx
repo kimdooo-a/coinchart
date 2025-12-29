@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { createChart, ColorType, IChartApi, ISeriesApi, Time, CandlestickSeries, LineSeries, HistogramSeries } from 'lightweight-charts';
-import { getTwelveDataTimeSeries } from '@/lib/api/twelvedata';
 import { calculateRSI, calculateBollingerBands, calculateMACD, calculateSMA } from '@/lib/indicators';
 
 interface Props {
@@ -232,12 +231,15 @@ export const StockChart: React.FC<Props> = ({
         const fetchData = async () => {
             try {
                 // Fetch generic or mocked data for stocks
-                const data = await getTwelveDataTimeSeries(symbol, interval);
+                const res = await fetch(`/api/stock/history?symbol=${symbol}&limit=365`);
+                if (!res.ok) throw new Error('Failed to fetch stock history');
+
+                const data: any[] = await res.json(); // Explicit any to match downstream usage or define type
 
                 if (isCancelled) return;
                 if (!data || data.length === 0) {
                     // Check if it's likely an API Key issue
-                    setError(lang === 'ko' ? '데이터가 없거나 API 키가 필요합니다.' : 'No data or API Key missing.');
+                    setError(lang === 'ko' ? '데이터가 없거나 API 키가 필요합니다. (Supabase)' : 'No data or API Key missing. (Supabase)');
                     setIsLoading(false);
                     return;
                 }

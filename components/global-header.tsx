@@ -5,17 +5,22 @@ import { Menu, X, BarChart2, ChevronDown } from "lucide-react";
 import Link from 'next/link';
 import { useLanguage } from "@/context/LanguageContext";
 import { TRANSLATIONS } from "@/lib/translations";
+import { AuthButton } from "@/components/AuthButton";
 
 export default function GlobalHeader() {
     const { lang, toggleLang } = useLanguage();
     const t = TRANSLATIONS[lang];
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        setMounted(true);
         const handleScroll = () => {
             setScrolled(window.scrollY > 20);
         };
+        // Check initial scroll position
+        handleScroll();
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
@@ -66,11 +71,14 @@ export default function GlobalHeader() {
         }
     ];
 
+    // Use mounted && scrolled to prevent hydration mismatch
+    const isScrolled = mounted && scrolled;
+
     return (
         <header
-            className={`fixed left-0 top-0 z-50 w-full px-4 md:px-8 border-b transition-all duration-300 ${scrolled
+            className={`fixed left-0 top-0 z-50 w-full h-16 border-b transition-all duration-300 ${isScrolled
                 ? "bg-black/80 backdrop-blur-md border-white/10"
-                : "bg-transparent border-transparent"
+                : "bg-black/20 border-transparent bg-gradient-to-b from-black/50 to-transparent"
                 }`}
         >
             <div className="container relative grid h-16 grid-cols-[1fr_auto_auto] items-center lg:grid-cols-[auto_1fr_auto] mx-auto">
@@ -80,7 +88,7 @@ export default function GlobalHeader() {
                         <div className="size-8 rounded bg-primary flex items-center justify-center text-primary-foreground">
                             <BarChart2 className="size-5" />
                         </div>
-                        <span className="text-white">사랑하는 마누라</span>
+                        <span className="text-white">ChartMaster</span>
                     </Link>
                 </div>
 
@@ -155,7 +163,8 @@ export default function GlobalHeader() {
                         <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent z-0" />
                     </button>
 
-                    {/* Optional: Auth Button placeholder */}
+                    {/* Auth Button */}
+                    <AuthButton />
                 </div>
             </div>
 

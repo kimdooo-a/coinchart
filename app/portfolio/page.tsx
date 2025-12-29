@@ -185,161 +185,184 @@ export default function PortfolioPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a] text-gray-100 p-8">
-            {/* Spacer for GlobalHeader */}
-            <div className="h-24 w-full" aria-hidden="true" />
+        <div className="min-h-screen bg-background text-foreground relative overflow-hidden pt-[120px] md:pt-[140px]">
+            {/* Background Effects */}
+            <div className="fixed inset-0 z-0 pointer-events-none">
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/20 rounded-full blur-[120px]" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/20 rounded-full blur-[120px]" />
+            </div>
 
-            <div className="max-w-7xl mx-auto">
+            <div className="relative z-10 max-w-7xl mx-auto px-4 py-8 space-y-8">
                 {/* Header */}
-                {/* Header (Simplified) */}
-                <header className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-800 pb-6">
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
-                        {t.portfolio.title}
-                    </h1>
-                    <div className="flex items-center gap-4">
-                        {user && (
-                            <div className="flex items-center gap-2 text-sm text-gray-400">
-                                <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                                {user.email}
-                            </div>
-                        )}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h1 className="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">
+                            {t.portfolio.title}
+                        </h1>
+                        <p className="text-muted-foreground mt-1">{t.portfolio.subtitle}</p>
                     </div>
-                </header>
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* 1. Summary Card - Updated with PnL */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="lg:col-span-3 rounded-xl bg-gradient-to-br from-[#151515] to-[#111] p-8 border border-gray-800"
+                    <button
+                        onClick={() => setIsTradeModalOpen(true)}
+                        className="px-6 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-full transition-all shadow-lg shadow-primary/20"
                     >
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-                            <div>
-                                <h2 className="text-gray-400 font-medium mb-1">{t.portfolio.totalBalance}</h2>
-                                <div className="text-5xl font-bold text-white tracking-tight">
-                                    ${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                </div>
-                                <div className="flex items-center gap-3 mt-4">
-                                    <div className={`px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 ${totalPnL >= 0 ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
-                                        {totalPnL >= 0 ? '+' : ''}{totalPnLPercent.toFixed(2)}%
-                                    </div>
-                                    <div className={`text-sm font-medium ${totalPnL >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                        {totalPnL >= 0 ? '+' : ''}${Math.abs(totalPnL).toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="text-right hidden md:block">
-                                <div className="text-gray-500 text-sm mb-1">{t.portfolio.totalInvested}</div>
-                                <div className="text-xl font-medium text-gray-300">
-                                    ${totalInvested.toLocaleString()}
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
+                        + {t.portfolio.addTrade}
+                    </button>
+                </div>
 
-                    {/* 2. Holdings List (Detailed) */}
-                    <div className="lg:col-span-2 rounded-xl bg-[#111] border border-gray-800 min-h-[400px] flex flex-col">
-                        <div className="p-6 border-b border-gray-800 flex justify-between items-center">
-                            <h3 className="text-lg font-bold text-white">{t.portfolio.holdings}</h3>
-                            <button
-                                onClick={() => setIsTradeModalOpen(true)}
-                                className="text-sm px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors font-medium"
-                                disabled={!user}
-                            >
-                                + {t.portfolio.addTrade}
-                            </button>
-                        </div>
-
-                        <div className="overflow-x-auto flex-1">
-                            {holdings.length === 0 ? (
-                                <div className="h-full flex flex-col items-center justify-center text-gray-500 p-8">
-                                    <p>{t.portfolio.noHoldings}</p>
-                                </div>
-                            ) : (
-                                <table className="w-full text-left">
-                                    <thead className="bg-[#151515] text-xs uppercase text-gray-500 font-medium">
-                                        <tr>
-                                            <th className="px-6 py-4">{t.portfolio.asset}</th>
-                                            <th className="px-6 py-4 text-right">{t.portfolio.price}</th>
-                                            <th className="px-6 py-4 text-right">{t.portfolio.balance}</th>
-                                            <th className="px-6 py-4 text-right">{t.portfolio.return}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-800/50">
-                                        {holdings.map((h) => (
-                                            <tr key={h.symbol} className="hover:bg-gray-800/20 transition-colors">
-                                                <td className="px-6 py-4">
-                                                    <a href={`/analysis/${h.symbol}`} className="cursor-pointer hover:opacity-80">
-                                                        <div className="font-bold text-white flex items-center gap-2">
-                                                            {h.symbol}
-                                                            <svg className="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                                                        </div>
-                                                        <div className="text-xs text-gray-500">{h.qty.toFixed(4)} {t.portfolio.shares}</div>
-                                                    </a>
-                                                </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <div className="text-gray-200">${h.currentPrice.toLocaleString()}</div>
-                                                    <div className="text-xs text-gray-500">{t.portfolio.avg}: ${h.avgPrice.toLocaleString()}</div>
-                                                </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <div className="font-medium text-white">${h.currentValue.toLocaleString()}</div>
-                                                </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <div className={`font-bold ${h.pnlPercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                                        {h.pnlPercent >= 0 ? '+' : ''}{h.pnlPercent.toFixed(2)}%
-                                                    </div>
-                                                    <div className={`text-xs ${h.pnl >= 0 ? 'text-green-500/70' : 'text-red-500/70'}`}>
-                                                        {h.pnl >= 0 ? '+' : ''}${Math.abs(h.pnl).toLocaleString()}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            )}
-                        </div>
+                {/* Summary Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="bg-card/30 backdrop-blur-md border border-white/10 p-6 rounded-2xl shadow-xl">
+                        <p className="text-muted-foreground text-sm font-medium mb-1">{t.portfolio.totalBalance}</p>
+                        <p className="text-3xl font-bold text-foreground">
+                            ${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
                     </div>
+                    <div className="bg-card/30 backdrop-blur-md border border-white/10 p-6 rounded-2xl shadow-xl">
+                        <p className="text-muted-foreground text-sm font-medium mb-1">{t.portfolio.totalInvested}</p>
+                        <p className="text-2xl font-bold text-foreground">
+                            ${totalInvested.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                    </div>
+                    <div className="bg-card/30 backdrop-blur-md border border-white/10 p-6 rounded-2xl shadow-xl">
+                        <p className="text-muted-foreground text-sm font-medium mb-1">{t.portfolio.pl}</p>
+                        <p className={`text-2xl font-bold ${totalPnL >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {totalPnL >= 0 ? '+' : ''}${totalPnL.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                    </div>
+                    <div className="bg-card/30 backdrop-blur-md border border-white/10 p-6 rounded-2xl shadow-xl">
+                        <p className="text-muted-foreground text-sm font-medium mb-1">{t.portfolio.return}</p>
+                        <p className={`text-2xl font-bold ${totalPnLPercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {totalPnLPercent >= 0 ? '+' : ''}{totalPnLPercent.toFixed(2)}%
+                        </p>
+                    </div>
+                </div>
 
-                    {/* 3. Recent Activity (Log) */}
-                    <div className="rounded-xl bg-[#111] p-6 border border-gray-800">
-                        <h3 className="text-lg font-bold text-white mb-4">{t.portfolio.recentTrades}</h3>
-                        <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-                            {trades.length === 0 ? (
-                                <div className="text-center text-gray-500 text-sm py-4">{t.portfolio.noHistory}</div>
-                            ) : trades.map((t_item) => (
-                                <div key={t_item.id} className="flex justify-between items-center p-3 rounded-lg bg-[#151515] hover:bg-[#1a1a1a] transition-colors border border-gray-800/50">
-                                    <div className="flex items-center gap-3">
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold ${t_item.side === 'BUY' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
-                                            {t_item.side}
-                                        </div>
-                                        <div>
-                                            <div className="font-bold text-sm text-white">{t_item.symbol}</div>
-                                            <div className="text-xs text-gray-500">{new Date(t_item.executed_at).toLocaleDateString()}</div>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className="text-sm font-medium text-gray-300">
-                                            {t_item.qty} @ ${t_item.price}
-                                        </div>
-                                        <div className="text-xs text-gray-600">
-                                            {t.portfolio.total}: ${(t_item.qty * t_item.price).toLocaleString()}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                {/* Holdings Section */}
+                <div className="bg-card/30 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden shadow-xl">
+                    <div className="p-6 border-b border-white/10">
+                        <h2 className="text-xl font-bold text-foreground">{t.portfolio.holdings}</h2>
+                    </div>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left text-sm text-gray-400">
+                            <thead className="bg-black/40 text-gray-200 uppercase font-bold text-xs">
+                                <tr>
+                                    <th className="px-6 py-4">{t.portfolio.asset}</th>
+                                    <th className="px-6 py-4 text-right">{t.portfolio.price}</th>
+                                    <th className="px-6 py-4 text-right">{t.portfolio.balance}</th>
+                                    <th className="px-6 py-4 text-right">{t.portfolio.avg}</th>
+                                    <th className="px-6 py-4 text-right">{t.portfolio.return}</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/10 bg-black/20">
+                                {isLoading ? (
+                                    <tr>
+                                        <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground animate-pulse">
+                                            {t.common.loading}
+                                        </td>
+                                    </tr>
+                                ) : holdings.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
+                                            {t.portfolio.noHoldings}
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    holdings.map((h) => (
+                                        <tr key={h.symbol} className="hover:bg-white/5 transition-colors">
+                                            <td className="px-6 py-4 font-bold text-foreground">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold shadow-lg shadow-indigo-500/20">
+                                                        {h.symbol.substring(0, 1)}
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-base">{h.symbol}</div>
+                                                        <div className="text-xs text-muted-foreground font-normal">{h.qty} {t.portfolio.shares}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-right text-foreground font-mono">
+                                                ${h.currentPrice.toLocaleString()}
+                                            </td>
+                                            <td className="px-6 py-4 text-right font-mono">
+                                                <div className="text-foreground font-bold">${h.currentValue.toLocaleString()}</div>
+                                                <div className="text-xs text-muted-foreground">{t.portfolio.total}: ${h.totalCost.toLocaleString()}</div>
+                                            </td>
+                                            <td className="px-6 py-4 text-right text-gray-300 font-mono">
+                                                ${h.avgPrice.toLocaleString()}
+                                            </td>
+                                            <td className={`px-6 py-4 text-right font-bold font-mono ${h.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                                <div className="flex flex-col items-end">
+                                                    <span>{h.pnlPercent >= 0 ? '+' : ''}{h.pnlPercent.toFixed(2)}%</span>
+                                                    <span className="text-xs opacity-70">${h.pnl.toLocaleString()}</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {/* Recent Trades Section */}
+                <div className="bg-card/30 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden shadow-xl mb-12">
+                    <div className="p-6 border-b border-white/10">
+                        <h2 className="text-xl font-bold text-foreground">{t.portfolio.recentTrades}</h2>
+                    </div>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left text-sm text-gray-400">
+                            <thead className="bg-black/40 text-gray-200 uppercase font-bold text-xs">
+                                <tr>
+                                    <th className="px-6 py-4">{t.portfolio.date}</th>
+                                    <th className="px-6 py-4">{t.portfolio.asset}</th>
+                                    <th className="px-6 py-4 text-center">{t.portfolio.type}</th>
+                                    <th className="px-6 py-4 text-right">{t.portfolio.shares}</th>
+                                    <th className="px-6 py-4 text-right">{t.portfolio.price}</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/10 bg-black/20">
+                                {isLoading ? (
+                                    <tr>
+                                        <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground animate-pulse">
+                                            {t.common.loading}
+                                        </td>
+                                    </tr>
+                                ) : trades.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
+                                            {t.portfolio.noHistory}
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    trades.map((t) => (
+                                        <tr key={t.id} className="hover:bg-white/5 transition-colors">
+                                            <td className="px-6 py-4 text-gray-400">{new Date(t.executed_at).toLocaleDateString()}</td>
+                                            <td className="px-6 py-4 font-bold text-foreground">{t.symbol}</td>
+                                            <td className="px-6 py-4 text-center">
+                                                <span className={`px-2 py-1 rounded text-xs font-bold ${t.side === 'BUY' ? 'bg-green-900/40 text-green-400 border border-green-500/20' : 'bg-red-900/40 text-red-400 border border-red-500/20'}`}>
+                                                    {t.side}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-right text-gray-300">{t.qty}</td>
+                                            <td className="px-6 py-4 text-right text-gray-300">${t.price.toLocaleString()}</td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
 
-            {isTradeModalOpen && (
-                <TradeModal
-                    isOpen={isTradeModalOpen}
-                    onClose={() => setIsTradeModalOpen(false)}
-                    onSuccess={handleTradeAdded}
-                    userId={user?.id}
-                />
-            )}
+            {/* Modal */}
+            <TradeModal
+                isOpen={isTradeModalOpen}
+                onClose={() => setIsTradeModalOpen(false)}
+                onSuccess={() => {
+                    if (user) fetchTrades(user.id)
+                }}
+                userId={user?.id}
+            />
         </div>
     )
 }

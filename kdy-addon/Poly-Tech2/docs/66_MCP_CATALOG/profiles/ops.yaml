@@ -1,0 +1,7 @@
+# MCP Profile: Ops
+# For System Administration and Maintenance.
+description: "Tools for managing local systems and repositories."
+servers:
+  - filesystem
+  - github
+  - sqlite

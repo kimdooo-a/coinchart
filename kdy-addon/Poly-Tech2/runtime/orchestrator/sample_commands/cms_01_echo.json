@@ -1,0 +1,13 @@
+{
+    "msg_id": "TEST_CMD_001",
+    "msg_type": "COMMAND",
+    "command_type": "exec",
+    "category": "A",
+    "title": "Echo Test",
+    "run": [
+        "echo Hello Poly-Tech2 from Bus"
+    ],
+    "context": {
+        "phase": 2
+    }
+}

@@ -1,0 +1,10 @@
+# MCP Server: Fetch
+# Provides capability to read internet content as Markdown
+type: stdio
+command: uvx
+args:
+  - mcp-server-fetch
+env_keys: []
+security:
+  network: "outbound-only"
+  filesystem: "none"

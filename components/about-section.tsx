@@ -41,7 +41,7 @@ export default function AboutSection() {
                         {
                             icon: <RefreshCw className="w-8 h-8 text-green-400" />,
                             title: "지속적인 혁신",
-                            description: "AI 기반 예측 모델과 사용자 피드백을 통해 서비스를 끊임없이 발전시킵니다."
+                            description: "통계 기반 분석 모델과 사용자 피드백을 통해 서비스를 끊임없이 발전시킵니다."
                         }
                     ].map((item, idx) => (
                         <motion.div

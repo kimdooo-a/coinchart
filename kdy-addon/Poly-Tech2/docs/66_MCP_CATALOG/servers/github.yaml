@@ -1,0 +1,12 @@
+# MCP Server: GitHub
+# Provides ability to search repositories, open PRs, and read issues
+type: stdio
+command: npx
+args:
+  - -y
+  - "@modelcontextprotocol/server-github"
+env_keys:
+  - "GITHUB_PERSONAL_ACCESS_TOKEN"
+security:
+  network: "api-access"
+  filesystem: "none"

@@ -8,12 +8,14 @@ interface LanguageContextType {
     lang: Language;
     toggleLang: () => void;
     setLang: (lang: Language) => void;
+    isHydrated: boolean;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
     const [lang, setLangState] = useState<Language>('ko');
+    const [isHydrated, setIsHydrated] = useState(false);
 
     useEffect(() => {
         // Load from localStorage if available
@@ -21,6 +23,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         if (savedLang && (savedLang === 'ko' || savedLang === 'en')) {
             setLangState(savedLang);
         }
+        setIsHydrated(true);
     }, []);
 
     const toggleLang = () => {
@@ -35,7 +38,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <LanguageContext.Provider value={{ lang, toggleLang, setLang }}>
+        <LanguageContext.Provider value={{ lang, toggleLang, setLang, isHydrated }}>
             {children}
         </LanguageContext.Provider>
     );

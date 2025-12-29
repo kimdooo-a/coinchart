@@ -39,14 +39,14 @@ export const TradingStrategyGuide: React.FC<Props> = ({ currentPrice, lang, anal
         if (lang === 'ko') {
             if (isStrongBuy) {
                 title = `🚀 강력 매수 기회 (상승 확률 ${avgWinRate}%)`;
-                desc = `상승 모멘텀이 폭발적입니다. '추세 추종' 스타일로 공격적 진입을 추천하며, 손절은 짧게 -3.5%로 잡으세요.`;
+                desc = `상승 모멘텀이 폭발적입니다. '추세 추종' 스타일로 공격적 진입이 유리할 수 있으며, 손절은 짧게 -3.5%로 잡으세요.`;
                 recStyle = 'aggressive';
                 recTradingStyle = 'trend';
                 recStopLoss = 3.5;
                 color = 'text-green-400 border-green-500 bg-green-900/20';
             } else if (isBuy) {
                 title = `📈 매수 우위 (상승 확률 ${avgWinRate}%)`;
-                desc = `안정적인 상승 흐름입니다. '추세 추종' 스타일로 안전하게 눌림목을 노리세요. 손절은 -5.0% 추천.`;
+                desc = `일반적인 상승 흐름입니다. '추세 추종' 스타일로 안전하게 눌림목을 노리세요. 손절 기준: -5.0%.`;
                 recStyle = 'conservative';
                 recTradingStyle = 'trend';
                 recStopLoss = 5.0;

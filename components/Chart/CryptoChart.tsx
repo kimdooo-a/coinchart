@@ -2,8 +2,17 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { createChart, ColorType, IChartApi, ISeriesApi, Time, CandlestickSeries, LineSeries, HistogramSeries } from 'lightweight-charts';
-import { getKlines, subscribeToKlines } from '@/lib/api/binance';
+import { subscribeToKlines } from '@/lib/api/binance';
 import { calculateRSI, calculateBollingerBands, calculateMACD, calculateSMA } from '@/lib/indicators';
+
+interface CandleData {
+    time: number;
+    open: number;
+    high: number;
+    low: number;
+    close: number;
+    volume: number;
+}
 
 interface Props {
     symbol: string;
@@ -233,21 +242,26 @@ export const CryptoChart: React.FC<Props> = ({
 
         const fetchData = async () => {
             try {
-                const data = await getKlines(symbol, interval);
+                // STEP 4-4B: API Route 프록시 + TTL 캐시 사용 (Binance 직접 호출 제거)
+                const res = await fetch(`/api/klines?symbol=${symbol}&interval=${interval}`);
+                if (!res.ok) {
+                    throw new Error(`API Route error: ${res.statusText}`);
+                }
+                const data: CandleData[] = await res.json();
                 if (isCancelled) return;
                 if (!data || data.length === 0) {
                     setError(lang === 'ko' ? `${symbol} 데이터가 없습니다` : `No data found for ${symbol}`); setIsLoading(false); return;
                 }
 
-                const closes = data.map(d => d.close);
-                const chartData = data.map(d => ({ ...d, time: d.time as Time }));
+                const closes = data.map((d: CandleData) => d.close);
+                const chartData = data.map((d: CandleData) => ({ ...d, time: d.time as Time }));
 
                 if (seriesRef.current) {
                     seriesRef.current.setData(chartData);
 
                     // Volume
                     if (showVolume && volumeSeriesRef.current) {
-                        const volData = data.map(d => ({
+                        const volData = data.map((d: CandleData) => ({
                             time: d.time as Time,
                             value: d.volume,
                             color: d.close >= d.open ? 'rgba(38, 166, 154, 0.5)' : 'rgba(239, 83, 80, 0.5)',
@@ -260,7 +274,7 @@ export const CryptoChart: React.FC<Props> = ({
                         const m25: { time: Time, value: number }[] = [];
                         const m99: { time: Time, value: number }[] = [];
                         const ma7 = calculateSMA(closes, 7); const ma25 = calculateSMA(closes, 25); const ma99 = calculateSMA(closes, 99);
-                        data.forEach((d, i) => {
+                        data.forEach((d: CandleData, i: number) => {
                             const t = d.time as Time;
                             if (ma7[i] !== null) m7.push({ time: t, value: ma7[i]! });
                             if (ma25[i] !== null) m25.push({ time: t, value: ma25[i]! });

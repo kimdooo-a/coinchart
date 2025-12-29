@@ -1,0 +1,400 @@
+name: Auto Deploy Release to Production
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  # ===========================
+  # DEPLOY JOB
+  # ===========================
+  deploy:
+    name: Deploy to Vercel Production
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    
+    outputs:
+      deployment_url: ${{ steps.deploy.outputs.deployment_url }}
+      deployment_id: ${{ steps.deploy.outputs.deployment_id }}
+      previous_prod_url: ${{ steps.capture_previous.outputs.previous_prod_url }}
+      previous_prod_id: ${{ steps.capture_previous.outputs.previous_prod_id }}
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Capture Previous Production Deployment
+        id: capture_previous
+        run: |
+          # Use Vercel CLI to get list of production deployments
+          npm install -g vercel@latest
+          
+          # Get the last 2 deployments in production
+          DEPLOYMENTS=$(vercel list --prod --json \
+            --token=${{ secrets.VERCEL_TOKEN }} \
+            --scope=${{ secrets.VERCEL_ORG_ID }} \
+            2>/dev/null || echo "[]")
+          
+          echo "Retrieved deployments: $DEPLOYMENTS"
+          
+          # Parse the first (current) and second (previous) deployments
+          # Using Node.js for JSON parsing
+          node -e "
+            try {
+              const deployments = JSON.parse('$DEPLOYMENTS');
+              if (Array.isArray(deployments) && deployments.length >= 1) {
+                const current = deployments[0];
+                const previous = deployments.length >= 2 ? deployments[1] : null;
+                
+                console.log('Current deployment:', current?.url || 'unknown');
+                console.log('Previous deployment:', previous?.url || 'none');
+                
+                if (previous) {
+                  console.log('previous_prod_url=' + previous.url);
+                  console.log('previous_prod_id=' + (previous.uid || previous.id));
+                } else {
+                  console.log('previous_prod_url=');
+                  console.log('previous_prod_id=');
+                }
+              } else {
+                console.log('No deployments found');
+                console.log('previous_prod_url=');
+                console.log('previous_prod_id=');
+              }
+            } catch (e) {
+              console.error('Failed to parse deployments:', e.message);
+              console.log('previous_prod_url=');
+              console.log('previous_prod_id=');
+            }
+          " >> $GITHUB_OUTPUT
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+
+      - name: Run Preflight Checks
+        run: npm run preflight
+
+      - name: Build Application
+        run: npm run build
+
+      - name: Deploy to Vercel Production
+        id: deploy
+        run: |
+          npm install -g vercel@latest
+          
+          # Deploy to production
+          DEPLOYMENT_OUTPUT=$(vercel deploy --prod \
+            --token=${{ secrets.VERCEL_TOKEN }} \
+            --scope=${{ secrets.VERCEL_ORG_ID }} \
+            --confirm 2>&1)
+          
+          echo "$DEPLOYMENT_OUTPUT"
+          
+          # Extract deployment URL from output
+          DEPLOYMENT_URL=$(echo "$DEPLOYMENT_OUTPUT" | grep -E '✔ Production' | head -1 | sed 's/^.*\(https:\/\/[^ ]*\).*/\1/' || echo "")
+          
+          if [ -z "$DEPLOYMENT_URL" ]; then
+            # Alternative: get from vercel list
+            DEPLOYMENT_URL=$(vercel list --prod --json \
+              --token=${{ secrets.VERCEL_TOKEN }} \
+              --scope=${{ secrets.VERCEL_ORG_ID }} 2>/dev/null | \
+              node -e "const data = JSON.parse(require('fs').readFileSync(0, 'utf-8')); console.log(data[0]?.url || '')")
+          fi
+          
+          echo "Deployment URL: $DEPLOYMENT_URL"
+          echo "deployment_url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          echo "deployment_id=$(date +%s)" >> $GITHUB_OUTPUT
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Save Deployment Info
+        if: always()
+        run: |
+          cat > deployment_info.json << EOF
+          {
+            "deployment_url": "${{ steps.deploy.outputs.deployment_url }}",
+            "deployment_id": "${{ steps.deploy.outputs.deployment_id }}",
+            "previous_prod_url": "${{ steps.capture_previous.outputs.previous_prod_url }}",
+            "previous_prod_id": "${{ steps.capture_previous.outputs.previous_prod_id }}",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "release_tag": "${{ github.event.release.tag_name || github.event.inputs.release_tag }}"
+          }
+          EOF
+          cat deployment_info.json
+
+      - name: Upload Deployment Info
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-info
+          path: deployment_info.json
+          retention-days: 7
+
+  # ===========================
+  # HEALTHCHECK JOB
+  # ===========================
+  healthcheck:
+    name: Verify Deployment Health
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: success()
+    timeout-minutes: 5
+    
+    outputs:
+      health_status: ${{ steps.healthcheck.outputs.health_status }}
+      health_duration: ${{ steps.healthcheck.outputs.health_duration }}
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Wait for Deployment (30s)
+        run: sleep 30
+
+      - name: Run Health Checks (with retries)
+        id: healthcheck
+        run: |
+          MAX_RETRIES=3
+          RETRY_DELAY=10
+          RETRY_COUNT=0
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            echo "[ATTEMPT $(($RETRY_COUNT + 1))/$MAX_RETRIES] Running healthcheck..."
+            
+            HEALTH_CHECK_URL="${{ needs.deploy.outputs.deployment_url }}" \
+            npm run healthcheck && {
+              echo "health_status=healthy" >> $GITHUB_OUTPUT
+              echo "health_duration=$((($RETRY_COUNT + 1) * ($RETRY_DELAY + 10)))" >> $GITHUB_OUTPUT
+              exit 0
+            }
+            
+            RETRY_COUNT=$(($RETRY_COUNT + 1))
+            
+            if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+              echo "[WAIT] Retrying in ${RETRY_DELAY}s..."
+              sleep $RETRY_DELAY
+            fi
+          done
+          
+          echo "health_status=unhealthy" >> $GITHUB_OUTPUT
+          exit 1
+        env:
+          HEALTH_CHECK_URL: ${{ needs.deploy.outputs.deployment_url }}
+
+      - name: Save Healthcheck Results
+        if: always()
+        run: |
+          mkdir -p healthcheck-results
+          cat > healthcheck-results/status.json << EOF
+          {
+            "status": "${{ steps.healthcheck.outputs.health_status || 'unknown' }}",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "deployment_url": "${{ needs.deploy.outputs.deployment_url }}"
+          }
+          EOF
+
+      - name: Upload Healthcheck Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: healthcheck-results
+          path: healthcheck-results/
+          retention-days: 7
+
+  # ===========================
+  # ROLLBACK JOB
+  # ===========================
+  rollback:
+    name: Rollback on Failure
+    needs: [deploy, healthcheck]
+    runs-on: ubuntu-latest
+    if: failure() && needs.healthcheck.result == 'failure'
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Check for Previous Production Deployment
+        id: check_previous
+        run: |
+          PREVIOUS_URL="${{ needs.deploy.outputs.previous_prod_url }}"
+          PREVIOUS_ID="${{ needs.deploy.outputs.previous_prod_id }}"
+          
+          if [ -z "$PREVIOUS_URL" ] || [ "$PREVIOUS_URL" = "none" ]; then
+            echo "can_rollback=false" >> $GITHUB_OUTPUT
+            echo "No previous production deployment found"
+          else
+            echo "can_rollback=true" >> $GITHUB_OUTPUT
+            echo "Previous deployment available: $PREVIOUS_URL"
+          fi
+
+      - name: Promote Previous Deployment to Production
+        if: steps.check_previous.outputs.can_rollback == 'true'
+        run: |
+          npm install -g vercel@latest
+          
+          PREVIOUS_URL="${{ needs.deploy.outputs.previous_prod_url }}"
+          
+          echo "Promoting $PREVIOUS_URL to production..."
+          
+          vercel promote $PREVIOUS_URL \
+            --token=${{ secrets.VERCEL_TOKEN }} \
+            --scope=${{ secrets.VERCEL_ORG_ID }} \
+            --yes || {
+            echo "ERROR: Failed to promote previous deployment"
+            exit 1
+          }
+          
+          echo "✅ Rollback completed: $PREVIOUS_URL is now in production"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+
+      - name: Re-run Healthcheck After Rollback
+        if: steps.check_previous.outputs.can_rollback == 'true'
+        run: |
+          sleep 30
+          
+          HEALTH_CHECK_URL="${{ needs.deploy.outputs.previous_prod_url }}" \
+          npm run healthcheck || {
+            echo "ERROR: Previous deployment is also unhealthy"
+            exit 1
+          }
+        env:
+          HEALTH_CHECK_URL: ${{ needs.deploy.outputs.previous_prod_url }}
+
+      - name: Generate Kill-Switch Instructions (No Previous Deployment)
+        if: steps.check_previous.outputs.can_rollback == 'false'
+        run: |
+          echo "⚠️  CRITICAL: Rollback not possible (no previous deployment)"
+          echo "Kill-switch instructions required..."
+          
+          # Kill-switch is NOT automated. It requires an operator.
+          
+          cat > kill_switch_incident.md << 'EOF'
+          # 🚨 DEPLOYMENT FAILED - MANUAL INTERVENTION REQUIRED
+          
+          ## Incident Details
+          - Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+          - Release: ${{ github.event.release.tag_name }}
+          - Reason: New deployment healthcheck failed, and NO previous deployment exists to rollback.
+          
+          ## 🛑 IMMEDIATE ACTION REQUIRED: MANUAL KILL-SWITCH
+          The pipeline CANNOT automatically resolve this. A human operator must:
+          
+          1. **Login to Vercel Dashboard**
+          2. **Go to Settings > Environment Variables**
+          3. **Set/Update the following**:
+             - `NEXT_PUBLIC_DISABLE_AUTOMATION` = `true`
+             - `NEXT_PUBLIC_DISABLE_PRO_GATE` = `true`
+          4. **Redeploy** (or rollback to a stable commit manually if possible)
+          
+          ## Diagnosis
+          - Check Vercel Logs for the failed deployment.
+          - Check Supabase database connectivity.
+          
+          EOF
+          
+          cat kill_switch_incident.md
+          exit 1
+
+      - name: Upload Rollback Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rollback-report
+          path: kill_switch_incident.md
+          retention-days: 30
+
+  # ===========================
+  # NOTIFICATION JOB
+  # ===========================
+  notify:
+    name: Send Deployment Notifications
+    needs: [deploy, healthcheck, rollback]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Determine Deployment Status
+        id: status
+        run: |
+          if [ "${{ needs.healthcheck.result }}" = "success" ]; then
+            echo "status=✅ SUCCESS"
+            echo "status_code=success" >> $GITHUB_OUTPUT
+          elif [ "${{ needs.rollback.result }}" = "success" ]; then
+            echo "status=⚠️ ROLLED BACK"
+            echo "status_code=rollback" >> $GITHUB_OUTPUT
+          else
+            echo "status=❌ FAILED - MANUAL ACTION REQUIRED"
+            echo "status_code=failed" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Deployment Summary
+        run: |
+          cat > deployment_summary.txt << EOF
+          ============================================
+          DEPLOYMENT SUMMARY
+          ============================================
+          
+          Release: ${{ github.event.release.tag_name }}
+          Status: ${{ steps.status.outputs.status }}
+          Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+          
+          Deployment URL: ${{ needs.deploy.outputs.deployment_url }}
+          Health Status: ${{ needs.healthcheck.outputs.health_status || 'unknown' }}
+          
+          Commit: ${{ github.sha }}
+          Actor: ${{ github.actor }}
+          
+          ============================================
+          EOF
+          cat deployment_summary.txt
+
+      - name: Upload Summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-summary
+          path: deployment_summary.txt
+          retention-days: 7
+
+      - name: Comment on Release
+        if: github.event_name == 'release'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ steps.status.outputs.status }}';
+            const url = '${{ needs.deploy.outputs.deployment_url }}';
+            const comment = `## Deployment Status\n\n${status}\n\nProduction URL: ${url || 'Not available'}`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

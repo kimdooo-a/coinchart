@@ -1,0 +1,112 @@
+name: Release Validation Gate
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to validate (for manual testing)'
+        required: false
+
+jobs:
+  validate:
+    name: Validate Release Tag
+    runs-on: ubuntu-latest
+    outputs:
+      passed: ${{ steps.validate.outcome == 'success' }}
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Quality Gate (Check Previous Release Logic)
+        run: npm run kpi:gate
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Release Validation
+        id: validate
+        run: npm run validate:release
+        env:
+          GITHUB_REF: ${{ github.ref }}
+
+      - name: Create Validation Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-validation-report
+          path: .release-validation.log
+          retention-days: 7
+
+  create_release:
+    name: Create GitHub Release
+    needs: validate
+    if: needs.validate.outputs.passed == 'true'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Extract Release Body from CHANGELOG
+        run: npm run release:body
+        env:
+          GITHUB_REF: ${{ github.ref }}
+
+      - name: Check if Release Exists
+        id: check_release
+        run: |
+          TAG="${{ github.ref_name }}"
+          if gh release view $TAG > /dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub Release (Draft)
+        if: steps.check_release.outputs.exists == 'false'
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --title "${{ github.ref_name }}" \
+            --notes-file release_body.md \
+            --draft
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release Already Exists (Skip)
+        if: steps.check_release.outputs.exists == 'true'
+        run: |
+          echo "Release ${{ github.ref_name }} already exists, skipping creation"
+
+      - name: Upload Release Body
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-body
+          path: release_body.md
+          retention-days: 7
+

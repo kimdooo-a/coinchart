@@ -1,0 +1,8 @@
+# MCP Profile: Coding
+# For Software Development.
+description: "Full suite of dev tools including Git and DB access."
+servers:
+  - filesystem
+  - fetch
+  - github
+  - sqlite

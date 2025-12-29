@@ -1,0 +1,35 @@
+규칙 기반 라우터 설계 연구 (Rule-Based Router Design)
+핵심 철학: 대규모 LLM의 판단 대신 결정론적 규칙과 사용자(Human)를 오케스트레이션의 두뇌로 활용하여, 비용 없이 작업을 분배하고 실행합니다. Option 3 (Interactive Local Orchestration) 전략의 일환으로, 파일명/확장자/키워드만으로 에이전트를 선택하는 규칙 기반 라우터를 설계합니다.
+규칙 정의 방식 (Rule Definition)
+현재 설계: 파일 경로에 대한 정규 표현식(Regex) 매칭을 활용합니다. 정규식은 매우 유연하여 복잡한 패턴도 표현할 수 있습니다 (예: src/.*\.test\.ts$ 패턴으로 모든 테스트 파일 매칭). 그러나 Python watchdog의 기본 핸들러는 내부적으로 fnmatch를 사용하여 UNIX Glob 스타일 패턴 매칭을 수행하므로, 단순 패턴의 경우 정규식보다 Glob 패턴이 직관적일 수 있습니다[1].
+추가 제안: - Glob 패턴 지원: 사용자 친화성을 위해 **/*.md와 같은 Glob 와일드카드 패턴을 규칙으로 허용하는 것을 고려합니다. Python의 fnmatch 또는 glob 모듈로 쉽게 구현 가능하며, watchdog도 기본적으로 Glob 패턴을 지원합니다[1]. 예를 들어 *.test.ts 패턴을 사용하면 정규식 \w+[.]test[.]ts보다 이해하기 쉽습니다.- 콘텐츠 기반 트리거(Content-based Trigger): 파일명뿐만 아니라 파일 내용의 특정 키워드로 라우팅할 수 있는 룰셋을 도입합니다. 예를 들어, 파일 최상단에 # [CMD] Deploy 문구가 있다면 배포 에이전트로 라우팅하는 식입니다. 이러한 키워드 기반 규칙은 커밋 메세지나 문서 내 지시에 따라 파이프라인 동작을 제어하는 CI 도구의 관행과 유사합니다 (예: 커밋 메시지에 [skip ci]가 포함되면 CI 파이프라인을 건너뜀[2]). 현재 설계에서도 TODO.md 내용의 특정 태그를 파싱하여 Human-as-a-Service 상호작용을 트리거하는 방법을 구상하고 있습니다.
+라우팅 결과 (Routing Outcome)
+규칙 매칭의 결과로 실행될 작업을 명확히 정의합니다. 파일 변경 이벤트가 발생하면, 미리 정의된 규칙에 따라 해당 에이전트 또는 스크립트가 실행됩니다:
+테스트 에이전트 할당: src/**/*.test.ts 파일이 수정되면 → 해당 테스트 파일을 실행하도록 npm test <filename> 명령 트리거. (예: 유닛 테스트 자동 재실행)
+문서 빌드 에이전트: docs/**/*.md 파일이 변경되면 → 문서 생성 스크립트 gen_docs.py 실행 (정적 사이트를 즉시 재빌드하여 미리보기 제공).
+커뮤니케이션 핸들러: 프로젝트 루트의 TODO.md가 갱신되면 → 내용 파싱 후 규칙에 따라 communication/TO_AGENT.md 등 소통용 파일을 생성하거나 업데이트. 이를 통해 에이전트가 필요한 추가 작업이나 질문을 사용자에게 남겨둡니다.
+UI 연동 신호: 특정 에이전트가 실행되면 .agent_lock 파일을 생성/해제하여 VS Code와 같은 IDE에서 잠금 아이콘을 표시하거나 해제. 이렇게 하면 사용자에게 현재 에이전트 동작 상태를 시각적으로 알려주는 효과가 있습니다.
+위와 같은 패턴별 작업 할당을 통해, 불필요한 작업은 거르고 필요한 작업만 자동화합니다[3][4]. 예를 들어, 이미지 파일 변경이나 임시 파일 생성 등은 별도 규칙이 없으므로 아무 작업도 수행하지 않고 넘어갑니다[4]. 이는 파일 변경에 따른 파급 효과를 최소화하고 무한 루프(예: 테스트 실행이 또 파일 변경을 일으켜 다시 테스트 실행…)를 방지해줍니다[5].
+트리거 (Trigger)
+주된 트리거: 파일 시스템 이벤트 기반 감지를 사용합니다. Python watchdog 라이브러리의 Observer와 이벤트 핸들러를 통해 실시간으로 파일 변경을 포착합니다[6]. 파일 생성/삭제/수정 등의 이벤트 발생 시 즉각 규칙 평가 및 대응이 이뤄지며, 0에 가까운 지연으로 워크플로를 진행합니다. 이는 파일 변경 여부를 주기적으로 확인하는 폴링(polling) 방식에 비해 효율적이고 빠른 대응이 가능합니다[7].
+보조 트리거: 실시간 이벤트 감지가 간혹 누락되거나 추가적인 주기적 작업이 필요할 경우를 대비해 시간 기반 폴링 메커니즘을 병행할 수 있습니다. 예를 들어 1분마다 변경 누락 파일을 스캔하거나, 장기간 미변경시 수행해야 할 정리 작업 등을 폴링으로 처리합니다. 실제로 watchdog도 일부 플랫폼에서는 폴링 옵저버(PollingObserver)를 제공하여 이벤트 감지가 어려운 환경에서 주기적 확인을 수행합니다[8].
+수동 트리거: 또한 사용자가 원할 때 규칙 평가를 강제로 실행하는 수동 명령도 지원하면 유용합니다. 예컨대 커맨드라인에서 python orchestrator.py --run-all 같은 명령을 실행하면 현재 폴더의 모든 파일에 대해 규칙을 재평가하여, 초기 로드 시점의 일괄 작업 실행이나 이벤트 누락 보정을 할 수 있습니다.
+구현 언어와 환경 (Implementation)
+Python 기반 구현: 현재 설계는 Python을 사용하여 오케스트레이션을 구현하는 것을 전제로 합니다. Python의 풍부한 파일시스템 라이브러리(watchdog 등)와 로컬 DB 연동, 시스템 명령 실행의 용이함 때문에 선택되었습니다. 실제 watchdog 라이브러리는 Windows, macOS, Linux 등 모든 주요 OS에서 동작하며 파일 생성/수정/삭제 이벤트를 실시간 추적할 수 있는 경량화된 솔루션입니다[6]. Python 스크립트로 Observer와 핸들러를 구성하여 여러 디렉토리를 동시에 감시하거나 특정 파일 타입만 필터링하는 등 유연한 제어가 가능합니다[9]. 더불어, 향후 로컬 LLM(OpenAI API를 쓰지 않는 Ollama 등)과의 연계, SQLite 기반 프로젝트 메모리 활용 등도 고려하면 Python 생태계가 적합합니다.
+Node.js 대안: 팀이 TypeScript/Node.js 환경에 익숙하고 Python 사용을 꺼린다면, Node.js의 chokidar와 같은 라이브러리로 동일한 기능 구현이 가능합니다. chokidar는 Node에서 가장 널리 쓰이는 크로스플랫폼 파일감시 도구로 평가받고 있습니다[10]. Node 환경에서는 FS 이벤트 처리와 프로세스 실행을 비동기로 다룰 수 있어, 프로젝트 기술 스택에 따라 고려될 수 있습니다. 다만 현재 로드맵 상 Option 3의 계획에는 Python이 명시되어 있으므로, 일단 Python으로 프로토타이핑 및 구현을 진행한 후 필요시 점진적으로 Node로 포팅을 검토하는 것이 현실적입니다.
+요약: 규칙 기반 라우터는 간결한 패턴 매칭과 파일 이벤트 트리거만으로 동작하는 가벼운 오케스트레이션 핵심 모듈입니다. 이를 통해 비용을 발생시키지 않으면서도 각 에이전트(테스트, 배포, 문서 등)가 언제 실행되어야 하는지를 자동으로 판단할 수 있으며, 사람(Human)에게는 중요한 의사결정만 위임하는 Interactive 협업 체계를 구축합니다. 모든 설계 요소는 명시적 규칙과 로컬 운영으로 이루어지므로 예측 가능성이 높고, 작은 수정에도 빠르게 대응할 수 있는 유연성을 갖추게 됩니다.
+
+[1] How to match only particular events with Python watchdog - Stack Overflow
+https://stackoverflow.com/questions/17756011/how-to-match-only-particular-events-with-python-watchdog
+[2] continuous integration - GitLab CI: avoid duplication of skip-ci for each job - Stack Overflow
+https://stackoverflow.com/questions/65982736/gitlab-ci-avoid-duplication-of-skip-ci-for-each-job
+[3] [6] [9] Python Watchdog 101: Track, Monitor, and React to File Changes
+https://www.pythonsnacks.com/p/python-watchdog-file-directory-updates
+[4] [5] Automatically run tests when a change occurs | by Jordan Chapuy | Medium
+https://medium.com/@chapuyj/automatically-run-tests-when-a-change-occurs-9bae2140586b
+[7] Smarter File Watching in Python: Rate-Limiting and Change History with Watchdog | by Josh Wiechman | Medium
+https://medium.com/@RampantLions/smarter-file-watching-in-python-rate-limiting-and-change-history-with-watchdog-2114e45e7774
+[8] API Reference — watchdog 2.1.5 documentation - Read the Docs
+https://python-watchdog.readthedocs.io/en/stable/api.html
+[10] Is Chokidar still the best library for detecting folder changes across platforms? : r/node
+https://www.reddit.com/r/node/comments/1csckzw/is_chokidar_still_the_best_library_for_detecting/

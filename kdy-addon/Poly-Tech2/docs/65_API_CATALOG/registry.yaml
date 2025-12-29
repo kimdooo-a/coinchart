@@ -1,0 +1,50 @@
+# Poly-Tech2 API Registry
+# This file catalogs all external and internal API dependencies.
+
+version: "1.2.0"
+
+apis:
+  # --- Example 1: External LLM Service ---
+  - id: "openai-gpt"
+    name: "OpenAI GPT-4"
+    base_url: "https://api.openai.com/v1"
+    auth_type: "bearer"
+    env_keys: ["OPENAI_API_KEY"]
+    spec_path: "./specs/openai_v1.json"
+    rate_limit:
+      requests: 500
+      period: "1m"
+    tags: ["llm", "external", "generative"]
+
+  # --- Example 2: External Code Repository ---
+  - id: "github-api"
+    name: "GitHub REST API"
+    base_url: "https://api.github.com"
+    auth_type: "token"
+    env_keys: ["GITHUB_TOKEN"]
+    spec_path: "./specs/github_v3.yaml"
+    rate_limit:
+      requests: 5000
+      period: "1h"
+    tags: ["code", "external", "version-control"]
+
+  # --- Example 3: Internal Microservice ---
+  - id: "poly-logger"
+    name: "Poly Logger Service"
+    base_url: "http://localhost:8080"
+    auth_type: "none"
+    env_keys: []
+    spec_path: "./specs/logger_v2.yaml"
+    tags: ["utility", "internal", "monitoring"]
+
+  # --- Example 4: Authenticated Internal ---
+  - id: "kdy-payment"
+    name: "KDY Payment Gateway"
+    base_url: "https://pay.kdy.internal/api"
+    auth_type: "hmac"
+    env_keys: ["KDY_PAY_KEY", "KDY_PAY_SECRET"]
+    spec_path: "./specs/kdy_payment_v1.json"
+    rate_limit:
+      requests: 100
+      period: "1s"
+    tags: ["finance", "internal", "critical"]

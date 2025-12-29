@@ -21,18 +21,23 @@ type Candle = {
     time: number;
 };
 
+// STEP 4-4B: Binance 직접 호출 제거, API Route 프록시 + TTL 캐시 사용
 async function fetchCandles(symbol: string, interval: string = '1h', limit: number = 100): Promise<Candle[]> {
     try {
-        const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`);
+        // Use internal API Route with TTL cache instead of direct Binance call
+        const res = await fetch(`/api/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`);
+        if (!res.ok) {
+            throw new Error(`API Route error: ${res.statusText}`);
+        }
         const data = await res.json();
-        // [time, open, high, low, close, volume, ...]
+        // API Route returns formatted data: { time, open, high, low, close, volume }
         if (!Array.isArray(data)) return [];
         return data.map((d: any) => ({
-            close: parseFloat(d[4]),
-            high: parseFloat(d[2]),
-            low: parseFloat(d[3]),
-            volume: parseFloat(d[5]),
-            time: d[0]
+            close: d.close,
+            high: d.high,
+            low: d.low,
+            volume: d.volume,
+            time: d.time * 1000 // Convert seconds back to ms for compatibility
         }));
     } catch (e) {
         console.error(`Failed to fetch ${symbol}`, e);
@@ -132,7 +137,7 @@ export async function scanMarket(): Promise<Signal[]> {
                 symbol: displaySym,
                 type: 'INFO',
                 title: `${displaySym} 시장 브리핑`,
-                description: `현재 특이사항 없이 안정적인 흐름을 보이고 있습니다. (RSI: ${currentRSI.toFixed(1)})`,
+                description: `현재 특이사항 없이 일반적인 흐름을 보이고 있습니다. (RSI: ${currentRSI.toFixed(1)})`,
                 score: 10,
                 timestamp: Date.now(),
                 metrics: `RSI: ${currentRSI.toFixed(1)}`

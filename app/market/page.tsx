@@ -10,6 +10,7 @@ import KimchiPremium from '@/components/Market/KimchiPremium';
 import RSIHeatmap from '@/components/Market/RSIHeatmap';
 import { calculateRSI } from '@/lib/indicators';
 import { analyzeFractalPattern } from '@/lib/fractal_engine';
+import { Disclaimer } from '@/components/Common/Disclaimer';
 
 type FNGData = {
     value: string;
@@ -57,12 +58,12 @@ const getStatus = (score: number, lang: 'ko' | 'en') => {
 
 const Gauge = ({ score, label, description }: GaugeProps) => {
     return (
-        <div className="bg-gray-900 rounded-3xl p-8 border border-gray-800 shadow-2xl flex flex-col items-center relative overflow-hidden w-full">
+        <div className="bg-card rounded-2xl p-6 border border-border shadow-2xl flex flex-col items-center relative overflow-hidden w-full">
             <div className="absolute top-0 w-full h-2 bg-gradient-to-r from-red-600 via-yellow-500 to-green-500 opacity-30"></div>
             <h3 className="text-gray-400 mb-6 text-xl font-bold">{label}</h3>
 
             <div className="relative w-64 h-32 overflow-hidden mb-4">
-                <div className="absolute top-0 left-0 w-full h-64 rounded-full border-[20px] border-gray-800 box-border"></div>
+                <div className="absolute top-0 left-0 w-full h-64 rounded-full border-[20px] border-border box-border"></div>
                 <motion.div
                     initial={{ rotate: -180 }}
                     animate={{ rotate: -180 + (score / 100) * 180 }}
@@ -119,19 +120,25 @@ export default function MarketPage() {
                 const tickers = await tickerRes.json();
 
                 // 3. Fetch Klines (4h) for RSI & Trend Check & Fractal Analysis
+                // STEP 4-4B: API Route 프록시 + TTL 캐시 사용 (Binance 직접 호출 제거)
                 // Fetching 1000 candles for Pattern Matching
                 const klinePromises = POPULAR_SYMBOLS.map(async (symbol) => {
                     try {
-                        const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=4h&limit=1000`);
+                        // Use internal API Route with TTL cache
+                        const res = await fetch(`/api/klines?symbol=${symbol}&interval=4h&limit=1000`);
+                        if (!res.ok) {
+                            throw new Error(`API Route error: ${res.statusText}`);
+                        }
                         const data = await res.json();
-                        // Map to simplified object for engine
+                        // API Route returns formatted data: { time, open, high, low, close, volume }
+                        // Map to simplified object for engine (time is in seconds, convert to ms)
                         const candles = data.map((d: any) => ({
-                            time: d[0],
-                            open: parseFloat(d[1]),
-                            high: parseFloat(d[2]),
-                            low: parseFloat(d[3]),
-                            close: parseFloat(d[4]),
-                            volume: parseFloat(d[5])
+                            time: d.time * 1000, // Convert seconds to ms for compatibility
+                            open: d.open,
+                            high: d.high,
+                            low: d.low,
+                            close: d.close,
+                            volume: d.volume
                         }));
 
                         const closes = candles.map((c: any) => c.close);
@@ -311,7 +318,7 @@ export default function MarketPage() {
             if (score < 55) return {
                 title: "⚖️ 방향성을 탐색하는 시기 (중립)",
                 strategy: "현금 비중 유지 및 관망",
-                story: "시장이 위로 갈지 아래로 갈지 고민하고 있습니다. 뚜렷한 호재도, 악재도 반영되지 않은 상태입니다. 이럴 때는 예측해서 베팅하기보다, 확실한 추세가 나올 때까지 기다리는 것이 돈을 잃지 않는 지름길입니다."
+                story: "시장이 위로 갈지 아래로 갈지 고민하고 있습니다. 뚜렷한 호재도, 악재도 반영되지 않은 상태입니다. 이럴 때는 추측해서 베팅하기보다, 확실한 추세가 나올 때까지 기다리는 것이 돈을 잃지 않는 지름길입니다."
             };
             if (score < 75) return {
                 title: "📈 상승장의 즐거움 (보유)",
@@ -356,13 +363,11 @@ export default function MarketPage() {
     const insight = getMarketInsight(todayScore);
 
     return (
-        <main className="min-h-screen bg-black text-white p-4 md:p-8 flex flex-col items-center">
-            {/* Spacer for GlobalHeader (1.5x height) */}
-            <div className="h-24 w-full" aria-hidden="true" />
+        <main className="flex-1 w-full pt-20 pb-12 px-4 md:px-6 flex flex-col items-center">
 
             {/* Header Removed - Managed by GlobalHeader */}
-            <div className="w-full max-w-6xl mb-8 flex items-center justify-between">
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 bg-clip-text text-transparent">
+            <div className="w-full max-w-7xl flex items-center justify-between mb-6">
+                <h2 className="text-3xl font-bold text-primary">
                     {t.market.title}
                 </h2>
 
@@ -384,11 +389,11 @@ export default function MarketPage() {
             </div>
 
             {loading ? (
-                <div className="w-full max-w-4xl h-96 bg-gray-900 rounded-3xl animate-pulse"></div>
+                <div className="w-full max-w-7xl h-96 bg-gray-900 rounded-2xl animate-pulse"></div>
             ) : (
-                <div className="w-full max-w-6xl space-y-8">
+                <div className="w-full max-w-7xl space-y-6">
                     {/* Gauges Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <Gauge
                             score={todayScore}
                             label={basis === 'daily' ? t.market.btcLabel_daily : t.market.btcLabel_realtime}
@@ -402,7 +407,7 @@ export default function MarketPage() {
                     </div>
 
                     {/* Individual Coin Analysis */}
-                    <div className="bg-gray-900/50 rounded-3xl p-8 border border-gray-800">
+                    <div className="bg-card/50 rounded-2xl p-6 border border-border">
                         <div className="flex items-center gap-3 mb-6">
                             <h3 className="text-xl font-bold text-gray-300">💎 {t.market.detailTitle}</h3>
                             <span className="text-xs px-2 py-1 rounded bg-gray-800 text-gray-400 border border-gray-700">
@@ -411,9 +416,9 @@ export default function MarketPage() {
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                             {coinMoods.map((coin) => (
-                                <div key={coin.symbol} className="bg-black/50 p-4 rounded-xl border border-gray-800 flex flex-col items-center hover:border-gray-600 transition-colors">
-                                    <div className="text-lg font-bold mb-2">{coin.symbol}</div>
-                                    <div className={`text-3xl font-black mb-1 ${getColor(coin.score)}`}>
+                                <div key={coin.symbol} className="bg-background/50 p-4 rounded-xl border border-border flex flex-col items-center hover:border-primary/50 transition-colors">
+                                    <div className="text-base font-bold text-gray-200 mb-2">{coin.symbol}</div>
+                                    <div className={`text-2xl md:text-3xl font-black mb-1 ${getColor(coin.score)}`}>
                                         {coin.score}
                                     </div>
                                     <div className={`text-xs font-bold px-2 py-0.5 rounded-full mb-2 ${coin.score < 45 ? 'bg-red-900/50 text-red-500' :
@@ -430,10 +435,12 @@ export default function MarketPage() {
                         </div>
                     </div>
 
+                    <Disclaimer />
+
                     {/* AI Insight Report */}
-                    <div className="bg-gray-900 border border-gray-800 rounded-3xl p-8 shadow-2xl">
+                    <div className="bg-card border border-border rounded-2xl p-6 shadow-2xl">
                         <div className="flex flex-col md:flex-row gap-6 items-start">
-                            <div className="text-5xl md:text-7xl">
+                            <div className="text-4xl md:text-6xl">
                                 {todayScore < 45 ? '🐻' : todayScore > 55 ? '🐂' : '🦆'}
                             </div>
                             <div className="flex-1">
@@ -441,12 +448,12 @@ export default function MarketPage() {
 
                                 <div className="space-y-4">
                                     <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700">
-                                        <span className="text-blue-400 font-bold block mb-1">💡 {lang === 'ko' ? '추천 전략' : 'Strategy'}</span>
+                                        <span className="text-blue-400 text-sm font-bold uppercase tracking-wide block mb-1">💡 {lang === 'ko' ? '추천 전략' : 'Strategy'}</span>
                                         <p className="text-gray-300 font-medium">{insight.strategy}</p>
                                     </div>
                                     <div>
                                         <span className="text-gray-500 font-bold block mb-2 text-sm uppercase tracking-wide">AI Commentary</span>
-                                        <p className="text-gray-300 leading-relaxed text-lg">
+                                        <p className="text-gray-300 leading-relaxed font-light md:font-normal text-lg">
                                             {insight.story}
                                         </p>
                                     </div>
@@ -457,7 +464,7 @@ export default function MarketPage() {
 
                     {/* History Section */}
                     {basis === 'daily' && (
-                        <div className="bg-gray-900/30 p-6 rounded-3xl border border-gray-800">
+                        <div className="bg-card/30 p-6 rounded-2xl border border-border">
                             <h3 className="text-gray-400 mb-4 font-bold text-center">📅 BTC {lang === 'ko' ? '심리 변화' : 'History'}</h3>
                             <div className="flex justify-center gap-4 md:gap-8 overflow-x-auto pb-2">
                                 {data.slice(1, 5).map((item, i) => (
@@ -478,7 +485,7 @@ export default function MarketPage() {
                     )}
 
                     {/* NEW: Kimchi Premium & RSI Heatmap */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <KimchiPremium />
                         <RSIHeatmap />
                     </div>

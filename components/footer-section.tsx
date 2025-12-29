@@ -16,7 +16,7 @@ export default function FooterSection() {
                             <div className="size-8 rounded bg-primary flex items-center justify-center text-primary-foreground">
                                 <BarChart2 className="size-5" />
                             </div>
-                            <span className="text-white font-bold text-xl">사랑하는 마누라</span>
+                            <span className="text-white font-bold text-xl">ChartMaster</span>
                         </Link>
                         <p className="text-gray-500 max-w-sm">
                             성공적인 암호화폐 투자를 위한 최고의 파트너.<br />
@@ -48,7 +48,7 @@ export default function FooterSection() {
 
                 <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-xs text-gray-600">
-                        © {currentYear} 사랑하는 마누라. All rights reserved.
+                        © {currentYear} ChartMaster. All rights reserved.
                         <span className="block mt-1 md:inline md:mt-0 md:ml-4 text-gray-700">
                             * 본 사이트의 정보는 투자 조언이 아니며, 투자 결과에 대한 책임은 본인에게 있습니다.
                         </span>

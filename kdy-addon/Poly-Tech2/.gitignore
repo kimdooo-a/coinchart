@@ -1,0 +1,16 @@
+# Runtime Sandbox
+runtime/_sandbox/
+runtime/**/*.log
+runtime/locks/*.lock
+
+# Python
+**/__pycache__/
+**/*.pyc
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

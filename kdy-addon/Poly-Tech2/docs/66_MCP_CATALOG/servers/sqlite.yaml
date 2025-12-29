@@ -1,0 +1,12 @@
+# MCP Server: SQLite
+# Provides capability to query local SQLite databases
+type: stdio
+command: uvx
+args:
+  - mcp-server-sqlite
+  - "--db-path"
+  - "{{SQLITE_DB_PATH}}"
+env_keys: []
+security:
+  network: "none"
+  filesystem: "read-write"

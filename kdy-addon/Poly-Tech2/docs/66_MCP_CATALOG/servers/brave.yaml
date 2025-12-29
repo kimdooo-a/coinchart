@@ -1,0 +1,12 @@
+# MCP Server: Brave Search
+# Provides capability to perform web searches
+type: stdio
+command: npx
+args:
+  - -y
+  - "@modelcontextprotocol/server-brave-search"
+env_keys:
+  - "BRAVE_API_KEY"
+security:
+  network: "outbound-only"
+  filesystem: "none"

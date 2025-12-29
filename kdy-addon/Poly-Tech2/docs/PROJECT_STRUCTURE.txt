@@ -1,0 +1,40 @@
+Poly-Tech2/
+├── .gitignore               # SCM Exclusion Rules
+├── SHARED_CONTEXT.md        # [SSOT] Active Phase & System State
+├── TO_HUMAN.md              # [SSOT] Human Reporting Channel
+├── message/                 # Repository for Non-Code Communication
+│   ├── prompts/             # System Prompt Archive (Moved from root)
+│   └── report/              # Generated Work Reports
+│       └── 2025-12-27_WORK_SUMMARY.md
+├── docs/                    # Governance & Documentation
+│   ├── 00_CONSTITUTION/     # Immutable Core Law (Human Only)
+│   │   ├── CONSTITUTION.md  # Supreme Law
+│   │   ├── AUTHORITY.md     # Permissions
+│   │   ├── COMMUNICATION.md # Protocol SSOT
+│   │   ├── POLICIES.md      # Category A-D Policies
+│   │   ├── ROLE_MODEL.md    # Agent Descriptions
+│   │   └── WORKFLOW.md      # 5-Phase Gates
+│   ├── 10_LAWS/             # Semi-Mutable Specs
+│   │   └── RULE_DSL.md      # Orchestrator Logic Spec
+│   ├── 20_REGULATIONS/      # Mutable Operational Rules
+│   │   └── APPROVAL_TOKENS.md
+│   ├── 90_AMENDMENTS/       # Constitutional Overrides
+│   ├── PROJECT_PROMPTS.md   # Prompt History Log
+│   └── PROJECT_STRUCTURE.txt # This Diagram
+├── runtime/                 # Operational Environment
+│   ├── bus/                 # [Evidence] Main Communication Channel
+│   │   ├── README.md        # Bus Protocol
+│   │   ├── input/           # Ingress
+│   │   ├── processing/      # Active Locks
+│   │   ├── output/          # Success Evidence
+│   │   └── error/           # Failure Logs
+│   ├── orchestrator/        # [Engine] Python Logic
+│   │   ├── orchestrator_loop.py
+│   │   └── sample_commands/
+│   ├── rules/               # [Logic] Executable Rule Packs
+│   │   └── rules.v0.1.yaml
+│   └── _sandbox/            # [Test] Isolated Environment (GitIgnored)
+│       ├── bus/             # Shadow Bus Architecture
+│       ├── logs/
+│       └── tmp/
+└── README.md                # Universal Entry Point

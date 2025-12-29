@@ -42,3 +42,9 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
+
+.vercel
+.env*.local
+
+# Windows reserved names workaround
+nul

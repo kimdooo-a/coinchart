@@ -23,12 +23,15 @@ export default function RSIHeatmap() {
     useEffect(() => {
         const fetchAndCalc = async () => {
             try {
+                // STEP 4-4B: API Route 프록시 + TTL 캐시 사용 (Binance 직접 호출 제거)
                 const promises = TARGET_COINS.map(async (coin) => {
-                    const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin}USDT&interval=4h&limit=20`);
+                    const res = await fetch(`/api/klines?symbol=${coin}USDT&interval=4h&limit=20`);
+                    if (!res.ok) {
+                        throw new Error(`API Route error: ${res.statusText}`);
+                    }
                     const json = await res.json();
-                    // Binance kline: [time, open, high, low, close, vol, ...]
-                    // Index 4 is close
-                    const closes = json.map((k: any) => parseFloat(k[4]));
+                    // API Route returns formatted data: { time, open, high, low, close, volume }
+                    const closes = json.map((k: any) => k.close);
                     const rsiArr = calculateRSI(closes, 14);
                     // Get last valid RSI
                     const currentRSI = rsiArr[rsiArr.length - 1] || 50;
@@ -63,12 +66,12 @@ export default function RSIHeatmap() {
     };
 
     return (
-        <div className="bg-gray-900 border border-gray-800 rounded-3xl p-6 md:p-8 shadow-2xl">
+        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-2xl">
             <div className="flex items-center gap-3 mb-6">
                 <h3 className="text-xl md:text-2xl font-bold text-white">🔥 RSI Heatmap (4H)</h3>
-                <div className="flex gap-2 text-xs">
-                    <span className="px-2 py-1 bg-red-600 rounded text-white">{lang === 'ko' ? '과열' : 'Hot'}</span>
-                    <span className="px-2 py-1 bg-green-600 rounded text-white">{lang === 'ko' ? '침체' : 'Cold'}</span>
+                <div className="flex gap-2">
+                    <span className="px-2 py-1 bg-red-600 rounded text-[10px] uppercase font-bold tracking-wider text-white">{lang === 'ko' ? '과열' : 'Hot'}</span>
+                    <span className="px-2 py-1 bg-green-600 rounded text-[10px] uppercase font-bold tracking-wider text-white">{lang === 'ko' ? '침체' : 'Cold'}</span>
                 </div>
             </div>
 
@@ -85,8 +88,8 @@ export default function RSIHeatmap() {
                             key={item.symbol}
                             className={`${getRSIColor(item.rsi)} p-4 rounded-xl flex flex-col items-center justify-center transition-transform hover:scale-105 shadow-lg border border-white/10`}
                         >
-                            <span className="text-white font-bold text-lg drop-shadow-md">{item.symbol}</span>
-                            <span className="text-white/90 text-2xl font-black drop-shadow-md">{item.rsi.toFixed(0)}</span>
+                            <span className="text-white font-bold text-base drop-shadow-sm">{item.symbol}</span>
+                            <span className="text-white/90 text-2xl md:text-3xl font-black drop-shadow-md tracking-tight">{item.rsi.toFixed(0)}</span>
                             <span className="text-white/70 text-xs mt-1 font-medium bg-black/20 px-2 py-0.5 rounded">
                                 {getRSIText(item.rsi)}
                             </span>
