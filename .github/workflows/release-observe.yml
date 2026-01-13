@@ -123,13 +123,33 @@ jobs:
         id: get_url
         run: |
           npm install -g vercel@latest
-          
-          # Get current prod url
-          DEPLOYMENT_URL=$(vercel list --prod --json \
+
+          # Get current prod url with error handling
+          VERCEL_OUTPUT=$(vercel list --prod --json \
             --token=${{ secrets.VERCEL_TOKEN }} \
-            --scope=${{ secrets.VERCEL_ORG_ID }} 2>/dev/null | \
-            node -e "const data = JSON.parse(require('fs').readFileSync(0, 'utf-8')); console.log(data[0]?.url || '')")
-            
+            --scope=${{ secrets.VERCEL_ORG_ID }} 2>&1) || true
+
+          echo "Vercel output: $VERCEL_OUTPUT"
+
+          # Parse URL with error handling for empty/invalid JSON
+          DEPLOYMENT_URL=$(echo "$VERCEL_OUTPUT" | node -e "
+            let input = '';
+            process.stdin.on('data', chunk => input += chunk);
+            process.stdin.on('end', () => {
+              try {
+                if (!input.trim()) {
+                  console.log('');
+                  return;
+                }
+                const data = JSON.parse(input);
+                console.log(data[0]?.url || '');
+              } catch (e) {
+                console.error('JSON parse error:', e.message);
+                console.log('');
+              }
+            });
+          ")
+
           echo "URL: $DEPLOYMENT_URL"
           echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
         env:
