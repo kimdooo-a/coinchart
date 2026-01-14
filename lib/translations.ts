@@ -29,6 +29,7 @@ export const TRANSLATIONS = {
             history: "코인 역사",
 
             portfolio: "포트폴리오",
+            secureMemo: "보안 메모",
             contact: "문의하기",
             terms: "이용약관"
         },
@@ -75,6 +76,7 @@ export const TRANSLATIONS = {
             title: "AI 뉴스 브리핑",
             all: "전체 (All)",
             noNews: "관련된 뉴스를 찾을 수 없습니다.",
+            noMoreNews: "모든 뉴스를 확인하셨습니다. (End of List)",
             footer: "Data provided by Google News • AI Sentiment Analysis via Local Engine",
         },
         signal: {
@@ -192,14 +194,48 @@ export const TRANSLATIONS = {
                 created: "가입일",
                 lastSign: "마지막 접속",
                 action: "작업",
-                delete: "삭제",
-                noUsers: "사용자를 찾을 수 없습니다."
+                delete: '삭제',
+                noUsers: '사용자가 없습니다.'
             },
+            dataCleanup: '데이터 정리',
+            cleanupDesc: '데이터베이스 공간 확보: 코인/주식(종목별 최신 2000개), 뉴스(전체 최신 1000개)',
+            startCleanup: '데이터 정리 실행',
+            cleanupResult: '정리 결과',
+            confirmCleanup: '정말로 데이터 정리를 시작하시겠습니까? (이 작업은 되돌릴 수 없습니다)',
             status: {
                 ready: "준비됨...",
                 success: "성공",
                 error: "오류"
             }
+        },
+        secureMemo: {
+            title: "보안 메모",
+            subtitle: "암호화된 비공개 메모를 안전하게 보관하세요",
+            newMemo: "새 메모",
+            noMemos: "저장된 메모가 없습니다",
+            memoTitle: "제목",
+            memoContent: "내용",
+            password: "비밀번호",
+            confirmPassword: "비밀번호 확인",
+            passwordMismatch: "비밀번호가 일치하지 않습니다",
+            passwordRequired: "비밀번호를 입력해주세요",
+            enterPassword: "비밀번호를 입력하여 메모를 열어주세요",
+            unlock: "잠금 해제",
+            save: "저장",
+            cancel: "취소",
+            delete: "삭제",
+            edit: "수정",
+            close: "닫기",
+            decryptionFailed: "복호화 실패: 비밀번호가 올바르지 않습니다",
+            deleteConfirm: "정말 이 메모를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+            warning: "주의: 비밀번호를 분실하면 메모를 복구할 수 없습니다",
+            createdAt: "생성일",
+            updatedAt: "수정일",
+            locked: "잠김",
+            saving: "저장 중...",
+            unlocking: "잠금 해제 중...",
+            contentPlaceholder: "비밀 메모 내용을 입력하세요...",
+            titlePlaceholder: "메모 제목"
         }
     },
     en: {
@@ -232,6 +268,7 @@ export const TRANSLATIONS = {
             history: "History",
 
             portfolio: "Portfolio",
+            secureMemo: "Secure Memo",
             contact: "Contact",
             terms: "Terms"
         },
@@ -278,6 +315,7 @@ export const TRANSLATIONS = {
             title: "AI News Briefing",
             all: "All",
             noNews: "No relevant news found.",
+            noMoreNews: "No more news to load.",
             footer: "Data provided by Google News • AI Sentiment Analysis via Local Engine",
         },
         signal: {
@@ -384,7 +422,7 @@ export const TRANSLATIONS = {
             newsControl: "News Crawler Control",
             newsDesc: "Manually trigger the news crawler. Duplicates will be strictly ignored based on URL.",
             marketControl: "Market Data Control",
-            marketDesc: "Update latest prices for all supported coins and stocks in the system. (Deletes data > 2000 days)",
+            marketDesc: "Update latest prices for all supported coins and stocks in the system.",
             userManagement: "User Management",
             triggerCrawler: "Trigger Crawler (Korean)",
             updatePrices: "Update Market Prices",
@@ -402,7 +440,41 @@ export const TRANSLATIONS = {
                 ready: "Ready...",
                 success: "Success",
                 error: "Error"
-            }
+            },
+            dataCleanup: 'Data Cleanup',
+            cleanupDesc: 'Free up database space: crypto/stock (2000 per symbol), news (1000 global).',
+            startCleanup: 'Start Data Cleanup',
+            cleanupResult: 'Cleanup Result',
+            confirmCleanup: 'Are you sure you want to start data cleanup? (This action cannot be undone)',
+        },
+        secureMemo: {
+            title: "Secure Memo",
+            subtitle: "Keep your encrypted private notes safe",
+            newMemo: "New Memo",
+            noMemos: "No memos saved",
+            memoTitle: "Title",
+            memoContent: "Content",
+            password: "Password",
+            confirmPassword: "Confirm Password",
+            passwordMismatch: "Passwords do not match",
+            passwordRequired: "Please enter a password",
+            enterPassword: "Enter password to unlock this memo",
+            unlock: "Unlock",
+            save: "Save",
+            cancel: "Cancel",
+            delete: "Delete",
+            edit: "Edit",
+            close: "Close",
+            decryptionFailed: "Decryption failed: Incorrect password",
+            deleteConfirm: "Are you sure you want to delete this memo? This action cannot be undone.",
+            warning: "Warning: If you lose your password, the memo cannot be recovered",
+            createdAt: "Created",
+            updatedAt: "Updated",
+            locked: "Locked",
+            saving: "Saving...",
+            unlocking: "Unlocking...",
+            contentPlaceholder: "Enter your secret memo content...",
+            titlePlaceholder: "Memo title"
         }
     }
 };

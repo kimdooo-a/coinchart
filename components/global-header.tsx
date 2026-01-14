@@ -65,6 +65,7 @@ export default function GlobalHeader() {
             label: t.menu.service,
             items: [
                 { label: t.menu.portfolio, href: '/portfolio' },
+                { label: t.menu.secureMemo, href: '/secure-memo' },
                 { label: t.menu.contact, href: '/contact' },
                 { label: t.menu.terms, href: '/terms' },
             ]
