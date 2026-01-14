@@ -19,6 +19,12 @@ CREATE INDEX IF NOT EXISTS idx_secure_memos_updated_at ON secure_memos(updated_a
 -- Enable Row Level Security
 ALTER TABLE secure_memos ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist (for re-run safety)
+DROP POLICY IF EXISTS "Users can view own memos" ON secure_memos;
+DROP POLICY IF EXISTS "Users can insert own memos" ON secure_memos;
+DROP POLICY IF EXISTS "Users can update own memos" ON secure_memos;
+DROP POLICY IF EXISTS "Users can delete own memos" ON secure_memos;
+
 -- RLS Policy: Users can only access their own memos
 CREATE POLICY "Users can view own memos" ON secure_memos
     FOR SELECT USING (auth.uid() = user_id);
@@ -31,6 +37,10 @@ CREATE POLICY "Users can update own memos" ON secure_memos
 
 CREATE POLICY "Users can delete own memos" ON secure_memos
     FOR DELETE USING (auth.uid() = user_id);
+
+-- Drop existing function/trigger if they exist (for re-run safety)
+DROP TRIGGER IF EXISTS update_secure_memos_updated_at ON secure_memos;
+DROP FUNCTION IF EXISTS update_secure_memos_updated_at();
 
 -- Auto-update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_secure_memos_updated_at()
