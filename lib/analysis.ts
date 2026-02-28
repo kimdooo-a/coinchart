@@ -3,9 +3,11 @@ import { CandleData } from './api/binance';
 import {
     calculateRSI, calculateMACD, calculateSMA, calculateBollingerBands,
     calculateStochastic, calculateCCI, calculateWilliamsR, calculateADX,
-    calculateATR, calculateEMA
+    calculateATR, calculateEMA, calculateOBV, calculateVWAP
 } from './indicators';
 import { runBacktest } from './backtest';
+import { detectDivergence } from './analysis/divergence';
+import { detectCandlestickPatterns } from './analysis/candlestick';
 
 type Signal = 'BUY' | 'SELL' | 'NEUTRAL';
 export type MarketState = 'TRENDING_UP' | 'TRENDING_DOWN' | 'RANGING' | 'VOLATILE' | 'UNCERTAIN';
@@ -256,6 +258,7 @@ export function analyzeMarket(candles: CandleData[], options: AnalysisOptions = 
     const closes = candles.map(c => c.close);
     const highs = candles.map(c => c.high);
     const lows = candles.map(c => c.low);
+    const volumes = candles.map(c => c.volume);
 
     // 1. Volatility & Market State
     const atrRaw = calculateATR(highs, lows, closes, 14);
@@ -281,7 +284,7 @@ export function analyzeMarket(candles: CandleData[], options: AnalysisOptions = 
     const bb = calculateBollingerBands(closes);
     const upper = bb.map(b => b.upper);
     const lower = bb.map(b => b.lower);
-    const adx = calculateADX(highs, lows, closes);
+    const { adx, plusDI, minusDI } = calculateADX(highs, lows, closes);
 
     const idx = candles.length - 1;
     const indicators: IndicatorResult[] = [];
@@ -383,20 +386,80 @@ export function analyzeMarket(candles: CandleData[], options: AnalysisOptions = 
     }, (i, s) => s === 'BUY' ? t.bbLower : s === 'SELL' ? t.bbUpper : t.neutral,
         (i) => 'Band');
 
-    // ADX
+    // ADX (+DI/-DI 방향 신호 포함)
     analyzeIndicator('ADX', (i) => {
         const v = adx[i]; if (!isFiniteNumber(v)) return 'NEUTRAL';
         if (v > 25) {
-            // Strong trend. Direction depends on MACD or Trend EMA.
-            // Here we just indicate Strength.
-            return 'NEUTRAL';
+            // 강한 추세: +DI/-DI로 방향 결정
+            const pdi = plusDI[i];
+            const mdi = minusDI[i];
+            if (isFiniteNumber(pdi) && isFiniteNumber(mdi)) {
+                if (pdi > mdi) return 'BUY';
+                if (mdi > pdi) return 'SELL';
+            }
         }
         return 'NEUTRAL';
-    }, (i) => {
+    }, (i, s) => {
         const v = adx[i] || 0;
-        return v > 25 ? t.adxStrong : t.adxWeak;
+        if (v <= 25) return t.adxWeak;
+        return s === 'BUY' ? `${t.adxStrong} (${t.bullish})` : s === 'SELL' ? `${t.adxStrong} (${t.bearish})` : t.adxStrong;
     }, (i) => adx[i]?.toFixed(1) ?? 'N/A');
 
+    // OBV (추세 확인 지표)
+    const obv = calculateOBV(closes, volumes);
+    const obvEma20 = calculateEMA(obv, 20);
+    analyzeIndicator('OBV', (i) => {
+        const curOBV = obv[i];
+        const curOBVEma = obvEma20[i];
+        if (!isFiniteNumber(curOBV) || !isFiniteNumber(curOBVEma)) return 'NEUTRAL';
+        // OBV가 EMA20 위면 매수 모멘텀, 아래면 매도 모멘텀
+        if (curOBV > curOBVEma) return 'BUY';
+        if (curOBV < curOBVEma) return 'SELL';
+        return 'NEUTRAL';
+    }, (i, s) => s === 'BUY' ? (lang === 'ko' ? 'OBV 상승 추세' : 'OBV Uptrend') : s === 'SELL' ? (lang === 'ko' ? 'OBV 하락 추세' : 'OBV Downtrend') : t.neutral,
+        (i) => obv[i]?.toFixed(0) ?? 'N/A');
+
+    // VWAP (가격 기준선)
+    const vwap = calculateVWAP(highs, lows, closes, volumes);
+    analyzeIndicator('VWAP', (i) => {
+        const curVWAP = vwap[i];
+        const curPrice = closes[i];
+        if (!isFiniteNumber(curVWAP) || !isFiniteNumber(curPrice)) return 'NEUTRAL';
+        const diff = (curPrice - curVWAP) / curVWAP;
+        // 가격이 VWAP 1% 이상 위면 BUY, 1% 이상 아래면 SELL
+        if (diff > 0.01) return 'BUY';
+        if (diff < -0.01) return 'SELL';
+        return 'NEUTRAL';
+    }, (i, s) => s === 'BUY' ? (lang === 'ko' ? 'VWAP 위 (강세)' : 'Above VWAP (Bullish)') : s === 'SELL' ? (lang === 'ko' ? 'VWAP 아래 (약세)' : 'Below VWAP (Bearish)') : t.neutral,
+        (i) => vwap[i]?.toFixed(2) ?? 'N/A');
+
+    // RSI Divergence (반전 신호)
+    const rsiDivergence = detectDivergence(closes, rsi, 50);
+    if (rsiDivergence.type !== 'NONE') {
+        // 다이버전스는 RANGING 시장에서 특히 유효 (가중치 1.5배)
+        const divWeight = marketState === 'RANGING' ? 1.5 : 1.0;
+        analyzeIndicator('RSI Divergence', () => rsiDivergence.signal,
+            () => rsiDivergence.description || (lang === 'ko' ? 'RSI 다이버전스' : 'RSI Divergence'),
+            () => rsiDivergence.type);
+    }
+
+    // MACD Divergence (반전 신호)
+    const macdDivergence = detectDivergence(closes, histogram, 50);
+    if (macdDivergence.type !== 'NONE') {
+        analyzeIndicator('MACD Divergence', () => macdDivergence.signal,
+            () => macdDivergence.description || (lang === 'ko' ? 'MACD 다이버전스' : 'MACD Divergence'),
+            () => macdDivergence.type);
+    }
+
+    // 캔들스틱 패턴
+    const candlePatterns = detectCandlestickPatterns(candles.slice(-5));
+    if (candlePatterns.length > 0) {
+        // 가장 강한 패턴만 사용
+        const strongest = candlePatterns.reduce((a, b) => a.strength > b.strength ? a : b);
+        analyzeIndicator('Candlestick', () => strongest.signal,
+            () => strongest.description || strongest.pattern,
+            () => strongest.pattern);
+    }
 
     // 3. Final Scoring
     const normalizedScore = totalWeight > 0 ? totalWeightedScore / totalWeight : 0;

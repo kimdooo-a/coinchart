@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Crypto Chart Analysis (코인 차트 분석)
 
-## Getting Started
+바이낸스 등 주요 거래소의 실시간 데이터를 기반으로 가상화폐/주식 시장을 심층 분석하는 AI 웹 애플리케이션.
+시장 상태(Trend/Range)를 자동 진단하고 통계적 확률(Win Rate)에 기반한 매매 전략을 제시합니다.
 
-First, run the development server:
+## 주요 기능
+
+- **AI 기술적 분석**: 시장 상태 분류 (상승추세/하락추세/횡보/고변동성) + 동적 가중치 기반 매매 신호
+- **시장 심리 분석**: Fear & Greed Index, 프랙탈 패턴 매칭, RSI 히트맵
+- **실시간 시그널**: Pump/Dump 감지, RSI 과매수/과매도 알림
+- **주식 분석**: 미국 주식 시장 데이터 연동 (TwelveData)
+- **백테스트**: 전략 성과 시뮬레이션
+- **보안 메모**: 클라이언트 측 암호화 메모 기능
+
+## 기술 스택
+
+| 영역 | 기술 |
+|------|------|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript (Strict Mode) |
+| Styling | Tailwind CSS v4, Framer Motion |
+| Charting | TradingView Lightweight Charts |
+| Backend | Supabase (Auth, DB, RPC) |
+| Data | Binance API, TwelveData API, Alternative.me |
+| Deployment | Vercel + GitHub Actions |
+
+## 빠른 시작
 
 ```bash
+# 의존성 설치
+npm install
+
+# 환경변수 설정 (.env.local)
+cp .env.example .env.local
+# 필수 변수 설정 (docs/ENV_REQUIRED.md 참조)
+
+# 개발 서버 실행
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+http://localhost:3000 에서 확인
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 주요 스크립트
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| 명령어 | 설명 |
+|--------|------|
+| `npm run dev` | 개발 서버 |
+| `npm run build` | 프로덕션 빌드 |
+| `npm run lint` | ESLint 검사 |
+| `npm run preflight` | 배포 전 사전 검증 |
+| `npm run healthcheck` | 상태 점검 |
+| `npm run cron:daily` | 일일 자동화 |
 
-## Learn More
+## 문서 구조
 
-To learn more about Next.js, take a look at the following resources:
+| 문서 | 설명 |
+|------|------|
+| [PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md) | 프로젝트 아키텍처 상세 |
+| [WORKFLOW.md](docs/WORKFLOW.md) | 개발 워크플로우 (Phase 1~4) |
+| [MODULE_OWNERSHIP.md](docs/MODULE_OWNERSHIP.md) | 모듈 소유권 |
+| [DEPLOYMENT_RUNBOOK.md](docs/DEPLOYMENT_RUNBOOK.md) | 배포 가이드 |
+| [ENV_REQUIRED.md](docs/ENV_REQUIRED.md) | 환경변수 목록 |
+| [SSOT_SEPARATION_RULES.md](docs/SSOT_SEPARATION_RULES.md) | 단일 진실 공급원 규칙 |
+| [CHANGELOG.md](CHANGELOG.md) | 변경 이력 |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 레퍼런스
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [API Reference](docs/references/_API_REFERENCE.md)
+- [Type Reference](docs/references/_TYPE_REFERENCE.md)
+- [Component Map](docs/references/_COMPONENT_MAP.md)
+- [Environment Variables](docs/references/_ENV_REFERENCE.md)
+- [Web Contract](docs/references/_WEB_CONTRACT.md)

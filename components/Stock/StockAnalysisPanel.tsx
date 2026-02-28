@@ -85,7 +85,7 @@ export const StockAnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
         if (!candles || candles.length === 0) return null;
 
         // 1. Generate Signals
-        const { signals, adxValue, bbWidth } = generateSignals(candles);
+        const { signals, adxValue, plusDI, minusDI, atrValue, avgAtrValue, bbWidth, volumeRatio } = generateSignals(candles);
 
         // 2. Generate Historical Trades (Simulated)
         const trades = generateHistoricalTrades(candles);
@@ -104,7 +104,12 @@ export const StockAnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
             timeframe: interval,
             signals,
             adxValue,
+            plusDI,
+            minusDI,
+            atrValue,
+            avgAtrValue,
             bbWidth,
+            volumeRatio,
             userTier,
             trades: trades,
             sampleSize: candles.length,

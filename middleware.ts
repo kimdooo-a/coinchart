@@ -40,8 +40,8 @@ export async function middleware(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
-    // Defined protected routes
-    const protectedPaths = ['/portfolio', '/settings', '/watchlist', '/secure-memo']
+    // 보호 대상 라우트 (인증 필요)
+    const protectedPaths = ['/portfolio', '/settings', '/watchlist', '/secure-memo', '/admin']
     const isProtected = protectedPaths.some((path) =>
         request.nextUrl.pathname.startsWith(path)
     )

@@ -314,9 +314,44 @@ export const calculateADX = (highs: number[], lows: number[], closes: number[], 
 
     // 4. ADX = SMA(DX) (or Wilder's smoothing of DX)
     const adx = smooth(dx, period);
-    return adx;
+    return { adx, plusDI, minusDI };
 }
 
+
+// --- OBV (On-Balance Volume) ---
+export const calculateOBV = (closes: number[], volumes: number[]): number[] => {
+    const obv = new Array(closes.length).fill(0);
+    obv[0] = volumes[0] || 0;
+
+    for (let i = 1; i < closes.length; i++) {
+        if (closes[i] > closes[i - 1]) {
+            obv[i] = obv[i - 1] + volumes[i];
+        } else if (closes[i] < closes[i - 1]) {
+            obv[i] = obv[i - 1] - volumes[i];
+        } else {
+            obv[i] = obv[i - 1];
+        }
+    }
+    return obv;
+}
+
+// --- VWAP (Volume Weighted Average Price) ---
+export const calculateVWAP = (highs: number[], lows: number[], closes: number[], volumes: number[]): number[] => {
+    const vwap = new Array(closes.length).fill(NaN);
+    let cumulativeTPV = 0; // 누적 (TP × Volume)
+    let cumulativeVolume = 0; // 누적 Volume
+
+    for (let i = 0; i < closes.length; i++) {
+        const tp = (highs[i] + lows[i] + closes[i]) / 3; // Typical Price
+        cumulativeTPV += tp * volumes[i];
+        cumulativeVolume += volumes[i];
+
+        if (cumulativeVolume > 0) {
+            vwap[i] = cumulativeTPV / cumulativeVolume;
+        }
+    }
+    return vwap;
+}
 
 export const analyzeTrend = (currentPrice: number, sma20: number): IndicatorResult => {
     if (isNaN(sma20)) return { value: 0, signal: 'NEUTRAL', interpretation: 'Insufficient Data' };

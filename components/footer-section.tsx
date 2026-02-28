@@ -40,7 +40,7 @@ export default function FooterSection() {
                         <h4 className="text-white font-bold mb-4">정보</h4>
                         <ul className="space-y-2 text-sm text-gray-400">
                             <li><Link href="/terms" className="hover:text-white transition-colors">이용약관</Link></li>
-                            <li><Link href="/terms" className="hover:text-white transition-colors">개인정보처리방침</Link></li>
+                            <li><Link href="/privacy" className="hover:text-white transition-colors">개인정보처리방침</Link></li>
                             <li><Link href="/contact" className="hover:text-white transition-colors">문의하기</Link></li>
                         </ul>
                     </div>

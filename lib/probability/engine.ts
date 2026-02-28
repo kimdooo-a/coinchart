@@ -11,6 +11,9 @@ interface EngineInput {
     historicalAccuracy?: number;
     sampleSize?: number;
     dataAgeSeconds?: number;
+    atrValue?: number;
+    avgAtrValue?: number;
+    bbWidth?: number;
 }
 
 export function calculateProbability(input: EngineInput): ProbabilityResult {
@@ -22,7 +25,8 @@ export function calculateProbability(input: EngineInput): ProbabilityResult {
     const signalDetails: { name: string; contribution: number }[] = [];
 
     signals.forEach(sig => {
-        const weight = getWeight(sig.name);
+        // 레짐 기반 가중치 적용
+        const weight = getWeight(sig.name, regime);
         // Score: BUY = +100, SELL = -100, NEUTRAL = 0
         let rawScore = 0;
         if (sig.signal === 'BUY') rawScore = 100;
@@ -30,9 +34,6 @@ export function calculateProbability(input: EngineInput): ProbabilityResult {
 
         // Adjust by signal strength if available (0-1)
         const effectiveScore = rawScore * (sig.strength || 1);
-
-        // Apply Regime-based weight adjustments??
-        // For now, standard weights.
 
         weightedSum += effectiveScore * weight;
         totalWeight += weight;
@@ -68,9 +69,12 @@ export function calculateProbability(input: EngineInput): ProbabilityResult {
         signals,
         adxValue: input.adxValue ?? 30,
         volumeRatio: input.volumeRatio ?? 1.0,
-        historicalAccuracy: input.historicalAccuracy ?? 0.8,
+        historicalAccuracy: input.historicalAccuracy ?? 0.5, // 실측값 없으면 보수적 기본값 (기존 0.8 → 0.5)
         sampleSize: input.sampleSize ?? signals.length,
-        dataAgeSeconds: input.dataAgeSeconds ?? 0
+        dataAgeSeconds: input.dataAgeSeconds ?? 0,
+        atrValue: input.atrValue,
+        avgAtrValue: input.avgAtrValue,
+        bbWidth: input.bbWidth
     });
 
     return {

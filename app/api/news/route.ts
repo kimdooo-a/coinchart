@@ -11,11 +11,17 @@ export async function GET(req: Request) {
         const queryParam = searchParams.get('query');
         const langParam = searchParams.get('lang'); // 'ko' or 'en' or 'ko,en'
 
+        const pageParam = searchParams.get('page');
+        const page = parseInt(pageParam || '0', 10);
+        const pageSize = 20;
+        const from = page * pageSize;
+        const to = from + pageSize - 1;
+
         let dbQuery = supabase
             .from('news')
             .select('*')
             .order('pub_date', { ascending: false })
-            .limit(30);
+            .range(from, to);
 
         // Language Filter
         if (langParam && langParam !== 'ALL') {

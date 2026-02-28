@@ -2,7 +2,7 @@
 
 # dependencies
 /node_modules
-kdy-addon/**/node_modules
+kdy-addon/
 /.pnp
 .pnp.*
 .yarn/*
@@ -42,9 +42,24 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
-
-.vercel
 .env*.local
 
 # Windows reserved names workaround
 nul
+
+# Claude Code 임시 파일
+tmpclaude-*
+
+# 디버그/임시 파일
+debug_*.png
+output.csv
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.python-version
+
+# 기타
+*.csv
+project_structure.txt

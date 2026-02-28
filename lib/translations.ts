@@ -30,6 +30,8 @@ export const TRANSLATIONS = {
 
             portfolio: "포트폴리오",
             secureMemo: "보안 메모",
+            watchlist: "관심종목",
+            settings: "설정",
             contact: "문의하기",
             terms: "이용약관"
         },
@@ -269,6 +271,8 @@ export const TRANSLATIONS = {
 
             portfolio: "Portfolio",
             secureMemo: "Secure Memo",
+            watchlist: "Watchlist",
+            settings: "Settings",
             contact: "Contact",
             terms: "Terms"
         },

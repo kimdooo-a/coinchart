@@ -6,6 +6,8 @@ interface ConfidenceInput {
     volumeRatio?: number; // Current Vol / Avg Vol
     historicalAccuracy?: number; // 0-1
     atrValue?: number;
+    avgAtrValue?: number; // 평균 ATR (변동성 페널티 계산용)
+    bbWidth?: number; // BB Width (ATR 없을 때 대체)
     sampleSize?: number;
     dataAgeSeconds?: number;
 }
@@ -63,10 +65,22 @@ export function calculateConfidence(input: ConfidenceInput): ConfidenceResult {
     }
 
     // 5. Volatility Penalty (-10pts)
-    // If ATR is "High" -> Penalty. Needs context what is high.
-    // Simplifying: If we don't have context, assume 0 penalty unless strictly defined.
-    // For now, placeholder: no penalty logic without Avg ATR context.
-    const scoreVolatility = 0;
+    // ATR이 평균 대비 높으면 페널티 적용
+    let scoreVolatility = 0;
+    if (atrValue && atrValue > 0) {
+        const avgAtr = input.avgAtrValue;
+        if (avgAtr && avgAtr > 0) {
+            const atrRatio = atrValue / avgAtr;
+            if (atrRatio > 2.0) {
+                scoreVolatility = WEIGHTS.VOLATILITY_PENALTY; // -10 (극단적 변동성)
+            } else if (atrRatio > 1.5) {
+                scoreVolatility = WEIGHTS.VOLATILITY_PENALTY * 0.5; // -5 (높은 변동성)
+            }
+        } else if (input.bbWidth && input.bbWidth > 0.10) {
+            // ATR 평균이 없으면 BB Width로 대체
+            scoreVolatility = WEIGHTS.VOLATILITY_PENALTY * 0.5; // -5
+        }
+    }
 
     // Sum Raw Score
     let rawScore = scoreAgreement + scoreTrend + scoreVolume + scoreHistory + scoreVolatility;

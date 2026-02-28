@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(dir /s /b \"C:\\\\Users\\\\smart\\\\.claude\\\\skills\\\\crawler-code-generator\")"
+    ]
+  }
+}

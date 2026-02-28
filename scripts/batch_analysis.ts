@@ -197,7 +197,7 @@ async function analyzeCryptoSymbol(
             close: p.close,
             volume: p.volume
         }));
-        const { signals, adxValue, bbWidth } = generateSignals(candles);
+        const { signals, adxValue, plusDI, minusDI, atrValue, avgAtrValue, bbWidth, volumeRatio } = generateSignals(candles);
 
         // 3. Run analysis
         const result = performAnalysis({
@@ -205,7 +205,12 @@ async function analyzeCryptoSymbol(
             timeframe: '1d',
             signals,
             adxValue,
+            plusDI,
+            minusDI,
+            atrValue,
+            avgAtrValue,
             bbWidth,
+            volumeRatio,
             userTier: 'pro',  // Batch always runs with full data
             dataSource: 'supabase',
             sampleSize: signals.length
@@ -271,7 +276,7 @@ async function analyzeStockSymbol(
             close: p.close,
             volume: p.volume
         }));
-        const { signals, adxValue, bbWidth } = generateSignals(candles);
+        const { signals, adxValue, plusDI, minusDI, atrValue, avgAtrValue, bbWidth, volumeRatio } = generateSignals(candles);
 
         // 3. Run analysis
         const result = analyzeStock({
@@ -279,7 +284,12 @@ async function analyzeStockSymbol(
             period: '1d',
             signals,
             adxValue,
+            plusDI,
+            minusDI,
+            atrValue,
+            avgAtrValue,
             bbWidth,
+            volumeRatio,
             userTier: 'pro',
             dataSource: 'supabase',
             sampleSize: signals.length

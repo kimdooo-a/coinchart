@@ -19,6 +19,7 @@ export default function AdminPage() {
     const [users, setUsers] = useState<any[]>([]);
     const [crawlResult, setCrawlResult] = useState<string | null>(null);
     const [marketResult, setMarketResult] = useState<string | null>(null);
+    const [cleanupResult, setCleanupResult] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -100,6 +101,24 @@ export default function AdminPage() {
             setMarketResult(JSON.stringify(data, null, 2));
         } catch (e) {
             setMarketResult('Error: ' + String(e));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const cleanupData = async () => {
+        if (!confirm(t.admin.confirmCleanup)) return;
+        setLoading(true);
+        setCleanupResult(t.admin.processing);
+        try {
+            const res = await fetch('/api/admin/cleanup-data', {
+                method: 'POST',
+                body: JSON.stringify({ limit: 2000, target: 'all' })
+            });
+            const data = await res.json();
+            setCleanupResult(JSON.stringify(data, null, 2));
+        } catch (e) {
+            setCleanupResult('Error: ' + String(e));
         } finally {
             setLoading(false);
         }
@@ -203,6 +222,32 @@ export default function AdminPage() {
 
                         <div className="flex-1 bg-black/40 p-4 rounded-xl font-mono text-xs text-blue-400 overflow-x-auto h-32 border border-white/10 custom-scrollbar">
                             {marketResult || t.admin.status.ready}
+                        </div>
+                    </div>
+                </section>
+
+
+                {/* Data Cleanup Section */}
+                <section className="bg-card/30 backdrop-blur-md border border-white/10 p-8 rounded-3xl shadow-xl">
+                    <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-foreground">
+                        🧹 {t.admin.dataCleanup}
+                        {loading && <span className="text-xs text-yellow-500 animate-pulse font-mono bg-yellow-500/10 px-2 py-1 rounded">({t.admin.processing})</span>}
+                    </h2>
+                    <p className="text-muted-foreground mb-6 text-sm">
+                        {t.admin.cleanupDesc}
+                    </p>
+
+                    <div className="flex gap-4 items-start">
+                        <button
+                            onClick={cleanupData}
+                            disabled={loading}
+                            className="bg-red-600 hover:bg-red-700 disabled:opacity-50 px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-red-900/20 text-white"
+                        >
+                            {t.admin.startCleanup}
+                        </button>
+
+                        <div className="flex-1 bg-black/40 p-4 rounded-xl font-mono text-xs text-red-400 overflow-x-auto h-32 border border-white/10 custom-scrollbar">
+                            {cleanupResult || t.admin.status.ready}
                         </div>
                     </div>
                 </section>

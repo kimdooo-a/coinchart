@@ -27,11 +27,11 @@ export const NewsRotator = () => {
                 const res = await fetch(`/api/news?query=ALL&lang=${lang}`);
                 const data = await res.json();
 
-                // Take top 20
+                // Take top 100
                 if (data.items && data.items.length > 0) {
-                    setNews(data.items.slice(0, 20));
+                    setNews(data.items.slice(0, 100)); // Increased from 20 to 100
                     // Initial random index
-                    setIndex(Math.floor(Math.random() * Math.min(data.items.length, 20)));
+                    setIndex(Math.floor(Math.random() * Math.min(data.items.length, 100)));
                 }
             } catch (error) {
                 console.error('Failed to fetch news for rotator:', error);

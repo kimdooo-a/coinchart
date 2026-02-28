@@ -47,7 +47,7 @@ export async function GET(
         }
 
         // 2. Generate Signals (from SSOT data only)
-        const { signals, adxValue, bbWidth } = generateSignals(priceData);
+        const { signals, adxValue, plusDI, minusDI, atrValue, avgAtrValue, bbWidth, volumeRatio } = generateSignals(priceData);
 
         // 3. Analyze Stock
         const analysisResult = analyzeStock({
@@ -55,7 +55,12 @@ export async function GET(
             period,
             signals,
             adxValue,
+            plusDI,
+            minusDI,
+            atrValue,
+            avgAtrValue,
             bbWidth,
+            volumeRatio,
             userTier,
             dataSource: 'supabase',
             sampleSize: priceData.length

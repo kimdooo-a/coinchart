@@ -15,7 +15,10 @@ export interface StockAnalysisInput {
     signals: IndicatorSignal[];
     adxValue?: number;
     atrValue?: number;
+    avgAtrValue?: number;
     bbWidth?: number;
+    plusDI?: number;
+    minusDI?: number;
     trades?: Trade[];
     userTier: 'free' | 'pro';
     dataAgeSeconds?: number;
@@ -58,7 +61,9 @@ export function analyzeStock(input: StockAnalysisInput): StockAnalysisResult {
         const regimeResult = detectRegime({
             adx: input.adxValue,
             atr: input.atrValue,
-            bbWidth: input.bbWidth
+            bbWidth: input.bbWidth,
+            plusDI: input.plusDI,
+            minusDI: input.minusDI
         });
 
         // Probability (includes confidence calculation with actual values)
@@ -69,7 +74,10 @@ export function analyzeStock(input: StockAnalysisInput): StockAnalysisResult {
             volumeRatio: input.volumeRatio,
             historicalAccuracy: input.historicalAccuracy,
             sampleSize: input.sampleSize,
-            dataAgeSeconds: input.dataAgeSeconds
+            dataAgeSeconds: input.dataAgeSeconds,
+            atrValue: input.atrValue,
+            avgAtrValue: input.avgAtrValue,
+            bbWidth: input.bbWidth
         });
 
         // Backtest Metrics

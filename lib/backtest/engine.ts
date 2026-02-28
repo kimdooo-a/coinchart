@@ -104,3 +104,46 @@ export function generateHistoricalTrades(candles: CandleData[]): Trade[] {
 
     return trades;
 }
+
+export interface RollingWindowResult {
+    recent90DayWinRate: number;
+    allTimeWinRate: number;
+    strategyDrift: boolean; // 전략 유효성 변화 감지
+    driftMagnitude: number; // 차이 크기 (pp)
+}
+
+/**
+ * 롤링 윈도우 비교: 최근 90일 vs 전체 기간 승률 비교
+ */
+export function analyzeRollingWindow(trades: Trade[]): RollingWindowResult {
+    if (trades.length < 10) {
+        return { recent90DayWinRate: 0, allTimeWinRate: 0, strategyDrift: false, driftMagnitude: 0 };
+    }
+
+    // 전체 기간 승률
+    const totalWins = trades.filter(t => t.pnl > 0).length;
+    const allTimeWinRate = (totalWins / trades.length) * 100;
+
+    // 최근 90일 거래 필터 (exitTime 기준)
+    const now = Date.now();
+    const ninetyDaysMs = 90 * 24 * 60 * 60 * 1000;
+    const recentTrades = trades.filter(t => (now - t.exitTime) < ninetyDaysMs);
+
+    if (recentTrades.length < 5) {
+        return { recent90DayWinRate: allTimeWinRate, allTimeWinRate, strategyDrift: false, driftMagnitude: 0 };
+    }
+
+    const recentWins = recentTrades.filter(t => t.pnl > 0).length;
+    const recent90DayWinRate = (recentWins / recentTrades.length) * 100;
+
+    // 전략 유효성 변화 감지: 10%p 이상 차이면 drift
+    const driftMagnitude = Math.abs(recent90DayWinRate - allTimeWinRate);
+    const strategyDrift = driftMagnitude >= 10;
+
+    return {
+        recent90DayWinRate: Math.round(recent90DayWinRate * 10) / 10,
+        allTimeWinRate: Math.round(allTimeWinRate * 10) / 10,
+        strategyDrift,
+        driftMagnitude: Math.round(driftMagnitude * 10) / 10
+    };
+}

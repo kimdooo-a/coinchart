@@ -23,30 +23,69 @@ export default function NewsPage() {
     const [loading, setLoading] = useState(true);
     const [selectedCoin, setSelectedCoin] = useState('ALL');
 
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const observerTarget = React.useRef(null);
+
+    // Initial Load & Filter Change
     useEffect(() => {
-        const fetchNews = async () => {
-            setLoading(true);
-            try {
-                // Pass selectedCoin as query param. 
-                const query = selectedCoin === 'ALL' ? 'ALL' : selectedCoin;
+        setNews([]);
+        setPage(0);
+        setHasMore(true);
+        fetchNews(0, true);
+    }, [selectedCoin, lang]);
 
-                // User Request: Strict separation. 
-                // ko -> ko only
-                // en -> en only
-                const targetLang = lang;
+    // Fetch Function
+    const fetchNews = async (pageNum: number, isNewFilter: boolean) => {
+        if (!isNewFilter && (loading || !hasMore)) return;
 
-                const res = await fetch(`/api/news?query=${query}&lang=${targetLang}`);
-                const data = await res.json();
-                setNews(data.items || []);
-            } catch (error) {
-                console.error('Failed to fetch news:', error);
-            } finally {
-                setLoading(false);
+        setLoading(true);
+        try {
+            const query = selectedCoin === 'ALL' ? 'ALL' : selectedCoin;
+            const res = await fetch(`/api/news?query=${query}&lang=${lang}&page=${pageNum}`);
+            const data = await res.json();
+
+            const newItems = data.items || [];
+
+            if (newItems.length === 0) {
+                setHasMore(false);
+            } else {
+                setNews(prev => isNewFilter ? newItems : [...prev, ...newItems]);
+                // If we got fewer items than page size (20), it's the end
+                if (newItems.length < 20) setHasMore(false);
+            }
+        } catch (error) {
+            console.error('Failed to fetch news:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Infinite Scroll Observer
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            entries => {
+                if (entries[0].isIntersecting && hasMore && !loading) {
+                    setPage(prev => {
+                        const nextPage = prev + 1;
+                        fetchNews(nextPage, false);
+                        return nextPage;
+                    });
+                }
+            },
+            { threshold: 1.0 }
+        );
+
+        if (observerTarget.current) {
+            observer.observe(observerTarget.current);
+        }
+
+        return () => {
+            if (observerTarget.current) {
+                observer.unobserve(observerTarget.current);
             }
         };
-
-        fetchNews();
-    }, [selectedCoin, lang]); // Refetch when lang changes
+    }, [hasMore, loading]);
 
     const getSentimentColor = (sentiment: string) => {
         switch (sentiment) {
@@ -161,6 +200,24 @@ export default function NewsPage() {
                             </p>
                         </a>
                     ))
+                )}
+
+
+                {/* Scroll Target & End Message */}
+                {!loading && hasMore && <div ref={observerTarget} className="h-10 w-full" />}
+
+                {/* Loading Spinner for Infinite Scroll */}
+                {loading && news.length > 0 && (
+                    <div className="flex justify-center p-4">
+                        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                )}
+
+                {/* End of List Message */}
+                {!hasMore && news.length > 0 && (
+                    <div className="text-center py-8 text-gray-500 text-sm font-medium border-t border-gray-800 mt-8">
+                        {t.news.noMoreNews || "No more news to load / 더 이상 불러올 뉴스가 없습니다."}
+                    </div>
                 )}
             </div>
 

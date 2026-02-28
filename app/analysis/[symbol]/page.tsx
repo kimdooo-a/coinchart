@@ -149,7 +149,7 @@ export default function AnalysisPage() {
                     const cci = calculateCCI(highs, lows, closes)
                     const williams = calculateWilliamsR(highs, lows, closes)
                     const atr = calculateATR(highs, lows, closes)
-                    const adx = calculateADX(highs, lows, closes)
+                    const { adx, plusDI: adxPlusDI, minusDI: adxMinusDI } = calculateADX(highs, lows, closes)
 
                     const signals: IndicatorSignal[] = []
 

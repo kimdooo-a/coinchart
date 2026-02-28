@@ -1,33 +1,35 @@
 import { CandleData } from './api/binance';
 
+export type HorizonResult = {
+    horizon: number;
+    winRate: number; // 0-100
+    totalSignals: number;
+    profitability: number;
+};
+
 export type BacktestResult = {
     totalSignals: number;
-    winRate: number; // 0-100
+    winRate: number; // 0-100 (기본 lookForward 기준)
     profitability: number; // Average % return per signal
+    horizonResults?: HorizonResult[]; // 다기간 백테스트 결과
 };
 
 /**
- * Runs a backtest associated with a specific signal logic.
- * @param candles Historical data
- * @param signalFn Function that returns 'BUY' | 'SELL' | null for a given index
- * @param lookForward Number of periods to check for profitability (default 3)
+ * 단일 기간 백테스트 실행
  */
-export function runBacktest(
+function runSingleHorizon(
     candles: CandleData[],
     signalFn: (index: number) => 'BUY' | 'SELL' | 'NEUTRAL' | null,
-    lookForward: number = 3,
+    lookForward: number,
     targetSignal?: 'BUY' | 'SELL' | 'NEUTRAL' | null
-): BacktestResult {
-    let wins = 0; // Counts times price INCREASED (Long Win)
+): { wins: number; total: number; totalReturn: number } {
+    let wins = 0;
     let total = 0;
     let totalReturn = 0;
 
-    // We need lookForward space at the end, so stop early
     for (let i = 50; i < candles.length - lookForward; i++) {
         const signal = signalFn(i);
 
-        // If targetSignal is provided, only test matching signals.
-        // If not provided, skip NEUTRAL/Null as before (backward compatibility if needed, though we will always provide target)
         if (targetSignal !== undefined) {
             if (signal !== targetSignal) continue;
         } else {
@@ -36,9 +38,6 @@ export function runBacktest(
 
         const entryPrice = candles[i].close;
         const exitPrice = candles[i + lookForward].close;
-
-        // User Query: "Probability of profit if I BUY at this signal"
-        // So we ALWAYS test for Price Rise (exit > entry)
         const pnl = (exitPrice - entryPrice) / entryPrice;
         const isWin = exitPrice > entryPrice;
 
@@ -47,9 +46,46 @@ export function runBacktest(
         totalReturn += pnl;
     }
 
-    return {
-        totalSignals: total,
-        winRate: total > 0 ? Math.round((wins / total) * 100) : 0,
-        profitability: total > 0 ? (totalReturn / total) * 100 : 0
+    return { wins, total, totalReturn };
+}
+
+/**
+ * 다기간 백테스트 실행
+ * @param candles Historical data
+ * @param signalFn Signal function
+ * @param lookForward 기본 look-forward 기간 (default 3)
+ * @param targetSignal 타겟 신호
+ * @param multiHorizon true면 [3, 5, 10] 다기간 실행
+ */
+export function runBacktest(
+    candles: CandleData[],
+    signalFn: (index: number) => 'BUY' | 'SELL' | 'NEUTRAL' | null,
+    lookForward: number = 3,
+    targetSignal?: 'BUY' | 'SELL' | 'NEUTRAL' | null,
+    multiHorizon: boolean = false
+): BacktestResult {
+    // 기본 백테스트
+    const primary = runSingleHorizon(candles, signalFn, lookForward, targetSignal);
+
+    const result: BacktestResult = {
+        totalSignals: primary.total,
+        winRate: primary.total > 0 ? Math.round((primary.wins / primary.total) * 100) : 0,
+        profitability: primary.total > 0 ? (primary.totalReturn / primary.total) * 100 : 0
     };
+
+    // 다기간 백테스트
+    if (multiHorizon) {
+        const horizons = [3, 5, 10];
+        result.horizonResults = horizons.map(h => {
+            const hr = runSingleHorizon(candles, signalFn, h, targetSignal);
+            return {
+                horizon: h,
+                winRate: hr.total > 0 ? Math.round((hr.wins / hr.total) * 100) : 0,
+                totalSignals: hr.total,
+                profitability: hr.total > 0 ? (hr.totalReturn / hr.total) * 100 : 0
+            };
+        });
+    }
+
+    return result;
 }

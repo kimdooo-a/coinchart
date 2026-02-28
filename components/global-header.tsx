@@ -66,6 +66,8 @@ export default function GlobalHeader() {
             items: [
                 { label: t.menu.portfolio, href: '/portfolio' },
                 { label: t.menu.secureMemo, href: '/secure-memo' },
+                { label: t.menu.watchlist, href: '/watchlist' },
+                { label: t.menu.settings, href: '/settings' },
                 { label: t.menu.contact, href: '/contact' },
                 { label: t.menu.terms, href: '/terms' },
             ]
