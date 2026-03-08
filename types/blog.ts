@@ -23,7 +23,7 @@ export interface BlogPost {
   category_id: string | null;
   title: string;
   slug: string;
-  content: Record<string, unknown>; // TipTap JSON
+  content: string; // HTML
   excerpt: string | null;
   featured_image: string | null;
   status: 'draft' | 'published' | 'archived';
@@ -42,7 +42,7 @@ export interface BlogPost {
 export interface BlogPostInput {
   title: string;
   slug?: string;
-  content: Record<string, unknown>;
+  content: string;
   excerpt?: string;
   featured_image?: string;
   category_id?: string | null;

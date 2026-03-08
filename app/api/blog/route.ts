@@ -46,9 +46,9 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json();
 
-  if (!body.title || !body.content) {
+  if (!body.title || !body.content || typeof body.content !== 'string') {
     return NextResponse.json(
-      { error: '제목과 내용은 필수입니다.' },
+      { error: '제목과 내용(HTML 문자열)은 필수입니다.' },
       { status: 400 }
     );
   }

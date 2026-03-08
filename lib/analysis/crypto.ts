@@ -32,10 +32,10 @@ export interface CryptoAnalysisInput {
 }
 
 export interface CryptoAnalysisResult {
-    probability: (ProbabilityResult & { regime?: string }) | null;
-    confidence: ConfidenceResult | null;
-    backtest: BacktestMetrics | null;
-    explanation: ExplanationOutput | null;
+    probability: ProbabilityResult & { regime?: string };
+    confidence: ConfidenceResult;
+    backtest: BacktestMetrics;
+    explanation: ExplanationOutput;
     uiState: 'loading' | 'insufficient' | 'ok' | 'pro-locked' | 'error';
     dataSource: 'supabase';
 }
@@ -50,10 +50,10 @@ export function analyzeCrypto(input: CryptoAnalysisInput): CryptoAnalysisResult 
     if (input.dataSource !== 'supabase') {
         console.error('[Crypto Analysis] Invalid data source:', input.dataSource);
         return {
-            probability: null,
-            confidence: null,
-            backtest: null,
-            explanation: null,
+            probability: {} as ProbabilityResult,
+            confidence: {} as ConfidenceResult,
+            backtest: {} as BacktestMetrics,
+            explanation: {} as ExplanationOutput,
             uiState: 'error',
             dataSource: 'supabase'
         };
@@ -105,10 +105,10 @@ export function analyzeCrypto(input: CryptoAnalysisInput): CryptoAnalysisResult 
     } catch (err) {
         console.error('[Crypto Analysis] Exception:', err);
         return {
-            probability: null,
-            confidence: null,
-            backtest: null,
-            explanation: null,
+            probability: {} as ProbabilityResult,
+            confidence: {} as ConfidenceResult,
+            backtest: {} as BacktestMetrics,
+            explanation: {} as ExplanationOutput,
             uiState: 'error',
             dataSource: 'supabase'
         };

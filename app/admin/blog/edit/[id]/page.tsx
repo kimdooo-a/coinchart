@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, useCallback, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useLanguage } from '@/context/LanguageContext';
 import { TRANSLATIONS } from '@/lib/translations';
 import BlogEditor from '@/components/Blog/editor/BlogEditor';
+import { useAutoSave } from '@/components/Blog/editor/hooks/useAutoSave';
 import type { BlogCategory, BlogPost } from '@/types/blog';
 import { ArrowLeft, Save, Send, Archive } from 'lucide-react';
 import Link from 'next/link';
@@ -29,13 +30,26 @@ export default function AdminBlogEditPage({
   // 폼 상태
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
-  const [content, setContent] = useState<Record<string, unknown>>({});
+  const [content, setContent] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [categoryId, setCategoryId] = useState<string>('');
   const [tagsInput, setTagsInput] = useState('');
   const [language, setLanguage] = useState<'ko' | 'en'>('ko');
   const [metaTitle, setMetaTitle] = useState('');
   const [metaDescription, setMetaDescription] = useState('');
+
+  // 자동저장
+  const { lastSaved, clearAutoSave } = useAutoSave({
+    postId: id,
+    title,
+    content,
+    excerpt,
+    onRestore: useCallback((data: { title: string; content: string; excerpt: string }) => {
+      setTitle(data.title);
+      setContent(data.content);
+      setExcerpt(data.excerpt);
+    }, []),
+  });
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -52,7 +66,7 @@ export default function AdminBlogEditPage({
             setPost(p);
             setTitle(p.title);
             setSlug(p.slug);
-            setContent(p.content);
+            setContent(typeof p.content === 'string' ? p.content : '');
             setExcerpt(p.excerpt || '');
             setCategoryId(p.category_id || '');
             setTagsInput(p.tags?.map((tag) => tag.name).join(', ') || '');
@@ -120,6 +134,7 @@ export default function AdminBlogEditPage({
       });
 
       if (res.ok) {
+        clearAutoSave();
         router.push('/admin/blog');
       } else {
         const err = await res.json();
@@ -170,6 +185,11 @@ export default function AdminBlogEditPage({
             <h1 className="text-2xl font-bold">
               {lang === 'ko' ? '글 수정' : 'Edit Post'}
             </h1>
+            {lastSaved && (
+              <span className="text-xs text-gray-500">
+                자동저장됨 {lastSaved.toLocaleTimeString('ko-KR')}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-3">
             {post.status === 'published' && (

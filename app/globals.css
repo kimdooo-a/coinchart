@@ -222,3 +222,66 @@
   grid-template-columns: 1fr 1.618fr;
   gap: 1rem;
 }
+
+/* ========================================
+   블로그 에디터 / 콘텐츠 스타일
+   ======================================== */
+
+/* TipTap 에디터 내 테이블 스타일 */
+.ProseMirror table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.ProseMirror th,
+.ProseMirror td {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 0.75rem;
+  min-width: 80px;
+  vertical-align: top;
+}
+
+.ProseMirror th {
+  background: rgba(255, 255, 255, 0.05);
+  font-weight: 600;
+  text-align: left;
+}
+
+.ProseMirror .selectedCell {
+  background: rgba(255, 87, 51, 0.15);
+}
+
+/* TipTap 에디터 내 YouTube 임베드 */
+.ProseMirror .youtube-embed,
+.youtube-embed {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  margin: 1rem 0;
+}
+
+.ProseMirror .youtube-embed iframe,
+.youtube-embed iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* TipTap 에디터 내 하이라이트 */
+.ProseMirror mark {
+  background-color: #fef08a;
+  color: #000;
+  padding: 0.1em 0.2em;
+  border-radius: 0.15em;
+}
+
+/* 콘텐츠 표시 영역 반응형 테이블 */
+@media (max-width: 640px) {
+  .prose table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}

@@ -5,6 +5,7 @@
 // ====================================================
 
 import { createAdminClient } from '@/lib/supabase/admin';
+import { sanitizeHtml } from '@/lib/blog-sanitize';
 import type {
   BlogPost,
   BlogPostInput,
@@ -253,7 +254,7 @@ export async function createPost(
     author_id: authorId,
     title: input.title,
     slug,
-    content: input.content,
+    content: sanitizeHtml(input.content),
     excerpt: input.excerpt || null,
     featured_image: input.featured_image || null,
     category_id: input.category_id || null,
@@ -293,7 +294,7 @@ export async function updatePost(
   const updateData: Record<string, any> = {};
   if (input.title !== undefined) updateData.title = input.title;
   if (input.slug !== undefined) updateData.slug = input.slug;
-  if (input.content !== undefined) updateData.content = input.content;
+  if (input.content !== undefined) updateData.content = sanitizeHtml(input.content);
   if (input.excerpt !== undefined) updateData.excerpt = input.excerpt;
   if (input.featured_image !== undefined) updateData.featured_image = input.featured_image;
   if (input.category_id !== undefined) updateData.category_id = input.category_id;

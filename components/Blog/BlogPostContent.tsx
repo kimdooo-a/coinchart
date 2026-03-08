@@ -1,48 +1,23 @@
 'use client';
 
 import { useMemo, useEffect, useRef } from 'react';
-import { generateHTML } from '@tiptap/html';
-import StarterKit from '@tiptap/starter-kit';
-import Image from '@tiptap/extension-image';
-import LinkExtension from '@tiptap/extension-link';
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import { common, createLowlight } from 'lowlight';
-
-const lowlight = createLowlight(common);
+import { addHeadingIds } from '@/lib/blog-html-utils';
 
 interface BlogPostContentProps {
-  content: Record<string, unknown>;
+  content: string;
 }
 
 export default function BlogPostContent({ content }: BlogPostContentProps) {
   const contentRef = useRef<HTMLDivElement>(null);
 
   const html = useMemo(() => {
-    if (!content || !content.type) return '';
+    if (!content) return '';
 
     try {
-      let rawHtml = generateHTML(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        content as any,
-        [
-          StarterKit.configure({ codeBlock: false }),
-          Image,
-          LinkExtension,
-          CodeBlockLowlight.configure({ lowlight }),
-        ]
-      );
-
-      // heading에 ID 부여 (TOC와 동일한 카운팅 로직: h2, h3만)
-      let idx = 0;
-      rawHtml = rawHtml.replace(/<(h[23])([^>]*)>/g, (_match, tag, attrs) => {
-        const id = `heading-${idx}`;
-        idx++;
-        return `<${tag}${attrs} id="${id}">`;
-      });
-
-      return rawHtml;
+      // heading에 ID 부여 (TOC 연동)
+      return addHeadingIds(content);
     } catch (err) {
-      console.error('HTML 변환 오류:', err);
+      console.error('HTML 처리 오류:', err);
       return '<p>콘텐츠를 표시할 수 없습니다.</p>';
     }
   }, [content]);
@@ -93,7 +68,10 @@ export default function BlogPostContent({ content }: BlogPostContentProps) {
         prose-blockquote:border-l-primary prose-blockquote:text-gray-400
         prose-img:rounded-xl prose-img:border prose-img:border-white/10
         prose-hr:border-white/10
-        prose-li:text-gray-300 prose-li:leading-[1.8]"
+        prose-li:text-gray-300 prose-li:leading-[1.8]
+        prose-table:border-collapse
+        prose-th:border prose-th:border-white/10 prose-th:bg-white/5 prose-th:p-2 prose-th:text-left
+        prose-td:border prose-td:border-white/10 prose-td:p-2"
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );

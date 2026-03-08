@@ -7,6 +7,33 @@ interface EditorImageUploadProps {
   editor: Editor | null;
 }
 
+/**
+ * 이미지 업로드 함수 (D&D, 클립보드 붙여넣기에서도 재사용)
+ */
+export async function uploadImage(file: File): Promise<string | null> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const res = await fetch('/api/blog/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      alert(err.error || '이미지 업로드 실패');
+      return null;
+    }
+
+    const { url } = await res.json();
+    return url;
+  } catch {
+    alert('이미지 업로드 중 오류가 발생했습니다.');
+    return null;
+  }
+}
+
 export default function EditorImageUpload({ editor }: EditorImageUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -14,25 +41,9 @@ export default function EditorImageUpload({ editor }: EditorImageUploadProps) {
     const file = e.target.files?.[0];
     if (!file || !editor) return;
 
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const res = await fetch('/api/blog/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        alert(err.error || '이미지 업로드 실패');
-        return;
-      }
-
-      const { url } = await res.json();
+    const url = await uploadImage(file);
+    if (url) {
       editor.chain().focus().setImage({ src: url }).run();
-    } catch {
-      alert('이미지 업로드 중 오류가 발생했습니다.');
     }
 
     // 파일 input 초기화

@@ -35,12 +35,12 @@ export interface AnalysisInput {
 }
 
 export interface AnalysisResult {
-    probability: (ProbabilityResult & { regime?: string }) | null;
-    confidence: ConfidenceResult | null;
-    backtest: (BacktestMetrics & { rollingWindow?: unknown }) | null;
-    explanation: ExplanationOutput | null;
+    probability: ProbabilityResult & { regime?: string };
+    confidence: ConfidenceResult;
+    backtest: BacktestMetrics & { rollingWindow?: unknown };
+    explanation: ExplanationOutput;
     mtf?: MTFResult;
-    fractal?: FractalAnalysisResult | null;
+    fractal?: FractalAnalysisResult;
     uiState: 'loading' | 'insufficient' | 'ok' | 'pro-locked';
     flags: string[];
     reasons: string[];
@@ -53,10 +53,10 @@ export function performAnalysis(input: AnalysisInput): AnalysisResult {
     // SSOT Guard: Only Supabase data allowed for analysis
     if (input.dataSource && input.dataSource !== 'supabase') {
         return {
-            probability: { probability: 50, direction: 'NEUTRAL', regime: 'UNKNOWN' },
-            confidence: { grade: 'F', score: 0, sampleSize: 0, factors: [] },
-            backtest: { status: 'insufficient', totalTrades: 0, winRate: 0, profitFactor: 0, sharpeRatio: 0, maxDrawdown: 0, maxDrawdownPercent: 0, avgTrade: 0, bestTrade: 0, worstTrade: 0, avgWin: 0, avgLoss: 0, expectancy: 0, totalReturn: 0, sortinoRatio: 0, calmarRatio: 0, riskRewardRatio: 0, maxConsecutiveWins: 0, maxConsecutiveLosses: 0, recoveryFactor: 0, drawdownDuration: 0 },
-            explanation: { title: 'SSOT Violation', sections: { evidence: '분석은 Supabase 데이터만 사용 가능합니다.', risk: 'Binance 직접 호출은 허용되지 않습니다.', watch: '데이터 소스를 확인하세요.' }, flags: [] },
+            probability: { probability: 50, direction: 'SIDEWAYS', regime: 'RANGING' } as ProbabilityResult,
+            confidence: { grade: 'F', score: 0, level: 'LOW', factors: [], breakdown: { agreement: 0, trend: 0, volume: 0, history: 0, volatility: 0 }, dataQuality: { multiplier: 0, issues: [] } } as ConfidenceResult,
+            backtest: { status: 'insufficient', totalTrades: 0, winRate: 0, profitFactor: 0, sharpeRatio: 0, maxDrawdown: 0, maxDrawdownPercent: 0, avgTrade: 0, bestTrade: 0, worstTrade: 0, avgWin: 0, avgLoss: 0, expectancy: 0, totalReturn: 0, sortinoRatio: 0, calmarRatio: 0, riskRewardRatio: 0, maxConsecutiveWins: 0, maxConsecutiveLosses: 0, recoveryFactor: 0, drawdownDuration: 0 } as BacktestMetrics,
+            explanation: {} as ExplanationOutput,
             uiState: 'insufficient',
             flags: ['SSOT_VIOLATION: Analysis must use Supabase data only'],
             reasons: [`Invalid data source: ${input.dataSource}. Only 'supabase' allowed.`]

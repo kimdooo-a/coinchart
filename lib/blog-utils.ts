@@ -1,40 +1,16 @@
 // 블로그 유틸리티 함수
 
-/**
- * HTML 태그를 제거하고 텍스트만 추출
- */
-function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, ' ');
-}
-
-/**
- * TipTap JSON에서 텍스트 추출
- */
-function extractTextFromTiptap(node: Record<string, unknown>): string {
-  if (node.type === 'text' && typeof node.text === 'string') {
-    return node.text;
-  }
-
-  if (Array.isArray(node.content)) {
-    return (node.content as Record<string, unknown>[])
-      .map(extractTextFromTiptap)
-      .join(' ');
-  }
-
-  return '';
-}
+import { extractTextFromHtml } from '@/lib/blog-html-utils';
 
 /**
  * 읽기 시간 계산 (분)
  * 한국어: 분당 약 500자, 영어: 분당 약 200단어
  */
 export function calculateReadingTime(
-  content: string | Record<string, unknown>,
+  content: string,
   lang: 'ko' | 'en' = 'ko'
 ): number {
-  const text = typeof content === 'string'
-    ? stripHtml(content)
-    : extractTextFromTiptap(content);
+  const text = extractTextFromHtml(content);
 
   if (lang === 'ko') {
     // 한국어: 글자 수 기반

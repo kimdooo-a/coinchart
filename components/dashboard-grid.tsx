@@ -75,7 +75,7 @@ function GlassIcon({
     gradientTo,
     glowColor
 }: {
-    icon: React.ReactNode,
+    icon: React.ComponentType<{ className?: string; strokeWidth?: number }>,
     gradientFrom: string,
     gradientTo: string,
     glowColor: string

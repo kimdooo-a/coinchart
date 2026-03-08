@@ -47,6 +47,14 @@ export async function PUT(
   }
 
   const body = await request.json();
+
+  if (body.content !== undefined && typeof body.content !== 'string') {
+    return NextResponse.json(
+      { error: 'content는 HTML 문자열이어야 합니다.' },
+      { status: 400 }
+    );
+  }
+
   const post = await updatePost(id, body);
 
   if (!post) {

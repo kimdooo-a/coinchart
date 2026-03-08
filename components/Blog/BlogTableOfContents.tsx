@@ -2,15 +2,10 @@
 
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
-
-interface TocItem {
-  id: string;
-  text: string;
-  level: number;
-}
+import { extractHeadingsFromHtml } from '@/lib/blog-html-utils';
 
 interface BlogTableOfContentsProps {
-  content: Record<string, unknown>;
+  content: string;
 }
 
 export default function BlogTableOfContents({ content }: BlogTableOfContentsProps) {
@@ -18,37 +13,12 @@ export default function BlogTableOfContents({ content }: BlogTableOfContentsProp
   const [activeId, setActiveId] = useState<string>('');
 
   const headings = useMemo(() => {
-    const items: TocItem[] = [];
-    if (!content || !content.content) return items;
-
-    const nodes = content.content as Array<Record<string, unknown>>;
-    let idx = 0;
-
-    for (const node of nodes) {
-      if (node.type === 'heading') {
-        const level = (node.attrs as Record<string, number>)?.level || 2;
-        if (level <= 3) {
-          const textContent = ((node.content as Array<Record<string, unknown>>) || [])
-            .map((c) => (c.text as string) || '')
-            .join('');
-          if (textContent) {
-            items.push({
-              id: `heading-${idx}`,
-              text: textContent,
-              level,
-            });
-            idx++;
-          }
-        }
-      }
-    }
-
-    return items;
+    if (!content) return [];
+    return extractHeadingsFromHtml(content);
   }, [content]);
 
   // IntersectionObserver로 현재 보이는 heading 추적
   const handleIntersection = useCallback((entries: IntersectionObserverEntry[]) => {
-    // 화면에 보이는 heading 중 가장 위에 있는 것을 active로
     const visible = entries
       .filter((e) => e.isIntersecting)
       .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);

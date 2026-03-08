@@ -544,7 +544,7 @@ export default function AnalysisPage() {
                                             </div>
                                             <CardDescription className="mt-2">
                                                 Score: {analysisResult.confidence.score}/100 |
-                                                {lang === 'ko' ? ' 샘플' : ' Sample'}: {analysisResult.confidence.sampleSize || 'N/A'}
+                                                {lang === 'ko' ? ' 레벨' : ' Level'}: {analysisResult.confidence.level || 'N/A'}
                                             </CardDescription>
                                         </CardContent>
                                     </Card>

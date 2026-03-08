@@ -31,7 +31,7 @@ export function renderTemplate(ctx: RenderContext): { sections: { evidence: stri
         ] as const;
 
         keys.forEach(k => {
-            processed = safeReplace(processed, k, (ctx as Record<string, unknown>)[k]);
+            processed = safeReplace(processed, k, (ctx as unknown as Record<string, unknown>)[k]);
         });
 
         const validated = validateText(processed);
