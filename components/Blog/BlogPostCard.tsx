@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Calendar, Eye } from 'lucide-react';
+import { Calendar, Eye, Clock } from 'lucide-react';
+import { calculateReadingTime } from '@/lib/blog-utils';
 import type { BlogPost } from '@/types/blog';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -72,6 +73,10 @@ export default function BlogPostCard({ post, index = 0 }: BlogPostCardProps) {
               {post.published_at
                 ? new Date(post.published_at).toLocaleDateString()
                 : new Date(post.created_at).toLocaleDateString()}
+            </span>
+            <span className="flex items-center gap-1">
+              <Clock className="w-3.5 h-3.5" />
+              {calculateReadingTime(post.content, lang as 'ko' | 'en')}{lang === 'ko' ? '분' : ' min'}
             </span>
             <span className="flex items-center gap-1">
               <Eye className="w-3.5 h-3.5" />

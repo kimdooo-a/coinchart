@@ -3,13 +3,15 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, Calendar, Eye } from 'lucide-react';
+import { ArrowLeft, Calendar, Eye, Clock } from 'lucide-react';
+import { calculateReadingTime } from '@/lib/blog-utils';
 import { useLanguage } from '@/context/LanguageContext';
 import BlogPostContent from '@/components/Blog/BlogPostContent';
 import BlogTagBadge from '@/components/Blog/BlogTagBadge';
 import BlogShareButtons from '@/components/Blog/BlogShareButtons';
 import BlogRelatedPosts from '@/components/Blog/BlogRelatedPosts';
 import BlogTableOfContents from '@/components/Blog/BlogTableOfContents';
+import BlogComments from '@/components/Blog/BlogComments';
 import type { BlogPost } from '@/types/blog';
 
 interface BlogPostDetailProps {
@@ -69,6 +71,10 @@ export default function BlogPostDetail({ post, relatedPosts }: BlogPostDetailPro
                   : new Date(post.created_at).toLocaleDateString()}
               </span>
               <span className="flex items-center gap-1.5">
+                <Clock className="w-4 h-4" />
+                {calculateReadingTime(post.content, lang as 'ko' | 'en')}{lang === 'ko' ? '분 읽기' : ' min read'}
+              </span>
+              <span className="flex items-center gap-1.5">
                 <Eye className="w-4 h-4" />
                 {post.view_count.toLocaleString()} {lang === 'ko' ? '조회' : 'views'}
               </span>
@@ -104,6 +110,9 @@ export default function BlogPostDetail({ post, relatedPosts }: BlogPostDetailPro
             <div className="mt-8 pt-6 border-t border-white/10">
               <BlogShareButtons title={post.title} slug={post.slug} />
             </div>
+
+            {/* 댓글 */}
+            <BlogComments slug={post.slug} />
 
             {/* 관련 글 */}
             <BlogRelatedPosts posts={relatedPosts} />

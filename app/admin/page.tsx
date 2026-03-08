@@ -176,6 +176,36 @@ export default function AdminPage() {
 
             <div className="relative z-10 max-w-5xl mx-auto space-y-12">
 
+                {/* 블로그 관리 바로가기 */}
+                <section className="bg-card/30 backdrop-blur-md border border-white/10 p-8 rounded-3xl shadow-xl">
+                    <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-foreground">
+                        {lang === 'ko' ? '블로그 관리' : 'Blog Management'}
+                    </h2>
+                    <p className="text-muted-foreground mb-6 text-sm">
+                        {lang === 'ko' ? '블로그 글 작성, 수정, 삭제를 관리합니다.' : 'Manage blog posts: create, edit, and delete.'}
+                    </p>
+                    <div className="flex flex-wrap gap-4">
+                        <Link
+                            href="/admin/blog"
+                            className="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-purple-900/20 text-white"
+                        >
+                            {lang === 'ko' ? '글 목록 관리' : 'Manage Posts'}
+                        </Link>
+                        <Link
+                            href="/admin/blog/new"
+                            className="bg-indigo-600 hover:bg-indigo-700 px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-indigo-900/20 text-white"
+                        >
+                            {lang === 'ko' ? '새 글 작성' : 'Write New Post'}
+                        </Link>
+                        <Link
+                            href="/blog"
+                            className="bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-gray-900/20 text-white"
+                        >
+                            {lang === 'ko' ? '블로그 보기' : 'View Blog'}
+                        </Link>
+                    </div>
+                </section>
+
                 {/* News Control Section */}
                 <section className="bg-card/30 backdrop-blur-md border border-white/10 p-8 rounded-3xl shadow-xl">
                     <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-foreground">
