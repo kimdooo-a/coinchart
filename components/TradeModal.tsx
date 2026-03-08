@@ -116,8 +116,8 @@ export const TradeModal = ({ isOpen, onClose, onSuccess, userId }: TradeModalPro
             onClose()
             alert('Trade added successfully!')
 
-        } catch (err: any) {
-            alert(err.message)
+        } catch (err: unknown) {
+            alert((err as Error).message)
         } finally {
             setLoading(false)
         }

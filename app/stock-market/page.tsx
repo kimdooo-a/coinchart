@@ -125,7 +125,7 @@ export default function StockMarketPage() {
                     const data = await fetchHistory(stock.symbol);
                     if (!data || data.length < 15) return null;
 
-                    const closes = data.map((d: any) => d.close);
+                    const closes = data.map((d: { close: number }) => d.close);
                     const rsiArr = calculateRSI(closes, 14);
                     const currentRSI = rsiArr[rsiArr.length - 1] || 50;
 
@@ -157,8 +157,8 @@ export default function StockMarketPage() {
                 }
 
                 // Prepare Gauges Data
-                const spyCloses = spyData.map((d: any) => d.close);
-                const qqqCloses = qqqData.map((d: any) => d.close);
+                const spyCloses = spyData.map((d: { close: number }) => d.close);
+                const qqqCloses = qqqData.map((d: { close: number }) => d.close);
 
                 const currentVix = vixData[vixData.length - 1].close; // VIX is non-cumulative, just get latest
 

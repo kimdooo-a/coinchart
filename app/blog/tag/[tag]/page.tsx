@@ -1,83 +1,46 @@
-'use client';
+import type { Metadata } from 'next';
+import { fetchTagBySlug, fetchPublishedPosts } from '@/lib/supabase/blog';
+import TagPageClient from './TagPageClient';
 
-import { useState, useEffect, use } from 'react';
-import { useLanguage } from '@/context/LanguageContext';
-import { TRANSLATIONS } from '@/lib/translations';
-import BlogPostList from '@/components/Blog/BlogPostList';
-import type { BlogPost } from '@/types/blog';
-import { ArrowLeft, Hash } from 'lucide-react';
-import Link from 'next/link';
-
-export default function BlogTagPage({
-  params,
-}: {
+interface Props {
   params: Promise<{ tag: string }>;
-}) {
-  const { tag: tagSlug } = use(params);
-  const { lang } = useLanguage();
-  const t = TRANSLATIONS[lang];
+}
 
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { tag: slug } = await params;
+  const tag = await fetchTagBySlug(slug);
 
-  const limit = 12;
+  const name = tag ? tag.name : decodeURIComponent(slug);
 
-  useEffect(() => {
-    let cancelled = false;
-    const loadPosts = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch(
-          `/api/blog?page=${page}&limit=${limit}&tag=${tagSlug}`
-        );
-        if (res.ok && !cancelled) {
-          const data = await res.json();
-          setPosts(data.posts || []);
-          setTotal(data.total || 0);
-        }
-      } catch (err) {
-        console.error('포스트 로딩 실패:', err);
-      }
-      if (!cancelled) setLoading(false);
-    };
-    loadPosts();
-    return () => { cancelled = true; };
-  }, [page, tagSlug]);
+  return {
+    title: `#${name} 태그`,
+    description: `#${name} 태그가 붙은 블로그 포스트 모음`,
+    openGraph: {
+      title: `#${name} 태그`,
+      description: `#${name} 태그가 붙은 블로그 포스트 모음`,
+      type: 'website',
+    },
+    alternates: {
+      canonical: `/blog/tag/${slug}`,
+    },
+  };
+}
 
-  const tagName = decodeURIComponent(tagSlug);
+export default async function BlogTagPage({ params }: Props) {
+  const { tag: tagSlug } = await params;
+  const [tag, { posts, total }] = await Promise.all([
+    fetchTagBySlug(tagSlug),
+    fetchPublishedPosts({ tag: tagSlug, limit: 12 }),
+  ]);
+
+  const tagName = tag ? tag.name : decodeURIComponent(tagSlug);
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="container mx-auto px-4 pt-24 pb-12">
-        <Link
-          href="/blog"
-          className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors mb-8"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          {t.blog.backToBlog}
-        </Link>
-
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-2">
-            <Hash className="w-6 h-6 text-primary" />
-            <h1 className="text-3xl font-bold">{tagName}</h1>
-          </div>
-          <p className="text-gray-400">
-            {total} {lang === 'ko' ? '개의 글' : 'posts'}
-          </p>
-        </div>
-
-        <BlogPostList
-          posts={posts}
-          total={total}
-          page={page}
-          limit={limit}
-          onPageChange={setPage}
-          loading={loading}
-        />
-      </div>
-    </div>
+    <TagPageClient
+      tagSlug={tagSlug}
+      tagName={tagName}
+      initialPosts={posts}
+      initialTotal={total}
+    />
   );
 }

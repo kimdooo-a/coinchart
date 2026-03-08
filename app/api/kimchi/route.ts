@@ -53,7 +53,7 @@ export async function GET() {
             const bithumbItem = bithumbData[coin];
             // Bithumb Item Structure: { opening_price, closing_price, min_price, max_price, ... }
 
-            const binanceItem = binanceData.find((item: any) => item.symbol === `${coin}USDT`);
+            const binanceItem = binanceData.find((item: { symbol: string; price: string }) => item.symbol === `${coin}USDT`);
 
             if (bithumbItem && binanceItem) {
                 const krwPrice = parseFloat(bithumbItem.closing_price); // Bithumb returns string
@@ -78,11 +78,11 @@ export async function GET() {
             exchangeRate
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Kimchi API Error:', error);
         return NextResponse.json({
             error: 'Failed to fetch data',
-            details: error.message
+            details: (error as Error).message
         }, { status: 500 });
     }
 }

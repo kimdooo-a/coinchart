@@ -38,9 +38,9 @@ export default function ContactPage() {
 
             setStatus('success');
             setFormData({ name: '', email: '', subject: '', message: '' });
-        } catch (error: any) {
+        } catch (error: unknown) {
             setStatus('error');
-            setErrorMessage(error.message);
+            setErrorMessage((error as Error).message);
         }
     };
 

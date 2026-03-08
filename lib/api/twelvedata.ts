@@ -52,7 +52,7 @@ export async function getTwelveDataTimeSeries(
         }
 
         // Twelve Data returns newest first.
-        const candles: TwelveDataCandle[] = data.values.map((item: any) => ({
+        const candles: TwelveDataCandle[] = data.values.map((item: { datetime: string; open: string; high: string; low: string; close: string; volume: string }) => ({
             time: new Date(item.datetime).getTime() / 1000,
             open: parseFloat(item.open),
             high: parseFloat(item.high),

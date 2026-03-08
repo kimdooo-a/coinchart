@@ -3,6 +3,9 @@ import { fetchPostBySlug, fetchPublishedPosts } from '@/lib/supabase/blog';
 import type { BlogPost } from '@/types/blog';
 import type { Metadata } from 'next';
 import BlogPostDetail from './BlogPostDetail';
+import JsonLd from '@/components/seo/JsonLd';
+import { generateArticleJsonLd, generateBreadcrumbJsonLd } from '@/lib/seo/json-ld';
+import { getSiteUrl } from '@/lib/blog-utils';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -21,8 +24,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description = post.meta_description || post.excerpt || '';
 
   return {
-    title: `${title} | ChartMaster Blog`,
+    title,
     description,
+    alternates: {
+      canonical: `/blog/${slug}`,
+    },
     openGraph: {
       title,
       description,
@@ -57,5 +63,22 @@ export default async function BlogPostPage({ params }: Props) {
     relatedPosts = posts.filter((p) => p.id !== post.id).slice(0, 3);
   }
 
-  return <BlogPostDetail post={post} relatedPosts={relatedPosts} />;
+  const siteUrl = getSiteUrl();
+
+  return (
+    <>
+      <JsonLd data={generateArticleJsonLd(post)} />
+      <JsonLd
+        data={generateBreadcrumbJsonLd([
+          { name: 'Home', url: siteUrl },
+          { name: '블로그', url: `${siteUrl}/blog` },
+          ...(post.category
+            ? [{ name: post.category.name_ko, url: `${siteUrl}/blog/category/${post.category.slug}` }]
+            : []),
+          { name: post.title, url: `${siteUrl}/blog/${post.slug}` },
+        ])}
+      />
+      <BlogPostDetail post={post} relatedPosts={relatedPosts} />
+    </>
+  );
 }

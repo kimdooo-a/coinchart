@@ -56,7 +56,7 @@ export default function AnalysisPage() {
                 const data = await res.json();
 
                 // Format for DetailedChart (time as YYYY-MM-DD string)
-                const formatted = data.map((d: any) => ({
+                const formatted = data.map((d: { time: number; open: number; high: number; low: number; close: number; volume: number }) => ({
                     time: new Date(d.time * 1000).toISOString().split('T')[0],
                     open: d.open,
                     high: d.high,

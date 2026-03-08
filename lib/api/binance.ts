@@ -74,7 +74,7 @@ export async function getKlines(symbol: string, interval: string = '1m', limit: 
 
     // Binance response format: [ [time, open, high, low, close, volume, ...], ... ]
     // Time from Binance is in ms, Lightweight Charts expects seconds (for UTCTimestamp) or just distinct numbers
-    return data.map((d: any) => ({
+    return data.map((d: [number, string, string, string, string, string, ...unknown[]]) => ({
         time: d[0] / 1000,
         open: parseFloat(d[1]),
         high: parseFloat(d[2]),

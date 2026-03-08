@@ -65,7 +65,7 @@ export const ChartAnalysisPanel: React.FC<Props> = ({ symbol, lang, apiEndpoint 
                 const data = await res.json();
                 if (!data || data.length === 0) { setIsLoading(false); return; }
 
-                const formatted: CandleData[] = data.map((d: any) => ({
+                const formatted: CandleData[] = data.map((d: { time: number; open: number; high: number; low: number; close: number; volume: number }) => ({
                     time: d.time,
                     open: Number(d.open),
                     high: Number(d.high),

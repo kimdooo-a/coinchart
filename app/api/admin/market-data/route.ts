@@ -23,7 +23,7 @@ export async function GET() {
                 const allTickers = await binanceRes.json();
 
                 // Create a Map for O(1) lookup
-                const tickerMap = new Map<string, string>(allTickers.map((t: any) => [t.symbol, t.price]));
+                const tickerMap = new Map<string, string>(allTickers.map((t: { symbol: string; price: string }) => [t.symbol, t.price]));
 
                 for (const coin of SUPPORTED_COINS) {
                     const pair = `${coin.symbol}USDT`;

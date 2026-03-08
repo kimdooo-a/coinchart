@@ -55,7 +55,7 @@ export const StockAnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
                 }
 
                 // Map to CandleData
-                const formatted: CandleData[] = data.map((d: any) => ({
+                const formatted: CandleData[] = data.map((d: { time: number; open: number; high: number; low: number; close: number; volume: number }) => ({
                     time: d.time, // Already in seconds from API (verified in route.ts)
                     open: Number(d.open),
                     high: Number(d.high),

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
 import { generateHTML } from '@tiptap/html';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
@@ -15,11 +15,13 @@ interface BlogPostContentProps {
 }
 
 export default function BlogPostContent({ content }: BlogPostContentProps) {
+  const contentRef = useRef<HTMLDivElement>(null);
+
   const html = useMemo(() => {
     if (!content || !content.type) return '';
 
     try {
-      return generateHTML(
+      let rawHtml = generateHTML(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         content as any,
         [
@@ -29,25 +31,69 @@ export default function BlogPostContent({ content }: BlogPostContentProps) {
           CodeBlockLowlight.configure({ lowlight }),
         ]
       );
+
+      // heading에 ID 부여 (TOC와 동일한 카운팅 로직: h2, h3만)
+      let idx = 0;
+      rawHtml = rawHtml.replace(/<(h[23])([^>]*)>/g, (_match, tag, attrs) => {
+        const id = `heading-${idx}`;
+        idx++;
+        return `<${tag}${attrs} id="${id}">`;
+      });
+
+      return rawHtml;
     } catch (err) {
       console.error('HTML 변환 오류:', err);
       return '<p>콘텐츠를 표시할 수 없습니다.</p>';
     }
   }, [content]);
 
+  // 코드 블록에 복사 버튼 동적 삽입
+  useEffect(() => {
+    const container = contentRef.current;
+    if (!container) return;
+
+    const preBlocks = container.querySelectorAll('pre');
+    preBlocks.forEach((pre) => {
+      // 이미 버튼이 있으면 스킵
+      if (pre.querySelector('.code-copy-btn')) return;
+
+      pre.style.position = 'relative';
+
+      const btn = document.createElement('button');
+      btn.className = 'code-copy-btn absolute top-2 right-2 px-2 py-1 text-xs bg-white/10 hover:bg-white/20 rounded text-gray-400 transition-colors';
+      btn.textContent = 'Copy';
+
+      btn.addEventListener('click', () => {
+        const code = pre.querySelector('code');
+        const text = code?.textContent || pre.textContent || '';
+        navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = 'Copied!';
+          setTimeout(() => {
+            btn.textContent = 'Copy';
+          }, 2000);
+        });
+      });
+
+      pre.appendChild(btn);
+    });
+  }, [html]);
+
   return (
     <div
+      ref={contentRef}
       className="prose prose-invert prose-lg max-w-none
         prose-headings:text-white prose-headings:font-bold
-        prose-p:text-gray-300 prose-p:leading-relaxed
+        prose-headings:mt-8 prose-headings:mb-4
+        prose-h2:text-2xl prose-h3:text-xl
+        prose-p:text-gray-300 prose-p:leading-[1.8]
         prose-a:text-primary prose-a:no-underline hover:prose-a:underline
         prose-strong:text-white
         prose-code:text-primary prose-code:bg-white/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded
-        prose-pre:bg-black/60 prose-pre:border prose-pre:border-white/10
+        prose-pre:bg-black/60 prose-pre:border prose-pre:border-white/10 prose-pre:relative
         prose-blockquote:border-l-primary prose-blockquote:text-gray-400
         prose-img:rounded-xl prose-img:border prose-img:border-white/10
         prose-hr:border-white/10
-        prose-li:text-gray-300"
+        prose-li:text-gray-300 prose-li:leading-[1.8]"
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );

@@ -40,7 +40,7 @@ export const StockSectorPerformance: React.FC = () => {
                     const json = await res.json();
                     if (!json || json.length < 2) return null;
 
-                    const closes = json.map((d: any) => d.close);
+                    const closes = json.map((d: { close: number }) => d.close);
                     const currentPrice = closes[closes.length - 1];
                     const prevPrice = closes[closes.length - 2];
                     const change = ((currentPrice - prevPrice) / prevPrice) * 100;

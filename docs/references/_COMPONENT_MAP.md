@@ -61,17 +61,26 @@
 
 | 컴포넌트 | 사용 페이지 | lib 의존성 | 컴포넌트 의존성 |
 |----------|-----------|------------|----------------|
-| `BlogPostCard` | `app/blog/page.tsx` | `context/LanguageContext` | 없음 |
-| `BlogPostList` | `app/blog/page.tsx`, `app/blog/category/`, `app/blog/tag/` | `context/LanguageContext` | `BlogPostCard` |
+| `BlogPageClient` | `app/blog/page.tsx` (서버) | `context/LanguageContext`, `lib/translations` | `BlogPostList`, `BlogCategoryFilter`, `BlogSearchBar`, `BlogSidebar` |
+| `CategoryPageClient` | `app/blog/category/[category]/page.tsx` (서버) | `context/LanguageContext`, `lib/translations` | `BlogPostList` |
+| `TagPageClient` | `app/blog/tag/[tag]/page.tsx` (서버) | `context/LanguageContext`, `lib/translations` | `BlogPostList` |
+| `BlogPostCard` | `BlogPageClient` | `context/LanguageContext` | 없음 |
+| `BlogPostList` | `BlogPageClient`, `CategoryPageClient`, `TagPageClient` | `context/LanguageContext` | `BlogPostCard` |
 | `BlogPostContent` | `app/blog/[slug]/BlogPostDetail.tsx` | `@tiptap/html`, `lowlight` | 없음 |
-| `BlogCategoryFilter` | `app/blog/page.tsx` | `context/LanguageContext` | 없음 |
+| `BlogCategoryFilter` | `BlogPageClient` | `context/LanguageContext` | 없음 |
 | `BlogTagBadge` | `app/blog/[slug]/BlogPostDetail.tsx` | 없음 | 없음 |
-| `BlogSearchBar` | `app/blog/page.tsx` | `context/LanguageContext` | 없음 |
-| `BlogSidebar` | `app/blog/page.tsx` | `context/LanguageContext` | 없음 |
+| `BlogSearchBar` | `BlogPageClient` | `context/LanguageContext` | 없음 |
+| `BlogSidebar` | `BlogPageClient` | `context/LanguageContext` | 없음 |
 | `BlogRelatedPosts` | `app/blog/[slug]/BlogPostDetail.tsx` | `context/LanguageContext` | 없음 |
 | `BlogShareButtons` | `app/blog/[slug]/BlogPostDetail.tsx` | `context/LanguageContext` | 없음 |
 | `BlogTableOfContents` | `app/blog/[slug]/BlogPostDetail.tsx` | `context/LanguageContext` | 없음 |
 | `BlogComments` | `app/blog/[slug]/BlogPostDetail.tsx` | `context/LanguageContext` | 없음 (Giscus 외부 스크립트) |
+
+### SEO
+
+| 컴포넌트 | 사용 페이지 | lib 의존성 | 컴포넌트 의존성 |
+|----------|-----------|------------|----------------|
+| `JsonLd` | `app/layout.tsx`, `app/blog/[slug]/page.tsx` | `lib/seo/json-ld` | 없음 |
 
 ### Blog Editor
 
@@ -139,10 +148,10 @@
 | `app/signal/page.tsx` | `WhaleAlert` |
 | `app/portfolio/page.tsx` | `TradeModal` |
 | `app/secure-memo/page.tsx` | `MemoCard`, `MemoCreateModal`, `MemoUnlockModal`, `MemoViewModal` |
-| `app/blog/page.tsx` | `BlogPostList`, `BlogCategoryFilter`, `BlogSearchBar`, `BlogSidebar` |
-| `app/blog/[slug]/page.tsx` | `BlogPostContent`, `BlogTagBadge`, `BlogShareButtons`, `BlogRelatedPosts`, `BlogTableOfContents` |
-| `app/blog/category/[category]/page.tsx` | `BlogPostList` |
-| `app/blog/tag/[tag]/page.tsx` | `BlogPostList` |
+| `app/blog/page.tsx` | `BlogPageClient` → `BlogPostList`, `BlogCategoryFilter`, `BlogSearchBar`, `BlogSidebar` |
+| `app/blog/[slug]/page.tsx` | `JsonLd`, `BlogPostDetail` → `BlogPostContent`, `BlogTagBadge`, `BlogShareButtons`, `BlogRelatedPosts`, `BlogTableOfContents` |
+| `app/blog/category/[category]/page.tsx` | `CategoryPageClient` → `BlogPostList` |
+| `app/blog/tag/[tag]/page.tsx` | `TagPageClient` → `BlogPostList` |
 | `app/admin/blog/page.tsx` | 없음 (독립 구현) |
 | `app/admin/blog/new/page.tsx` | `BlogEditor` |
 | `app/admin/blog/edit/[id]/page.tsx` | `BlogEditor` |

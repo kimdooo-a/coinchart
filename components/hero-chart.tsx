@@ -1,6 +1,6 @@
 "use client";
 
-import { createChart, ColorType, CrosshairMode, IChartApi, CandlestickSeries } from "lightweight-charts";
+import { createChart, ColorType, CrosshairMode, IChartApi, CandlestickSeries, UTCTimestamp } from "lightweight-charts";
 import React, { useEffect, useRef } from "react";
 import { subscribeToKlines, CandleData } from "@/lib/api/binance";
 
@@ -77,7 +77,7 @@ export const HeroChart = () => {
                 if (!isMounted) return;
 
                 const candleData = klines.map((k) => ({
-                    time: k.time as any,
+                    time: k.time as UTCTimestamp,
                     open: k.open,
                     high: k.high,
                     low: k.low,
@@ -93,7 +93,7 @@ export const HeroChart = () => {
                         if (!isMounted || !chartRef.current) return;
 
                         candlestickSeries.update({
-                            time: data.time as any,
+                            time: data.time as UTCTimestamp,
                             open: data.open,
                             high: data.high,
                             low: data.low,

@@ -18,8 +18,8 @@ export function renderTemplate(ctx: RenderContext): { sections: { evidence: stri
     const template = TEMPLATES[ctx.action];
     const flags: string[] = [];
 
-    const safeReplace = (tpl: string, key: string, val: any) => {
-        const strVal = val !== undefined && val !== null ? String(val) : (DEFAULT_VALUES as any)[key] || "";
+    const safeReplace = (tpl: string, key: string, val: unknown) => {
+        const strVal = val !== undefined && val !== null ? String(val) : (DEFAULT_VALUES as Record<string, string>)[key] || "";
         return tpl.replace(new RegExp(`{${key}}`, 'g'), strVal);
     };
 
@@ -28,10 +28,10 @@ export function renderTemplate(ctx: RenderContext): { sections: { evidence: stri
         const keys = [
             'riseProb', 'dropProb', 'regime', 'strongFactors',
             'topSignals', 'riskNotes', 'watchNext', 'volatility', 'grade'
-        ];
+        ] as const;
 
         keys.forEach(k => {
-            processed = safeReplace(processed, k, (ctx as any)[k]);
+            processed = safeReplace(processed, k, (ctx as Record<string, unknown>)[k]);
         });
 
         const validated = validateText(processed);

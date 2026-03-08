@@ -24,7 +24,7 @@ export default function BlogPostCard({ post, index = 0 }: BlogPostCardProps) {
     >
       <Link
         href={`/blog/${post.slug}`}
-        className="group block h-full border border-white/10 rounded-xl overflow-hidden bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all duration-300"
+        className="group flex flex-col h-full border border-white/10 rounded-xl overflow-hidden bg-white/5 shadow-[0_2px_8px_rgba(0,0,0,0.3)] hover:bg-white/10 hover:border-white/20 hover:shadow-[0_8px_24px_rgba(0,0,0,0.4)] transition-all duration-300"
       >
         {/* 대표 이미지 */}
         {post.featured_image && (
@@ -39,7 +39,7 @@ export default function BlogPostCard({ post, index = 0 }: BlogPostCardProps) {
           </div>
         )}
 
-        <div className="p-5">
+        <div className="p-5 flex flex-col flex-1">
           {/* 카테고리 뱃지 */}
           {post.category && (
             <span
@@ -67,7 +67,7 @@ export default function BlogPostCard({ post, index = 0 }: BlogPostCardProps) {
           )}
 
           {/* 메타 정보 */}
-          <div className="flex items-center gap-4 text-xs text-gray-500">
+          <div className="flex items-center gap-4 text-xs text-gray-500 mt-auto">
             <span className="flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5" />
               {post.published_at

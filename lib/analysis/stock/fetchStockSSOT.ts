@@ -131,7 +131,7 @@ export async function fetchStockSSOT(
         // Transform to StockCandleData format
         // Sort ascending by time for analysis (oldest to newest)
         const candles: StockCandleData[] = data
-            .map((row: any) => ({
+            .map((row: { time: string | number; open: string | number; high: string | number; low: string | number; close: string | number; volume: string | number; symbol: string; currency?: string; source?: string }) => ({
                 time: Number(row.time),
                 open: Number(row.open),
                 high: Number(row.high),

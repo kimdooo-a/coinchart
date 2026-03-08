@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
         // The previous route mapped Binance data: time: d[0] / 1000 (seconds)
 
         const formatted = data
-            .map((d: any) => ({
+            .map((d: { date: string; open: string | number; high: string | number; low: string | number; close: string | number; volume: string | number }) => ({
                 time: new Date(d.date).getTime() / 1000,
                 open: Number(d.open),
                 high: Number(d.high),
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
                 close: Number(d.close),
                 volume: Number(d.volume),
             }))
-            .sort((a: any, b: any) => a.time - b.time);
+            .sort((a, b) => a.time - b.time);
 
         return NextResponse.json(formatted, {
             headers: {

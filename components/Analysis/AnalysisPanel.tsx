@@ -66,7 +66,7 @@ export const AnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
                 }
 
                 // Map to CandleData (API returns time in seconds)
-                const formatted: CandleData[] = data.map((d: any) => ({
+                const formatted: CandleData[] = data.map((d: { time: number; open: number; high: number; low: number; close: number; volume: number }) => ({
                     time: d.time, // Already in seconds from API
                     open: Number(d.open),
                     high: Number(d.high),

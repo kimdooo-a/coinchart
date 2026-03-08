@@ -31,7 +31,7 @@ export default function RSIHeatmap() {
                     }
                     const json = await res.json();
                     // API Route returns formatted data: { time, open, high, low, close, volume }
-                    const closes = json.map((k: any) => k.close);
+                    const closes = json.map((k: { close: number }) => k.close);
                     const rsiArr = calculateRSI(closes, 14);
                     // Get last valid RSI
                     const currentRSI = rsiArr[rsiArr.length - 1] || 50;

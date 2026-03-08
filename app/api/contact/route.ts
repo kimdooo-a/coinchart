@@ -60,10 +60,10 @@ ${message}
             { status: 200 }
         );
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Email send error:', error);
         return NextResponse.json(
-            { message: 'Failed to send email', error: error.message },
+            { message: 'Failed to send email', error: (error as Error).message },
             { status: 500 }
         );
     }

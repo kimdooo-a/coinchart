@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
         const limit = body.limit || 2000; // Default limit for market data
         const target = body.target || 'all'; // 'all', 'crypto', 'stock', 'news'
 
-        const results: any = {
+        const results: Record<string, { status: string; deleted: number; message?: string }> = {
             crypto: { status: 'skipped', deleted: 0 },
             stock: { status: 'skipped', deleted: 0 },
             news: { status: 'skipped', deleted: 0 }
@@ -128,8 +128,8 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({ success: true, results });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Cleanup error:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: (error as Error).message }, { status: 500 });
     }
 }

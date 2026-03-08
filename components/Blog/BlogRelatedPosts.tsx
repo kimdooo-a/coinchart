@@ -24,7 +24,7 @@ export default function BlogRelatedPosts({ posts }: BlogRelatedPostsProps) {
           <Link
             key={post.id}
             href={`/blog/${post.slug}`}
-            className="group border border-white/10 rounded-xl overflow-hidden bg-white/5 hover:bg-white/10 transition-all"
+            className="group border border-white/10 rounded-xl overflow-hidden bg-white/5 shadow-[0_2px_8px_rgba(0,0,0,0.3)] hover:bg-white/10 hover:shadow-[0_8px_24px_rgba(0,0,0,0.4)] transition-all duration-300"
           >
             {post.featured_image && (
               <div className="relative aspect-[16/9] overflow-hidden">

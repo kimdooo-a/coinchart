@@ -10,8 +10,8 @@ export async function GET() {
         const { data: { users }, error } = await supabase.auth.admin.listUsers();
         if (error) throw error;
         return NextResponse.json({ users });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (error: unknown) {
+        return NextResponse.json({ error: (error as Error).message }, { status: 500 });
     }
 }
 
@@ -22,7 +22,7 @@ export async function DELETE(req: Request) {
         const { error } = await supabase.auth.admin.deleteUser(userId);
         if (error) throw error;
         return NextResponse.json({ success: true });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (error: unknown) {
+        return NextResponse.json({ error: (error as Error).message }, { status: 500 });
     }
 }

@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
 
         // Format and sort ascending
         const formatted = data
-            .map((d: any) => ({
+            .map((d: { time: string | number; open: string | number; high: string | number; low: string | number; close: string | number; volume: string | number }) => ({
                 time: Number(d.time), // Ensure number
                 open: Number(d.open),
                 high: Number(d.high),

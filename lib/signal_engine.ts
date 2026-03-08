@@ -32,7 +32,7 @@ async function fetchCandles(symbol: string, interval: string = '1h', limit: numb
         const data = await res.json();
         // API Route returns formatted data: { time, open, high, low, close, volume }
         if (!Array.isArray(data)) return [];
-        return data.map((d: any) => ({
+        return data.map((d: { time: number; open: number; high: number; low: number; close: number; volume: number }) => ({
             close: d.close,
             high: d.high,
             low: d.low,

@@ -9,6 +9,9 @@ import { detectRegime } from '@/lib/probability/regime';
 import { analyzeMultiTimeframe, getMTFWeightMultiplier, MTFResult } from './mtf';
 import { analyzeFractalPattern, FractalAnalysisResult } from '@/lib/fractal_engine';
 import { CandleData } from '@/lib/api/binance';
+import { ProbabilityResult, ConfidenceResult } from '@/types/probability';
+import { BacktestMetrics } from '@/types/backtest';
+import { ExplanationOutput } from '@/types/explanation';
 
 export interface AnalysisInput {
     symbol: string;
@@ -32,12 +35,12 @@ export interface AnalysisInput {
 }
 
 export interface AnalysisResult {
-    probability: any;
-    confidence: any;
-    backtest: any;
-    explanation: any;
+    probability: (ProbabilityResult & { regime?: string }) | null;
+    confidence: ConfidenceResult | null;
+    backtest: (BacktestMetrics & { rollingWindow?: unknown }) | null;
+    explanation: ExplanationOutput | null;
     mtf?: MTFResult;
-    fractal?: any;
+    fractal?: FractalAnalysisResult | null;
     uiState: 'loading' | 'insufficient' | 'ok' | 'pro-locked';
     flags: string[];
     reasons: string[];
@@ -123,7 +126,7 @@ export function performAnalysis(input: AnalysisInput): AnalysisResult {
         }
         // 백테스트 승률을 historicalAccuracy로 피드백 (이미 확률 엔진에 전달됨)
         // 다음 분석 시 실측값이 반영되도록 backtest 결과에 포함
-        (backtest as any).rollingWindow = rollingResult;
+        (backtest as BacktestMetrics & { rollingWindow?: unknown }).rollingWindow = rollingResult;
     }
 
     // 5. Generate Explanation

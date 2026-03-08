@@ -16,10 +16,10 @@ interface BlogCommentsProps {
  * 2. 아래 REPO, REPO_ID, CATEGORY_ID를 실제 값으로 교체
  */
 const GISCUS_CONFIG = {
-  repo: 'user/repo' as `${string}/${string}`,
-  repoId: '',
-  category: 'Blog Comments',
-  categoryId: '',
+  repo: 'kimdooo-a/coinchart' as `${string}/${string}`,
+  repoId: 'R_kgDOQoFNbg',
+  category: 'General',
+  categoryId: 'DIC_kwDOQoFNbs4C38fP',
 };
 
 export default function BlogComments({ slug }: BlogCommentsProps) {

@@ -8,6 +8,9 @@ import { generateExplanation } from '@/lib/explanation/generator';
 import { IndicatorSignal } from '@/types/probability';
 import { Trade } from '@/types/backtest';
 import { detectRegime } from '@/lib/probability/regime';
+import { ProbabilityResult, ConfidenceResult } from '@/types/probability';
+import { BacktestMetrics } from '@/types/backtest';
+import { ExplanationOutput } from '@/types/explanation';
 
 export interface CryptoAnalysisInput {
     symbol: string;
@@ -29,10 +32,10 @@ export interface CryptoAnalysisInput {
 }
 
 export interface CryptoAnalysisResult {
-    probability: any;
-    confidence: any;
-    backtest: any;
-    explanation: any;
+    probability: (ProbabilityResult & { regime?: string }) | null;
+    confidence: ConfidenceResult | null;
+    backtest: BacktestMetrics | null;
+    explanation: ExplanationOutput | null;
     uiState: 'loading' | 'insufficient' | 'ok' | 'pro-locked' | 'error';
     dataSource: 'supabase';
 }

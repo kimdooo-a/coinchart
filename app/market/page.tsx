@@ -19,6 +19,20 @@ type FNGData = {
     time_until_update: string;
 };
 
+type BinanceTicker = {
+    symbol: string;
+    priceChangePercent: string;
+};
+
+type KlineCandle = {
+    time: number;
+    open: number;
+    high: number;
+    low: number;
+    close: number;
+    volume: number;
+};
+
 type CoinMood = {
     symbol: string;
     score: number;
@@ -132,7 +146,7 @@ export default function MarketPage() {
                         const data = await res.json();
                         // API Route returns formatted data: { time, open, high, low, close, volume }
                         // Map to simplified object for engine (time is in seconds, convert to ms)
-                        const candles = data.map((d: any) => ({
+                        const candles: KlineCandle[] = data.map((d: KlineCandle) => ({
                             time: d.time * 1000, // Convert seconds to ms for compatibility
                             open: d.open,
                             high: d.high,
@@ -141,7 +155,7 @@ export default function MarketPage() {
                             volume: d.volume
                         }));
 
-                        const closes = candles.map((c: any) => c.close);
+                        const closes = candles.map((c: KlineCandle) => c.close);
 
                         // 1. RSI & Trend (Using last 30 data points)
                         const recentCloses = closes.slice(-30);
@@ -166,9 +180,9 @@ export default function MarketPage() {
                 const techData = await Promise.all(klinePromises);
                 const techMap = new Map(techData.map(item => [item.symbol, item]));
 
-                const btc = tickers.find((t: any) => t.symbol === 'BTCUSDT');
+                const btc = tickers.find((t: BinanceTicker) => t.symbol === 'BTCUSDT');
                 const btcChange = btc ? parseFloat(btc.priceChangePercent) : 0;
-                const alts = tickers.filter((t: any) => t.symbol !== 'BTCUSDT');
+                const alts = tickers.filter((t: BinanceTicker) => t.symbol !== 'BTCUSDT');
 
                 // --- CALCULATION LOGIC ---
                 let newBtcScore = 50;
@@ -178,7 +192,7 @@ export default function MarketPage() {
                 if (basis === 'daily') {
                     // [Daily Mode] - Mixed Logic
 
-                    const calculateSmartScore = (ticker: any, baseScore: number) => {
+                    const calculateSmartScore = (ticker: BinanceTicker, baseScore: number) => {
                         const symbol = ticker.symbol;
                         const change = parseFloat(ticker.priceChangePercent);
                         const tech = techMap.get(symbol);
@@ -222,8 +236,8 @@ export default function MarketPage() {
 
                     // Alt Score Aggregate
                     if (alts.length > 0) {
-                        const avgAltChange = alts.reduce((acc: number, t: any) => acc + parseFloat(t.priceChangePercent), 0) / alts.length;
-                        const deviation = (avgAltChange - btcChange) * 2;
+                        const avgAltChange = alts.reduce((acc: number, t: BinanceTicker) => acc + parseFloat(t.priceChangePercent), 0) / alts.length;
+                        const deviation: number = (avgAltChange - btcChange) * 2;
                         let rawAltScore = officialScore + deviation;
 
                         let techBonus = 0;
@@ -238,7 +252,7 @@ export default function MarketPage() {
 
                     // Individual Coins
                     if (Array.isArray(tickers)) {
-                        newCoinMoods = tickers.map((t: any) => {
+                        newCoinMoods = tickers.map((t: BinanceTicker) => {
                             const score = calculateSmartScore(t, officialScore);
                             const tech = techMap.get(t.symbol);
                             const fractal = tech ? tech.fractalRes : null;
@@ -270,12 +284,12 @@ export default function MarketPage() {
 
                     newBtcScore = calculateRealtimeScore(btcChange);
                     if (alts.length > 0) {
-                        const avgAltChange = alts.reduce((acc: number, t: any) => acc + parseFloat(t.priceChangePercent), 0) / alts.length;
+                        const avgAltChange = alts.reduce((acc: number, t: BinanceTicker) => acc + parseFloat(t.priceChangePercent), 0) / alts.length;
                         newAltScore = calculateRealtimeScore(avgAltChange);
                     }
 
                     if (Array.isArray(tickers)) {
-                        newCoinMoods = tickers.map((t: any) => {
+                        newCoinMoods = tickers.map((t: BinanceTicker) => {
                             const change = parseFloat(t.priceChangePercent);
                             const score = calculateRealtimeScore(change);
                             return {

@@ -52,11 +52,11 @@ export function MemoUnlockModal({ isOpen, memo, onClose, onUnlock, t }: MemoUnlo
 
             setPassword('')
             onUnlock(memo, decrypted.content)
-        } catch (err: any) {
-            if (err.message === 'DECRYPTION_FAILED') {
+        } catch (err: unknown) {
+            if ((err as Error).message === 'DECRYPTION_FAILED') {
                 setError(t.decryptionFailed)
             } else {
-                setError(err.message || 'Decryption failed')
+                setError((err as Error).message || 'Decryption failed')
             }
         } finally {
             setIsLoading(false)

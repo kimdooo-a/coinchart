@@ -98,8 +98,8 @@ export function MemoViewModal({ isOpen, memo, decryptedContent, onClose, onDelet
             setIsEditing(false)
             onUpdate()
             onClose()
-        } catch (err: any) {
-            setError(err.message || 'Failed to save memo')
+        } catch (err: unknown) {
+            setError((err as Error).message || 'Failed to save memo')
         } finally {
             setIsLoading(false)
         }
