@@ -63,3 +63,4 @@ __pycache__/
 # 기타
 *.csv
 project_structure.txt
+supabase/.temp/
