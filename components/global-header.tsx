@@ -56,7 +56,6 @@ export default function GlobalHeader() {
             label: t.menu.info,
             items: [
                 { label: t.menu.news, href: '/news' },
-                { label: t.menu.blog, href: '/blog' },
                 { label: t.menu.calendar, href: '/calendar' },
                 { label: t.menu.history, href: '/history' },
             ]
@@ -128,6 +127,17 @@ export default function GlobalHeader() {
                                     </div>
                                 </li>
                             ))}
+
+                            {/* 블로그 독립 메뉴 */}
+                            <li>
+                                <Link
+                                    href="/blog"
+                                    className="px-3 py-2 text-sm font-medium transition-all hover:text-primary hover:bg-white/5 rounded-full"
+                                    style={{ color: colors.text }}
+                                >
+                                    {t.menu.blog}
+                                </Link>
+                            </li>
                         </ul>
                     </nav>
                 </div>
@@ -194,6 +204,15 @@ export default function GlobalHeader() {
                             </div>
                         </div>
                     ))}
+
+                    {/* 블로그 독립 메뉴 */}
+                    <Link
+                        href="/blog"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="text-lg font-semibold p-2 text-white hover:text-primary hover:bg-white/5 rounded-lg transition-colors border-l-2 border-primary pl-4"
+                    >
+                        {t.menu.blog}
+                    </Link>
                 </div>
             )}
         </header>
