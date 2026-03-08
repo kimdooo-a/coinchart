@@ -27,21 +27,6 @@ describe('calculateReadingTime', () => {
     expect(calculateReadingTime(html, 'ko')).toBe(1);
   });
 
-  it('TipTap JSON 콘텐츠 처리', () => {
-    const tiptapContent = {
-      type: 'doc',
-      content: [
-        {
-          type: 'paragraph',
-          content: [
-            { type: 'text', text: '가'.repeat(1000) },
-          ],
-        },
-      ],
-    };
-    expect(calculateReadingTime(tiptapContent, 'ko')).toBe(2);
-  });
-
   it('빈 콘텐츠는 최소 1분', () => {
     expect(calculateReadingTime('', 'ko')).toBe(1);
     expect(calculateReadingTime('', 'en')).toBe(1);

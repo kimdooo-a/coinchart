@@ -78,17 +78,18 @@ export default function BlogEditor({ content, onChange }: BlogEditorProps) {
   const handleViewModeChange = useCallback((mode: ViewMode) => {
     if (!editor) return;
 
-    if (mode === 'html') {
-      // WYSIWYG → HTML: 현재 에디터 HTML을 textarea에 반영
-      setHtmlSource(editor.getHTML());
-    } else if (viewMode === 'html' && mode !== 'html') {
-      // HTML → 다른 모드: textarea 내용을 에디터에 반영
-      editor.commands.setContent(htmlSource);
-      onChange(htmlSource);
-    }
-
-    setViewMode(mode);
-  }, [editor, viewMode, htmlSource, onChange]);
+    setViewMode((prev) => {
+      if (mode === 'html') {
+        // WYSIWYG/Preview → HTML: 현재 에디터 HTML을 textarea에 반영
+        setHtmlSource(editor.getHTML());
+      } else if (prev === 'html') {
+        // HTML → 다른 모드: textarea 내용을 에디터에 반영
+        editor.commands.setContent(htmlSource);
+        onChange(htmlSource);
+      }
+      return mode;
+    });
+  }, [editor, htmlSource, onChange]);
 
   // HTML 소스 수정 시
   const handleHtmlSourceChange = useCallback((newHtml: string) => {

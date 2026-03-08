@@ -23,7 +23,8 @@ export interface BlogPost {
   category_id: string | null;
   title: string;
   slug: string;
-  content: string; // HTML
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  content: string | Record<string, any>; // HTML (마이그레이션 전 레거시 JSON 호환)
   excerpt: string | null;
   featured_image: string | null;
   status: 'draft' | 'published' | 'archived';

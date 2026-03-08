@@ -1,16 +1,17 @@
 // 블로그 유틸리티 함수
 
-import { extractTextFromHtml } from '@/lib/blog-html-utils';
+import { extractText } from '@/lib/blog-html-utils';
 
 /**
  * 읽기 시간 계산 (분)
  * 한국어: 분당 약 500자, 영어: 분당 약 200단어
+ * content는 HTML 문자열 또는 레거시 TipTap JSON 모두 지원
  */
 export function calculateReadingTime(
-  content: string,
+  content: string | Record<string, unknown>,
   lang: 'ko' | 'en' = 'ko'
 ): number {
-  const text = extractTextFromHtml(content);
+  const text = extractText(content);
 
   if (lang === 'ko') {
     // 한국어: 글자 수 기반

@@ -2,10 +2,10 @@
 
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
-import { extractHeadingsFromHtml } from '@/lib/blog-html-utils';
+import { extractHeadingsFromHtml, normalizeContent } from '@/lib/blog-html-utils';
 
 interface BlogTableOfContentsProps {
-  content: string;
+  content: string | Record<string, unknown>;
 }
 
 export default function BlogTableOfContents({ content }: BlogTableOfContentsProps) {
@@ -14,7 +14,9 @@ export default function BlogTableOfContents({ content }: BlogTableOfContentsProp
 
   const headings = useMemo(() => {
     if (!content) return [];
-    return extractHeadingsFromHtml(content);
+    const htmlStr = normalizeContent(content);
+    if (!htmlStr) return [];
+    return extractHeadingsFromHtml(htmlStr);
   }, [content]);
 
   // IntersectionObserver로 현재 보이는 heading 추적

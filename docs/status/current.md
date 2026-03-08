@@ -2,16 +2,17 @@
 
 | 항목 | 값 |
 |------|-----|
-| **마지막 세션** | 2026-03-08 (세션 4) |
-| **작업 내용** | Giscus 댓글 활성화 + Vitest 테스트 도입 + any 타입 정리 |
+| **마지막 세션** | 2026-03-08 (세션 5) |
+| **작업 내용** | 블로그 에디터 티스토리급 강화 + HTML 저장 전환 |
 | **브랜치** | main |
 | **빌드 상태** | ✅ 성공 (Next.js 16.0.7 Turbopack) |
-| **마지막 커밋** | 2589111 (push 완료) |
+| **마지막 커밋** | 미커밋 (세션 종료 시 커밋 예정) |
 
 ## 최근 작업 이력
 
 | 날짜 | 작업 | 결과 |
 |------|------|------|
+| 2026-03-08 | 에디터 강화 + HTML 전환 (세션 5) | TipTap 확장 10개, HTML 저장, 자동저장, 뷰모드, 전체화면, DOMPurify |
 | 2026-03-08 | Giscus + Vitest + any 정리 (세션 4) | Giscus 활성화, Vitest 20개 테스트, any 35개→1개 (핵심 코드) |
 | 2026-03-08 | 블로그 SEO + 디자인 (세션 3) | SEO 인프라/서버-클라이언트 분리/JSON-LD/카드 그림자/TOC 하이라이팅/코드 복사 |
 | 2026-03-08 | 블로그 확장 (세션 2) | RSS/sitemap/읽기시간/댓글/Admin링크/네비독립배치/시드3글 |
@@ -29,6 +30,7 @@
 | 2 | 2026-03-08 | 블로그 확장 (Phase 5) | [로그](../logs/2026-03.md) | [handover](../handover/2026-03-08-session2-blog-extend.md) |
 | 3 | 2026-03-08 | 블로그 SEO 최적화 + 디자인 강화 | [로그](../logs/2026-03.md) | [handover](../handover/2026-03-08-session3-blog-seo.md) |
 | 4 | 2026-03-08 | Giscus + Vitest + any 타입 정리 | [로그](../logs/2026-03.md) | [handover](../handover/2026-03-08-session4-quality.md) |
+| 5 | 2026-03-08 | 블로그 에디터 강화 + HTML 전환 | [로그](../logs/2026-03.md) | [handover](../handover/2026-03-08-session5-editor-upgrade.md) |
 
 ## 미해결 사항
 
@@ -37,6 +39,7 @@
 - ~~Giscus 댓글 활성화 필요~~ → 완료 (2026-03-08, GitHub Discussions + repoId/categoryId 설정)
   - **수동 작업 필요**: https://github.com/apps/giscus 에서 앱 설치
 - ~~테스트 프레임워크 미도입~~ → 완료 (Vitest 20개 테스트, indicators + blog-utils)
-- ~~any 타입 78회 사용~~ → 핵심 코드 1개 (BlogPostContent TipTap 호환), scripts/ 45개 (낮은 우선순위)
+- ~~any 타입 78회 사용~~ → 핵심 코드 1개 (BlogPost.content 레거시 호환), scripts/ 45개 (낮은 우선순위)
 - 대형 파일 리팩토링 필요 (analysis/[symbol]/page.tsx 807줄)
+- DB content 컬럼 이미 text 타입 (마이그레이션 불필요), 데이터도 HTML 형식 확인 완료
 - ~~kdy-addon/monet-registry-main (1.7GB) 정리 필요~~ → 완료 (2026-02-28)

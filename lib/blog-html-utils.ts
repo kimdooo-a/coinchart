@@ -51,3 +51,39 @@ export function addHeadingIds(html: string): string {
 export function extractTextFromHtml(html: string): string {
   return html.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, ' ');
 }
+
+/**
+ * TipTap JSON에서 텍스트 재귀 추출 (마이그레이션 호환용)
+ */
+function extractTextFromTiptapJson(node: Record<string, unknown>): string {
+  if (node.type === 'text' && typeof node.text === 'string') {
+    return node.text;
+  }
+  if (Array.isArray(node.content)) {
+    return (node.content as Record<string, unknown>[])
+      .map(extractTextFromTiptapJson)
+      .join(' ');
+  }
+  return '';
+}
+
+/**
+ * 콘텐츠(HTML 문자열 또는 레거시 TipTap JSON)에서 텍스트 추출
+ * DB 마이그레이션 완료 전 호환용
+ */
+export function extractText(content: string | Record<string, unknown>): string {
+  if (typeof content === 'string') {
+    return extractTextFromHtml(content);
+  }
+  return extractTextFromTiptapJson(content);
+}
+
+/**
+ * 콘텐츠를 HTML 문자열로 정규화 (마이그레이션 호환용)
+ * - 이미 string이면 그대로 반환
+ * - TipTap JSON이면 빈 문자열 반환 (클라이언트에서 처리)
+ */
+export function normalizeContent(content: string | Record<string, unknown>): string {
+  if (typeof content === 'string') return content;
+  return '';
+}

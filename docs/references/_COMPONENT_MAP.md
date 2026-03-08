@@ -66,14 +66,14 @@
 | `TagPageClient` | `app/blog/tag/[tag]/page.tsx` (서버) | `context/LanguageContext`, `lib/translations` | `BlogPostList` |
 | `BlogPostCard` | `BlogPageClient` | `context/LanguageContext` | 없음 |
 | `BlogPostList` | `BlogPageClient`, `CategoryPageClient`, `TagPageClient` | `context/LanguageContext` | `BlogPostCard` |
-| `BlogPostContent` | `app/blog/[slug]/BlogPostDetail.tsx` | `@tiptap/html`, `lowlight` | 없음 |
+| `BlogPostContent` | `app/blog/[slug]/BlogPostDetail.tsx`, `BlogEditor` (미리보기) | `lib/blog-html-utils` | 없음 |
 | `BlogCategoryFilter` | `BlogPageClient` | `context/LanguageContext` | 없음 |
 | `BlogTagBadge` | `app/blog/[slug]/BlogPostDetail.tsx` | 없음 | 없음 |
 | `BlogSearchBar` | `BlogPageClient` | `context/LanguageContext` | 없음 |
 | `BlogSidebar` | `BlogPageClient` | `context/LanguageContext` | 없음 |
 | `BlogRelatedPosts` | `app/blog/[slug]/BlogPostDetail.tsx` | `context/LanguageContext` | 없음 |
 | `BlogShareButtons` | `app/blog/[slug]/BlogPostDetail.tsx` | `context/LanguageContext` | 없음 |
-| `BlogTableOfContents` | `app/blog/[slug]/BlogPostDetail.tsx` | `context/LanguageContext` | 없음 |
+| `BlogTableOfContents` | `app/blog/[slug]/BlogPostDetail.tsx` | `context/LanguageContext`, `lib/blog-html-utils` | 없음 |
 | `BlogComments` | `app/blog/[slug]/BlogPostDetail.tsx` | `context/LanguageContext` | 없음 (Giscus 외부 스크립트) |
 
 ### SEO
@@ -86,9 +86,11 @@
 
 | 컴포넌트 | 사용 페이지 | lib 의존성 | 컴포넌트 의존성 |
 |----------|-----------|------------|----------------|
-| `BlogEditor` | `app/admin/blog/new/`, `app/admin/blog/edit/` | `@tiptap/react`, `@tiptap/starter-kit`, `lowlight` | `EditorToolbar`, `EditorImageUpload` |
-| `EditorToolbar` | `BlogEditor` | `@tiptap/react` | 없음 |
+| `BlogEditor` | `app/admin/blog/new/`, `app/admin/blog/edit/` | `lib/blog-editor-extensions`, `@tiptap/react` | `EditorToolbar`, `EditorImageUpload`, `BlogPostContent` (미리보기 모드) |
+| `EditorToolbar` | `BlogEditor` | `@tiptap/react` | `ColorPicker` |
 | `EditorImageUpload` | `BlogEditor` | `@tiptap/react` | 없음 |
+| `ColorPicker` | `EditorToolbar` | 없음 | 없음 |
+| `useAutoSave` (훅) | `app/admin/blog/new/`, `app/admin/blog/edit/` | 없음 (localStorage) | 없음 |
 
 ### Common
 

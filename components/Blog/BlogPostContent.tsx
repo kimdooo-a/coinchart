@@ -1,10 +1,10 @@
 'use client';
 
 import { useMemo, useEffect, useRef } from 'react';
-import { addHeadingIds } from '@/lib/blog-html-utils';
+import { addHeadingIds, normalizeContent } from '@/lib/blog-html-utils';
 
 interface BlogPostContentProps {
-  content: string;
+  content: string | Record<string, unknown>;
 }
 
 export default function BlogPostContent({ content }: BlogPostContentProps) {
@@ -14,8 +14,10 @@ export default function BlogPostContent({ content }: BlogPostContentProps) {
     if (!content) return '';
 
     try {
+      const htmlStr = normalizeContent(content);
+      if (!htmlStr) return '<p>콘텐츠를 표시할 수 없습니다.</p>';
       // heading에 ID 부여 (TOC 연동)
-      return addHeadingIds(content);
+      return addHeadingIds(htmlStr);
     } catch (err) {
       console.error('HTML 처리 오류:', err);
       return '<p>콘텐츠를 표시할 수 없습니다.</p>';
