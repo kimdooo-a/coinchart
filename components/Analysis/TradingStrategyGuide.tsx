@@ -5,7 +5,14 @@ import React, { useState, useEffect } from 'react';
 interface Props {
     currentPrice: number;
     lang: 'en' | 'ko';
-    analysis: any; // Using 'any' for now to avoid circular dependency complex types, or better, define a subset type
+    analysis: {
+        winRate?: number;
+        recommendation: string;
+        priceLevels: {
+            support: number | number[];
+            resistance: number | number[];
+        };
+    };
 }
 
 type TradingStyle = 'trend' | 'reversal' | 'breakout';

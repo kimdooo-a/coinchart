@@ -24,7 +24,7 @@ export function generateStockSignals(candles: StockPriceData[]): {
     signals: IndicatorSignal[];
     adxValue?: number;
     bbWidth?: number;
-    rawIndicators?: any;
+    rawIndicators?: Record<string, number | number[]>;
 } {
     if (!candles || candles.length < 14) {
         return { signals: [] };

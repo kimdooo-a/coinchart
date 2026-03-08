@@ -234,7 +234,7 @@ export const StockChart: React.FC<Props> = ({
                 const res = await fetch(`/api/stock/history?symbol=${symbol}&limit=365`);
                 if (!res.ok) throw new Error('Failed to fetch stock history');
 
-                const data: any[] = await res.json(); // Explicit any to match downstream usage or define type
+                const data: { time: number; open: number; high: number; low: number; close: number; volume: number }[] = await res.json();
 
                 if (isCancelled) return;
                 if (!data || data.length === 0) {
