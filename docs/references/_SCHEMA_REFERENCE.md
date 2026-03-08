@@ -1,6 +1,6 @@
 # Schema Reference (Supabase)
 
-> 마지막 갱신: 2026-02-28
+> 마지막 갱신: 2026-03-08
 > 소스: `supabase/migrations/` SQL 파일 기반
 
 ## 테이블 목록
@@ -12,6 +12,10 @@
 | `news` | 뉴스 아카이브 (15일) | O | 20241214 |
 | `secure_memos` | 암호화 메모 | O | 20260114 |
 | `profiles` | 사용자 프로필 | - | trigger |
+| `blog_categories` | 블로그 카테고리 | O | 20260308 |
+| `blog_posts` | 블로그 포스트 | O | 20260308 |
+| `blog_tags` | 블로그 태그 | O | 20260308 |
+| `blog_post_tags` | 포스트-태그 다대다 | O | 20260308 |
 
 ---
 
@@ -122,6 +126,82 @@
 
 ---
 
+## blog_categories
+
+> 블로그 카테고리
+
+| 컬럼 | 타입 | 필수 | 기본값 | 설명 |
+|------|------|------|--------|------|
+| `id` | UUID | PK | gen_random_uuid() | |
+| `name_ko` | TEXT | O | - | 한국어 이름 |
+| `name_en` | TEXT | O | - | 영어 이름 |
+| `slug` | TEXT | O (UNIQUE) | - | URL slug |
+| `color` | TEXT | - | `#6366f1` | 표시 색상 |
+| `sort_order` | INTEGER | - | 0 | 정렬 순서 |
+| `created_at` | TIMESTAMPTZ | - | NOW() | |
+
+**RLS**: SELECT 공개, CUD는 service_role
+
+---
+
+## blog_posts
+
+> 블로그 포스트 (TipTap JSON 기반)
+
+| 컬럼 | 타입 | 필수 | 기본값 | 설명 |
+|------|------|------|--------|------|
+| `id` | UUID | PK | gen_random_uuid() | |
+| `author_id` | UUID | O (FK → auth.users) | - | 작성자 |
+| `category_id` | UUID | FK → blog_categories | - | 카테고리 |
+| `title` | TEXT | O | - | 제목 |
+| `slug` | TEXT | O (UNIQUE) | - | URL slug |
+| `content` | JSONB | O | `{}` | TipTap JSON |
+| `excerpt` | TEXT | - | - | 요약 |
+| `featured_image` | TEXT | - | - | 대표 이미지 URL |
+| `status` | TEXT | O | `draft` | `draft` / `published` / `archived` |
+| `language` | TEXT | O | `ko` | `ko` / `en` |
+| `meta_title` | TEXT | - | - | SEO 타이틀 |
+| `meta_description` | TEXT | - | - | SEO 설명 |
+| `view_count` | INTEGER | - | 0 | 조회수 |
+| `published_at` | TIMESTAMPTZ | - | - | 발행일시 |
+| `created_at` | TIMESTAMPTZ | - | NOW() | |
+| `updated_at` | TIMESTAMPTZ | - | NOW() | 자동 갱신 |
+| `search_vector` | tsvector | - | - | 전문 검색 벡터 |
+
+**인덱스**: status, slug, author, category, published_at DESC, search_vector (GIN)
+**RLS**: published만 공개, author_id 기반 CUD
+**트리거**: `updated_at` 자동 갱신, `search_vector` 자동 생성 (title + excerpt, simple 사전)
+
+---
+
+## blog_tags
+
+> 블로그 태그
+
+| 컬럼 | 타입 | 필수 | 기본값 | 설명 |
+|------|------|------|--------|------|
+| `id` | UUID | PK | gen_random_uuid() | |
+| `name` | TEXT | O (UNIQUE) | - | 태그 이름 |
+| `slug` | TEXT | O (UNIQUE) | - | URL slug |
+| `created_at` | TIMESTAMPTZ | - | NOW() | |
+
+**RLS**: SELECT 공개, CUD는 service_role
+
+---
+
+## blog_post_tags
+
+> 포스트-태그 다대다 연결
+
+| 컬럼 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `post_id` | UUID | PK (FK → blog_posts) | |
+| `tag_id` | UUID | PK (FK → blog_tags) | |
+
+**RLS**: SELECT 공개, INSERT/DELETE는 포스트 작성자만
+
+---
+
 ## RPC / 함수
 
 | 함수 | 설명 | 스케줄 |
@@ -129,6 +209,8 @@
 | `delete_old_market_prices()` | 3년 이상 된 market_prices 삭제 | 매일 03:00 UTC (pg_cron) |
 | `handle_new_user()` | 신규 사용자 프로필 자동 생성 | auth.users INSERT 트리거 |
 | `update_secure_memos_updated_at()` | 메모 수정 시 updated_at 갱신 | secure_memos UPDATE 트리거 |
+| `update_blog_posts_updated_at()` | 블로그 포스트 updated_at 갱신 | blog_posts UPDATE 트리거 |
+| `update_blog_posts_search_vector()` | 검색 벡터 자동 생성 (title+excerpt) | blog_posts INSERT/UPDATE 트리거 |
 
 ---
 

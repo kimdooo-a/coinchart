@@ -14,6 +14,7 @@ interface EngineInput {
     atrValue?: number;
     avgAtrValue?: number;
     bbWidth?: number;
+    mtfMultiplier?: number; // MTF 가중치 조정 계수 (상위 TF 일치/불일치)
 }
 
 export function calculateProbability(input: EngineInput): ProbabilityResult {
@@ -44,7 +45,14 @@ export function calculateProbability(input: EngineInput): ProbabilityResult {
         });
     });
 
-    const finalScore = totalWeight > 0 ? weightedSum / totalWeight : 0; // -100 to +100
+    let finalScore = totalWeight > 0 ? weightedSum / totalWeight : 0; // -100 to +100
+
+    // MTF 멀티플라이어 적용: 상위 타임프레임과의 정합성 반영
+    if (input.mtfMultiplier !== undefined && input.mtfMultiplier !== 1.0) {
+        finalScore *= input.mtfMultiplier;
+        // 범위 제한 (-100 ~ +100)
+        finalScore = Math.max(-100, Math.min(100, finalScore));
+    }
 
     // 2. Normalize to Probability (0 to 100)
     // Score -100 => 0% Rise (100% Drop)

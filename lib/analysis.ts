@@ -419,8 +419,9 @@ export function analyzeMarket(candles: CandleData[], options: AnalysisOptions = 
     }, (i, s) => s === 'BUY' ? (lang === 'ko' ? 'OBV 상승 추세' : 'OBV Uptrend') : s === 'SELL' ? (lang === 'ko' ? 'OBV 하락 추세' : 'OBV Downtrend') : t.neutral,
         (i) => obv[i]?.toFixed(0) ?? 'N/A');
 
-    // VWAP (가격 기준선)
-    const vwap = calculateVWAP(highs, lows, closes, volumes);
+    // VWAP (가격 기준선, 세션 리셋 적용)
+    const timestamps = candles.map(c => c.time);
+    const vwap = calculateVWAP(highs, lows, closes, volumes, timestamps, 'daily');
     analyzeIndicator('VWAP', (i) => {
         const curVWAP = vwap[i];
         const curPrice = closes[i];

@@ -33,13 +33,13 @@ export function detectRegime(input: RegimeInput): { regime: MarketRegime; reason
             if (plusDI !== undefined && minusDI !== undefined) {
                 if (plusDI > minusDI) {
                     return {
-                        regime: adx >= ADX_STRONG_THRESHOLD ? 'STRONG_UPTREND' : 'STRONG_UPTREND',
-                        reason: `ADX ${adx.toFixed(1)} + +DI(${plusDI.toFixed(1)}) > -DI(${minusDI.toFixed(1)}) → 상승 추세`
+                        regime: adx >= ADX_STRONG_THRESHOLD ? 'STRONG_UPTREND' : 'UPTREND',
+                        reason: `ADX ${adx.toFixed(1)} + +DI(${plusDI.toFixed(1)}) > -DI(${minusDI.toFixed(1)}) → ${adx >= ADX_STRONG_THRESHOLD ? '강한' : '중간'} 상승 추세`
                     };
                 } else {
                     return {
-                        regime: adx >= ADX_STRONG_THRESHOLD ? 'STRONG_DOWNTREND' : 'STRONG_DOWNTREND',
-                        reason: `ADX ${adx.toFixed(1)} + -DI(${minusDI.toFixed(1)}) > +DI(${plusDI.toFixed(1)}) → 하락 추세`
+                        regime: adx >= ADX_STRONG_THRESHOLD ? 'STRONG_DOWNTREND' : 'DOWNTREND',
+                        reason: `ADX ${adx.toFixed(1)} + -DI(${minusDI.toFixed(1)}) > +DI(${plusDI.toFixed(1)}) → ${adx >= ADX_STRONG_THRESHOLD ? '강한' : '중간'} 하락 추세`
                     };
                 }
             }

@@ -2,7 +2,7 @@
 
 > **이 파일은 kdyweb 스킬이 관리하는 단일 진실의 원천입니다.**
 > 수동 편집 시 계약 무결성이 깨질 수 있으므로 kdyweb을 통해 갱신하세요.
-> 생성일: 2026-02-20 | 최종 갱신: 2026-02-20 | 계약 버전: 2
+> 생성일: 2026-02-20 | 최종 갱신: 2026-03-08 | 계약 버전: 3
 
 ---
 
@@ -51,6 +51,13 @@
 | R-021 | /watchlist | 관심종목 | list | app/watchlist/page.tsx | RootLayout | 예 (미들웨어) | GNB(서비스>관심종목) | /analysis | meta | 🚧 개발중 |
 | R-022 | /privacy | 개인정보처리방침 | static | app/privacy/page.tsx | RootLayout | 아니오 | Footer(정보) | /terms | meta | 🚧 개발중 |
 | R-023 | /pricing | 요금제 | static | app/pricing/page.tsx | RootLayout | 아니오 | PremiumLock, /analysis/[symbol] | / | meta | 🚧 개발중 |
+| R-024 | /blog | 블로그 목록 | list | app/blog/page.tsx | RootLayout | 아니오 | GNB(정보>블로그) | /blog/[slug] | API(/api/blog) | ✅ 활성 |
+| R-025 | /blog/[slug] | 블로그 상세 | detail | app/blog/[slug]/page.tsx | RootLayout | 아니오 | /blog에서 포스트 선택 | /blog | API(/api/blog/slug/[slug]), meta(dynamic) | ✅ 활성 |
+| R-026 | /blog/category/[category] | 카테고리별 블로그 | list | app/blog/category/[category]/page.tsx | RootLayout | 아니오 | /blog 사이드바 카테고리 링크 | /blog | API(/api/blog) | ✅ 활성 |
+| R-027 | /blog/tag/[tag] | 태그별 블로그 | list | app/blog/tag/[tag]/page.tsx | RootLayout | 아니오 | /blog/[slug] 태그 뱃지 | /blog | API(/api/blog) | ✅ 활성 |
+| R-028 | /admin/blog | 블로그 관리 | dashboard | app/admin/blog/page.tsx | RootLayout | 예 (이메일) | /admin에서 링크 | /admin/blog/new, /admin/blog/edit/[id] | API(/api/blog) | ✅ 활성 |
+| R-029 | /admin/blog/new | 새 글 작성 | form | app/admin/blog/new/page.tsx | RootLayout | 예 (이메일) | /admin/blog에서 '새 글' 버튼 | /admin/blog | API(/api/blog, /api/blog/upload) | ✅ 활성 |
+| R-030 | /admin/blog/edit/[id] | 글 수정 | form | app/admin/blog/edit/[id]/page.tsx | RootLayout | 예 (이메일) | /admin/blog에서 수정 아이콘 | /admin/blog | API(/api/blog/[id]) | ✅ 활성 |
 <!-- 새 라우트는 이 줄 위에 추가 -->
 
 **유형 값:** `auth`, `dashboard`, `list`, `detail`, `form`, `static`, `error` (7종)
@@ -80,8 +87,9 @@
 | 주식 | 1 | 주식 분석 | /stock | 드롭다운 | 항상 |
 | 주식 | 2 | 주식 시장 분위기 | /stock-market | 드롭다운 | 항상 |
 | 정보 | 1 | 뉴스 | /news | 드롭다운 | 항상 |
-| 정보 | 2 | 캘린더 | /calendar | 드롭다운 | 항상 |
-| 정보 | 3 | 코인 히스토리 | /history | 드롭다운 | 항상 |
+| 정보 | 2 | 블로그 | /blog | 드롭다운 | 항상 |
+| 정보 | 3 | 캘린더 | /calendar | 드롭다운 | 항상 |
+| 정보 | 4 | 코인 히스토리 | /history | 드롭다운 | 항상 |
 | 서비스 | 1 | 포트폴리오 | /portfolio | 드롭다운 | 항상 |
 | 서비스 | 2 | 보안 메모 | /secure-memo | 드롭다운 | 항상 |
 | 서비스 | 3 | 관심종목 | /watchlist | 드롭다운 | 항상 |

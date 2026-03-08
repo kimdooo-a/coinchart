@@ -1,9 +1,9 @@
 # API Reference
 
 ## 개요
-총 15개 엔드포인트 (공개 9개, 관리자 4개, 주식 분석 2개 포함)
+총 26개 엔드포인트 (공개 9개 + 블로그 6개, 관리자 4개 + 블로그 5개, 주식 분석 2개 포함)
 
-최종 업데이트: 2026-02-28
+최종 업데이트: 2026-03-08
 
 ---
 
@@ -466,6 +466,71 @@
 
 ---
 
+## 블로그 관련
+
+### GET /api/blog
+- **파일**: `app/api/blog/route.ts`
+- **설명**: 발행된 블로그 포스트 목록 조회 (페이지네이션, 카테고리/태그/언어 필터)
+- **파라미터**: `page`, `limit`, `category` (slug), `tag` (slug), `lang`
+- **인증**: 불필요
+- **캐시**: `s-maxage=30`
+
+### POST /api/blog
+- **파일**: `app/api/blog/route.ts`
+- **설명**: 블로그 포스트 생성
+- **인증**: Admin (`smartkdy7@gmail.com`)
+
+### GET /api/blog/[id]
+- **파일**: `app/api/blog/[id]/route.ts`
+- **설명**: 포스트 상세 조회 (draft 포함, 관리자용)
+- **인증**: Admin
+
+### PUT /api/blog/[id]
+- **파일**: `app/api/blog/[id]/route.ts`
+- **설명**: 포스트 수정
+- **인증**: Admin
+
+### DELETE /api/blog/[id]
+- **파일**: `app/api/blog/[id]/route.ts`
+- **설명**: 포스트 삭제
+- **인증**: Admin
+
+### GET /api/blog/slug/[slug]
+- **파일**: `app/api/blog/slug/[slug]/route.ts`
+- **설명**: slug로 발행 포스트 조회
+- **인증**: 불필요
+- **캐시**: `s-maxage=60`
+
+### GET /api/blog/categories
+- **파일**: `app/api/blog/categories/route.ts`
+- **설명**: 카테고리 목록 조회
+- **인증**: 불필요
+- **캐시**: `s-maxage=300`
+
+### GET /api/blog/tags
+- **파일**: `app/api/blog/tags/route.ts`
+- **설명**: 태그 목록 조회
+- **인증**: 불필요
+- **캐시**: `s-maxage=300`
+
+### POST /api/blog/upload
+- **파일**: `app/api/blog/upload/route.ts`
+- **설명**: 이미지 업로드 (Supabase Storage `blog-images` 버킷)
+- **인증**: Admin
+
+### GET /api/blog/search
+- **파일**: `app/api/blog/search/route.ts`
+- **설명**: 전문 검색 (tsvector 기반, ILIKE 폴백)
+- **파라미터**: `q`, `page`, `limit`
+- **인증**: 불필요
+
+### POST /api/blog/view/[id]
+- **파일**: `app/api/blog/view/[id]/route.ts`
+- **설명**: 조회수 증가
+- **인증**: 불필요
+
+---
+
 ## 요약 테이블
 
 | 메서드 | 경로 | 설명 | 인증 |
@@ -486,6 +551,17 @@
 | GET | `/api/admin/market-data` | 시장 데이터 수집 실행 | 필요 |
 | GET | `/api/admin/news-crawl` | 뉴스 크롤링 실행 | 필요 |
 | POST | `/api/admin/cleanup-data` | 데이터 정리 실행 | 필요 |
+| GET | `/api/blog` | 블로그 포스트 목록 | 불필요 |
+| POST | `/api/blog` | 블로그 포스트 생성 | Admin |
+| GET | `/api/blog/[id]` | 포스트 상세 (관리자) | Admin |
+| PUT | `/api/blog/[id]` | 포스트 수정 | Admin |
+| DELETE | `/api/blog/[id]` | 포스트 삭제 | Admin |
+| GET | `/api/blog/slug/[slug]` | slug로 포스트 조회 | 불필요 |
+| GET | `/api/blog/categories` | 카테고리 목록 | 불필요 |
+| GET | `/api/blog/tags` | 태그 목록 | 불필요 |
+| POST | `/api/blog/upload` | 이미지 업로드 | Admin |
+| GET | `/api/blog/search` | 블로그 검색 | 불필요 |
+| POST | `/api/blog/view/[id]` | 조회수 증가 | 불필요 |
 
 ## 환경변수 의존성
 

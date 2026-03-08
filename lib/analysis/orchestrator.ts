@@ -78,7 +78,8 @@ export function performAnalysis(input: AnalysisInput): AnalysisResult {
         mtfResult = analyzeMultiTimeframe(input.candles, dailyTrend);
     }
 
-    // 2. Probability Engine (now includes confidence calculation with actual values)
+    // 2. Probability Engine (MTF 멀티플라이어 포함)
+    const mtfMultiplier = mtfResult ? getMTFWeightMultiplier(mtfResult) : undefined;
     const probability = calculateProbability({
         signals: input.signals,
         regime: regimeResult.regime,
@@ -89,7 +90,8 @@ export function performAnalysis(input: AnalysisInput): AnalysisResult {
         dataAgeSeconds: input.dataAgeSeconds,
         atrValue: input.atrValue,
         avgAtrValue: input.avgAtrValue,
-        bbWidth: input.bbWidth
+        bbWidth: input.bbWidth,
+        mtfMultiplier
     });
 
     // 3. 프랙탈 엔진 결과 통합 (confidence > 70%일 때 보조 가중치 0.15로 합산)

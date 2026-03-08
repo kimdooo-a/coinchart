@@ -56,6 +56,7 @@ export default function GlobalHeader() {
             label: t.menu.info,
             items: [
                 { label: t.menu.news, href: '/news' },
+                { label: t.menu.blog, href: '/blog' },
                 { label: t.menu.calendar, href: '/calendar' },
                 { label: t.menu.history, href: '/history' },
             ]

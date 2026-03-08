@@ -183,16 +183,32 @@ export const calculateStochastic = (highs: number[], lows: number[], closes: num
         }
     }
 
-    // Smooth K needs to handle NaNs. Filter out for EMA, then map back?
-    // Analysis.ts expects strict array access.
-    // Simple SMA smoothing for %D usually? Or EMA? Standard is SMA.
-    const dLine = calculateSMA(kLine.map(x => (isNaN(x) ? 0 : x)), smoothD); // Crude handling of NaNs
+    // NaN-safe SMA smoothing: NaN을 건너뛰고 유효 값만으로 SMA 계산
+    const warmup = period - 1 + smoothK - 1 + smoothD - 1;
 
-    // Correct NaN restoring
-    const finalK = kLine;
-    const finalD = dLine.map((v, i) => i < period + smoothD ? NaN : v);
+    // %K smoothing (smoothK 기간 SMA)
+    const smoothedK = new Array(closes.length).fill(NaN);
+    for (let i = 0; i < closes.length; i++) {
+        if (i < period - 1 + smoothK - 1) continue;
+        const window = kLine.slice(i - smoothK + 1, i + 1);
+        const valid = window.filter(v => !isNaN(v));
+        if (valid.length === smoothK) {
+            smoothedK[i] = valid.reduce((a, b) => a + b, 0) / valid.length;
+        }
+    }
 
-    return { k: finalK, d: finalD };
+    // %D = SMA(%K, smoothD)
+    const dLine = new Array(closes.length).fill(NaN);
+    for (let i = 0; i < closes.length; i++) {
+        if (i < warmup) continue;
+        const window = smoothedK.slice(i - smoothD + 1, i + 1);
+        const valid = window.filter(v => !isNaN(v));
+        if (valid.length === smoothD) {
+            dLine[i] = valid.reduce((a, b) => a + b, 0) / valid.length;
+        }
+    }
+
+    return { k: smoothedK, d: dLine };
 }
 
 // --- CCI ---
@@ -236,10 +252,27 @@ export const calculateWilliamsR = (highs: number[], lows: number[], closes: numb
     return wR;
 }
 
-// --- ATR ---
+// --- RMA (Wilder's Smoothed Moving Average, α = 1/n) ---
+export const calculateRMA = (data: number[], period: number): number[] => {
+    const rma = new Array(data.length).fill(NaN);
+    if (data.length < period) return rma;
+
+    // 초기값: 첫 period개의 SMA
+    let sum = 0;
+    for (let i = 0; i < period; i++) sum += data[i];
+    rma[period - 1] = sum / period;
+
+    // RMA: α = 1/n (Wilder's smoothing)
+    const alpha = 1 / period;
+    for (let i = period; i < data.length; i++) {
+        rma[i] = alpha * data[i] + (1 - alpha) * rma[i - 1];
+    }
+    return rma;
+}
+
+// --- ATR (Wilder's RMA 기반) ---
 export const calculateATR = (highs: number[], lows: number[], closes: number[], period: number = 14) => {
     const tr = new Array(closes.length).fill(0);
-    // TR calculation requires previous close
     tr[0] = highs[0] - lows[0];
     for (let i = 1; i < closes.length; i++) {
         const hl = highs[i] - lows[i];
@@ -248,10 +281,7 @@ export const calculateATR = (highs: number[], lows: number[], closes: number[], 
         tr[i] = Math.max(hl, hpc, lpc);
     }
 
-    // ATR is usually RMA (Running Moving Average) or SMA depending on impl.
-    // Wilder uses RMA (Smoothed MA which is basically EMA with alpha 1/N)
-    // Let's use simple EMA helper here for approximate standard ATR behavior
-    return calculateEMA(tr, period);
+    return calculateRMA(tr, period);
 }
 
 // --- ADX ---
@@ -335,14 +365,35 @@ export const calculateOBV = (closes: number[], volumes: number[]): number[] => {
     return obv;
 }
 
-// --- VWAP (Volume Weighted Average Price) ---
-export const calculateVWAP = (highs: number[], lows: number[], closes: number[], volumes: number[]): number[] => {
+// --- VWAP (Volume Weighted Average Price, 세션 리셋 지원) ---
+export const calculateVWAP = (
+    highs: number[],
+    lows: number[],
+    closes: number[],
+    volumes: number[],
+    timestamps?: number[], // 밀리초 또는 초 단위 타임스탬프
+    sessionType: 'daily' | 'none' = 'none' // 'daily': 일봉 기준 리셋
+): number[] => {
     const vwap = new Array(closes.length).fill(NaN);
-    let cumulativeTPV = 0; // 누적 (TP × Volume)
-    let cumulativeVolume = 0; // 누적 Volume
+    let cumulativeTPV = 0;
+    let cumulativeVolume = 0;
+    let prevDay = -1;
 
     for (let i = 0; i < closes.length; i++) {
-        const tp = (highs[i] + lows[i] + closes[i]) / 3; // Typical Price
+        // 세션 리셋 체크
+        if (sessionType === 'daily' && timestamps && timestamps.length > i) {
+            // 타임스탬프를 Date로 변환 (초 단위면 1000 곱하기)
+            const ts = timestamps[i] < 1e12 ? timestamps[i] * 1000 : timestamps[i];
+            const day = new Date(ts).getUTCDate();
+            if (prevDay !== -1 && day !== prevDay) {
+                // 새 세션: 누적값 리셋
+                cumulativeTPV = 0;
+                cumulativeVolume = 0;
+            }
+            prevDay = day;
+        }
+
+        const tp = (highs[i] + lows[i] + closes[i]) / 3;
         cumulativeTPV += tp * volumes[i];
         cumulativeVolume += volumes[i];
 
@@ -351,6 +402,162 @@ export const calculateVWAP = (highs: number[], lows: number[], closes: number[],
         }
     }
     return vwap;
+}
+
+// --- Supertrend (ATR 기반 동적 지지/저항) ---
+export interface SupertrendResult {
+    supertrend: number[];  // Supertrend 라인 값
+    direction: number[];   // 1 = 상승(지지), -1 = 하락(저항)
+}
+
+export const calculateSupertrend = (
+    highs: number[],
+    lows: number[],
+    closes: number[],
+    period: number = 10,
+    multiplier: number = 3
+): SupertrendResult => {
+    const len = closes.length;
+    const supertrend = new Array(len).fill(NaN);
+    const direction = new Array(len).fill(1);
+
+    const atr = calculateATR(highs, lows, closes, period);
+
+    // 기본 밴드 계산
+    const upperBand = new Array(len).fill(NaN);
+    const lowerBand = new Array(len).fill(NaN);
+
+    for (let i = 0; i < len; i++) {
+        if (isNaN(atr[i])) continue;
+        const hl2 = (highs[i] + lows[i]) / 2;
+        upperBand[i] = hl2 + multiplier * atr[i];
+        lowerBand[i] = hl2 - multiplier * atr[i];
+    }
+
+    // 첫 유효 인덱스 탐색
+    let startIdx = -1;
+    for (let i = 0; i < len; i++) {
+        if (!isNaN(upperBand[i])) { startIdx = i; break; }
+    }
+    if (startIdx === -1) return { supertrend, direction };
+
+    // 초기화
+    supertrend[startIdx] = lowerBand[startIdx];
+    direction[startIdx] = 1;
+
+    for (let i = startIdx + 1; i < len; i++) {
+        if (isNaN(upperBand[i])) continue;
+
+        // 밴드 조정: 이전 밴드보다 좁아지면 유지
+        if (lowerBand[i] > lowerBand[i - 1] || closes[i - 1] < lowerBand[i - 1]) {
+            // lowerBand 유지 또는 갱신
+        } else {
+            lowerBand[i] = lowerBand[i - 1];
+        }
+
+        if (upperBand[i] < upperBand[i - 1] || closes[i - 1] > upperBand[i - 1]) {
+            // upperBand 유지 또는 갱신
+        } else {
+            upperBand[i] = upperBand[i - 1];
+        }
+
+        // 방향 결정
+        if (direction[i - 1] === 1) {
+            // 이전이 상승: 종가가 lowerBand 아래로 이탈하면 하락 전환
+            if (closes[i] < lowerBand[i]) {
+                direction[i] = -1;
+                supertrend[i] = upperBand[i];
+            } else {
+                direction[i] = 1;
+                supertrend[i] = lowerBand[i];
+            }
+        } else {
+            // 이전이 하락: 종가가 upperBand 위로 돌파하면 상승 전환
+            if (closes[i] > upperBand[i]) {
+                direction[i] = 1;
+                supertrend[i] = lowerBand[i];
+            } else {
+                direction[i] = -1;
+                supertrend[i] = upperBand[i];
+            }
+        }
+    }
+
+    return { supertrend, direction };
+}
+
+// --- Parabolic SAR ---
+export interface PSARResult {
+    psar: number[];     // SAR 값
+    trend: number[];    // 1 = 상승, -1 = 하락
+}
+
+export const calculatePSAR = (
+    highs: number[],
+    lows: number[],
+    closes: number[],
+    afStart: number = 0.02,
+    afIncrement: number = 0.02,
+    afMax: number = 0.2
+): PSARResult => {
+    const len = closes.length;
+    const psar = new Array(len).fill(NaN);
+    const trend = new Array(len).fill(1);
+
+    if (len < 2) return { psar, trend };
+
+    // 초기화: 첫 봉은 하락 추세로 가정 (high가 초기 SAR)
+    let isUpTrend = closes[1] > closes[0];
+    let af = afStart;
+    let ep = isUpTrend ? highs[0] : lows[0]; // Extreme Point
+    psar[0] = isUpTrend ? lows[0] : highs[0];
+    trend[0] = isUpTrend ? 1 : -1;
+
+    for (let i = 1; i < len; i++) {
+        // SAR 계산
+        let newSAR = psar[i - 1] + af * (ep - psar[i - 1]);
+
+        if (isUpTrend) {
+            // 상승 추세: SAR은 이전 2봉의 저가보다 낮아야 함
+            newSAR = Math.min(newSAR, lows[i - 1]);
+            if (i >= 2) newSAR = Math.min(newSAR, lows[i - 2]);
+
+            if (lows[i] < newSAR) {
+                // 추세 전환 → 하락
+                isUpTrend = false;
+                newSAR = ep; // EP가 새 SAR
+                af = afStart;
+                ep = lows[i];
+            } else {
+                if (highs[i] > ep) {
+                    ep = highs[i];
+                    af = Math.min(af + afIncrement, afMax);
+                }
+            }
+        } else {
+            // 하락 추세: SAR은 이전 2봉의 고가보다 높아야 함
+            newSAR = Math.max(newSAR, highs[i - 1]);
+            if (i >= 2) newSAR = Math.max(newSAR, highs[i - 2]);
+
+            if (highs[i] > newSAR) {
+                // 추세 전환 → 상승
+                isUpTrend = true;
+                newSAR = ep;
+                af = afStart;
+                ep = highs[i];
+            } else {
+                if (lows[i] < ep) {
+                    ep = lows[i];
+                    af = Math.min(af + afIncrement, afMax);
+                }
+            }
+        }
+
+        psar[i] = newSAR;
+        trend[i] = isUpTrend ? 1 : -1;
+    }
+
+    return { psar, trend };
 }
 
 export const analyzeTrend = (currentPrice: number, sma20: number): IndicatorResult => {

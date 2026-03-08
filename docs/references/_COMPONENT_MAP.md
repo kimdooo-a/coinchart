@@ -1,6 +1,6 @@
 # Component Map
 
-> 최종 업데이트: 2026-02-28
+> 최종 업데이트: 2026-03-08
 >
 > 각 컴포넌트의 사용 페이지, lib 의존성, 컴포넌트 간 의존 관계를 정리한 문서입니다.
 
@@ -56,6 +56,29 @@
 | `MemoCreateModal` | `app/secure-memo/page.tsx` | `lib/crypto/memo-encryption`, `lib/supabase/client` | 없음 |
 | `MemoUnlockModal` | `app/secure-memo/page.tsx` | `lib/crypto/memo-encryption` | 없음 |
 | `MemoViewModal` | `app/secure-memo/page.tsx` | `lib/crypto/memo-encryption`, `lib/supabase/client` | 없음 |
+
+### Blog
+
+| 컴포넌트 | 사용 페이지 | lib 의존성 | 컴포넌트 의존성 |
+|----------|-----------|------------|----------------|
+| `BlogPostCard` | `app/blog/page.tsx` | `context/LanguageContext` | 없음 |
+| `BlogPostList` | `app/blog/page.tsx`, `app/blog/category/`, `app/blog/tag/` | `context/LanguageContext` | `BlogPostCard` |
+| `BlogPostContent` | `app/blog/[slug]/BlogPostDetail.tsx` | `@tiptap/html`, `lowlight` | 없음 |
+| `BlogCategoryFilter` | `app/blog/page.tsx` | `context/LanguageContext` | 없음 |
+| `BlogTagBadge` | `app/blog/[slug]/BlogPostDetail.tsx` | 없음 | 없음 |
+| `BlogSearchBar` | `app/blog/page.tsx` | `context/LanguageContext` | 없음 |
+| `BlogSidebar` | `app/blog/page.tsx` | `context/LanguageContext` | 없음 |
+| `BlogRelatedPosts` | `app/blog/[slug]/BlogPostDetail.tsx` | `context/LanguageContext` | 없음 |
+| `BlogShareButtons` | `app/blog/[slug]/BlogPostDetail.tsx` | `context/LanguageContext` | 없음 |
+| `BlogTableOfContents` | `app/blog/[slug]/BlogPostDetail.tsx` | `context/LanguageContext` | 없음 |
+
+### Blog Editor
+
+| 컴포넌트 | 사용 페이지 | lib 의존성 | 컴포넌트 의존성 |
+|----------|-----------|------------|----------------|
+| `BlogEditor` | `app/admin/blog/new/`, `app/admin/blog/edit/` | `@tiptap/react`, `@tiptap/starter-kit`, `lowlight` | `EditorToolbar`, `EditorImageUpload` |
+| `EditorToolbar` | `BlogEditor` | `@tiptap/react` | 없음 |
+| `EditorImageUpload` | `BlogEditor` | `@tiptap/react` | 없음 |
 
 ### Common
 
@@ -115,6 +138,13 @@
 | `app/signal/page.tsx` | `WhaleAlert` |
 | `app/portfolio/page.tsx` | `TradeModal` |
 | `app/secure-memo/page.tsx` | `MemoCard`, `MemoCreateModal`, `MemoUnlockModal`, `MemoViewModal` |
+| `app/blog/page.tsx` | `BlogPostList`, `BlogCategoryFilter`, `BlogSearchBar`, `BlogSidebar` |
+| `app/blog/[slug]/page.tsx` | `BlogPostContent`, `BlogTagBadge`, `BlogShareButtons`, `BlogRelatedPosts`, `BlogTableOfContents` |
+| `app/blog/category/[category]/page.tsx` | `BlogPostList` |
+| `app/blog/tag/[tag]/page.tsx` | `BlogPostList` |
+| `app/admin/blog/page.tsx` | 없음 (독립 구현) |
+| `app/admin/blog/new/page.tsx` | `BlogEditor` |
+| `app/admin/blog/edit/[id]/page.tsx` | `BlogEditor` |
 
 ---
 

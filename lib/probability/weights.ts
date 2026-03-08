@@ -24,6 +24,10 @@ export const WEIGHT_MATRIX: Record<string, number> = {
     'OBV': 0.6,
     'VWAP': 0.5,
 
+    // Trend Following
+    'Supertrend': 0.8,
+    'PSAR': 0.7,
+
     // Pattern/Divergence
     'RSI Divergence': 0.8,
     'MACD Divergence': 0.8,
@@ -38,14 +42,30 @@ const REGIME_ADJUSTMENTS: Record<string, Record<string, number>> = {
     'STRONG_UPTREND': {
         'MACD': 1.2, 'ADX': 1.0, 'RSI': 0.5, 'Stochastic': 0.5,
         'OBV': 1.1, 'VWAP': 0.9,
+        'Supertrend': 1.3, 'PSAR': 1.2,
         'RSI Divergence': 0.7, 'MACD Divergence': 0.7,
         'Candlestick': 0.6,
     },
     'STRONG_DOWNTREND': {
         'MACD': 1.2, 'ADX': 1.0, 'RSI': 0.5, 'Stochastic': 0.5,
         'OBV': 1.1, 'VWAP': 0.9,
+        'Supertrend': 1.3, 'PSAR': 1.2,
         'RSI Divergence': 0.7, 'MACD Divergence': 0.7,
         'Candlestick': 0.6,
+    },
+    'UPTREND': {
+        'MACD': 1.1, 'ADX': 0.9, 'RSI': 0.7, 'Stochastic': 0.7,
+        'OBV': 1.0, 'VWAP': 0.9,
+        'Supertrend': 1.1, 'PSAR': 1.0,
+        'RSI Divergence': 0.9, 'MACD Divergence': 0.9,
+        'Candlestick': 0.8,
+    },
+    'DOWNTREND': {
+        'MACD': 1.1, 'ADX': 0.9, 'RSI': 0.7, 'Stochastic': 0.7,
+        'OBV': 1.0, 'VWAP': 0.9,
+        'Supertrend': 1.1, 'PSAR': 1.0,
+        'RSI Divergence': 0.9, 'MACD Divergence': 0.9,
+        'Candlestick': 0.8,
     },
     'STRONG_TREND': {
         'MACD': 1.2, 'ADX': 1.0, 'RSI': 0.5, 'Stochastic': 0.5,
@@ -54,7 +74,8 @@ const REGIME_ADJUSTMENTS: Record<string, Record<string, number>> = {
     'RANGING': {
         'RSI': 1.0, 'Stochastic': 0.9, 'CCI': 0.8, 'MACD': 0.4,
         'ADX': 0.3, 'Bollinger': 0.8,
-        'RSI Divergence': 1.5, 'MACD Divergence': 1.5, // 횡보에서 다이버전스 매우 유효
+        'Supertrend': 0.4, 'PSAR': 0.4, // 횡보에서 추세 지표 약화
+        'RSI Divergence': 1.5, 'MACD Divergence': 1.5,
         'Candlestick': 1.0,
     },
     'HIGH_VOLATILITY': {

@@ -1,4 +1,4 @@
-export type MarketRegime = 'STRONG_UPTREND' | 'STRONG_DOWNTREND' | 'STRONG_TREND' | 'RANGING' | 'HIGH_VOLATILITY' | 'ACCUMULATION';
+export type MarketRegime = 'STRONG_UPTREND' | 'STRONG_DOWNTREND' | 'UPTREND' | 'DOWNTREND' | 'STRONG_TREND' | 'RANGING' | 'HIGH_VOLATILITY' | 'ACCUMULATION';
 
 export type ConfidenceGrade = 'A' | 'B' | 'C' | 'D' | 'F';
 

@@ -2,7 +2,8 @@ import { CandleData } from '@/lib/api/binance';
 import {
     calculateRSI, calculateMACD, calculateBollingerBands,
     calculateStochastic, calculateCCI, calculateWilliamsR, calculateADX,
-    calculateATR, calculateOBV, calculateVWAP, calculateEMA
+    calculateATR, calculateOBV, calculateVWAP, calculateEMA,
+    calculateSupertrend, calculatePSAR
 } from '@/lib/indicators';
 import { IndicatorSignal } from '@/types/probability';
 import { detectDivergence } from './divergence';
@@ -184,8 +185,9 @@ export function generateSignals(candles: CandleData[]): MarketData {
     }
     signals.push({ name: 'OBV', signal: obvSig, strength: obvSig === 'NEUTRAL' ? 0.4 : 0.8, timestamp: now });
 
-    // VWAP (가격 기준선)
-    const vwap = calculateVWAP(highs, lows, closes, volumes);
+    // VWAP (가격 기준선, 세션 리셋 적용)
+    const timestamps = candles.map(c => c.time);
+    const vwap = calculateVWAP(highs, lows, closes, volumes, timestamps, 'daily');
     const curVWAP = vwap[idx];
     let vwapSig: 'BUY' | 'SELL' | 'NEUTRAL' = 'NEUTRAL';
     if (Number.isFinite(curVWAP) && curVWAP > 0) {
@@ -194,6 +196,28 @@ export function generateSignals(candles: CandleData[]): MarketData {
         else if (diff < -0.01) vwapSig = 'SELL';
     }
     signals.push({ name: 'VWAP', signal: vwapSig, strength: vwapSig === 'NEUTRAL' ? 0.4 : 0.7, timestamp: now });
+
+    // Supertrend (동적 지지/저항)
+    const { direction: stDir } = calculateSupertrend(highs, lows, closes);
+    const curSTDir = stDir[idx];
+    const prevSTDir = stDir[idx - 1];
+    let stSig: 'BUY' | 'SELL' | 'NEUTRAL' = 'NEUTRAL';
+    if (curSTDir === 1 && prevSTDir === -1) stSig = 'BUY'; // 상승 전환
+    else if (curSTDir === -1 && prevSTDir === 1) stSig = 'SELL'; // 하락 전환
+    else if (curSTDir === 1) stSig = 'BUY'; // 상승 유지
+    else if (curSTDir === -1) stSig = 'SELL'; // 하락 유지
+    signals.push({ name: 'Supertrend', signal: stSig, strength: (curSTDir !== prevSTDir) ? 1.0 : 0.6, timestamp: now });
+
+    // Parabolic SAR (추세 전환 감지)
+    const { trend: psarTrend } = calculatePSAR(highs, lows, closes);
+    const curPSAR = psarTrend[idx];
+    const prevPSAR = psarTrend[idx - 1];
+    let psarSig: 'BUY' | 'SELL' | 'NEUTRAL' = 'NEUTRAL';
+    if (curPSAR === 1 && prevPSAR === -1) psarSig = 'BUY'; // 상승 전환
+    else if (curPSAR === -1 && prevPSAR === 1) psarSig = 'SELL'; // 하락 전환
+    else if (curPSAR === 1) psarSig = 'BUY';
+    else if (curPSAR === -1) psarSig = 'SELL';
+    signals.push({ name: 'PSAR', signal: psarSig, strength: (curPSAR !== prevPSAR) ? 1.0 : 0.5, timestamp: now });
 
     // BB Width (Upper - Lower) / Middle
     const bbWidth = (curBB.upper && curBB.lower && curBB.middle)

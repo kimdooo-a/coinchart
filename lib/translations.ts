@@ -25,6 +25,7 @@ export const TRANSLATIONS = {
             stockMarketMood: "시장 심리 (주식)",
 
             news: "뉴스",
+            blog: "블로그",
             calendar: "경제 일정",
             history: "코인 역사",
 
@@ -238,6 +239,27 @@ export const TRANSLATIONS = {
             unlocking: "잠금 해제 중...",
             contentPlaceholder: "비밀 메모 내용을 입력하세요...",
             titlePlaceholder: "메모 제목"
+        },
+        blog: {
+            title: "블로그",
+            subtitle: "투자 인사이트와 시장 분석, 그리고 다양한 이야기",
+            backToBlog: "블로그로 돌아가기",
+            newPost: "새 글 작성",
+            published: "발행",
+            draft: "초안",
+            archived: "보관",
+            category: "카테고리",
+            tags: "태그",
+            views: "조회수",
+            noResults: "검색 결과가 없습니다.",
+            searchPlaceholder: "블로그 검색...",
+            relatedPosts: "관련 글",
+            share: "공유",
+            copyLink: "링크 복사",
+            copied: "복사됨",
+            tableOfContents: "목차",
+            recentPosts: "최근 글",
+            allCategories: "전체",
         }
     },
     en: {
@@ -266,6 +288,7 @@ export const TRANSLATIONS = {
             stockMarketMood: "Market Mood (Stock)",
 
             news: "News",
+            blog: "Blog",
             calendar: "Calendar",
             history: "History",
 
@@ -479,6 +502,27 @@ export const TRANSLATIONS = {
             unlocking: "Unlocking...",
             contentPlaceholder: "Enter your secret memo content...",
             titlePlaceholder: "Memo title"
+        },
+        blog: {
+            title: "Blog",
+            subtitle: "Investment insights, market analysis, and more",
+            backToBlog: "Back to Blog",
+            newPost: "New Post",
+            published: "Published",
+            draft: "Draft",
+            archived: "Archived",
+            category: "Category",
+            tags: "Tags",
+            views: "Views",
+            noResults: "No results found.",
+            searchPlaceholder: "Search blog...",
+            relatedPosts: "Related Posts",
+            share: "Share",
+            copyLink: "Copy link",
+            copied: "Copied",
+            tableOfContents: "Table of Contents",
+            recentPosts: "Recent Posts",
+            allCategories: "All",
         }
     }
 };
