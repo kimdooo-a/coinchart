@@ -32,4 +32,4 @@
 
 - Next.js 빌드: ✅ 성공
 - TypeScript: ✅ 에러 없음
-- Git: ⚠️ 미커밋 변경 존재 (기반: b97f263)
+- Git: ✅ clean, push 완료 (7aa8908)
