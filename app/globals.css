@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 /* ========================================
    monet-registry 호환 CSS 변수 시스템

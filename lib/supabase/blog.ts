@@ -80,6 +80,33 @@ export async function createTag(name: string): Promise<BlogTag | null> {
 }
 
 // ====================================================
+// 개별 카테고리/태그 조회 (slug 기반)
+// ====================================================
+export async function fetchCategoryBySlug(slug: string): Promise<BlogCategory | null> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from('blog_categories')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+
+  if (error || !data) return null;
+  return data as BlogCategory;
+}
+
+export async function fetchTagBySlug(slug: string): Promise<BlogTag | null> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from('blog_tags')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+
+  if (error || !data) return null;
+  return data as BlogTag;
+}
+
+// ====================================================
 // 포스트 조회 (공개)
 // ====================================================
 export async function fetchPublishedPosts(

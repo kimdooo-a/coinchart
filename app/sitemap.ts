@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { fetchPublishedPosts } from '@/lib/supabase/blog';
+import { fetchPublishedPosts, fetchCategories, fetchTags } from '@/lib/supabase/blog';
 import { getSiteUrl } from '@/lib/blog-utils';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -16,8 +16,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/calendar`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.5 },
   ];
 
-  // 블로그 포스트 (동적)
   try {
+    // 블로그 포스트 (동적)
     const { posts } = await fetchPublishedPosts({ limit: 100 });
     const blogPages: MetadataRoute.Sitemap = posts.map((post) => ({
       url: `${siteUrl}/blog/${post.slug}`,
@@ -26,7 +26,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     }));
 
-    return [...staticPages, ...blogPages];
+    // 카테고리 페이지
+    const categories = await fetchCategories();
+    const categoryPages: MetadataRoute.Sitemap = categories.map((cat) => ({
+      url: `${siteUrl}/blog/category/${cat.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.5,
+    }));
+
+    // 태그 페이지
+    const tags = await fetchTags();
+    const tagPages: MetadataRoute.Sitemap = tags.map((tag) => ({
+      url: `${siteUrl}/blog/tag/${tag.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.4,
+    }));
+
+    return [...staticPages, ...blogPages, ...categoryPages, ...tagPages];
   } catch {
     return staticPages;
   }
