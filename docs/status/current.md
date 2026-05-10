@@ -34,8 +34,8 @@
 | 3 | 2026-03-08 | 블로그 SEO 최적화 + 디자인 강화 | [로그](../logs/2026-03.md) | [handover](../handover/2026-03-08-session3-blog-seo.md) |
 | 4 | 2026-03-08 | Giscus + Vitest + any 타입 정리 | [로그](../logs/2026-03.md) | [handover](../handover/2026-03-08-session4-quality.md) |
 | 5 | 2026-03-08 | 블로그 에디터 강화 + HTML 전환 | [로그](../logs/2026-03.md) | [handover](../handover/2026-03-08-session5-editor-upgrade.md) |
-| 6 | 2026-05-10 | v2.0 방향성 피벗 + 디자인 의뢰서 6종 | (작성 예정) | (세션 종료 시) |
-| 7 | 2026-05-10 | Stitch 시안 코드 적용 Step 1~3 | (작성 예정) | (세션 종료 시) |
+| 6 | 2026-05-10 | v2.0 방향성 피벗 + 디자인 의뢰서 6종 | [로그](../logs/2026-05.md) | [handover (6+7 통합)](../handover/2026-05-10-session7-stitch-applied.md) |
+| 7 | 2026-05-10 | Stitch 시안 코드 적용 Step 1~3 | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-10-session7-stitch-applied.md) |
 
 ## v2.0 피벗 핵심 (2026-05-10 결정)
 
