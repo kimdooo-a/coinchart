@@ -54,6 +54,14 @@
 - SSOT 분리: `docs/SSOT_SEPARATION_RULES.md` 참조
 - 배포: `docs/DEPLOYMENT_RUNBOOK.md` 참조
 
+## 프로젝트 방향성 (v2.0 — 2026-05-10 피벗)
+
+- **방향성 정의**: `docs/PROJECT_DIRECTION.md` (코인·주식 정보 공유 커뮤니티로 피벗)
+- **디자인 의뢰서**: `docs/design-brief/` (Stitch 의뢰용, 6개 문서)
+  - `00-overview.md`: 디자인 시스템 (전 페이지 공통)
+  - `01-home.md` ~ `05-coin-room.md`: 페이지별 의뢰서
+  - `README.md`: 인덱스·우선순위·체크리스트
+
 ## 레퍼런스 파일
 
 | 파일 | 경로 |

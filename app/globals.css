@@ -2,232 +2,219 @@
 @plugin "@tailwindcss/typography";
 
 /* ========================================
-   monet-registry 호환 CSS 변수 시스템
+   v2.0 커뮤니티 디자인 토큰 (Stitch / Material 3 기반)
+   - 한국식 금융: 빨강↑ 상승 / 파랑↓ 하락
+   - 라이트 통일 (다크 톤 폐기)
    ======================================== */
 
-@layer base {
-  :root {
-    /* Brand Colors (User Defined) */
-    --brand-main: 11 100% 60%; /* #FF5733 */
-    --brand-sub: 0 0% 20%;    /* #333333 */
-
-    /* Dark theme as default (코인 분석 페이지용) */
-    --background: 0 0% 12%; /* Slightly darker than #333333 for main bg */
-    --foreground: 0 0% 98%;
-
-    --card: 0 0% 20%; /* #333333 (Brand Sub) */
-    --card-foreground: 0 0% 98%;
-
-    --popover: 0 0% 20%; /* #333333 */
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 11 100% 60%; /* #FF5733 (Brand Main) */
-    --primary-foreground: 0 0% 98%;
-
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 98%;
-
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 65%;
-
-    --accent: 11 100% 60%; /* #FF5733 */
-    --accent-foreground: 0 0% 98%;
-
-    --destructive: 0 62.8% 50%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 0 0% 30%;
-    --input: 0 0% 30%;
-    --ring: 11 100% 60%;
-    --radius: 0.5rem;
-
-    /* Chart colors - Update to match brand vibe */
-    --chart-1: 11 100% 60%; /* Brand Main */
-    --chart-2: 0 0% 40%;
-    --chart-3: 0 0% 60%;
-    --chart-4: 0 0% 80%;
-    --chart-5: 0 0% 100%;
-
-    /* Shadow */
-    --shadow: 0 0% 0%;
-    --shadow-strong: 0 0% 0%;
-  }
-
-  /* Light theme (선택적) */
-  .light {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 215 100% 50%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 215 100% 50%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 215 100% 50%;
-  }
-}
-
-/* Tailwind v4 color theme mapping */
 @theme {
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
+  /* --- Surface (배경) --- */
+  --color-surface: #faf8ff;
+  --color-surface-dim: #d8d9e6;
+  --color-surface-bright: #faf8ff;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f2f3ff;
+  --color-surface-container: #ecedfa;
+  --color-surface-container-high: #e6e7f4;
+  --color-surface-container-highest: #e1e2ee;
+  --color-surface-variant: #e1e2ee;
 
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
+  /* --- On-surface (텍스트) --- */
+  --color-on-surface: #191b24;
+  --color-on-surface-variant: #424656;
+  --color-inverse-surface: #2e303a;
+  --color-inverse-on-surface: #eff0fd;
 
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  /* --- Outline (보더) --- */
+  --color-outline: #727687;
+  --color-outline-variant: #c2c6d8;
 
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  /* --- Primary (Fintech Blue) --- */
+  --color-primary: #0050cb;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #0066ff;
+  --color-on-primary-container: #f8f7ff;
+  --color-inverse-primary: #b3c5ff;
+  --color-primary-fixed: #dae1ff;
+  --color-primary-fixed-dim: #b3c5ff;
+  --color-on-primary-fixed: #001849;
+  --color-on-primary-fixed-variant: #003fa4;
 
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
+  /* --- Secondary (Naver Green) --- */
+  --color-secondary: #006e2e;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #5efd88;
+  --color-on-secondary-container: #007230;
+  --color-secondary-fixed: #67ff8d;
+  --color-secondary-fixed-dim: #3ee271;
+  --color-on-secondary-fixed: #002109;
+  --color-on-secondary-fixed-variant: #005321;
 
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
+  /* --- Tertiary (강조·경고) --- */
+  --color-tertiary: #a33200;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #cc4204;
+  --color-on-tertiary-container: #fff6f4;
+  --color-tertiary-fixed: #ffdbd0;
+  --color-tertiary-fixed-dim: #ffb59d;
+  --color-on-tertiary-fixed: #390c00;
+  --color-on-tertiary-fixed-variant: #832600;
 
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
+  /* --- Error --- */
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
 
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
+  /* --- 한국식 금융 시맨틱 --- */
+  --color-positive: #ba1a1a;        /* 호재·상승·매수 = 빨강 */
+  --color-negative: #0050cb;        /* 악재·하락·매도 = 파랑 (primary와 일치) */
+  --color-mixed: #9333ea;           /* 혼조 = 보라 */
+  --color-neutral: #6b7280;         /* 중립 = 회색 */
+  --color-hot: #ff6b35;             /* HOT 뱃지 = 주황 */
+  --color-new: #03c75a;             /* NEW 뱃지 = 그린 */
+  --color-notice: #fbbf24;          /* 공지 뱃지 = 노랑 */
 
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
+  /* --- 시세 (시안에서 text-kr-up / text-kr-down 사용) --- */
+  --color-kr-up: #ba1a1a;           /* 상승 = 빨강 (positive와 동일) */
+  --color-kr-down: #0050cb;         /* 하락 = 파랑 (negative와 동일) */
 
-  --shadow-md: 0 4px 6px -1px hsl(var(--shadow)), 0 2px 4px -2px hsl(var(--shadow));
-  --shadow-xl: 0 20px 25px -5px hsl(var(--shadow)), 0 8px 10px -6px hsl(var(--shadow));
-  --shadow-2xl: 0 25px 50px -12px hsl(var(--shadow));
+  /* --- 호환: shadcn-ui 계열 alias --- */
+  --color-background: var(--color-surface-container-lowest);
+  --color-foreground: var(--color-on-surface);
+  --color-card: var(--color-surface-container-lowest);
+  --color-card-foreground: var(--color-on-surface);
+  --color-popover: var(--color-surface-container-lowest);
+  --color-popover-foreground: var(--color-on-surface);
+  --color-muted: var(--color-surface-container);
+  --color-muted-foreground: var(--color-on-surface-variant);
+  --color-accent: var(--color-primary);
+  --color-accent-foreground: var(--color-on-primary);
+  --color-destructive: var(--color-error);
+  --color-destructive-foreground: var(--color-on-error);
+  --color-border: var(--color-outline-variant);
+  --color-input: var(--color-outline-variant);
+  --color-ring: var(--color-primary);
+
+  /* --- 폰트 패밀리 --- */
+  --font-sans: var(--font-noto-sans-kr), 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'D2 Coding', 'Consolas', 'Courier New', monospace;
+
+  /* --- 타이포그래피 스케일 (Stitch DESIGN.md) --- */
+  --text-h1: 28px;
+  --text-h1--line-height: 1.2;
+  --text-h1--font-weight: 700;
+  --text-h2: 22px;
+  --text-h2--line-height: 1.3;
+  --text-h2--font-weight: 700;
+  --text-body-base: 14px;
+  --text-body-base--line-height: 1.5;
+  --text-body-base--font-weight: 400;
+  --text-body-sm: 13px;
+  --text-body-sm--line-height: 1.4;
+  --text-body-sm--font-weight: 400;
+  --text-meta: 12px;
+  --text-meta--line-height: 1.2;
+  --text-meta--font-weight: 400;
+  --text-label-bold: 12px;
+  --text-label-bold--line-height: 1.2;
+  --text-label-bold--font-weight: 700;
+
+  /* --- 라운드 --- */
+  --radius-sm: 0.125rem;
+  --radius: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+
+  /* --- 레이아웃 토큰 --- */
+  --spacing-container-max: 1200px;
+  --spacing-main-width: 760px;
+  --spacing-sidebar-width: 300px;
+  --spacing-column-gap: 24px;
+  --spacing-row-padding-v: 8px;
+  --spacing-row-padding-h: 12px;
+  --spacing-widget-padding: 16px;
 }
 
-/* Base styles */
+/* ========================================
+   Base styles
+   ======================================== */
+
 @layer base {
   *,
   ::after,
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: hsl(var(--border));
+    border-color: var(--color-outline-variant);
+  }
+
+  html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
+    background-color: var(--color-surface-container-lowest);
+    color: var(--color-on-surface);
+    font-size: var(--text-body-base);
+    line-height: var(--text-body-base--line-height);
+  }
+
+  /* 링크 기본 */
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* 방문한 게시판 글 제목 (네이버 관습) */
+  a.visited-fade:visited {
+    color: var(--color-on-surface-variant);
   }
 }
 
 /* ========================================
-   Glass & Glow 유틸리티 클래스
+   재사용 유틸리티
    ======================================== */
 
-.glass-4 {
-  background: linear-gradient(to bottom,
-    hsl(var(--card) / 0.6),
-    hsl(var(--card) / 0.2));
-  border: 1px solid hsl(var(--border) / 0.1);
-  border-top-color: hsl(var(--border) / 0.3);
+/* 가로 스크롤바 숨김 (필터 칩 / 시세 스트립) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-.glass-5 {
-  background: linear-gradient(to bottom,
-    hsl(var(--primary) / 0.15),
-    hsl(var(--primary) / 0.05));
-  border: 1px solid hsl(var(--border) / 0.1);
-  border-top-color: hsl(var(--border) / 0.3);
+/* 시세 스트립 가로 마퀴 */
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.ticker-scroll {
+  animation: ticker-scroll 60s linear infinite;
+}
+.ticker-scroll:hover {
+  animation-play-state: paused;
+}
+
+/* 사이드바 광고 자리(추후) */
+.sidebar-placeholder {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--color-surface-container),
+    var(--color-surface-container) 8px,
+    var(--color-surface-container-high) 8px,
+    var(--color-surface-container-high) 16px
+  );
 }
 
 /* ========================================
-   Classic Masters Design System (레거시)
+   블로그 / TipTap 에디터 콘텐츠 스타일 (라이트 톤)
    ======================================== */
 
-:root {
-  /* 🎨 MONET 토큰 (홈) */
-  --monet-primary: #6B8E9F;
-  --monet-secondary: #A7C4BC;
-  --monet-accent: #E8B4BC;
-  --monet-light: #F5EDE0;
-  --monet-dark: #3A4A5C;
-  --monet-radius: 24px;
-  --monet-blur: 20px;
-
-  /* 🌻 VAN GOGH 토큰 (코인 분석) */
-  --vangogh-primary: #1A3A5C;
-  --vangogh-secondary: #F4C430;
-  --vangogh-accent: #E55B3C;
-  --vangogh-light: #A8D5E2;
-  --vangogh-dark: #0D1B2A;
-  --vangogh-radius: 16px;
-
-  /* 📐 DA VINCI 토큰 (주식 분석) */
-  --davinci-primary: #2C2C2C;
-  --davinci-secondary: #C9A959;
-  --davinci-accent: #8B4513;
-  --davinci-light: #F5F1E6;
-  --davinci-dark: #1A1A1A;
-  --davinci-radius: 4px;
-
-  /* 공통 상태 색상 */
-  --state-positive: #22C55E;
-  --state-negative: #EF4444;
-  --state-neutral: #6B7280;
-  --state-warning: #F59E0B;
-}
-
-/* 레거시 스타일 유틸리티 */
-.monet-card {
-  background: rgba(107, 142, 159, 0.1);
-  backdrop-filter: blur(var(--monet-blur));
-  border-radius: var(--monet-radius);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.monet-gradient {
-  background: linear-gradient(135deg, var(--monet-primary) 0%, var(--monet-accent) 100%);
-}
-
-.vangogh-card {
-  background: var(--vangogh-dark);
-  border-radius: var(--vangogh-radius);
-  border: 2px solid var(--vangogh-secondary);
-  box-shadow: 0 4px 30px rgba(244, 196, 48, 0.3);
-}
-
-.vangogh-gradient {
-  background: linear-gradient(135deg, var(--vangogh-primary) 0%, var(--vangogh-secondary) 100%);
-}
-
-.davinci-card {
-  background: var(--davinci-light);
-  border-radius: var(--davinci-radius);
-  border: 1px solid var(--davinci-secondary);
-}
-
-.davinci-grid {
-  display: grid;
-  grid-template-columns: 1fr 1.618fr;
-  gap: 1rem;
-}
-
-/* ========================================
-   블로그 에디터 / 콘텐츠 스타일
-   ======================================== */
-
-/* TipTap 에디터 내 테이블 스타일 */
 .ProseMirror table {
   border-collapse: collapse;
   width: 100%;
@@ -236,20 +223,20 @@
 
 .ProseMirror th,
 .ProseMirror td {
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--color-outline-variant);
   padding: 0.5rem 0.75rem;
   min-width: 80px;
   vertical-align: top;
 }
 
 .ProseMirror th {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-surface-container);
   font-weight: 600;
   text-align: left;
 }
 
 .ProseMirror .selectedCell {
-  background: rgba(255, 87, 51, 0.15);
+  background: rgba(0, 80, 203, 0.08); /* primary 8% */
 }
 
 /* TipTap 에디터 내 YouTube 임베드 */
@@ -265,11 +252,10 @@
 .youtube-embed iframe {
   width: 100%;
   aspect-ratio: 16 / 9;
-  border-radius: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-outline-variant);
 }
 
-/* TipTap 에디터 내 하이라이트 */
 .ProseMirror mark {
   background-color: #fef08a;
   color: #000;

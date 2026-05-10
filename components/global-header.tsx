@@ -1,218 +1,219 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Menu, X, BarChart2, ChevronDown } from "lucide-react";
-import Link from 'next/link';
+import { Menu, X, BarChart2, ChevronDown, Search, PenSquare } from "lucide-react";
+import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import { TRANSLATIONS } from "@/lib/translations";
 import { AuthButton } from "@/components/AuthButton";
+
+interface MenuPrimary {
+    label: string;
+    href: string;
+}
+
+interface MenuDropdownItem {
+    label: string;
+    href: string;
+}
+
+interface MenuDropdown {
+    label: string;
+    items: MenuDropdownItem[];
+}
 
 export default function GlobalHeader() {
     const { lang, toggleLang } = useLanguage();
     const t = TRANSLATIONS[lang];
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [scrolled, setScrolled] = useState(false);
-    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        setMounted(true);
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 20);
-        };
-        // Check initial scroll position
-        handleScroll();
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
-
-    // Colors can be dynamic or fixed based on theme. 
-    // Assuming dark mode default for premium feel, but responding to potential light mode if needed.
-    // For now, hardcoding dark/premium feel as per current HeroSection design.
-    const isDark = true;
-    const colors = {
-        text: "#E4E4E4",
-    };
-    // Navigation Items
-    const menuItems = [
-        {
-            key: 'coin', // Translations: menu.coin
-            label: t.menu.coin,
-            items: [
-                { label: t.menu.coinAnalysis, href: '/analysis' },
-                { label: t.menu.marketMood, href: '/market' },
-                { label: t.menu.aiSignal, href: '/signal' },
-            ]
-        },
-        {
-            key: 'stock', // Translations: menu.stock
-            label: t.menu.stock,
-            items: [
-                { label: t.menu.stockAnalysis, href: '/stock' },
-                { label: t.menu.stockMarketMood, href: '/stock-market' },
-            ]
-        },
-        {
-            key: 'info', // Translations: menu.info
-            label: t.menu.info,
-            items: [
-                { label: t.menu.news, href: '/news' },
-                { label: t.menu.calendar, href: '/calendar' },
-                { label: t.menu.history, href: '/history' },
-            ]
-        },
-        {
-            key: 'service', // Translations: menu.service
-            label: t.menu.service,
-            items: [
-                { label: t.menu.portfolio, href: '/portfolio' },
-                { label: t.menu.secureMemo, href: '/secure-memo' },
-                { label: t.menu.watchlist, href: '/watchlist' },
-                { label: t.menu.settings, href: '/settings' },
-                { label: t.menu.contact, href: '/contact' },
-                { label: t.menu.terms, href: '/terms' },
-            ]
+        if (isMobileMenuOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "";
         }
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, [isMobileMenuOpen]);
+
+    // 1차 메뉴 5개
+    const primary: MenuPrimary[] = [
+        { label: lang === "ko" ? "베스트" : "Best", href: "/" },
+        { label: lang === "ko" ? "자유게시판" : "Free Board", href: "/board/free" },
+        { label: lang === "ko" ? "시세토론" : "Market Talk", href: "/board/market" },
+        { label: lang === "ko" ? "정보공유" : "Info", href: "/board/info" },
+        { label: t.menu.news, href: "/news" },
     ];
 
-    // Use mounted && scrolled to prevent hydration mismatch
-    const isScrolled = mounted && scrolled;
+    // 코인룸 드롭다운
+    const coinRoom: MenuDropdown = {
+        label: lang === "ko" ? "코인룸" : "Coin Room",
+        items: [
+            { label: "BTC", href: "/coin/btc" },
+            { label: "ETH", href: "/coin/eth" },
+            { label: "XRP", href: "/coin/xrp" },
+            { label: "SOL", href: "/coin/sol" },
+            { label: lang === "ko" ? "알트코인" : "Altcoin", href: "/coin/altcoin" },
+            { label: lang === "ko" ? "김치프리미엄" : "Kimchi Premium", href: "/coin/kimp" },
+        ],
+    };
+
+    // 도구 드롭다운
+    const tools: MenuDropdown = {
+        label: lang === "ko" ? "도구" : "Tools",
+        items: [
+            { label: t.menu.coinAnalysis, href: "/analysis" },
+            { label: t.menu.stockAnalysis, href: "/stock" },
+            { label: t.menu.aiSignal, href: "/signal" },
+            { label: t.menu.marketMood, href: "/market" },
+            { label: t.menu.calendar, href: "/calendar" },
+            { label: t.menu.watchlist, href: "/watchlist" },
+            { label: t.menu.secureMemo, href: "/secure-memo" },
+        ],
+    };
 
     return (
-        <header
-            className={`fixed left-0 top-0 z-50 w-full h-16 border-b transition-all duration-300 ${isScrolled
-                ? "bg-black/80 backdrop-blur-md border-white/10"
-                : "bg-black/20 border-transparent bg-gradient-to-b from-black/50 to-transparent"
-                }`}
-        >
-            <div className="container relative grid h-16 grid-cols-[1fr_auto_auto] items-center lg:grid-cols-[auto_1fr_auto] mx-auto">
+        <header className="sticky top-0 z-50 w-full bg-surface-container-lowest border-b border-outline-variant">
+            <div className="max-w-[1200px] mx-auto h-14 px-4 lg:px-6 flex items-center justify-between gap-4">
                 {/* Logo */}
-                <div className="col-start-1 col-end-2 row-start-1 row-end-2 font-bold text-xl tracking-tighter">
-                    <Link href="/" className="flex items-center gap-2">
-                        <div className="size-8 rounded bg-primary flex items-center justify-center text-primary-foreground">
-                            <BarChart2 className="size-5" />
-                        </div>
-                        <span className="text-white">ChartMaster</span>
-                    </Link>
-                </div>
+                <Link href="/" className="flex items-center gap-2 flex-shrink-0">
+                    <div className="size-8 rounded-md bg-primary flex items-center justify-center text-on-primary">
+                        <BarChart2 className="size-5" />
+                    </div>
+                    <span className="text-h2 text-primary tracking-tight">ChartMaster</span>
+                </Link>
 
                 {/* Desktop Navigation */}
-                <div className="hidden lg:block">
-                    <nav className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                        <ul className="flex items-center justify-center gap-6">
-                            {menuItems.map((group) => (
-                                <li key={group.label} className="group relative">
-                                    <div
-                                        className="flex items-center gap-1 px-3 py-2 text-sm font-medium transition-all hover:text-primary hover:bg-white/5 rounded-full cursor-default"
-                                        style={{ color: colors.text }}
-                                    >
-                                        {group.label}
-                                        <ChevronDown className="h-3 w-3 opacity-50 transition-transform group-hover:rotate-180" />
-                                    </div>
+                <nav className="hidden lg:flex items-center gap-5 flex-1 justify-center">
+                    {primary.map((m) => (
+                        <Link
+                            key={m.href}
+                            href={m.href}
+                            className="text-body-base text-on-surface-variant hover:text-primary transition-colors"
+                        >
+                            {m.label}
+                        </Link>
+                    ))}
 
-                                    {/* Dropdown */}
-                                    <div className="absolute left-1/2 -translate-x-1/2 top-full pt-2 w-48 hidden group-hover:block transition-all animate-in fade-in slide-in-from-top-2">
-                                        <div className="bg-black/90 backdrop-blur-xl border border-white/10 rounded-xl p-2 shadow-xl shadow-black/50">
-                                            <div className="flex flex-col gap-1">
-                                                {group.items.map((item) => (
-                                                    <Link
-                                                        key={item.href}
-                                                        href={item.href}
-                                                        className="px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors text-left"
-                                                    >
-                                                        {item.label}
-                                                    </Link>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </li>
-                            ))}
+                    <span className="h-4 w-px bg-outline-variant" />
 
-                            {/* 블로그 독립 메뉴 */}
-                            <li>
-                                <Link
-                                    href="/blog"
-                                    className="px-3 py-2 text-sm font-medium transition-all hover:text-primary hover:bg-white/5 rounded-full"
-                                    style={{ color: colors.text }}
-                                >
-                                    {t.menu.blog}
-                                </Link>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
-
-                {/* Mobile Menu Button */}
-                <div className="block lg:hidden">
-                    <button
-                        type="button"
-                        className="flex h-10 w-10 items-center justify-center"
-                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    >
-                        {isMobileMenuOpen ? (
-                            <X className="h-6 w-6" style={{ color: colors.text }} />
-                        ) : (
-                            <Menu className="h-6 w-6" style={{ color: colors.text }} />
-                        )}
-                    </button>
-                </div>
-
-                {/* Right Side Buttons (Language Switcher) */}
-                <div className="col-start-2 col-end-3 row-start-1 row-end-2 flex items-center gap-3 justify-self-end lg:col-start-3">
-                    <button
-                        onClick={toggleLang}
-                        className="
-                            group relative overflow-hidden rounded-full px-4 py-1.5 text-xs font-semibold
-                            bg-gradient-to-tr from-gray-800 to-gray-700
-                            border border-white/10 shadow-lg
-                            transition-all duration-300 ease-out
-                            hover:scale-105 hover:border-white/20 hover:shadow-cyan-500/20
-                        "
-                        aria-label="Toggle Language"
-                    >
-                        <span className="relative z-10 flex items-center gap-2 text-gray-200 group-hover:text-white">
-                            <span>{lang === 'ko' ? '🇺🇸 EN' : '🇰🇷 KR'}</span>
-                        </span>
-                        {/* Shimmer effect */}
-                        <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent z-0" />
-                    </button>
-
-                    {/* Auth Button */}
-                    <AuthButton />
-                </div>
-            </div>
-
-            {/* Mobile Menu Overlay */}
-            {isMobileMenuOpen && (
-                <div className="absolute top-16 left-0 w-full h-[calc(100vh-4rem)] bg-black/95 backdrop-blur-xl border-b border-white/10 p-6 lg:hidden flex flex-col gap-8 overflow-y-auto animate-in slide-in-from-top-2">
-                    {menuItems.map((group) => (
-                        <div key={group.label} className="flex flex-col gap-3">
-                            <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider pl-2 border-l-2 border-primary">
+                    {[coinRoom, tools].map((group) => (
+                        <div key={group.label} className="relative group">
+                            <button
+                                type="button"
+                                className="flex items-center gap-1 text-body-base text-on-surface-variant hover:text-primary transition-colors"
+                            >
                                 {group.label}
-                            </span>
-                            <div className="flex flex-col pl-4 gap-1">
-                                {group.items.map((item) => (
-                                    <Link
-                                        key={item.href}
-                                        href={item.href}
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                        className="text-lg font-medium p-2 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
-                                    >
-                                        {item.label}
-                                    </Link>
-                                ))}
+                                <ChevronDown className="w-3 h-3 opacity-60 transition-transform group-hover:rotate-180" />
+                            </button>
+                            <div className="absolute left-1/2 -translate-x-1/2 top-full pt-2 w-48 hidden group-hover:block">
+                                <div className="bg-surface-container-lowest border border-outline-variant rounded-md p-1.5 shadow-md">
+                                    {group.items.map((it) => (
+                                        <Link
+                                            key={it.href}
+                                            href={it.href}
+                                            className="block px-3 py-1.5 text-body-sm text-on-surface hover:bg-surface-container-low hover:text-primary rounded transition-colors"
+                                        >
+                                            {it.label}
+                                        </Link>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     ))}
+                </nav>
 
-                    {/* 블로그 독립 메뉴 */}
-                    <Link
-                        href="/blog"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="text-lg font-semibold p-2 text-white hover:text-primary hover:bg-white/5 rounded-lg transition-colors border-l-2 border-primary pl-4"
+                {/* Right Side */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                    <button
+                        type="button"
+                        aria-label="검색"
+                        className="hidden md:inline-flex items-center justify-center w-9 h-9 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors"
                     >
-                        {t.menu.blog}
+                        <Search className="w-4 h-4" />
+                    </button>
+
+                    <button
+                        onClick={toggleLang}
+                        className="hidden md:inline-flex items-center px-2 h-9 rounded-md text-meta font-bold text-on-surface-variant hover:bg-surface-container transition-colors"
+                        aria-label="Toggle Language"
+                    >
+                        {lang === "ko" ? "EN" : "KR"}
+                    </button>
+
+                    <AuthButton />
+
+                    <Link
+                        href="/board/free/write"
+                        className="hidden sm:inline-flex items-center gap-1 bg-primary text-on-primary px-3 h-9 rounded-md text-label-bold hover:bg-primary-container transition-colors"
+                    >
+                        <PenSquare className="w-3.5 h-3.5" />
+                        {lang === "ko" ? "글쓰기" : "Write"}
                     </Link>
+
+                    <button
+                        type="button"
+                        className="lg:hidden w-9 h-9 inline-flex items-center justify-center text-on-surface"
+                        onClick={() => setIsMobileMenuOpen((v) => !v)}
+                        aria-label="메뉴"
+                    >
+                        {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                    </button>
+                </div>
+            </div>
+
+            {/* Mobile Menu */}
+            {isMobileMenuOpen && (
+                <div className="lg:hidden absolute top-14 left-0 w-full bg-surface-container-lowest border-b border-outline-variant max-h-[calc(100vh-3.5rem)] overflow-y-auto">
+                    <div className="px-4 py-4 flex flex-col gap-1">
+                        {primary.map((m) => (
+                            <Link
+                                key={m.href}
+                                href={m.href}
+                                className="px-3 py-2.5 text-body-base text-on-surface hover:bg-surface-container-low rounded-md"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                {m.label}
+                            </Link>
+                        ))}
+
+                        {[coinRoom, tools].map((group) => (
+                            <div key={group.label} className="mt-2">
+                                <div className="px-3 py-1.5 text-meta font-bold text-on-surface-variant uppercase">
+                                    {group.label}
+                                </div>
+                                {group.items.map((it) => (
+                                    <Link
+                                        key={it.href}
+                                        href={it.href}
+                                        className="block px-5 py-2 text-body-sm text-on-surface hover:bg-surface-container-low rounded-md"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                    >
+                                        {it.label}
+                                    </Link>
+                                ))}
+                            </div>
+                        ))}
+
+                        <div className="mt-4 flex gap-2">
+                            <Link
+                                href="/board/free/write"
+                                className="flex-1 inline-flex items-center justify-center gap-1 bg-primary text-on-primary px-3 h-10 rounded-md text-label-bold"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                <PenSquare className="w-3.5 h-3.5" />
+                                {lang === "ko" ? "글쓰기" : "Write"}
+                            </Link>
+                            <button
+                                onClick={toggleLang}
+                                className="px-4 h-10 rounded-md border border-outline-variant text-body-sm"
+                            >
+                                {lang === "ko" ? "EN" : "KR"}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </header>

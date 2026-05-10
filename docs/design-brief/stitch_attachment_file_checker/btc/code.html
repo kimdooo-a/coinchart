@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bitcoin (BTC) Coin Room - ChartMaster</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#191b24",
+                        "surface-container-high": "#e6e7f4",
+                        "primary": "#0050cb",
+                        "surface-container": "#ecedfa",
+                        "secondary-fixed-dim": "#3ee271",
+                        "primary-fixed-dim": "#b3c5ff",
+                        "on-secondary-fixed": "#002109",
+                        "outline-variant": "#c2c6d8",
+                        "on-error-container": "#93000a",
+                        "surface": "#faf8ff",
+                        "primary-container": "#0066ff",
+                        "inverse-primary": "#b3c5ff",
+                        "on-surface-variant": "#424656",
+                        "on-tertiary-container": "#fff6f4",
+                        "surface-variant": "#e1e2ee",
+                        "inverse-surface": "#2e303a",
+                        "on-tertiary-fixed-variant": "#832600",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb59d",
+                        "tertiary": "#a33200",
+                        "surface-container-low": "#f2f3ff",
+                        "surface-bright": "#faf8ff",
+                        "primary-fixed": "#dae1ff",
+                        "on-primary-container": "#f8f7ff",
+                        "surface-container-highest": "#e1e2ee",
+                        "tertiary-fixed": "#ffdbd0",
+                        "on-error": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed": "#390c00",
+                        "secondary-container": "#5efd88",
+                        "surface-dim": "#d8d9e6",
+                        "on-primary-fixed-variant": "#003fa4",
+                        "tertiary-container": "#cc4204",
+                        "on-primary-fixed": "#001849",
+                        "error": "#ba1a1a",
+                        "surface-tint": "#0054d6",
+                        "on-surface": "#191b24",
+                        "on-tertiary": "#ffffff",
+                        "outline": "#727687",
+                        "secondary": "#006e2e",
+                        "inverse-on-surface": "#eff0fd",
+                        "on-secondary-fixed-variant": "#005321",
+                        "on-secondary-container": "#007230",
+                        "secondary-fixed": "#67ff8d",
+                        "background": "#faf8ff",
+                        "kr-up": "#E12C2C",
+                        "kr-down": "#1A6FCC"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "row-padding-h": "12px",
+                        "main-width": "760px",
+                        "widget-padding": "16px",
+                        "container-max": "1200px",
+                        "row-padding-v": "8px",
+                        "column-gap": "24px",
+                        "sidebar-width": "300px"
+                    },
+                    "fontFamily": {
+                        "label-bold": ["notoSans"],
+                        "body-sm": ["notoSans"],
+                        "meta": ["notoSans"],
+                        "h1": ["notoSans"],
+                        "body-base": ["notoSans"],
+                        "h2": ["notoSans"]
+                    },
+                    "fontSize": {
+                        "label-bold": ["12px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-sm": ["13px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                        "meta": ["12px", {"lineHeight": "1.2", "fontWeight": "400"}],
+                        "h1": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-base": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "h2": ["22px", {"lineHeight": "1.3", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'notoSans', sans-serif; }
+        .material-symbols-outlined { font-size: 20px; }
+        .bento-grid { display: grid; gap: 1px; background-color: #E5E7EB; border: 1px solid #E5E7EB; }
+        .bento-item { background-color: #FFFFFF; padding: 12px; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 flex items-center justify-between px-row-padding-h h-[60px] bg-surface border-b border-outline-variant max-w-[1200px] left-1/2 -translate-x-1/2">
+<div class="flex items-center gap-6">
+<span class="font-h2 text-h2 font-black text-primary">ChartMaster</span>
+<div class="hidden md:flex items-center gap-4">
+<a class="text-on-surface-variant font-body-base hover:bg-surface-container-low transition-colors px-2 py-1" href="#">Best</a>
+<a class="text-on-surface-variant font-body-base hover:bg-surface-container-low transition-colors px-2 py-1" href="#">Board</a>
+<a class="text-on-surface-variant font-body-base hover:bg-surface-container-low transition-colors px-2 py-1" href="#">Market Talk</a>
+<a class="text-primary font-label-bold border-b-2 border-primary px-2 py-1" href="#">Info</a>
+<a class="text-on-surface-variant font-body-base hover:bg-surface-container-low transition-colors px-2 py-1" href="#">News</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<input class="bg-surface-container-low border border-outline-variant rounded-lg px-3 py-1 text-body-base focus:border-primary outline-none w-48" placeholder="Search..." type="text"/>
+<span class="material-symbols-outlined absolute right-2 top-1.5 text-on-surface-variant" data-icon="search">search</span>
+</div>
+<button class="bg-primary text-on-primary font-label-bold px-4 py-1.5 rounded hover:opacity-90 transition-opacity">Write</button>
+<button class="text-on-surface-variant font-body-base hover:text-primary transition-colors">Login</button>
+</div>
+</nav>
+<main class="mt-[60px] max-w-[1200px] mx-auto px-row-padding-h pt-4">
+<!-- Breadcrumb -->
+<nav class="flex items-center gap-2 mb-4 text-meta font-meta text-on-surface-variant">
+<span>Home</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span>Coin Room</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-on-surface">BTC</span>
+</nav>
+<!-- Hero Section -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded p-widget-padding flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
+<div class="flex items-center gap-4 flex-1">
+<div class="w-12 h-12 bg-[#F7931A] rounded-full flex items-center justify-center text-white overflow-hidden">
+<img alt="BTC" class="w-8 h-8" data-alt="A clean, high-resolution 3D render of the golden Bitcoin logo against a pristine white background. The logo features its signature tilted 'B' and two vertical strokes, with soft studio lighting highlighting its metallic edges. The atmosphere is professional and modern, consistent with a premium financial analysis platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDy3IYx79dWBljq_7Ryb0PWw-R8BiIgUgCIFq6_Z80Y0AEbCjG3Kd5A58HfllGMfcuqjRYR8KoXvUnlwKqUDEeNKCETrFubFGeX83kCDakYLbEEvKmN2JjV48Mvu0I9x3K5hERT358e7htQrun7KwAWl-AjEHk_k0pesJa0qrFqlYh8VqBV7B4bQk--ztSazv-Zo3O2C3s-0Y2JBExolTBJC2Zy5fk2EZnFVrICQMLSbrZNzpwkMrJOkpSfSVlhMFc-21J1X4ODqWAm"/>
+</div>
+<div>
+<h1 class="font-h1 text-h1">Bitcoin / <span class="text-on-surface-variant">BTC</span></h1>
+<div class="flex gap-2 mt-1">
+<span class="bg-kr-up/10 text-kr-up text-meta font-label-bold px-2 py-0.5 rounded">Rank #1</span>
+<span class="bg-surface-variant text-on-surface-variant text-meta font-label-bold px-2 py-0.5 rounded">POW</span>
+</div>
+</div>
+</div>
+<div class="hidden lg:block w-48 h-12">
+<!-- SVG Mini Line Chart (Simulated) -->
+<svg class="w-full h-full" viewbox="0 0 100 30">
+<path d="M0 25 L10 22 L20 28 L30 15 L40 18 L50 10 L60 12 L70 5 L80 8 L90 2 L100 0" fill="none" stroke="#E12C2C" stroke-width="2"></path>
+</svg>
+</div>
+<div class="flex flex-col items-end flex-1">
+<div class="flex items-baseline gap-2">
+<span class="text-h1 font-h1 text-kr-up">$132,400</span>
+<span class="text-body-base font-label-bold text-kr-up">▲ +1.58%</span>
+</div>
+<div class="flex gap-4 text-meta font-meta text-on-surface-variant mt-1">
+<span>Vol: <span class="text-on-surface font-label-bold">$34.2B</span></span>
+<span>Cap: <span class="text-on-surface font-label-bold">$2.61T (1st)</span></span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<button class="bg-primary text-on-primary font-label-bold py-2 px-6 rounded-lg whitespace-nowrap">Analysis View</button>
+<button class="bg-white border border-outline text-on-surface font-label-bold py-2 px-6 rounded-lg whitespace-nowrap hover:bg-surface-container-low transition-colors">Write in BTC Room</button>
+</div>
+</section>
+<!-- Tab Navigation -->
+<nav class="flex border-b border-outline-variant mb-6 overflow-x-auto">
+<a class="px-6 py-3 font-label-bold text-primary border-b-2 border-primary whitespace-nowrap" href="#">Summary</a>
+<a class="px-6 py-3 font-body-base text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap" href="#">Discussion</a>
+<a class="px-6 py-3 font-body-base text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap" href="#">News</a>
+<a class="px-6 py-3 font-body-base text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap" href="#">Quotes/Analysis</a>
+<a class="px-6 py-3 font-body-base text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap" href="#">Notices</a>
+</nav>
+<div class="flex flex-col md:flex-row gap-column-gap">
+<!-- Main Content Area (760px) -->
+<div class="flex-1 max-w-full md:max-w-[760px]">
+<!-- Trending BTC Posts -->
+<section class="mb-8">
+<div class="flex justify-between items-center mb-2 border-b border-on-surface pb-1">
+<h2 class="font-label-bold text-body-base uppercase tracking-tight">Trending BTC Posts</h2>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer">add</span>
+</div>
+<div class="divide-y divide-outline-variant">
+<!-- BoardRow 1 -->
+<div class="flex items-center py-row-padding-v hover:bg-surface-container-low transition-colors px-1 cursor-pointer">
+<span class="w-8 font-label-bold text-primary italic">01</span>
+<span class="flex-1 font-body-base truncate pr-4">Can Bitcoin hit $150k by the end of Q2? Technical Analysis inside.</span>
+<div class="flex items-center gap-3 text-meta text-on-surface-variant shrink-0">
+<span class="w-20 truncate">ChartMaster99</span>
+<span class="w-12 text-right">14:20</span>
+<span class="w-12 text-right">12.5k</span>
+<span class="w-10 text-right text-kr-up font-label-bold">+45</span>
+</div>
+</div>
+<!-- Repeat rows for density -->
+<div class="flex items-center py-row-padding-v hover:bg-surface-container-low transition-colors px-1 cursor-pointer">
+<span class="w-8 font-label-bold text-on-surface-variant italic">02</span>
+<span class="flex-1 font-body-base truncate pr-4">Institutional inflow report for BlackRock and Fidelity.</span>
+<div class="flex items-center gap-3 text-meta text-on-surface-variant shrink-0">
+<span class="w-20 truncate">CryptoAnalyst</span>
+<span class="w-12 text-right">14:05</span>
+<span class="w-12 text-right">8.2k</span>
+<span class="w-10 text-right text-kr-up font-label-bold">+28</span>
+</div>
+</div>
+<!-- Generating more board rows for visual density -->
+<div class="flex items-center py-row-padding-v hover:bg-surface-container-low transition-colors px-1 cursor-pointer">
+<span class="w-8 font-label-bold text-on-surface-variant italic">03</span>
+<span class="flex-1 font-body-base truncate pr-4"><span class="text-kr-up font-label-bold">[HOT]</span> Breaking: SEC update on Ethereum spot ETF implications.</span>
+<div class="flex items-center gap-3 text-meta text-on-surface-variant shrink-0"><span class="w-20 truncate">AlphaSeeker</span><span class="w-12 text-right">13:50</span><span class="w-12 text-right">7.1k</span><span class="w-10 text-right text-kr-up font-label-bold">+112</span></div>
+</div>
+<div class="flex items-center py-row-padding-v hover:bg-surface-container-low transition-colors px-1 cursor-pointer">
+<span class="w-8 font-label-bold text-on-surface-variant italic">04</span>
+<span class="flex-1 font-body-base truncate pr-4">Why I sold 50% of my BTC stack today.</span>
+<div class="flex items-center gap-3 text-meta text-on-surface-variant shrink-0"><span class="w-20 truncate">PaperHands</span><span class="w-12 text-right">13:32</span><span class="w-12 text-right">5.4k</span><span class="w-10 text-right text-kr-down font-label-bold">-12</span></div>
+</div>
+<div class="flex items-center py-row-padding-v hover:bg-surface-container-low transition-colors px-1 cursor-pointer">
+<span class="w-8 font-label-bold text-on-surface-variant italic">05</span>
+<span class="flex-1 font-body-base truncate pr-4">Mining difficulty adjustment expectations for next week.</span>
+<div class="flex items-center gap-3 text-meta text-on-surface-variant shrink-0"><span class="w-20 truncate">RigMaster</span><span class="w-12 text-right">13:15</span><span class="w-12 text-right">3.2k</span><span class="w-10 text-right font-label-bold">0</span></div>
+</div>
+<!-- Filler rows for density -->
+<div class="flex items-center py-row-padding-v hover:bg-surface-container-low transition-colors px-1 cursor-pointer">
+<span class="w-8 font-label-bold text-on-surface-variant italic">06</span>
+<span class="flex-1 font-body-base truncate pr-4">History of Bitcoin Halvings and price action.</span>
+<div class="flex items-center gap-3 text-meta text-on-surface-variant shrink-0"><span class="w-20 truncate">MacroWiki</span><span class="w-12 text-right">12:55</span><span class="w-12 text-right">2.9k</span><span class="w-10 text-right text-kr-up font-label-bold">+15</span></div>
+</div>
+<div class="flex items-center py-row-padding-v hover:bg-surface-container-low transition-colors px-1 cursor-pointer">
+<span class="w-8 font-label-bold text-on-surface-variant italic">07</span>
+<span class="flex-1 font-body-base truncate pr-4">Bitcoin versus Gold in 2024 - New data.</span>
+<div class="flex items-center gap-3 text-meta text-on-surface-variant shrink-0"><span class="w-20 truncate">GoldBug</span><span class="w-12 text-right">12:40</span><span class="w-12 text-right">2.1k</span><span class="w-10 text-right text-kr-up font-label-bold">+8</span></div>
+</div>
+<div class="flex items-center py-row-padding-v hover:bg-surface-container-low transition-colors px-1 cursor-pointer">
+<span class="w-8 font-label-bold text-on-surface-variant italic">08</span>
+<span class="flex-1 font-body-base truncate pr-4">Weekly macro roundup: CPI and Interest Rates.</span>
+<div class="flex items-center gap-3 text-meta text-on-surface-variant shrink-0"><span class="w-20 truncate">FedWatch</span><span class="w-12 text-right">12:12</span><span class="w-12 text-right">1.8k</span><span class="w-10 text-right text-kr-up font-label-bold">+22</span></div>
+</div>
+<div class="flex items-center py-row-padding-v hover:bg-surface-container-low transition-colors px-1 cursor-pointer">
+<span class="w-8 font-label-bold text-on-surface-variant italic">09</span>
+<span class="flex-1 font-body-base truncate pr-4">Lightning Network adoption hitting record highs.</span>
+<div class="flex items-center gap-3 text-meta text-on-surface-variant shrink-0"><span class="w-20 truncate">LN_Node</span><span class="w-12 text-right">11:58</span><span class="w-12 text-right">1.5k</span><span class="w-10 text-right text-kr-up font-label-bold">+31</span></div>
+</div>
+<div class="flex items-center py-row-padding-v hover:bg-surface-container-low transition-colors px-1 cursor-pointer">
+<span class="w-8 font-label-bold text-on-surface-variant italic">10</span>
+<span class="flex-1 font-body-base truncate pr-4">Tutorial: How to secure your seeds offline.</span>
+<div class="flex items-center gap-3 text-meta text-on-surface-variant shrink-0"><span class="w-20 truncate">SecurityFirst</span><span class="w-12 text-right">11:30</span><span class="w-12 text-right">4.2k</span><span class="w-10 text-right text-kr-up font-label-bold">+92</span></div>
+</div>
+</div>
+</section>
+<!-- BTC News Section -->
+<section class="mb-8">
+<div class="flex justify-between items-center mb-2 border-b border-on-surface pb-1">
+<h2 class="font-label-bold text-body-base uppercase tracking-tight">BTC News</h2>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer">chevron_right</span>
+</div>
+<div class="grid grid-cols-1 gap-2">
+<!-- News Row 1 -->
+<div class="flex items-center gap-3 py-row-padding-v border-b border-outline-variant hover:bg-surface-container-low transition-colors px-1">
+<div class="w-2 h-2 rounded-full bg-kr-up"></div>
+<span class="text-meta font-label-bold text-primary shrink-0">[Market]</span>
+<a class="flex-1 font-body-base truncate" href="#">Bitcoin breaks $130,000 as institutional demand surges.</a>
+<span class="text-meta text-on-surface-variant shrink-0">CoinDesk · 15m ago</span>
+</div>
+<!-- News Row 2 -->
+<div class="flex items-center gap-3 py-row-padding-v border-b border-outline-variant hover:bg-surface-container-low transition-colors px-1">
+<div class="w-2 h-2 rounded-full bg-kr-down"></div>
+<span class="text-meta font-label-bold text-tertiary shrink-0">[Policy]</span>
+<a class="flex-1 font-body-base truncate" href="#">South Korea considers new taxation framework for large crypto holders.</a>
+<span class="text-meta text-on-surface-variant shrink-0">News1 · 32m ago</span>
+</div>
+<!-- More news rows for density -->
+<div class="flex items-center gap-3 py-row-padding-v border-b border-outline-variant px-1 hover:bg-surface-container-low">
+<div class="w-2 h-2 rounded-full bg-kr-up"></div>
+<span class="text-meta font-label-bold text-primary shrink-0">[Market]</span>
+<span class="flex-1 font-body-base truncate">Whale alert: 5,000 BTC moved from unknown wallet to Coinbase.</span>
+<span class="text-meta text-on-surface-variant shrink-0">Watcher.Guru · 1h ago</span>
+</div>
+<div class="flex items-center gap-3 py-row-padding-v border-b border-outline-variant px-1 hover:bg-surface-container-low">
+<div class="w-2 h-2 rounded-full bg-surface-variant"></div>
+<span class="text-meta font-label-bold text-on-surface-variant shrink-0">[Tech]</span>
+<span class="flex-1 font-body-base truncate">New BIP proposed to enhance Bitcoin's privacy layer.</span>
+<span class="text-meta text-on-surface-variant shrink-0">GitHub · 2h ago</span>
+</div>
+<div class="flex items-center gap-3 py-row-padding-v border-b border-outline-variant px-1 hover:bg-surface-container-low">
+<div class="w-2 h-2 rounded-full bg-kr-up"></div>
+<span class="text-meta font-label-bold text-primary shrink-0">[Economy]</span>
+<span class="flex-1 font-body-base truncate">Goldman Sachs adds BTC ETF to its wealth management portfolio.</span>
+<span class="text-meta text-on-surface-variant shrink-0">Reuters · 3h ago</span>
+</div>
+</div>
+</section>
+<!-- BTC Discussion List (Extended Density) -->
+<section>
+<div class="flex justify-between items-center mb-2 border-b border-on-surface pb-1">
+<h2 class="font-label-bold text-body-base uppercase tracking-tight">BTC Discussion</h2>
+<div class="flex items-center gap-2">
+<button class="bg-surface-variant text-on-surface-variant text-meta font-label-bold px-2 py-0.5 rounded">Recent</button>
+<button class="text-on-surface-variant text-meta px-2 py-0.5">Popular</button>
+</div>
+</div>
+<div class="divide-y divide-outline-variant">
+<!-- 20 rows of simple board items -->
+<div class="flex items-center py-row-padding-v hover:bg-surface-container-low px-1 transition-colors">
+<span class="flex-1 font-body-base truncate pr-2">Is this the start of the parabolic phase?</span>
+<div class="flex items-center gap-4 text-meta text-on-surface-variant">
+<span>anon_123</span>
+<span>14:45</span>
+<span class="material-symbols-outlined text-[12px]">chat_bubble</span> 12
+                                <span class="material-symbols-outlined text-[12px]">thumb_up</span> 4
+                            </div>
+</div>
+<div class="flex items-center py-row-padding-v hover:bg-surface-container-low px-1">
+<span class="flex-1 font-body-base truncate pr-2">Bitcoin Dominance update: Alts taking a hit.</span>
+<div class="flex items-center gap-4 text-meta text-on-surface-variant"><span>CryptoKing</span><span>14:42</span><span>8</span><span>12</span></div>
+</div>
+<div class="flex items-center py-row-padding-v hover:bg-surface-container-low px-1">
+<span class="flex-1 font-body-base truncate pr-2">Buy the dip or wait for $125k?</span>
+<div class="flex items-center gap-4 text-meta text-on-surface-variant"><span>TraderJ</span><span>14:38</span><span>22</span><span>-2</span></div>
+</div>
+<div class="flex items-center py-row-padding-v hover:bg-surface-container-low px-1">
+<span class="flex-1 font-body-base truncate pr-2">Michael Saylor just tweeted something interesting...</span>
+<div class="flex items-center gap-4 text-meta text-on-surface-variant"><span>SaylorFan</span><span>14:35</span><span>5</span><span>10</span></div>
+</div>
+<div class="flex items-center py-row-padding-v hover:bg-surface-container-low px-1">
+<span class="flex-1 font-body-base truncate pr-2">Hashrate is at an all time high again. Bullish.</span>
+<div class="flex items-center gap-4 text-meta text-on-surface-variant"><span>Miner_01</span><span>14:30</span><span>1</span><span>6</span></div>
+</div>
+<div class="flex items-center py-row-padding-v hover:bg-surface-container-low px-1">
+<span class="flex-1 font-body-base truncate pr-2">Don't be fooled by the fake pump.</span>
+<div class="flex items-center gap-4 text-meta text-on-surface-variant"><span>BearGrylls</span><span>14:28</span><span>15</span><span>-8</span></div>
+</div>
+<div class="flex items-center py-row-padding-v hover:bg-surface-container-low px-1">
+<span class="flex-1 font-body-base truncate pr-2">Which wallet is best for long term cold storage?</span>
+<div class="flex items-center gap-4 text-meta text-on-surface-variant"><span>Newbie</span><span>14:25</span><span>31</span><span>5</span></div>
+</div>
+<div class="flex items-center py-row-padding-v hover:bg-surface-container-low px-1">
+<span class="flex-1 font-body-base truncate pr-2">Institutional FOMO is real.</span>
+<div class="flex items-center gap-4 text-meta text-on-surface-variant"><span>WallStCrypto</span><span>14:20</span><span>9</span><span>14</span></div>
+</div>
+<div class="flex items-center py-row-padding-v hover:bg-surface-container-low px-1">
+<span class="flex-1 font-body-base truncate pr-2">BTC Price Prediction for end of 2024.</span>
+<div class="flex items-center gap-4 text-meta text-on-surface-variant"><span>Oracle</span><span>14:15</span><span>112</span><span>45</span></div>
+</div>
+<div class="flex items-center py-row-padding-v hover:bg-surface-container-low px-1">
+<span class="flex-1 font-body-base truncate pr-2">Anyone using Bitcoin as a daily payment method?</span>
+<div class="flex items-center gap-4 text-meta text-on-surface-variant"><span>UserX</span><span>14:10</span><span>44</span><span>7</span></div>
+</div>
+</div>
+<div class="flex justify-center mt-6">
+<div class="flex gap-1">
+<button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant font-label-bold text-primary">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant hover:bg-surface-container-low transition-colors">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant hover:bg-surface-container-low transition-colors">3</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant hover:bg-surface-container-low transition-colors">4</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant hover:bg-surface-container-low transition-colors">5</button>
+</div>
+</div>
+</section>
+</div>
+<!-- Sidebar (300px) -->
+<aside class="w-full md:w-sidebar-width shrink-0 flex flex-col gap-6">
+<!-- BTC Key Indicators -->
+<div class="bg-surface-container-low border border-outline-variant rounded p-widget-padding">
+<h3 class="font-label-bold text-body-sm border-b border-outline-variant pb-2 mb-3">BTC Key Indicators</h3>
+<table class="w-full text-meta font-meta">
+<tbody class="divide-y divide-outline-variant/30">
+<tr class="h-8">
+<td class="text-on-surface-variant">Current Price</td>
+<td class="text-right font-label-bold">$132,400.50</td>
+</tr>
+<tr class="h-8">
+<td class="text-on-surface-variant">24h Change</td>
+<td class="text-right font-label-bold text-kr-up">+1.58%</td>
+</tr>
+<tr class="h-8">
+<td class="text-on-surface-variant">7d Change</td>
+<td class="text-right font-label-bold text-kr-up">+12.4%</td>
+</tr>
+<tr class="h-8">
+<td class="text-on-surface-variant">30d Change</td>
+<td class="text-right font-label-bold text-kr-up">+24.8%</td>
+</tr>
+<tr class="h-8">
+<td class="text-on-surface-variant">24h High/Low</td>
+<td class="text-right font-label-bold">$133k / $128k</td>
+</tr>
+<tr class="h-8">
+<td class="text-on-surface-variant">Market Cap</td>
+<td class="text-right font-label-bold">$2.61T</td>
+</tr>
+<tr class="h-8">
+<td class="text-on-surface-variant">BTC Dominance</td>
+<td class="text-right font-label-bold">54.2%</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- BTC AI Signal -->
+<div class="bg-surface-container-lowest border border-primary/20 rounded-lg p-widget-padding shadow-sm relative overflow-hidden">
+<div class="absolute top-0 right-0 w-16 h-16 bg-primary/5 rounded-full -mr-8 -mt-8"></div>
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary" data-icon="neurology">neurology</span>
+<h3 class="font-label-bold text-body-sm text-primary uppercase">BTC AI Signal</h3>
+</div>
+<div class="text-center py-4 bg-primary/5 rounded-lg border border-primary/10">
+<p class="text-h2 font-h2 text-kr-up mb-1">Strong Buy</p>
+<p class="text-body-base font-label-bold text-primary">75% Probability</p>
+</div>
+<p class="text-meta text-on-surface-variant mt-3 text-center">Based on technical patterns and sentiment analysis across 50+ major news sources.</p>
+</div>
+<!-- BTC Calendar -->
+<div class="bg-surface-container-low border border-outline-variant rounded p-widget-padding">
+<h3 class="font-label-bold text-body-sm border-b border-outline-variant pb-2 mb-3">BTC Calendar</h3>
+<ul class="flex flex-col gap-3">
+<li class="flex flex-col">
+<span class="text-meta font-label-bold">Bitcoin Halving</span>
+<span class="text-body-sm text-primary">April 2028 (Estimated)</span>
+</li>
+<li class="flex flex-col">
+<span class="text-meta font-label-bold">Monthly Options Expiry</span>
+<span class="text-body-sm text-on-surface-variant">March 29, 2024</span>
+</li>
+<li class="flex flex-col">
+<span class="text-meta font-label-bold">US FOMC Meeting</span>
+<span class="text-body-sm text-on-surface-variant">May 01, 2024</span>
+</li>
+</ul>
+</div>
+<!-- Related Coins -->
+<div class="bg-surface-container-low border border-outline-variant rounded p-widget-padding">
+<h3 class="font-label-bold text-body-sm border-b border-outline-variant pb-2 mb-3">Related Coins</h3>
+<div class="flex flex-col gap-2">
+<a class="flex items-center justify-between p-2 bg-surface hover:bg-surface-container-high transition-colors rounded" href="#">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-[#42d6a4]" data-icon="currency_bitcoin" style="font-variation-settings: 'FILL' 1;">currency_bitcoin</span>
+<span class="font-label-bold text-body-sm">Bitcoin Cash (BCH)</span>
+</div>
+<span class="text-meta text-kr-up">+3.4%</span>
+</a>
+<a class="flex items-center justify-between p-2 bg-surface hover:bg-surface-container-high transition-colors rounded" href="#">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant" data-icon="link">link</span>
+<span class="font-label-bold text-body-sm">Wrapped BTC (WBTC)</span>
+</div>
+<span class="text-meta text-on-surface-variant">+1.5%</span>
+</a>
+<a class="flex items-center justify-between p-2 bg-surface hover:bg-surface-container-high transition-colors rounded" href="#">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant" data-icon="layers">layers</span>
+<span class="font-label-bold text-body-sm">Rootstock (RBTC)</span>
+</div>
+<span class="text-meta text-kr-down">-0.8%</span>
+</a>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-widget-padding px-row-padding-h flex flex-col items-center gap-2 bg-surface-container-low border-t border-outline-variant mt-12">
+<span class="font-label-bold text-label-bold text-on-surface-variant">ChartMaster</span>
+<div class="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-4">
+<a class="text-meta font-meta text-on-surface-variant hover:text-primary transition-colors" href="#">About Us</a>
+<a class="text-meta font-meta text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="text-meta font-meta text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="text-meta font-meta text-on-surface-variant hover:text-primary transition-colors" href="#">Investment Risk</a>
+<a class="text-meta font-meta text-on-surface-variant hover:text-primary transition-colors" href="#">Operator Info</a>
+<a class="text-meta font-meta text-on-surface-variant hover:text-primary transition-colors" href="#">Sitemap</a>
+</div>
+<p class="text-meta font-meta text-on-surface-variant text-center max-w-[800px]">
+            © 2024 ChartMaster. All investment risks and responsibilities belong to the user. Disclaimer: Data may be delayed.
+        </p>
+</footer>
+</body></html>

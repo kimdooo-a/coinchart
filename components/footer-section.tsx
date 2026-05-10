@@ -7,62 +7,63 @@ export default function FooterSection() {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer className="bg-black border-t border-white/10 pt-16 pb-8">
-            <div className="container mx-auto px-4 md:px-8">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+        <footer className="bg-surface-container border-t border-outline-variant pt-12 pb-8">
+            <div className="max-w-[1200px] mx-auto px-4 md:px-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
                     {/* Brand */}
-                    <div className="col-span-1 md:col-span-2">
-                        <Link href="/" className="flex items-center gap-2 mb-4">
-                            <div className="size-8 rounded bg-primary flex items-center justify-center text-primary-foreground">
+                    <div className="col-span-2">
+                        <Link href="/" className="flex items-center gap-2 mb-3">
+                            <div className="size-8 rounded-md bg-primary flex items-center justify-center text-on-primary">
                                 <BarChart2 className="size-5" />
                             </div>
-                            <span className="text-white font-bold text-xl">ChartMaster</span>
+                            <span className="text-h2 text-primary tracking-tight">ChartMaster Community</span>
                         </Link>
-                        <p className="text-gray-500 max-w-sm">
-                            성공적인 암호화폐 투자를 위한 최고의 파트너.<br />
-                            데이터에 기반한 객관적인 분석을 경험하세요.
+                        <p className="text-body-sm text-on-surface-variant max-w-sm">
+                            한국 투자자를 위한 코인·주식 정보 공유 커뮤니티.<br />
+                            자유 토론, 큐레이션 뉴스, 코인별 토론룸이 한 자리에.
                         </p>
                     </div>
 
-                    {/* Links */}
+                    {/* 커뮤니티 */}
                     <div>
-                        <h4 className="text-white font-bold mb-4">플랫폼</h4>
-                        <ul className="space-y-2 text-sm text-gray-400">
-                            <li><Link href="/market" className="hover:text-white transition-colors">시장 개요</Link></li>
-                            <li><Link href="/portfolio" className="hover:text-white transition-colors">포트폴리오</Link></li>
-                            <li><Link href="/signal" className="hover:text-white transition-colors">AI 시그널</Link></li>
-                            <li><Link href="/history" className="hover:text-white transition-colors">코인 히스토리</Link></li>
+                        <h4 className="text-body-base font-bold text-on-surface mb-3">커뮤니티</h4>
+                        <ul className="space-y-2 text-body-sm text-on-surface-variant">
+                            <li><Link href="/board/free" className="hover:text-primary transition-colors">자유게시판</Link></li>
+                            <li><Link href="/board/market" className="hover:text-primary transition-colors">시세토론</Link></li>
+                            <li><Link href="/board/info" className="hover:text-primary transition-colors">정보공유</Link></li>
+                            <li><Link href="/news" className="hover:text-primary transition-colors">뉴스</Link></li>
+                            <li><Link href="/blog" className="hover:text-primary transition-colors">공식글</Link></li>
                         </ul>
                     </div>
 
-                    {/* Legal */}
+                    {/* 정보 */}
                     <div>
-                        <h4 className="text-white font-bold mb-4">정보</h4>
-                        <ul className="space-y-2 text-sm text-gray-400">
-                            <li><Link href="/terms" className="hover:text-white transition-colors">이용약관</Link></li>
-                            <li><Link href="/privacy" className="hover:text-white transition-colors">개인정보처리방침</Link></li>
-                            <li><Link href="/contact" className="hover:text-white transition-colors">문의하기</Link></li>
+                        <h4 className="text-body-base font-bold text-on-surface mb-3">정보</h4>
+                        <ul className="space-y-2 text-body-sm text-on-surface-variant">
+                            <li><Link href="/terms" className="hover:text-primary transition-colors">이용약관</Link></li>
+                            <li><Link href="/privacy" className="hover:text-primary transition-colors">개인정보처리방침</Link></li>
+                            <li><Link href="/contact" className="hover:text-primary transition-colors">문의하기</Link></li>
                         </ul>
                     </div>
                 </div>
 
-                <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-xs text-gray-600">
-                        © {currentYear} ChartMaster. All rights reserved.
-                        <span className="block mt-1 md:inline md:mt-0 md:ml-4 text-gray-700">
-                            * 본 사이트의 정보는 투자 조언이 아니며, 투자 결과에 대한 책임은 본인에게 있습니다.
+                <div className="border-t border-outline-variant pt-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <p className="text-meta text-on-surface-variant">
+                        © {currentYear} ChartMaster Community. All rights reserved.
+                        <span className="block mt-1 md:inline md:mt-0 md:ml-3 text-outline">
+                            * 본 사이트의 모든 정보는 투자 권유가 아니며, 투자 결과의 책임은 본인에게 있습니다.
                         </span>
                     </p>
 
-                    <div className="flex items-center gap-4">
-                        <Link href="#" className="text-gray-500 hover:text-white transition-colors">
-                            <Github className="w-5 h-5" />
+                    <div className="flex items-center gap-3">
+                        <Link href="#" className="text-on-surface-variant hover:text-primary transition-colors" aria-label="GitHub">
+                            <Github className="w-4 h-4" />
                         </Link>
-                        <Link href="#" className="text-gray-500 hover:text-white transition-colors">
-                            <Twitter className="w-5 h-5" />
+                        <Link href="#" className="text-on-surface-variant hover:text-primary transition-colors" aria-label="Twitter">
+                            <Twitter className="w-4 h-4" />
                         </Link>
-                        <Link href="#" className="text-gray-500 hover:text-white transition-colors">
-                            <Mail className="w-5 h-5" />
+                        <Link href="#" className="text-on-surface-variant hover:text-primary transition-colors" aria-label="Mail">
+                            <Mail className="w-4 h-4" />
                         </Link>
                     </div>
                 </div>

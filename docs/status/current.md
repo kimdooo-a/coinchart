@@ -2,16 +2,19 @@
 
 | 항목 | 값 |
 |------|-----|
-| **마지막 세션** | 2026-03-08 (세션 5) |
-| **작업 내용** | 블로그 에디터 티스토리급 강화 + HTML 저장 전환 |
+| **마지막 세션** | 2026-05-10 (세션 7) |
+| **작업 내용** | Stitch 시안 → 코드 적용 1차 (디자인 토큰·공통 컴포넌트·5개 더미 페이지) |
 | **브랜치** | main |
-| **빌드 상태** | ✅ 성공 (Next.js 16.0.7 Turbopack) |
-| **마지막 커밋** | 미커밋 (세션 종료 시 커밋 예정) |
+| **빌드 상태** | ✅ 성공 (Next.js 16.0.7, 41개 라우트 정상) |
+| **마지막 커밋** | f8c24e0 (이번 세션 미커밋, Step 1~3 완료) |
+| **프로젝트 방향성** | **v2.0 커뮤니티 피벗** ([PROJECT_DIRECTION.md](../PROJECT_DIRECTION.md)) |
 
 ## 최근 작업 이력
 
 | 날짜 | 작업 | 결과 |
 |------|------|------|
+| 2026-05-10 | Stitch 시안 코드 적용 Step 1~3 (세션 7) | 디자인 토큰 통합(Material 3 + 한국식 빨/파), Noto Sans KR, 공통 컴포넌트 13개, 더미 페이지 6개(홈·뉴스·게시판×3·코인룸), 빌드 통과 |
+| 2026-05-10 | v2.0 방향성 정의 + 디자인 의뢰서 6종 (세션 6) | 코인판×네이버 하이브리드 커뮤니티로 피벗. Stitch 의뢰용 design-brief/ 작성 |
 | 2026-03-08 | 에디터 강화 + HTML 전환 (세션 5) | TipTap 확장 10개, HTML 저장, 자동저장, 뷰모드, 전체화면, DOMPurify |
 | 2026-03-08 | Giscus + Vitest + any 정리 (세션 4) | Giscus 활성화, Vitest 20개 테스트, any 35개→1개 (핵심 코드) |
 | 2026-03-08 | 블로그 SEO + 디자인 (세션 3) | SEO 인프라/서버-클라이언트 분리/JSON-LD/카드 그림자/TOC 하이라이팅/코드 복사 |
@@ -31,6 +34,30 @@
 | 3 | 2026-03-08 | 블로그 SEO 최적화 + 디자인 강화 | [로그](../logs/2026-03.md) | [handover](../handover/2026-03-08-session3-blog-seo.md) |
 | 4 | 2026-03-08 | Giscus + Vitest + any 타입 정리 | [로그](../logs/2026-03.md) | [handover](../handover/2026-03-08-session4-quality.md) |
 | 5 | 2026-03-08 | 블로그 에디터 강화 + HTML 전환 | [로그](../logs/2026-03.md) | [handover](../handover/2026-03-08-session5-editor-upgrade.md) |
+| 6 | 2026-05-10 | v2.0 방향성 피벗 + 디자인 의뢰서 6종 | (작성 예정) | (세션 종료 시) |
+| 7 | 2026-05-10 | Stitch 시안 코드 적용 Step 1~3 | (작성 예정) | (세션 종료 시) |
+
+## v2.0 피벗 핵심 (2026-05-10 결정)
+
+- **정체성**: AI 차트 분석 도구 → **코인·주식 정보 공유 커뮤니티** (코인판 × 네이버)
+- **메인 가치**: 유저 게시판 (자유/시세토론/정보공유 + 코인룸 6종)
+- **AI 차트 분석**: 부가 기능. "도구" 메뉴로 격리 (URL은 유지)
+- **뉴스**: 룰베이스 분류(AI 흉내), 4차원(코인·카테고리·호악재·중요도) 시각화
+- **작성 권한**: 익명+회원 혼용 (코인판 방식)
+- **디자인 톤**: 네이버 스타일 (흰 배경, 빨↑/파↓, 정보 밀도, 표 우선)
+
+## 디자인 의뢰서 (Stitch 의뢰용)
+
+| 문서 | 위치 |
+|-----|------|
+| 방향성 합의 문서 | [PROJECT_DIRECTION.md](../PROJECT_DIRECTION.md) |
+| 디자인 시스템 (공통) | [design-brief/00-overview.md](../design-brief/00-overview.md) |
+| 메인(홈) | [design-brief/01-home.md](../design-brief/01-home.md) |
+| 게시판 리스트 | [design-brief/02-board-list.md](../design-brief/02-board-list.md) |
+| 게시글 상세+작성 | [design-brief/03-post-detail-write.md](../design-brief/03-post-detail-write.md) |
+| 뉴스 강화 | [design-brief/04-news.md](../design-brief/04-news.md) |
+| 코인룸 | [design-brief/05-coin-room.md](../design-brief/05-coin-room.md) |
+| 인덱스·우선순위 | [design-brief/README.md](../design-brief/README.md) |
 
 ## 미해결 사항
 
@@ -43,3 +70,42 @@
 - 대형 파일 리팩토링 필요 (analysis/[symbol]/page.tsx 807줄)
 - DB content 컬럼 이미 text 타입 (마이그레이션 불필요), 데이터도 HTML 형식 확인 완료
 - ~~kdy-addon/monet-registry-main (1.7GB) 정리 필요~~ → 완료 (2026-02-28)
+
+## v2.0 진행 상태
+
+### 세션 7 완료 (2026-05-10)
+- ✅ 디자인 토큰 통합 (`app/globals.css` 전면 교체, Material 3 + 한국식 빨/파)
+- ✅ Noto Sans KR 적용 (`app/layout.tsx`)
+- ✅ 헤더 라이트화 + 메뉴 5+2 구조 (`components/global-header.tsx`)
+- ✅ 푸터 라이트화 (`components/footer-section.tsx`)
+- ✅ 공통 컴포넌트 13개 (`components/community/*`)
+  - Badge, CommunityTabs, Pagination, SidebarWidget
+  - BoardRow + BoardTableHeader, NewsRow, NewsHeadlineCard, CoinHero
+  - PriceTickerWidget, HotIssueWidget, FngGaugeWidget, OfficialPostsWidget, ToolsShortcutWidget
+- ✅ 더미 데이터 모듈 3종 (`lib/community/mock-{posts,news,coins}.ts`)
+- ✅ 신규/리디자인 페이지 6개 (모두 더미 데이터, DB 미연결)
+  - 홈 (`app/page.tsx`) — 시세스트립 + 베스트30 + 최신뉴스10 + 게시판 3컬럼 + 코인룸 6카드 + 사이드바
+  - 뉴스 (`app/news/page.tsx`) — 4차원 필터(코인·분류·감정·정렬) + 헤드라인3 + 표
+  - 게시판 리스트 (`app/board/[slug]/page.tsx`) — free/market/info 동일 템플릿
+  - 게시글 상세 (`app/board/[slug]/[postId]/page.tsx`) — 본문+추천+댓글+이전다음
+  - 게시글 작성 (`app/board/[slug]/write/page.tsx`) — TipTap 에디터 재사용
+  - 코인룸 (`app/coin/[symbol]/page.tsx`) — btc/eth/xrp/sol/altcoin/kimp 동일 템플릿
+- ✅ Next.js 빌드 통과 (41개 라우트)
+
+### 다음 세션 (Step 4~5 + 백엔드)
+- [ ] Step 4: 기존 다크 톤 페이지 라이트화 (페이지 25개)
+  - 우선순위 1: `/blog`, `/blog/[slug]`, `/blog/category`, `/blog/tag` (커뮤니티와 직접 연결)
+  - 우선순위 2: `/analysis`, `/analysis/[symbol]`, `/signal`, `/market` (코인룸 진입)
+  - 우선순위 3: `/stock`, `/stock-market`, `/portfolio`, `/watchlist`, `/calendar`
+  - 우선순위 4: `/admin/*`, `/auth/*`, `/settings`, `/secure-memo`, `/contact`, `/terms`, `/privacy`
+  - TradingView 차트 색상 라이트 톤 옵션 추가 (`lib/chart/theme.ts`)
+- [ ] BlogEditor의 `prose-invert` → 라이트 톤 옵션 props 추가
+- [ ] DB 마이그레이션: `community_boards`, `community_posts`, `community_comments`, `community_post_likes`
+- [ ] 익명 글 비밀번호 해싱 (bcrypt 권장)
+- [ ] IP 마스킹 미들웨어 (X-Forwarded-For 앞 2옥텟)
+- [ ] API 라우트: `/api/board/*`, `/api/community/*`
+- [ ] 더미 데이터(`lib/community/mock-*`) → Supabase 연동
+- [ ] 뉴스 룰베이스 분류 로직 (`lib/news/classifier.ts`, `lib/news/keyword-dict.ts`)
+- [ ] `news` 테이블 스키마 추가 (`category`, `importance_score`)
+- [ ] AI 분석 페이지를 "도구" 드롭다운 라우트와 시각적 일관성 맞추기
+- [ ] /history 페이지 메뉴 정리 (도구 드롭다운에서 제외하거나 추가)

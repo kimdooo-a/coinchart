@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/context/LanguageContext";
 import GlobalHeader from "@/components/global-header";
@@ -7,25 +7,22 @@ import JsonLd from "@/components/seo/JsonLd";
 import { generateWebsiteJsonLd } from "@/lib/seo/json-ld";
 import { getSiteUrl } from "@/lib/blog-utils";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const notoSansKr = Noto_Sans_KR({
+  variable: "--font-noto-sans-kr",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["400", "500", "700", "800"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   title: {
-    default: "ChartMaster - AI Crypto & Stock Analysis",
+    default: "ChartMaster Community - 코인·주식 정보 공유",
     template: "%s | ChartMaster",
   },
-  description: "AI 기반 암호화폐/주식 시장 분석 플랫폼",
+  description: "한국 투자자를 위한 코인·주식 정보 공유 커뮤니티. 자유 토론, 큐레이션 뉴스, 코인별 토론룸.",
   openGraph: {
-    siteName: "ChartMaster",
+    siteName: "ChartMaster Community",
     locale: "ko_KR",
   },
   alternates: {
@@ -41,9 +38,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ko">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-background text-foreground overflow-x-hidden`}
+        className={`${notoSansKr.variable} antialiased min-h-screen flex flex-col bg-surface-container-lowest text-on-surface overflow-x-hidden`}
       >
         <JsonLd data={generateWebsiteJsonLd()} />
         <LanguageProvider>
