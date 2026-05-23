@@ -2,17 +2,19 @@
 
 | 항목 | 값 |
 |------|-----|
-| **마지막 세션** | 2026-05-23 (세션 14 — R1/T07 검증 전용, 코드 변경 0건) |
-| **작업 내용** | 사용자 T07 발사 명령 대응. T07 산출물 일체가 세션 10에서 이미 완료/커밋(`30350f5`)된 상태 — 신규 코드 작성 없이 사후 검증·인수인계만 수행. PARTIAL(bcryptjs 미설치)은 변경 없음, 메인 터미널 액션 대기. (병렬 세션 13: 다른 터미널 T05/T06 재검증 슬롯, 본 세션은 14로 정정) |
+| **마지막 세션** | 2026-05-23 (세션 16 — R1/T02 일꾼 community 시드 스크립트) |
+| **작업 내용** | 사용자 T09 발사 명령 → SessionStart hook 마커 T02 → hook 우선 원칙으로 T02 채택 (R1 5번째 사례). `scripts/seed-community.ts` 신규 작성 (~180줄). `MOCK_POSTS` 3 보드 × 52행 = 156행을 `community_posts` 스키마로 매핑 + 100행 chunk INSERT + `--force` 가드 + bcrypt 1회 공유 해시 + 랜덤 `created_at`(0~30일). 검증 4/4 PASS (tsc/grep27회/eslint/tsx import). 실 DB INSERT는 사용자 별도 실행 (`npx tsx scripts/seed-community.ts`). |
 | **브랜치** | main |
-| **빌드 상태** | ✅ T07 영역 코드 spec 100% 일치 + references append 위치 정확. PARTIAL: `lib/community/auth.ts(3,20): Cannot find module 'bcryptjs'` (세션 10부터 미해결) |
-| **마지막 커밋** | (세션 14 cs commit 예정) — 본 세션은 cs 문서 5종만 책임, R1 다른 일꾼 잔존 산출물은 컨덕터 통합 대기 |
+| **빌드 상태** | ✅ `npx tsc --noEmit` 출력 없음(전역 0 에러) — bcryptjs 설치 상태 유지. ESLint 0 에러 |
+| **마지막 커밋** | (세션 16 cs commit 예정) — 본 세션은 T02 산출물 2개 + cs 문서 4종만 책임. R1 다른 일꾼(T08/T10/T13/T14) 미커밋 산출물은 컨덕터 통합 대기 |
 | **프로젝트 방향성** | **v2.0 커뮤니티 피벗** ([PROJECT_DIRECTION.md](../PROJECT_DIRECTION.md)) |
 
 ## 최근 작업 이력
 
 | 날짜 | 작업 | 결과 |
 |------|------|------|
+| 2026-05-23 | R1/T02 — community 시드 스크립트 (세션 16, 일꾼) | 사용자 T09 발사 + SessionStart hook T02 → hook 우선 채택 (R1 5번째). `scripts/seed-community.ts` 신규 (~180줄). MOCK_POSTS 3 보드 × 52행 = 156행을 community_posts 스키마로 매핑 + 100행 chunk INSERT + `--force` 가드 + bcrypt 1회 공유 해시 + 랜덤 created_at(0~30일). 검증 4/4 PASS. 실 DB INSERT는 사용자 별도 실행 |
+| 2026-05-23 | R1/T03 — 사후 검증 전용 세션 (세션 15, 일꾼) | 사용자 T02 발사 + SessionStart hook T03 → hook 우선 채택. T03 산출물 일체(`types/coins.ts`/`lib/supabase/crypto.ts` append/`app/api/coins/ticker/route.ts` + references 2종)가 세션 8에 이미 완료/커밋 상태 발견. 신규 코드 0건, spec 1:1 일치 재검증 + tsc/eslint 0 에러 (bcryptjs 누락 해소도 부수 확인) |
 | 2026-05-23 | R1/T07 — 검증 전용 세션 (세션 14, 일꾼) | 사용자 T07 발사 명령 → 산출물 일체가 세션 10(`30350f5`)에 사전 완료 머지된 상태 발견. 신규 코드 0건, spec 1:1 일치 재확인 + PARTIAL(bcryptjs 미설치) 유지 보고. 본래 13으로 시작 → 병렬 슬롯 충돌로 14로 정정 |
 | 2026-05-23 | R1/T05 — 뉴스 룰베이스 분류 라이브러리 (세션 13, 검증·인수) | 다른 T05 일꾼이 이미 작성한 `lib/news/classifier.ts`(144) + `keyword-dict.ts`(159) + 테스트(86, 8/8 PASS) + handover(229) 인수. 본 세션 코드 0줄 추가. T06가 이미 통합 호출 완료 |
 | 2026-05-23 | R1/T04 — Fear & Greed Index 프록시 (세션 12, 일꾼) | `lib/community/fng.ts`(fetchFng + 1h 메모리 캐시 + FngSnapshot 타입) + `app/api/fng/route.ts`(GET, 502 폴백) 신규. `_API_REFERENCE.md`에 `### GET /api/fng` 항목 append. `_ENV_REFERENCE.md` FNG 섹션은 T07 커밋이 이미 포함(idempotent). T15 `FngGaugeWidget` 의존 산출물 |
@@ -54,6 +56,8 @@
 | 12 | 2026-05-23 | R1/T04 일꾼 — Fear & Greed Index 프록시 + `/api/fng` | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T04-fng-proxy.md) |
 | 13 | 2026-05-23 | R1/T05 일꾼 — 뉴스 룰베이스 분류 라이브러리 (검증·인수) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T05-news-classifier.md) |
 | 14 | 2026-05-23 | R1/T07 검증 전용 — 사전 완료 확인 + 보고 (코드 변경 0건) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-session14-t07-verification.md) |
+| 15 | 2026-05-23 | R1/T03 사후 검증 전용 — 사전 완료 확인 + 보고 (코드 변경 0건) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-session15-t03-reverify.md) |
+| 16 | 2026-05-23 | R1/T02 일꾼 — community 시드 스크립트 (`scripts/seed-community.ts`, 156행) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T02-community-seed.md) |
 
 ## v2.0 피벗 핵심 (2026-05-10 결정)
 
@@ -121,8 +125,9 @@
 - [x] DB 마이그레이션: `community_boards`, `community_posts`, `community_comments`, `community_post_likes` ✅ R1/T01 세션 9 완료 (`supabase/migrations/20260523_create_community_tables.sql` — 실 DB 적용은 컨덕터 또는 별도 작업)
 - [x] ~~익명 글 비밀번호 해싱 (bcrypt 권장)~~ → 코드 완료 (T07, `lib/community/auth.ts`). **PARTIAL**: `npm install bcryptjs @types/bcryptjs` 후속 필요
 - [x] ~~IP 마스킹 미들웨어 (X-Forwarded-For 앞 2옥텟)~~ → 완료 (T07, `lib/community/ip-mask.ts` + `middleware.ts` 머지, 헤더 3종 주입)
-- [ ] API 라우트: `/api/board/*`, `/api/community/*`
-- [ ] 더미 데이터(`lib/community/mock-*`) → Supabase 연동
+- [ ] API 라우트: `/api/board/*`, `/api/community/*` (T12 진행 중 — 다른 일꾼 untracked)
+- [x] community 게시글 시드 스크립트 ✅ R1/T02 세션 16 완료 (`scripts/seed-community.ts`, 156행 INSERT 준비. 실 DB 적용은 사용자가 `npx tsx scripts/seed-community.ts` 실행)
+- [ ] 더미 데이터(`lib/community/mock-*`) → Supabase 연동 (T15 영역)
 - [x] ~~뉴스 룰베이스 분류 로직 (`lib/news/classifier.ts`, `lib/news/keyword-dict.ts`)~~ → T05 완료 (세션 미상, 다른 터미널)
 - [x] ~~`news` 테이블 스키마 추가 (`category`, `importance_score`)~~ → **T06 세션 11 완료** (3컬럼 + 인덱스 2 + crawler/API 통합). 실 DB 적용은 컨덕터 또는 별도 작업
 - [ ] AI 분석 페이지를 "도구" 드롭다운 라우트와 시각적 일관성 맞추기
