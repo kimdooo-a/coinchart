@@ -1,7 +1,12 @@
 'use client'
 
 import React, { useEffect, useRef } from 'react'
-import { createChart, ColorType, IChartApi, CandlestickSeries, LineSeries } from 'lightweight-charts'
+import { createChart, IChartApi, CandlestickSeries, LineSeries } from 'lightweight-charts'
+import { getChartTheme, getCandleColors } from '@/lib/chart/theme'
+
+// 라이트 테마 + 한국식(빨↑/파↓) 캔들 — lib/chart/theme.ts SSOT (R1/T08)
+const CHART_THEME = getChartTheme('light')
+const CANDLE_COLORS = getCandleColors('kr')
 
 interface ChartData {
     time: string
@@ -34,33 +39,17 @@ export const DetailedChart = ({ data, avgPrice, symbol }: DetailedChartProps) =>
         }
 
         const chart = createChart(chartContainerRef.current, {
-            layout: {
-                background: { type: ColorType.Solid, color: '#111' },
-                textColor: '#DDD',
-            },
+            ...CHART_THEME,
             width: chartContainerRef.current.clientWidth,
             height: chartContainerRef.current.clientHeight, // Use container height
-            grid: {
-                vertLines: { color: '#333' },
-                horzLines: { color: '#333' },
-            },
-            rightPriceScale: {
-                borderColor: '#444',
-            },
-            timeScale: {
-                borderColor: '#444',
-            },
         })
 
         chartRef.current = chart
 
         // Candlestick Series (v5 Syntax)
         const candlestickSeries = chart.addSeries(CandlestickSeries, {
-            upColor: '#26a69a',
-            downColor: '#ef5350',
+            ...CANDLE_COLORS,
             borderVisible: false,
-            wickUpColor: '#26a69a',
-            wickDownColor: '#ef5350',
         })
 
         candlestickSeries.setData(data)

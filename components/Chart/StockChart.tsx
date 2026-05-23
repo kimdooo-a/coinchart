@@ -1,8 +1,14 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { createChart, ColorType, IChartApi, ISeriesApi, Time, CandlestickSeries, LineSeries, HistogramSeries } from 'lightweight-charts';
+import { createChart, IChartApi, ISeriesApi, Time, CandlestickSeries, LineSeries, HistogramSeries } from 'lightweight-charts';
 import { calculateRSI, calculateBollingerBands, calculateMACD, calculateSMA } from '@/lib/indicators';
+import { getChartTheme, getCandleColors } from '@/lib/chart/theme';
+
+// 라이트 테마 + 한국식(빨↑/파↓) 캔들 — lib/chart/theme.ts SSOT (R1/T08).
+// 주식도 한국 투자자 관례(빨↑/파↓)에 맞춰 'kr' 적용.
+const CHART_THEME = getChartTheme('light');
+const CANDLE_COLORS = getCandleColors('kr');
 
 interface Props {
     symbol: string;
@@ -29,11 +35,6 @@ export const StockChart: React.FC<Props> = ({
     showVolume = false,
     showMA = false,
     lang = 'ko',
-    colors = {
-        backgroundColor: '#1E1E1E',
-        lineColor: '#2962FF',
-        textColor: '#D9D9D9',
-    },
 }) => {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const rsiContainerRef = useRef<HTMLDivElement>(null);
@@ -104,15 +105,14 @@ export const StockChart: React.FC<Props> = ({
         if (!chartContainerRef.current) return;
 
         const chart = createChart(chartContainerRef.current, {
-            layout: { background: { type: ColorType.Solid, color: colors.backgroundColor }, textColor: colors.textColor },
+            ...CHART_THEME,
             width: chartContainerRef.current.clientWidth,
             height: chartContainerRef.current.clientHeight,
-            grid: { vertLines: { color: '#2B2B43' }, horzLines: { color: '#2B2B43' } },
-            timeScale: { timeVisible: true, secondsVisible: false },
+            timeScale: { ...CHART_THEME.timeScale, timeVisible: true, secondsVisible: false },
         });
 
         const candlestickSeries = chart.addSeries(CandlestickSeries, {
-            upColor: '#26a69a', downColor: '#ef5350', borderVisible: false, wickUpColor: '#26a69a', wickDownColor: '#ef5350',
+            ...CANDLE_COLORS, borderVisible: false,
         });
 
         chartRef.current = chart;
@@ -121,34 +121,32 @@ export const StockChart: React.FC<Props> = ({
         return () => {
             chartRef.current = null; seriesRef.current = null; chart.remove();
         };
-    }, [colors.backgroundColor, colors.textColor]);
+    }, []);
 
     // Initialize RSI Chart
     useEffect(() => {
         if (showRSI && rsiContainerRef.current) {
             const rsiChart = createChart(rsiContainerRef.current, {
-                layout: { background: { type: ColorType.Solid, color: colors.backgroundColor }, textColor: colors.textColor },
+                ...CHART_THEME,
                 width: rsiContainerRef.current.clientWidth,
                 height: rsiContainerRef.current.clientHeight,
-                grid: { vertLines: { color: '#2B2B43' }, horzLines: { color: '#2B2B43' } },
-                timeScale: { timeVisible: true, secondsVisible: false },
+                timeScale: { ...CHART_THEME.timeScale, timeVisible: true, secondsVisible: false },
             });
             const rsiSeries = rsiChart.addSeries(LineSeries, { color: '#9c27b0', lineWidth: 2 });
             rsiChartRef.current = rsiChart; rsiSeriesRef.current = rsiSeries;
             syncCharts();
             return () => { rsiChartRef.current = null; rsiSeriesRef.current = null; rsiChart.remove(); };
         }
-    }, [showRSI, colors]);
+    }, [showRSI]);
 
     // Initialize MACD Chart
     useEffect(() => {
         if (showMACD && macdContainerRef.current) {
             const macdChart = createChart(macdContainerRef.current, {
-                layout: { background: { type: ColorType.Solid, color: colors.backgroundColor }, textColor: colors.textColor },
+                ...CHART_THEME,
                 width: macdContainerRef.current.clientWidth,
                 height: macdContainerRef.current.clientHeight,
-                grid: { vertLines: { color: '#2B2B43' }, horzLines: { color: '#2B2B43' } },
-                timeScale: { timeVisible: true, secondsVisible: false },
+                timeScale: { ...CHART_THEME.timeScale, timeVisible: true, secondsVisible: false },
             });
             const histogramSeries = macdChart.addSeries(HistogramSeries, { color: '#26a69a' });
             const macdSeries = macdChart.addSeries(LineSeries, { color: '#2962FF', lineWidth: 2 });
@@ -161,7 +159,7 @@ export const StockChart: React.FC<Props> = ({
                 macdChartRef.current = null; macdHistogramRef.current = null; macdLineRef.current = null; signalLineRef.current = null; macdChart.remove();
             };
         }
-    }, [showMACD, colors]);
+    }, [showMACD]);
 
     // Manage Volume
     useEffect(() => {

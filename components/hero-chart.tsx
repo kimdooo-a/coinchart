@@ -1,8 +1,13 @@
 "use client";
 
-import { createChart, ColorType, CrosshairMode, IChartApi, CandlestickSeries, UTCTimestamp } from "lightweight-charts";
+import { createChart, CrosshairMode, IChartApi, CandlestickSeries, UTCTimestamp } from "lightweight-charts";
 import React, { useEffect, useRef } from "react";
 import { subscribeToKlines, CandleData } from "@/lib/api/binance";
+import { getChartTheme, getCandleColors } from "@/lib/chart/theme";
+
+// 라이트 테마 + 한국식(빨↑/파↓) 캔들 — lib/chart/theme.ts SSOT (R1/T08)
+const CHART_THEME = getChartTheme("light");
+const CANDLE_COLORS = getCandleColors("kr");
 
 export const HeroChart = () => {
     const chartContainerRef = useRef<HTMLDivElement>(null);
@@ -30,36 +35,17 @@ export const HeroChart = () => {
         };
 
         const chart = createChart(chartContainerRef.current, {
-            layout: {
-                background: { type: ColorType.Solid, color: "transparent" },
-                textColor: "rgba(255, 255, 255, 0.5)",
-            },
-            grid: {
-                vertLines: { color: "rgba(255, 255, 255, 0.05)" },
-                horzLines: { color: "rgba(255, 255, 255, 0.05)" },
-            },
-            crosshair: {
-                mode: CrosshairMode.Normal,
-            },
-            rightPriceScale: {
-                borderColor: "rgba(255, 255, 255, 0.1)",
-            },
-            timeScale: {
-                borderColor: "rgba(255, 255, 255, 0.1)",
-                timeVisible: true,
-                secondsVisible: false,
-            },
+            ...CHART_THEME,
+            crosshair: { ...CHART_THEME.crosshair, mode: CrosshairMode.Normal },
+            timeScale: { ...CHART_THEME.timeScale, timeVisible: true, secondsVisible: false },
             height: 400,
         });
 
         chartRef.current = chart;
 
         const candlestickSeries = chart.addSeries(CandlestickSeries, {
-            upColor: "#26a69a",
-            downColor: "#ef5350",
+            ...CANDLE_COLORS,
             borderVisible: false,
-            wickUpColor: "#26a69a",
-            wickDownColor: "#ef5350",
         });
 
         let isMounted = true;
