@@ -611,3 +611,31 @@ R1 (2026-05-23) 추가.
 
 응답: `{ tickers: CoinTicker[], ts: number }` — `types/coins.ts#CoinTicker`
 캐시: 60초 (Next revalidate + 메모리 Map)
+
+---
+
+### GET /api/fng
+
+R1 (2026-05-23) 추가. Alternative.me Fear & Greed Index 프록시.
+
+- **파일**: `app/api/fng/route.ts`
+- **데이터 소스**: `https://api.alternative.me/fng/?limit=2&format=json` (무인증, 무료)
+- **파라미터**: 없음
+- **응답 (200)**: `FngSnapshot`
+  ```json
+  {
+    "value": 72,
+    "classification": "Greed",
+    "prevValue": 68,
+    "timestamp": 1747958400000
+  }
+  ```
+  - `value`: 0~100 정수
+  - `classification`: `"Extreme Fear" | "Fear" | "Neutral" | "Greed" | "Extreme Greed"`
+  - `prevValue`: 어제 값 (없을 수도 있음)
+  - `timestamp`: unix ms
+- **에러 응답**:
+  - `502`: `{ "error": "..." }` (외부 API 실패 / 빈 응답)
+- **캐시**: 1시간 (Next `revalidate = 3600` + 모듈 메모리)
+- **인증**: 불필요
+- **사용처**: 메인페이지 사이드바 `FngGaugeWidget` (T15)

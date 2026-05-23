@@ -4,6 +4,7 @@
 
 ## 최근 완료된 작업
 
+- **세션 12 (2026-05-23)**: R1/T04 일꾼 — Alternative.me Fear & Greed Index 프록시. `lib/community/fng.ts` 신규(`fetchFng()` + `FngSnapshot` 인터페이스 + 1시간 모듈 메모리 캐시 + `next: { revalidate: 3600 }`) + `app/api/fng/route.ts` 신규(`GET /api/fng`, 실패 시 502). `_API_REFERENCE.md`에 `### GET /api/fng` 항목 append. `_ENV_REFERENCE.md` FNG 섹션은 T07 커밋(`30350f5`)이 이미 동일 텍스트를 포함하고 있어 idempotent(git diff 0). 라이브 fetch 검증 PASS(`value=28, classification="Fear"`). **T15 메모**: 메인페이지 `FngGaugeWidget`에서 `/api/fng` 호출, 502 시 fallback UI(현재 하드코딩 72/68 재사용 가능) 권장. ENV 추가 없음·`FngGaugeWidget.tsx`/`app/page.tsx` 미수정.
 - **세션 11 (2026-05-23)**: R1/T06 일꾼 — 뉴스 분류 4차원 DB·API 통합. `supabase/migrations/20260523_alter_news_classify.sql` 신규 (`category` text + 8값 enum CHECK / `importance_score` smallint 1~10 / `sentiment_score` integer, 인덱스 2). `app/api/admin/news-crawl/route.ts`에 T05 `classify()` 호출 통합하여 RSS item 파싱 직후 4차원 결과를 적재 (기존 인라인 symbol 매칭 7줄 제거). `app/api/news/route.ts`에 `?category=` / `?minImportance=` 쿼리 파라미터 + 응답 필드 4종(camelCase) 추가. T15가 메인 NewsRow에서 소비. 실 DB 적용은 컨덕터 또는 별도 작업.
 - **세션 10 (2026-05-23)**: R1/T07 일꾼 — 익명 게스트 bcrypt 해시/검증 (`lib/community/auth.ts`) + IP 마스킹/HMAC 해시 (`lib/community/ip-mask.ts`) + 기존 `middleware.ts`에 IP 헤더 3종(`x-client-ip`/`-masked`/`-hash`) 주입 로직 머지 + matcher에 `/api/board/:path*`, `/api/community/:path*` 추가. T12(board API)가 의존할 헤더 명세 handover에 코드 예시로 명시. **PARTIAL**: `npm install bcryptjs @types/bcryptjs` 후속 필요.
 - **세션 9 (2026-05-23)**: R1/T08 일꾼 — `lib/chart/theme.ts` 신규 (`getChartTheme('light'|'dark')` + `getCandleColors('kr'|'us')`, KR 빨/파 + US 녹/빨) + `BlogEditor`/`EditorToolbar`에 `tone?: 'light'|'dark'` prop 추가 (default `light`). lightweight-charts v5 `ColorType.Solid` enum 호환성 솔루션 별도 기록(`docs/solutions/2026-05-23-lightweight-charts-v5-colortype-enum.md`). 페이지 적용은 T09(signal)·T10(analysis)·T11(market) 의존.
@@ -34,6 +35,7 @@
 7. ~~**IP 마스킹 미들웨어** — `X-Forwarded-For` 앞 2옥텟만 저장~~ → **세션 10(T07) 완료** (`lib/community/ip-mask.ts` + `middleware.ts` 머지, 3종 헤더 주입)
 8. **API 라우트** — `/api/board/[slug]`, `/api/board/[slug]/[postId]`, `/api/community/comment`, `/api/community/like` — T12 영역
 9. **더미 → 실데이터** — `lib/community/mock-*` → Supabase 연동 — T02 + T15 영역
+   - ~~**FngGaugeWidget 하드코딩(`value=72, prevValue=68`) → `/api/fng` hydrate**~~ → **세션 12(T04) 산출물 준비 완료** (`/api/fng`). 메인페이지 통합은 T15에서 수행 (502 시 fallback UI 권장)
 
 ### 뉴스 룰베이스 분류 (완료)
 

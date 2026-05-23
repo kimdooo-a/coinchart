@@ -2,17 +2,18 @@
 
 | 항목 | 값 |
 |------|-----|
-| **마지막 세션** | 2026-05-23 (세션 11 — R1/T06 일꾼, T04/T10 등과 동시 발사) |
-| **작업 내용** | `news` 테이블 3컬럼 ALTER(`category`/`importance_score`/`sentiment_score`) + crawler에 T05 `classify()` 통합 + API 응답 4차원 확장 + `?category=`/`?minImportance=` 필터. T15가 메인 NewsRow에서 소비. (R1 dispatch, T06 일꾼) |
+| **마지막 세션** | 2026-05-23 (세션 12 — R1/T04 일꾼, T06/T07 등과 동시 발사) |
+| **작업 내용** | Alternative.me Fear & Greed Index 프록시 신규 (`lib/community/fng.ts` + `app/api/fng/route.ts`). 1시간 메모리 + Next revalidate 이중 캐시, 502 시 fallback UI 권장. T15 메인페이지 `FngGaugeWidget` hydrate 의존. (R1 dispatch, T04 일꾼) |
 | **브랜치** | main |
-| **빌드 상태** | ✅ T06 영역(news 관련) tsc 에러 0. ESLint clean. 무관 에러 1건(`bcryptjs` 미설치, T07 영역) 잔존 |
-| **마지막 커밋** | (T06 commit 예정) — R1 다른 일꾼 T04/T10 산출물 워킹트리 잔존, 컨덕터 통합 대기 |
+| **빌드 상태** | ✅ T04 영역(`lib/community/fng.ts`, `app/api/fng/route.ts`) tsc 에러 0, ESLint clean. 무관 에러 1건(`bcryptjs` 미설치, T07 영역) 잔존 |
+| **마지막 커밋** | (T04 commit 예정) — R1 다른 일꾼 T05/T08/T10/T14 산출물 워킹트리 잔존, 컨덕터 통합 대기 |
 | **프로젝트 방향성** | **v2.0 커뮤니티 피벗** ([PROJECT_DIRECTION.md](../PROJECT_DIRECTION.md)) |
 
 ## 최근 작업 이력
 
 | 날짜 | 작업 | 결과 |
 |------|------|------|
+| 2026-05-23 | R1/T04 — Fear & Greed Index 프록시 (세션 12, 일꾼) | `lib/community/fng.ts`(fetchFng + 1h 메모리 캐시 + FngSnapshot 타입) + `app/api/fng/route.ts`(GET, 502 폴백) 신규. `_API_REFERENCE.md`에 `### GET /api/fng` 항목 append. `_ENV_REFERENCE.md` FNG 섹션은 T07 커밋이 이미 포함(idempotent). T15 `FngGaugeWidget` 의존 산출물 |
 | 2026-05-23 | R1/T06 — 뉴스 분류 4차원 DB·API 통합 (세션 11, 일꾼) | `supabase/migrations/20260523_alter_news_classify.sql` 신규 (`category`/`importance_score`/`sentiment_score` 3컬럼 + 인덱스 2). `app/api/admin/news-crawl/route.ts`에 T05 `classify()` 호출 통합 (인라인 symbol 매칭 7줄 제거). `app/api/news/route.ts` 응답 필드 4종 확장 + `?category=`/`?minImportance=` 필터. T15 의존 산출물 |
 | 2026-05-23 | R1/T07 — 익명 bcrypt + IP 마스킹 + middleware (세션 10, 일꾼) | `lib/community/auth.ts`(bcrypt 해시/검증 + 닉네임) + `lib/community/ip-mask.ts`(IP 추출/마스킹/HMAC 해시) 신규. `middleware.ts`에 IP 헤더 3종 주입 + matcher 확장. T12(board API) 의존 산출물. PARTIAL: bcryptjs 패키지 미설치 |
 | 2026-05-23 | R1/T08 — 차트 라이트 테마 + BlogEditor `tone` prop (세션 9, 일꾼) | `lib/chart/theme.ts` 신규 (`getChartTheme`/`getCandleColors`, KR 빨/파 + US 녹/빨), `BlogEditor`/`EditorToolbar`에 `tone?: 'light'\|'dark'` prop 추가. T09·T10·T11 의존 산출물 |
@@ -48,6 +49,7 @@
 | 9 | 2026-05-23 | R1/T14 일꾼 — 번역 키 정리 + 헤더 인라인 분기 제거 | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T14-translations-cleanup.md) |
 | 10 | 2026-05-23 | R1/T07 일꾼 — 익명 bcrypt + IP 마스킹 + middleware 머지 | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T07-auth-middleware.md) |
 | 11 | 2026-05-23 | R1/T06 일꾼 — 뉴스 분류 4차원 DB·API 통합 | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T06-news-classify-integration.md) |
+| 12 | 2026-05-23 | R1/T04 일꾼 — Fear & Greed Index 프록시 + `/api/fng` | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T04-fng-proxy.md) |
 
 ## v2.0 피벗 핵심 (2026-05-10 결정)
 
