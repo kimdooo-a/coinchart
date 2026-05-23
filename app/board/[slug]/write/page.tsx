@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { Info } from "lucide-react";
 import FooterSection from "@/components/footer-section";
 import { BOARD_META, type BoardSlug } from "@/lib/community/mock-posts";
+import { createBoardPost } from "@/lib/community/board-queries";
 
 const BlogEditor = dynamic(() => import("@/components/Blog/editor/BlogEditor"), {
     ssr: false,
@@ -50,7 +51,7 @@ export default function PostWritePage({
         setTagInput("");
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!title.trim()) {
             alert("제목을 입력해주세요.");
             return;
@@ -64,12 +65,22 @@ export default function PostWritePage({
             return;
         }
         setSubmitting(true);
-        // TODO: 실제 API 연동은 다음 세션
-        setTimeout(() => {
+        try {
+            const id = await createBoardPost(boardSlug, {
+                title: title.trim(),
+                contentHtml: content,
+                category,
+                tags,
+                postAsAnonymous,
+                guestNickname: postAsAnonymous ? guestNick.trim() : undefined,
+                guestPassword: postAsAnonymous ? guestPwd : undefined,
+            });
+            // 성공 시 작성한 글 상세로 이동
+            router.push(`/board/${boardSlug}/${id}`);
+        } catch (e: unknown) {
+            alert(e instanceof Error ? e.message : "게시글 등록에 실패했습니다.");
             setSubmitting(false);
-            alert("게시글이 등록되었습니다 (더미 동작). 다음 세션에서 DB 연동 예정.");
-            router.push(`/board/${boardSlug}`);
-        }, 600);
+        }
     };
 
     return (

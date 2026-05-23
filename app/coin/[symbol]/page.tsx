@@ -1,9 +1,9 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, useEffect } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Activity, Bell } from "lucide-react";
+import { Activity } from "lucide-react";
 import CoinHero from "@/components/community/CoinHero";
 import CommunityTabs from "@/components/community/CommunityTabs";
 import BoardRow, { BoardTableHeader } from "@/components/community/BoardRow";
@@ -14,9 +14,24 @@ import HotIssueWidget from "@/components/community/widgets/HotIssueWidget";
 import FngGaugeWidget from "@/components/community/widgets/FngGaugeWidget";
 import OfficialPostsWidget from "@/components/community/widgets/OfficialPostsWidget";
 import FooterSection from "@/components/footer-section";
-import { getCoin, TICKER_LIST, HOT_ISSUES, OFFICIAL_POSTS } from "@/lib/community/mock-coins";
-import { getPostsForCoin } from "@/lib/community/mock-posts";
-import { getNewsForCoin } from "@/lib/community/mock-news";
+import {
+    getCoinRoomMeta,
+    buildCoinView,
+    fetchTickers,
+    findTicker,
+    toTickerItems,
+    fetchCoinPosts,
+    fetchCoinNews,
+    fetchHotIssues,
+    fetchFng,
+    fetchOfficialPosts,
+    type CoinBoardPost,
+} from "@/lib/community/coin-queries";
+import type { CoinTicker } from "@/types/coins";
+import type { NewsHeadlineItem } from "@/components/community/NewsHeadlineCard";
+import type { HotIssue } from "@/components/community/widgets/HotIssueWidget";
+import type { OfficialPost } from "@/components/community/widgets/OfficialPostsWidget";
+import type { FngView } from "@/lib/community/coin-queries";
 
 const TABS = [
     { key: "all", label: "전체" },
@@ -26,20 +41,76 @@ const TABS = [
     { key: "notice", label: "📌 공지" },
 ];
 
+type NewsItem = NewsHeadlineItem & { coinTag?: string };
+
+interface CoinRoomData {
+    symbol: string; // 데이터를 가져온 시점의 meta.slug
+    tickers: CoinTicker[];
+    posts: CoinBoardPost[];
+    notices: CoinBoardPost[];
+    news: NewsItem[];
+    hotIssues: HotIssue[];
+    fng: FngView | null;
+    officialPosts: OfficialPost[];
+}
+
 export default function CoinRoomPage({
     params,
 }: {
     params: Promise<{ symbol: string }>;
 }) {
     const { symbol } = use(params);
-    const coin = getCoin(symbol);
-    if (!coin) notFound();
+    const meta = getCoinRoomMeta(symbol);
+    if (!meta) notFound();
 
     const [activeTab, setActiveTab] = useState("all");
 
-    const posts = getPostsForCoin(coin.coinTagFilter, 30);
-    const news = getNewsForCoin(coin.coinTagFilter, 10);
-    const trending = posts.slice(0, 10);
+    // 실데이터 — 단일 상태 객체(symbol 포함)로 보관해 effect 내 동기 setState 회피.
+    const [data, setData] = useState<CoinRoomData | null>(null);
+
+    useEffect(() => {
+        let alive = true;
+        Promise.all([
+            fetchTickers(),
+            fetchCoinPosts(meta.boardSlug),
+            fetchCoinNews(meta.coinTagFilter),
+            fetchHotIssues(),
+            fetchFng(),
+            fetchOfficialPosts(),
+        ]).then(([tk, pr, nw, hi, f, op]) => {
+            if (!alive) return;
+            setData({
+                symbol: meta.slug,
+                tickers: tk,
+                posts: pr.posts,
+                notices: pr.notices,
+                news: nw,
+                hotIssues: hi,
+                fng: f,
+                officialPosts: op,
+            });
+        });
+        return () => {
+            alive = false;
+        };
+    }, [meta.slug, meta.boardSlug, meta.coinTagFilter]);
+
+    // 현재 symbol 데이터가 준비됐을 때만 사용(심볼 전환 시 이전 데이터 노출 방지)
+    const ready = data && data.symbol === meta.slug ? data : null;
+    const loading = ready === null;
+    const tickers = ready?.tickers ?? [];
+    const posts = ready?.posts ?? [];
+    const notices = ready?.notices ?? [];
+    const news = ready?.news ?? [];
+    const hotIssues = ready?.hotIssues ?? [];
+    const fng = ready?.fng ?? null;
+    const officialPosts = ready?.officialPosts ?? [];
+
+    // 정적 메타 + 실시세 병합 (집계형 altcoin/kimp는 ticker 미존재 → 정적 폴백)
+    const coin = buildCoinView(meta, findTicker(tickers, meta.symbol));
+    // 인기글: 추천수 상위 10 (실데이터 클라 정렬)
+    const trending = [...posts].sort((a, b) => b.likes - a.likes).slice(0, 10);
+    const tickerItems = toTickerItems(tickers).slice(0, 6);
 
     return (
         <main className="flex-1 bg-surface-container-low">
@@ -77,13 +148,17 @@ export default function CoinRoomPage({
                                 <section className="bg-surface-container-lowest border border-outline-variant rounded-md mb-4 overflow-hidden">
                                     <header className="px-4 py-2.5 border-b border-outline-variant flex items-center justify-between">
                                         <h2 className="text-body-base font-bold">🔥 인기글 (오늘)</h2>
-                                        <Link href="/board/market" className="text-meta text-on-surface-variant hover:text-primary">
+                                        <Link href={`/board/${meta.boardSlug}`} className="text-meta text-on-surface-variant hover:text-primary">
                                             더보기 ›
                                         </Link>
                                     </header>
                                     <BoardTableHeader />
                                     <div className="divide-y divide-outline-variant">
-                                        {trending.length === 0 ? (
+                                        {loading ? (
+                                            <div className="py-12 text-center text-on-surface-variant text-body-sm">
+                                                불러오는 중…
+                                            </div>
+                                        ) : trending.length === 0 ? (
                                             <div className="py-12 text-center text-on-surface-variant text-body-sm">
                                                 아직 {coin.symbol} 관련 글이 없습니다.{" "}
                                                 <Link href={`/board/free/write?coin=${coin.symbol}`} className="text-primary font-bold hover:underline">
@@ -93,9 +168,9 @@ export default function CoinRoomPage({
                                         ) : (
                                             trending.map((p, i) => (
                                                 <BoardRow
-                                                    key={p.id}
+                                                    key={p.uuid}
                                                     post={{ ...p, number: i + 1 }}
-                                                    href={`/board/${p.boardSlug}/${p.id}`}
+                                                    href={`/board/${p.boardSlug}/${p.uuid}`}
                                                     compact
                                                 />
                                             ))
@@ -112,12 +187,16 @@ export default function CoinRoomPage({
                                         </Link>
                                     </header>
                                     <div className="divide-y divide-outline-variant">
-                                        {news.length === 0 ? (
+                                        {loading ? (
+                                            <div className="py-8 text-center text-on-surface-variant text-body-sm">
+                                                불러오는 중…
+                                            </div>
+                                        ) : news.length === 0 ? (
                                             <div className="py-8 text-center text-on-surface-variant text-body-sm">
                                                 관련 뉴스가 없습니다.
                                             </div>
                                         ) : (
-                                            news.map((n) => <NewsRow key={n.id} item={n} />)
+                                            news.slice(0, 10).map((n) => <NewsRow key={n.id} item={n} />)
                                         )}
                                     </div>
                                 </section>
@@ -126,20 +205,30 @@ export default function CoinRoomPage({
                                 <section className="bg-surface-container-lowest border border-outline-variant rounded-md overflow-hidden">
                                     <header className="px-4 py-2.5 border-b border-outline-variant flex items-center justify-between">
                                         <h2 className="text-body-base font-bold">💬 최신 토론</h2>
-                                        <Link href="/board/market" className="text-meta text-on-surface-variant hover:text-primary">
+                                        <Link href={`/board/${meta.boardSlug}`} className="text-meta text-on-surface-variant hover:text-primary">
                                             더보기 ›
                                         </Link>
                                     </header>
                                     <BoardTableHeader />
                                     <div className="divide-y divide-outline-variant">
-                                        {posts.slice(0, 20).map((p) => (
-                                            <BoardRow
-                                                key={p.id}
-                                                post={p}
-                                                href={`/board/${p.boardSlug}/${p.id}`}
-                                                compact
-                                            />
-                                        ))}
+                                        {loading ? (
+                                            <div className="py-8 text-center text-on-surface-variant text-body-sm">
+                                                불러오는 중…
+                                            </div>
+                                        ) : posts.length === 0 ? (
+                                            <div className="py-8 text-center text-on-surface-variant text-body-sm">
+                                                아직 글이 없습니다.
+                                            </div>
+                                        ) : (
+                                            posts.slice(0, 20).map((p) => (
+                                                <BoardRow
+                                                    key={p.uuid}
+                                                    post={p}
+                                                    href={`/board/${p.boardSlug}/${p.uuid}`}
+                                                    compact
+                                                />
+                                            ))
+                                        )}
                                     </div>
                                 </section>
                             </>
@@ -149,9 +238,15 @@ export default function CoinRoomPage({
                             <section className="bg-surface-container-lowest border border-outline-variant rounded-md overflow-hidden">
                                 <BoardTableHeader />
                                 <div className="divide-y divide-outline-variant">
-                                    {posts.map((p) => (
-                                        <BoardRow key={p.id} post={p} href={`/board/${p.boardSlug}/${p.id}`} />
-                                    ))}
+                                    {loading ? (
+                                        <div className="py-8 text-center text-on-surface-variant text-body-sm">불러오는 중…</div>
+                                    ) : posts.length === 0 ? (
+                                        <div className="py-8 text-center text-on-surface-variant text-body-sm">아직 글이 없습니다.</div>
+                                    ) : (
+                                        posts.map((p) => (
+                                            <BoardRow key={p.uuid} post={p} href={`/board/${p.boardSlug}/${p.uuid}`} />
+                                        ))
+                                    )}
                                 </div>
                             </section>
                         )}
@@ -159,9 +254,13 @@ export default function CoinRoomPage({
                         {activeTab === "news" && (
                             <section className="bg-surface-container-lowest border border-outline-variant rounded-md overflow-hidden">
                                 <div className="divide-y divide-outline-variant">
-                                    {news.map((n) => (
-                                        <NewsRow key={n.id} item={n} />
-                                    ))}
+                                    {loading ? (
+                                        <div className="py-8 text-center text-on-surface-variant text-body-sm">불러오는 중…</div>
+                                    ) : news.length === 0 ? (
+                                        <div className="py-8 text-center text-on-surface-variant text-body-sm">관련 뉴스가 없습니다.</div>
+                                    ) : (
+                                        news.map((n) => <NewsRow key={n.id} item={n} />)
+                                    )}
                                 </div>
                             </section>
                         )}
@@ -179,8 +278,21 @@ export default function CoinRoomPage({
                         )}
 
                         {activeTab === "notice" && (
-                            <section className="bg-surface-container-lowest border border-outline-variant rounded-md p-6 text-center text-on-surface-variant">
-                                현재 공지가 없습니다.
+                            <section className="bg-surface-container-lowest border border-outline-variant rounded-md overflow-hidden">
+                                {loading ? (
+                                    <div className="p-6 text-center text-on-surface-variant text-body-sm">불러오는 중…</div>
+                                ) : notices.length === 0 ? (
+                                    <div className="p-6 text-center text-on-surface-variant">현재 공지가 없습니다.</div>
+                                ) : (
+                                    <>
+                                        <BoardTableHeader />
+                                        <div className="divide-y divide-outline-variant">
+                                            {notices.map((p) => (
+                                                <BoardRow key={p.uuid} post={p} href={`/board/${p.boardSlug}/${p.uuid}`} />
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
                             </section>
                         )}
                     </div>
@@ -246,7 +358,7 @@ export default function CoinRoomPage({
                             </table>
                         </SidebarWidget>
 
-                        {/* AI 시그널 */}
+                        {/* AI 시그널 — 시그널 API 미연동(후속 트랙). 정적 placeholder */}
                         <SidebarWidget title="🤖 AI 차트 시그널">
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between text-body-sm">
@@ -271,10 +383,10 @@ export default function CoinRoomPage({
                             </div>
                         </SidebarWidget>
 
-                        <PriceTickerWidget items={TICKER_LIST.slice(0, 6)} />
-                        <FngGaugeWidget value={72} prevValue={68} />
-                        <HotIssueWidget items={HOT_ISSUES.slice(0, 5)} />
-                        <OfficialPostsWidget posts={OFFICIAL_POSTS} />
+                        {tickerItems.length > 0 && <PriceTickerWidget items={tickerItems} />}
+                        {fng && <FngGaugeWidget value={fng.value} label={fng.label} prevValue={fng.prevValue} />}
+                        {hotIssues.length > 0 && <HotIssueWidget items={hotIssues.slice(0, 5)} />}
+                        {officialPosts.length > 0 && <OfficialPostsWidget posts={officialPosts} />}
                     </aside>
                 </div>
             </div>

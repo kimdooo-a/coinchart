@@ -1,22 +1,26 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import NewsHeadlineCard from "@/components/community/NewsHeadlineCard";
 import NewsRow from "@/components/community/NewsRow";
 import SidebarWidget from "@/components/community/SidebarWidget";
-import PriceTickerWidget from "@/components/community/widgets/PriceTickerWidget";
-import HotIssueWidget from "@/components/community/widgets/HotIssueWidget";
+import PriceTickerWidget, { type TickerItem } from "@/components/community/widgets/PriceTickerWidget";
+import HotIssueWidget, { type HotIssue } from "@/components/community/widgets/HotIssueWidget";
 import FngGaugeWidget from "@/components/community/widgets/FngGaugeWidget";
-import OfficialPostsWidget from "@/components/community/widgets/OfficialPostsWidget";
+import OfficialPostsWidget, { type OfficialPost } from "@/components/community/widgets/OfficialPostsWidget";
 import FooterSection from "@/components/footer-section";
+// 라벨 사전만 유지 (데이터는 /api/news 실데이터로 전환 — R2/T02)
+import { NEWS_CATEGORIES, COIN_FILTERS } from "@/lib/community/mock-news";
 import {
-    MOCK_NEWS,
-    NEWS_CATEGORIES,
-    COIN_FILTERS,
-    getHeadlines,
-} from "@/lib/community/mock-news";
-import { TICKER_LIST, HOT_ISSUES, OFFICIAL_POSTS } from "@/lib/community/mock-coins";
+    fetchNews,
+    fetchTickerItems,
+    fetchHotIssueItems,
+    fetchFngData,
+    fetchOfficialPosts,
+    type NewsListItem,
+    type FngData,
+} from "@/lib/community/news-queries";
 import type { NewsSentiment } from "@/components/community/NewsHeadlineCard";
 import { cn } from "@/lib/utils";
 
@@ -41,27 +45,93 @@ export default function NewsPage() {
     const [sort, setSort] = useState<"latest" | "importance" | "popular">("latest");
     const [page, setPage] = useState(1);
 
-    const headlines = useMemo(() => getHeadlines(), []);
+    // /api/news 실데이터 (코인·분류는 서버 위임, 감정·정렬은 아래 클라 처리)
+    const [news, setNews] = useState<NewsListItem[]>([]);
+    const [headlines, setHeadlines] = useState<NewsListItem[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+    const [reloadKey, setReloadKey] = useState(0);
 
+    // 사이드바 위젯 실데이터
+    const [tickers, setTickers] = useState<TickerItem[]>([]);
+    const [hotIssues, setHotIssues] = useState<HotIssue[]>([]);
+    const [fng, setFng] = useState<FngData | null>(null);
+    const [officialPosts, setOfficialPosts] = useState<OfficialPost[]>([]);
+
+    // 뉴스 목록 — 코인/분류 변경 시 서버 재조회
+    useEffect(() => {
+        let alive = true;
+        setLoading(true);
+        setError(false);
+        setPage(1);
+        fetchNews({ coin: coinFilter, category: categoryFilter })
+            .then((items) => {
+                if (alive) setNews(items);
+            })
+            .catch(() => {
+                if (alive) {
+                    setError(true);
+                    setNews([]);
+                }
+            })
+            .finally(() => {
+                if (alive) setLoading(false);
+            });
+        return () => {
+            alive = false;
+        };
+    }, [coinFilter, categoryFilter, reloadKey]);
+
+    // 헤드라인 3개 — 마운트 1회, 필터와 독립 (전체 중 중요도 상위)
+    useEffect(() => {
+        let alive = true;
+        fetchNews({})
+            .then((items) => {
+                if (!alive) return;
+                const top3 = [...items]
+                    .sort((a, b) => (b.importance ?? 0) - (a.importance ?? 0))
+                    .slice(0, 3);
+                setHeadlines(top3);
+            })
+            .catch(() => {});
+        return () => {
+            alive = false;
+        };
+    }, []);
+
+    // 사이드바 위젯 — 마운트 1회 병렬 fetch (각 fetch는 실패 시 빈 배열/null)
+    useEffect(() => {
+        let alive = true;
+        Promise.all([
+            fetchTickerItems(),
+            fetchHotIssueItems(),
+            fetchFngData(),
+            fetchOfficialPosts(),
+        ]).then(([t, h, f, o]) => {
+            if (!alive) return;
+            setTickers(t);
+            setHotIssues(h);
+            setFng(f);
+            setOfficialPosts(o);
+        });
+        return () => {
+            alive = false;
+        };
+    }, []);
+
+    // 감정 필터 + 정렬 (클라 — /api/news 미지원 차원)
     const filtered = useMemo(() => {
-        let items = MOCK_NEWS.slice();
-        if (coinFilter !== "ALL") {
-            items = items.filter((n) => n.coinTag === coinFilter || (coinFilter === "ALL" && n.coinTag === "ALL"));
-        }
-        if (categoryFilter !== "all") {
-            const labelMap = NEWS_CATEGORIES.reduce<Record<string, string>>((acc, c) => {
-                acc[c.key] = c.label;
-                return acc;
-            }, {});
-            items = items.filter((n) => n.category === labelMap[categoryFilter]);
-        }
+        let items = news.slice();
         if (sentimentFilter !== "all") {
             items = items.filter((n) => n.sentiment === sentimentFilter);
         }
-        if (sort === "importance") items.sort((a, b) => (b.importance ?? 0) - (a.importance ?? 0));
-        else if (sort === "popular") items.sort((a, b) => (b.commentCount ?? 0) - (a.commentCount ?? 0));
+        if (sort === "importance" || sort === "popular") {
+            // popular(토론많은순)는 뉴스별 토론 실데이터가 없어 중요도순으로 대체
+            items.sort((a, b) => (b.importance ?? 0) - (a.importance ?? 0));
+        }
+        // latest는 /api/news가 pub_date desc로 반환한 순서를 그대로 유지
         return items;
-    }, [coinFilter, categoryFilter, sentimentFilter, sort]);
+    }, [news, sentimentFilter, sort]);
 
     const PER_PAGE = 20;
     const pageItems = filtered.slice(0, page * PER_PAGE);
@@ -151,7 +221,21 @@ export default function NewsPage() {
                                 </h2>
                             </header>
                             <div className="divide-y divide-outline-variant">
-                                {pageItems.length === 0 ? (
+                                {loading ? (
+                                    <div className="py-12 text-center text-on-surface-variant text-body-sm">
+                                        뉴스를 불러오는 중…
+                                    </div>
+                                ) : error ? (
+                                    <div className="py-12 text-center text-on-surface-variant text-body-sm">
+                                        뉴스를 불러오지 못했습니다.{" "}
+                                        <button
+                                            onClick={() => setReloadKey((k) => k + 1)}
+                                            className="text-primary font-bold hover:underline"
+                                        >
+                                            다시 시도
+                                        </button>
+                                    </div>
+                                ) : pageItems.length === 0 ? (
                                     <div className="py-12 text-center text-on-surface-variant text-body-sm">
                                         조건에 맞는 뉴스가 없습니다.{" "}
                                         <button
@@ -184,11 +268,11 @@ export default function NewsPage() {
 
                     {/* Sidebar */}
                     <aside className="w-full lg:w-[300px] flex-shrink-0 space-y-4">
-                        <PriceTickerWidget items={TICKER_LIST.slice(0, 6)} />
-                        <HotIssueWidget items={HOT_ISSUES} />
-                        <FngGaugeWidget value={72} prevValue={68} />
+                        <PriceTickerWidget items={tickers.slice(0, 6)} />
+                        <HotIssueWidget items={hotIssues} />
+                        {fng && <FngGaugeWidget value={fng.value} prevValue={fng.prevValue} />}
 
-                        {/* 코인별 뉴스 랭킹 */}
+                        {/* 코인별 뉴스 랭킹 — 정적 데모 (집계 소스 없음, R2 후속 과제) */}
                         <SidebarWidget title="📊 코인별 뉴스 (오늘)">
                             <ol className="space-y-1.5">
                                 {[
@@ -214,7 +298,7 @@ export default function NewsPage() {
                             </ol>
                         </SidebarWidget>
 
-                        <OfficialPostsWidget posts={OFFICIAL_POSTS} />
+                        <OfficialPostsWidget posts={officialPosts} />
                     </aside>
                 </div>
             </div>
