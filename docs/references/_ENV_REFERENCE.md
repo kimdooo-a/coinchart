@@ -111,3 +111,19 @@
 - `SUPABASE_SERVICE_ROLE_KEY`는 **서버 사이드에서만** 사용해야 함 (프론트엔드 노출 금지)
 - `TWELVEDATA_API_KEY`가 없으면 주식 실시간 호가 API가 실패할 수 있음 (SSOT 경로는 Supabase 데이터 사용)
 - Feature Flags (`NEXT_PUBLIC_APP_MODE` 등)의 기본값은 `lib/config/gates.ts`에서 관리
+
+---
+
+### IP_HASH_SECRET (R1 2026-05-23)
+- 익명 게시글 추천 dedup용 IP 해시 비밀키 (HMAC-SHA256)
+- 사용 위치: `lib/community/ip-mask.ts`
+- 미설정 시 `default-secret-change-me` 사용 (운영 환경 필수 설정)
+- Scope: Private (서버 사이드 전용, `middleware.ts`에서 호출)
+
+---
+
+### FNG 외부 API (R1/T04 2026-05-23)
+- `/api/fng`는 `https://api.alternative.me/fng/?limit=2`를 프록시
+- 무인증·무료 — **ENV 추가 없음**
+- 캐시: 1시간 (Next `revalidate=3600` + 모듈 메모리, `lib/community/fng.ts`)
+- 외부 다운 시 502 반환 — 호출자(T15)는 fallback UI 노출 권장

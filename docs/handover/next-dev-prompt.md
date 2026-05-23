@@ -4,6 +4,8 @@
 
 ## 최근 완료된 작업
 
+- **세션 10 (2026-05-23)**: R1/T07 일꾼 — 익명 게스트 bcrypt 해시/검증 (`lib/community/auth.ts`) + IP 마스킹/HMAC 해시 (`lib/community/ip-mask.ts`) + 기존 `middleware.ts`에 IP 헤더 3종(`x-client-ip`/`-masked`/`-hash`) 주입 로직 머지 + matcher에 `/api/board/:path*`, `/api/community/:path*` 추가. T12(board API)가 의존할 헤더 명세 handover에 코드 예시로 명시. **PARTIAL**: `npm install bcryptjs @types/bcryptjs` 후속 필요.
+- **세션 9 (2026-05-23)**: R1/T08 일꾼 — `lib/chart/theme.ts` 신규 (`getChartTheme('light'|'dark')` + `getCandleColors('kr'|'us')`, KR 빨/파 + US 녹/빨) + `BlogEditor`/`EditorToolbar`에 `tone?: 'light'|'dark'` prop 추가 (default `light`). lightweight-charts v5 `ColorType.Solid` enum 호환성 솔루션 별도 기록(`docs/solutions/2026-05-23-lightweight-charts-v5-colortype-enum.md`). 페이지 적용은 T09(signal)·T10(analysis)·T11(market) 의존.
 - **세션 9 (2026-05-23)**: R1/T14 일꾼 — `lib/translations.ts` menu 그룹에 신규 키 9개(ko/en) append(`best`, `boardFree`, `boardMarket`, `boardInfo`, `coinRoom`, `tools`, `write`, `search`, `login`; `news`는 기존 존재) + `components/global-header.tsx` 인라인 한/영 분기 8건 → `t.menu.*` 호출로 교체. JSX 구조·아이콘 무변경. 잔여 분기 4건(altcoin/김치프리미엄/EN-KR 토글 ×2) 의도적 잔류.
 - **세션 9 (2026-05-23)**: R1/T01 일꾼 — `community_boards/posts/comments/post_likes` 4테이블 마이그레이션 SQL (`supabase/migrations/20260523_create_community_tables.sql`) + 시드 9행(`free`/`market`/`info` + 코인룸 6종) + 트리거 4 + RLS 15 + 인덱스 6. `_SCHEMA_REFERENCE.md` 신규 섹션 append. 익명 XOR 회원 CHECK 제약 DB 레벨 강제.
 - **세션 8 (2026-05-23)**: R1/T03 일꾼 — Binance 24h ticker SSOT 추가 (`lib/supabase/crypto.ts`의 `fetchBinanceTickers`/`fetchCommunityTickers`) + `/api/coins/ticker` 신규 라우트. 60s 이중 캐시.
@@ -19,16 +21,16 @@
 
 ### 세션 8 — 라이트화 (Step 4)
 
-1. **블로그 라이트화** (필수, 커뮤니티 직접 연결) — `/blog`, `/blog/[slug]`, `/blog/category/[category]`, `/blog/tag/[tag]`. BlogEditor의 `prose-invert` 제거 또는 props 옵션화.
-2. **AI 분석 도구 라이트화** (높음) — `/analysis/*`, `/signal`, `/market`. 차트 라이트 테마 분리 (`lib/chart/theme.ts` 신규).
+1. **블로그 라이트화** (필수, 커뮤니티 직접 연결) — `/blog`, `/blog/[slug]`, `/blog/category/[category]`, `/blog/tag/[tag]`. ~~BlogEditor의 `prose-invert` 제거 또는 props 옵션화.~~ → **세션 9(T08) 완료** (`tone?: 'light'|'dark'`, default light, EditorToolbar에도 전파). 페이지에서는 `<BlogEditor tone="light" />` 또는 default 사용.
+2. **AI 분석 도구 라이트화** (높음) — `/analysis/*`, `/signal`, `/market`. ~~차트 라이트 테마 분리 (`lib/chart/theme.ts` 신규).~~ → **세션 9(T08) 완료** (`getChartTheme('light')` + `getCandleColors('kr')`). 후속 일꾼(T09·T10·T11)이 기존 차트 컴포넌트에 헬퍼 적용.
 3. ~~**번역 키 정리** — `lib/translations.ts`의 `menu` 그룹에 `best`, `boardFree`, `boardMarket`, `boardInfo`, `coinRoom`, `tools`, `write` 키 추가.~~ → **세션 9(T14) 완료** (9키 append + 헤더 인라인 분기 8건 교체). 잔여: altcoin/kimp 라벨, EN-KR 토글 — 후속 라운드 처리 권고.
 4. **나머지 페이지 라이트화** (중간) — `/stock`, `/stock-market`, `/portfolio`, `/watchlist`, `/calendar`, `/secure-memo`, `/admin/*`, `/auth/*`, 정책 페이지.
 
 ### R1 (in progress) — 백엔드 (DB + API) — dispatch 일꾼별
 
 5. ~~**DB 마이그레이션** — `community_boards`, `community_posts`, `community_comments`, `community_post_likes`~~ → **세션 9(T01) 완료** (`supabase/migrations/20260523_create_community_tables.sql`). 실 DB 적용은 컨덕터 또는 별도 작업
-6. **익명 비밀번호 해싱** — bcrypt 권장 (`lib/community/auth.ts`) — T07 진행 중
-7. **IP 마스킹 미들웨어** — `X-Forwarded-For` 앞 2옥텟만 저장 — T07 진행 중
+6. ~~**익명 비밀번호 해싱** — bcrypt 권장~~ → **세션 10(T07) 완료** (`lib/community/auth.ts`, PARTIAL: `npm install bcryptjs @types/bcryptjs` 후속 필요)
+7. ~~**IP 마스킹 미들웨어** — `X-Forwarded-For` 앞 2옥텟만 저장~~ → **세션 10(T07) 완료** (`lib/community/ip-mask.ts` + `middleware.ts` 머지, 3종 헤더 주입)
 8. **API 라우트** — `/api/board/[slug]`, `/api/board/[slug]/[postId]`, `/api/community/comment`, `/api/community/like` — T12 영역
 9. **더미 → 실데이터** — `lib/community/mock-*` → Supabase 연동 — T02 + T15 영역
 
@@ -50,8 +52,8 @@
 ## 알려진 이슈 및 주의사항
 
 - **다크 톤 페이지 시각 회귀** (세션 7 진입 후): 디자인 토큰을 라이트로 통일했으므로 기존 25페이지가 색상 일관성이 일시 깨짐. 빌드는 통과. 다음 세션 Step 4 우선순위 1.
-- **TradingView 차트**: 다크 옵션 그대로라 라이트 환경에 어울리지 않음. `lib/chart/theme.ts`로 분리 필요.
-- **BlogEditor `prose-invert`**: TipTap 에디터 내부 텍스트가 라이트 환경에서 잘 안 보일 수 있음. props로 톤 전환 옵션 추가.
+- ~~**TradingView 차트**: 다크 옵션 그대로라 라이트 환경에 어울리지 않음. `lib/chart/theme.ts`로 분리 필요.~~ → **세션 9(T08) 완료** — `lib/chart/theme.ts` 헬퍼 신규. 후속 일꾼(T09·T10·T11)이 기존 차트 컴포넌트에 적용 예정.
+- ~~**BlogEditor `prose-invert`**: TipTap 에디터 내부 텍스트가 라이트 환경에서 잘 안 보일 수 있음. props로 톤 전환 옵션 추가.~~ → **세션 9(T08) 완료** — `tone?: 'light'|'dark'` prop 추가 (default light). EditorToolbar ToolButton 내부 색상은 minimal diff로 미수정, R2에서 세부 조정 권장.
 - **`/history` 메뉴 미배치**: 신규 메뉴 5+2에 미포함. 도구 드롭다운 추가 또는 폐기 결정 필요.
 - **Material Symbols vs lucide-react**: 시안은 Material Symbols 사용, 우리는 lucide-react. 누락 아이콘 있으면 시각 차이.
 - **번역 키 일부 미추가**: 헤더에서 인라인 한/영 분기 사용 중 (`lang === "ko" ? "베스트" : "Best"` 등).

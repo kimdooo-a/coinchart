@@ -2,17 +2,18 @@
 
 | 항목 | 값 |
 |------|-----|
-| **마지막 세션** | 2026-05-23 (세션 9 — R1/T14 일꾼, T01과 동시 발사) |
-| **작업 내용** | translations.ts menu 9키 append + global-header.tsx 인라인 한/영 분기 8건 → `t.menu.*` 교체 (R1 dispatch, T14 일꾼) |
+| **마지막 세션** | 2026-05-23 (세션 10 — R1/T07 일꾼, T01/T08/T14와 동시 발사) |
+| **작업 내용** | 익명 게스트 bcrypt 해시/검증 + IP 마스킹/해시 + Next.js middleware 머지. `/board/*`, `/api/board/*`, `/api/community/*` 경로에 `x-client-ip-*` 3종 헤더 주입. (R1 dispatch, T07 일꾼) |
 | **브랜치** | main |
-| **빌드 상태** | ✅ tsc 통과 (T14 산출물 한정, 사전 에러 3건은 본 작업 무관) |
-| **마지막 커밋** | 본 세션 비커밋 (R1 다른 일꾼 T01/T05/T07/T08 + T14 산출물 모두 워킹트리 잔존, 컨덕터 통합 대기) |
+| **빌드 상태** | ⚠️ TS 1건 (`bcryptjs` 미설치, 패키지 추가 시 해소). `ip-mask.ts`/`middleware.ts`는 통과. eslint 0 errors |
+| **마지막 커밋** | (T07 commit 예정) — R1 다른 일꾼 T01/T05/T08/T14 산출물 워킹트리 잔존, 컨덕터 통합 대기 |
 | **프로젝트 방향성** | **v2.0 커뮤니티 피벗** ([PROJECT_DIRECTION.md](../PROJECT_DIRECTION.md)) |
 
 ## 최근 작업 이력
 
 | 날짜 | 작업 | 결과 |
 |------|------|------|
+| 2026-05-23 | R1/T07 — 익명 bcrypt + IP 마스킹 + middleware (세션 10, 일꾼) | `lib/community/auth.ts`(bcrypt 해시/검증 + 닉네임) + `lib/community/ip-mask.ts`(IP 추출/마스킹/HMAC 해시) 신규. `middleware.ts`에 IP 헤더 3종 주입 + matcher 확장. T12(board API) 의존 산출물. PARTIAL: bcryptjs 패키지 미설치 |
 | 2026-05-23 | R1/T08 — 차트 라이트 테마 + BlogEditor `tone` prop (세션 9, 일꾼) | `lib/chart/theme.ts` 신규 (`getChartTheme`/`getCandleColors`, KR 빨/파 + US 녹/빨), `BlogEditor`/`EditorToolbar`에 `tone?: 'light'\|'dark'` prop 추가. T09·T10·T11 의존 산출물 |
 | 2026-05-23 | R1/T14 — 번역 키 정리 + 헤더 인라인 분기 제거 (세션 9, 일꾼) | `lib/translations.ts` menu 9키(ko/en) append + `components/global-header.tsx` 인라인 한/영 분기 8건 → `t.menu.*` 교체. 잔여 분기 4건(altcoin/kimp/EN-KR 토글 ×2) 의도적 잔류 |
 | 2026-05-23 | R1/T01 — community_* 4테이블 마이그레이션 (세션 9, 일꾼) | `community_boards/posts/comments/post_likes` + 시드 9행 + 트리거 4 + RLS 15 + 인덱스 6. `_SCHEMA_REFERENCE.md` 신규 섹션 append |
@@ -44,6 +45,7 @@
 | 9 | 2026-05-23 | R1/T01 일꾼 — community_* 4테이블 마이그레이션 | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T01-community-migrations.md) |
 | 9 | 2026-05-23 | R1/T08 일꾼 — 차트 라이트 테마 + BlogEditor `tone` prop | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T08-chart-theme-editor-tone.md) |
 | 9 | 2026-05-23 | R1/T14 일꾼 — 번역 키 정리 + 헤더 인라인 분기 제거 | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T14-translations-cleanup.md) |
+| 10 | 2026-05-23 | R1/T07 일꾼 — 익명 bcrypt + IP 마스킹 + middleware 머지 | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T07-auth-middleware.md) |
 
 ## v2.0 피벗 핵심 (2026-05-10 결정)
 
@@ -109,8 +111,8 @@
   - [x] TradingView 차트 색상 라이트 톤 옵션 추가 (`lib/chart/theme.ts`) ✅ R1/T08 세션 9 완료 — 페이지 적용은 T09·T10·T11 후속
 - [x] BlogEditor의 `prose-invert` → 라이트 톤 옵션 props 추가 ✅ R1/T08 세션 9 완료 (`tone?: 'light'|'dark'`, default light, EditorToolbar에도 전파)
 - [x] DB 마이그레이션: `community_boards`, `community_posts`, `community_comments`, `community_post_likes` ✅ R1/T01 세션 9 완료 (`supabase/migrations/20260523_create_community_tables.sql` — 실 DB 적용은 컨덕터 또는 별도 작업)
-- [ ] 익명 글 비밀번호 해싱 (bcrypt 권장)
-- [ ] IP 마스킹 미들웨어 (X-Forwarded-For 앞 2옥텟)
+- [x] ~~익명 글 비밀번호 해싱 (bcrypt 권장)~~ → 코드 완료 (T07, `lib/community/auth.ts`). **PARTIAL**: `npm install bcryptjs @types/bcryptjs` 후속 필요
+- [x] ~~IP 마스킹 미들웨어 (X-Forwarded-For 앞 2옥텟)~~ → 완료 (T07, `lib/community/ip-mask.ts` + `middleware.ts` 머지, 헤더 3종 주입)
 - [ ] API 라우트: `/api/board/*`, `/api/community/*`
 - [ ] 더미 데이터(`lib/community/mock-*`) → Supabase 연동
 - [ ] 뉴스 룰베이스 분류 로직 (`lib/news/classifier.ts`, `lib/news/keyword-dict.ts`)
