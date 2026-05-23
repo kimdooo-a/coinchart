@@ -9,13 +9,15 @@ import EditorImageUpload, { triggerImageUpload, uploadImage } from './EditorImag
 import BlogPostContent from '@/components/Blog/BlogPostContent';
 
 export type ViewMode = 'wysiwyg' | 'html' | 'preview';
+export type EditorTone = 'light' | 'dark';
 
 interface BlogEditorProps {
   content?: string;
   onChange: (content: string) => void;
+  tone?: EditorTone;
 }
 
-export default function BlogEditor({ content, onChange }: BlogEditorProps) {
+export default function BlogEditor({ content, onChange, tone = 'light' }: BlogEditorProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('wysiwyg');
   const [htmlSource, setHtmlSource] = useState('');
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -33,8 +35,12 @@ export default function BlogEditor({ content, onChange }: BlogEditorProps) {
     },
     editorProps: {
       attributes: {
-        class:
-          'prose prose-invert prose-sm sm:prose-base max-w-none min-h-[400px] p-4 focus:outline-none',
+        class: [
+          'prose prose-sm sm:prose-base max-w-none min-h-[400px] p-4 focus:outline-none',
+          tone === 'dark' ? 'prose-invert' : '',
+        ]
+          .filter(Boolean)
+          .join(' '),
       },
       // 이미지 드래그앤드롭
       handleDrop: (_view, event, _slice, moved) => {
@@ -108,8 +114,12 @@ export default function BlogEditor({ content, onChange }: BlogEditorProps) {
   }, [isFullscreen]);
 
   const containerClass = isFullscreen
-    ? 'fixed inset-0 z-50 bg-black flex flex-col overflow-hidden'
-    : 'border border-white/10 rounded-xl overflow-hidden bg-black/40';
+    ? tone === 'dark'
+      ? 'fixed inset-0 z-50 bg-black flex flex-col overflow-hidden'
+      : 'fixed inset-0 z-50 bg-surface-container-lowest flex flex-col overflow-hidden'
+    : tone === 'dark'
+      ? 'border border-white/10 rounded-xl overflow-hidden bg-black/40'
+      : 'border border-outline-variant rounded-xl overflow-hidden bg-surface-container-lowest';
 
   return (
     <div className={containerClass}>
@@ -120,6 +130,7 @@ export default function BlogEditor({ content, onChange }: BlogEditorProps) {
         onViewModeChange={handleViewModeChange}
         isFullscreen={isFullscreen}
         onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+        tone={tone}
       />
       <EditorImageUpload editor={editor} />
 

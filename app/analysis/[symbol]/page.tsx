@@ -320,7 +320,7 @@ export default function AnalysisPage() {
     }, [symbol, router])
 
     const getPriceColor = () => {
-        if (!currentPrice || !avgPrice) return 'text-white'
+        if (!currentPrice || !avgPrice) return 'text-on-surface'
         return currentPrice >= avgPrice ? 'text-green-500' : 'text-red-500'
     }
 
@@ -330,7 +330,7 @@ export default function AnalysisPage() {
     // ===========================================
 
     return (
-        <div className="min-h-screen bg-gray-950 text-white p-4 flex flex-col items-center">
+        <div className="min-h-screen bg-surface text-on-surface p-4 flex flex-col items-center">
             <div className="w-full max-w-6xl space-y-6">
 
                 {/* ========== HEADER SECTION ========== */}
@@ -339,7 +339,7 @@ export default function AnalysisPage() {
                     <div className="flex justify-between items-center">
                         <button
                             onClick={() => router.back()}
-                            className="text-gray-400 hover:text-white flex items-center gap-2 text-sm"
+                            className="text-on-surface-variant hover:text-on-surface flex items-center gap-2 text-sm"
                         >
                             &larr; {t.common.back}
                         </button>
@@ -378,7 +378,7 @@ export default function AnalysisPage() {
                         </div>
                         {currentPrice && (
                             <div className="text-right">
-                                <Label className="text-gray-500 text-xs">{t.analysis.currentPrice}</Label>
+                                <Label className="text-on-surface-variant text-xs">{t.analysis.currentPrice}</Label>
                                 <div className={`text-4xl font-black ${getPriceColor()}`}>
                                     ${currentPrice.toLocaleString()}
                                 </div>
@@ -390,7 +390,7 @@ export default function AnalysisPage() {
                 {/* ========== CHART SECTION ========== */}
                 <section>
                     {loading ? (
-                        <Card className="bg-gray-900 border-gray-800">
+                        <Card className="bg-surface-container-lowest border-outline-variant">
                             <CardContent className="h-[500px] flex items-center justify-center">
                                 <div className="flex flex-col items-center gap-4">
                                     <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
@@ -407,10 +407,10 @@ export default function AnalysisPage() {
                             />
                         </div>
                     ) : (
-                        <Card className="bg-gray-900 border-gray-800">
+                        <Card className="bg-surface-container-lowest border-outline-variant">
                             <CardContent className="p-10 text-center">
-                                <p className="text-gray-400">{t.analysis.notSupported}</p>
-                                <p className="text-xs text-gray-600 mt-2">{t.analysis.noHistoryDesc}</p>
+                                <p className="text-on-surface-variant">{t.analysis.notSupported}</p>
+                                <p className="text-xs text-on-surface-variant mt-2">{t.analysis.noHistoryDesc}</p>
                             </CardContent>
                         </Card>
                     )}
@@ -424,14 +424,14 @@ export default function AnalysisPage() {
                         {loading && !analysisResult && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {[...Array(4)].map((_, i) => (
-                                    <Card key={i} className="bg-gray-900 border-gray-800 opacity-50 relative">
+                                    <Card key={i} className="bg-surface-container-lowest border-outline-variant opacity-50 relative">
                                         <CardHeader>
-                                            <div className="h-6 bg-gray-800 rounded animate-pulse" />
+                                            <div className="h-6 bg-surface-container rounded animate-pulse" />
                                         </CardHeader>
                                         <CardContent>
                                             <div className="space-y-2">
-                                                <div className="h-12 bg-gray-800 rounded animate-pulse" />
-                                                <div className="h-4 bg-gray-800 rounded animate-pulse w-2/3" />
+                                                <div className="h-12 bg-surface-container rounded animate-pulse" />
+                                                <div className="h-4 bg-surface-container rounded animate-pulse w-2/3" />
                                             </div>
                                         </CardContent>
                                         <Badge variant="secondary" className="absolute top-4 right-4">
@@ -444,12 +444,12 @@ export default function AnalysisPage() {
 
                         {/* === uiState: error === */}
                         {error && (
-                            <Card className="bg-gray-900 border-red-800">
+                            <Card className="bg-surface-container-lowest border-red-800">
                                 <CardHeader>
                                     <Badge variant="destructive">{lang === 'ko' ? '오류 발생' : 'Error'}</Badge>
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="text-gray-400">{error}</p>
+                                    <p className="text-on-surface-variant">{error}</p>
                                 </CardContent>
                                 <CardFooter>
                                     <Button variant="outline" onClick={() => window.location.reload()}>
@@ -461,7 +461,7 @@ export default function AnalysisPage() {
 
                         {/* === uiState: insufficient === */}
                         {!error && analysisResult && analysisResult.uiState === 'insufficient' && (
-                            <Card className="bg-gray-900 border-orange-800">
+                            <Card className="bg-surface-container-lowest border-orange-800">
                                 <CardHeader className="flex flex-row items-center justify-between">
                                     <CardTitle className="text-lg">{lang === 'ko' ? '데이터 부족' : 'Insufficient Data'}</CardTitle>
                                     <Badge variant="destructive">{lang === 'ko' ? '분석 불가' : 'Cannot Analyze'}</Badge>
@@ -475,7 +475,7 @@ export default function AnalysisPage() {
                                     {analysisResult.reasons && analysisResult.reasons.length > 0 && (
                                         <div className="space-y-2">
                                             <Label className="text-orange-400">{lang === 'ko' ? '상세 사유' : 'Details'}</Label>
-                                            <ul className="text-sm text-gray-400 space-y-1">
+                                            <ul className="text-sm text-on-surface-variant space-y-1">
                                                 {analysisResult.reasons.map((reason, idx) => (
                                                     <li key={idx} className="flex items-start gap-2">
                                                         <span className="text-orange-400">•</span>
@@ -500,9 +500,9 @@ export default function AnalysisPage() {
                                 {/* Probability & Confidence Row */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {/* Probability Card */}
-                                    <Card className="bg-gray-900 border-gray-800">
+                                    <Card className="bg-surface-container-lowest border-outline-variant">
                                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                            <CardTitle className="text-sm font-medium text-gray-400 uppercase tracking-wider">
+                                            <CardTitle className="text-sm font-medium text-on-surface-variant uppercase tracking-wider">
                                                 {lang === 'ko' ? '상승 확률' : 'Rise Probability'}
                                             </CardTitle>
                                             <Badge variant={getProbabilityBadgeVariant(analysisResult.probability.probability)}>
@@ -513,7 +513,7 @@ export default function AnalysisPage() {
                                         <CardContent>
                                             <div className={`text-5xl font-black ${
                                                 analysisResult.probability.probability >= 60 ? 'text-green-400' :
-                                                analysisResult.probability.probability <= 40 ? 'text-red-400' : 'text-gray-400'
+                                                analysisResult.probability.probability <= 40 ? 'text-red-400' : 'text-on-surface-variant'
                                             }`}>
                                                 {analysisResult.probability.probability}%
                                             </div>
@@ -524,9 +524,9 @@ export default function AnalysisPage() {
                                     </Card>
 
                                     {/* Confidence Card */}
-                                    <Card className="bg-gray-900 border-gray-800">
+                                    <Card className="bg-surface-container-lowest border-outline-variant">
                                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                            <CardTitle className="text-sm font-medium text-gray-400 uppercase tracking-wider">
+                                            <CardTitle className="text-sm font-medium text-on-surface-variant uppercase tracking-wider">
                                                 {lang === 'ko' ? '신뢰도 등급' : 'Confidence Grade'}
                                             </CardTitle>
                                             <Badge variant={getConfidenceBadgeVariant(analysisResult.confidence.grade)}>
@@ -551,9 +551,9 @@ export default function AnalysisPage() {
                                 </div>
 
                                 {/* Explanation Card - 3 Column Grid */}
-                                <Card className="bg-gray-900 border-gray-800">
+                                <Card className="bg-surface-container-lowest border-outline-variant">
                                     <CardHeader>
-                                        <CardTitle className="text-sm font-medium text-gray-400 uppercase tracking-wider">
+                                        <CardTitle className="text-sm font-medium text-on-surface-variant uppercase tracking-wider">
                                             {analysisResult.explanation.title}
                                         </CardTitle>
                                     </CardHeader>
@@ -567,7 +567,7 @@ export default function AnalysisPage() {
                                                         {lang === 'ko' ? '근거' : 'Evidence'}
                                                     </Label>
                                                 </div>
-                                                <ul className="space-y-2 text-gray-300 text-sm">
+                                                <ul className="space-y-2 text-on-surface text-sm">
                                                     {analysisResult.explanation.sections.evidence
                                                         .split(/[。.]/)
                                                         .filter((s: string) => s.trim().length > 0)
@@ -580,7 +580,7 @@ export default function AnalysisPage() {
                                                 </ul>
                                             </div>
 
-                                            <Separator orientation="vertical" className="hidden md:block bg-gray-700 mx-auto" />
+                                            <Separator orientation="vertical" className="hidden md:block bg-outline-variant mx-auto" />
 
                                             {/* Risk Column */}
                                             <div className="space-y-3">
@@ -590,7 +590,7 @@ export default function AnalysisPage() {
                                                         {lang === 'ko' ? '위험' : 'Risk'}
                                                     </Label>
                                                 </div>
-                                                <ul className="space-y-2 text-gray-300 text-sm">
+                                                <ul className="space-y-2 text-on-surface text-sm">
                                                     {analysisResult.explanation.sections.risk
                                                         .split(/[。.]/)
                                                         .filter((s: string) => s.trim().length > 0)
@@ -603,7 +603,7 @@ export default function AnalysisPage() {
                                                 </ul>
                                             </div>
 
-                                            <Separator orientation="vertical" className="hidden md:block bg-gray-700 mx-auto" />
+                                            <Separator orientation="vertical" className="hidden md:block bg-outline-variant mx-auto" />
 
                                             {/* Watch Column */}
                                             <div className="space-y-3">
@@ -613,7 +613,7 @@ export default function AnalysisPage() {
                                                         {lang === 'ko' ? '관찰' : 'Watch'}
                                                     </Label>
                                                 </div>
-                                                <ul className="space-y-2 text-gray-300 text-sm">
+                                                <ul className="space-y-2 text-on-surface text-sm">
                                                     {analysisResult.explanation.sections.watch
                                                         .split(/[。.]/)
                                                         .filter((s: string) => s.trim().length > 0)
@@ -631,9 +631,9 @@ export default function AnalysisPage() {
 
                                 {/* Backtest Card (PRO Gate) */}
                                 {analysisResult.backtest && (
-                                    <Card className="bg-gray-900 border-gray-800 relative overflow-hidden">
+                                    <Card className="bg-surface-container-lowest border-outline-variant relative overflow-hidden">
                                         <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                                            <CardTitle className="text-sm font-medium text-gray-400 uppercase tracking-wider">
+                                            <CardTitle className="text-sm font-medium text-on-surface-variant uppercase tracking-wider">
                                                 {lang === 'ko' ? '백테스트 결과' : 'Backtest Results'}
                                             </CardTitle>
                                             {userTier === 'free' && (
@@ -649,7 +649,7 @@ export default function AnalysisPage() {
                                                     <Badge variant="destructive" className="mb-2">
                                                         {lang === 'ko' ? '데이터 부족' : 'Insufficient Data'}
                                                     </Badge>
-                                                    <p className="text-gray-500 text-sm">
+                                                    <p className="text-on-surface-variant text-sm">
                                                         {lang === 'ko' ? '최소 30개 거래가 필요합니다.' : 'Minimum 30 trades required.'}
                                                     </p>
                                                 </div>
@@ -659,25 +659,25 @@ export default function AnalysisPage() {
                                                 <CardContent className="blur-sm pointer-events-none">
                                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                                         <div>
-                                                            <Label className="text-gray-500">{lang === 'ko' ? '승률' : 'Win Rate'}</Label>
-                                                            <div className="text-2xl font-bold text-white">--.--%</div>
+                                                            <Label className="text-on-surface-variant">{lang === 'ko' ? '승률' : 'Win Rate'}</Label>
+                                                            <div className="text-2xl font-bold text-on-surface">--.--%</div>
                                                         </div>
                                                         <div>
-                                                            <Label className="text-gray-500">{lang === 'ko' ? '손익비' : 'Profit Factor'}</Label>
-                                                            <div className="text-2xl font-bold text-white">--.--</div>
+                                                            <Label className="text-on-surface-variant">{lang === 'ko' ? '손익비' : 'Profit Factor'}</Label>
+                                                            <div className="text-2xl font-bold text-on-surface">--.--</div>
                                                         </div>
                                                         <div>
-                                                            <Label className="text-gray-500">{lang === 'ko' ? '최대 낙폭' : 'Max DD'}</Label>
-                                                            <div className="text-2xl font-bold text-white">--.--%</div>
+                                                            <Label className="text-on-surface-variant">{lang === 'ko' ? '최대 낙폭' : 'Max DD'}</Label>
+                                                            <div className="text-2xl font-bold text-on-surface">--.--%</div>
                                                         </div>
                                                         <div>
-                                                            <Label className="text-gray-500">{lang === 'ko' ? 'Sharpe' : 'Sharpe Ratio'}</Label>
-                                                            <div className="text-2xl font-bold text-white">--.--</div>
+                                                            <Label className="text-on-surface-variant">{lang === 'ko' ? 'Sharpe' : 'Sharpe Ratio'}</Label>
+                                                            <div className="text-2xl font-bold text-on-surface">--.--</div>
                                                         </div>
                                                     </div>
                                                 </CardContent>
                                                 {/* Pro Lock Overlay */}
-                                                <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-4">
+                                                <div className="absolute inset-0 bg-on-surface/40 flex flex-col items-center justify-center gap-4">
                                                     <Badge variant="outline" className="border-yellow-500 text-yellow-500">
                                                         PRO
                                                     </Badge>
@@ -686,7 +686,7 @@ export default function AnalysisPage() {
                                                             {lang === 'ko' ? '프리미엄으로 전체 보기' : 'Unlock with Premium'}
                                                         </Button>
                                                     </Link>
-                                                    <Label className="text-gray-400 text-xs">
+                                                    <Label className="text-on-surface-variant text-xs">
                                                         {lang === 'ko' ? '이 기능은 프리미엄 전용입니다' : 'This feature is Premium only'}
                                                     </Label>
                                                 </div>
@@ -695,26 +695,26 @@ export default function AnalysisPage() {
                                             <CardContent>
                                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                                     <div>
-                                                        <Label className="text-gray-500">{lang === 'ko' ? '승률' : 'Win Rate'}</Label>
-                                                        <div className="text-2xl font-bold text-white">
+                                                        <Label className="text-on-surface-variant">{lang === 'ko' ? '승률' : 'Win Rate'}</Label>
+                                                        <div className="text-2xl font-bold text-on-surface">
                                                             {analysisResult.backtest.winRate >= 999 ? 'N/A' : `${analysisResult.backtest.winRate.toFixed(1)}%`}
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <Label className="text-gray-500">{lang === 'ko' ? '손익비' : 'Profit Factor'}</Label>
-                                                        <div className="text-2xl font-bold text-white">
+                                                        <Label className="text-on-surface-variant">{lang === 'ko' ? '손익비' : 'Profit Factor'}</Label>
+                                                        <div className="text-2xl font-bold text-on-surface">
                                                             {analysisResult.backtest.profitFactor >= 999 ? 'N/A' : analysisResult.backtest.profitFactor.toFixed(2)}
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <Label className="text-gray-500">{lang === 'ko' ? '최대 낙폭' : 'Max DD'}</Label>
-                                                        <div className="text-2xl font-bold text-white">
+                                                        <Label className="text-on-surface-variant">{lang === 'ko' ? '최대 낙폭' : 'Max DD'}</Label>
+                                                        <div className="text-2xl font-bold text-on-surface">
                                                             {analysisResult.backtest.maxDrawdownPercent.toFixed(1)}%
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <Label className="text-gray-500">{lang === 'ko' ? 'Sharpe' : 'Sharpe Ratio'}</Label>
-                                                        <div className="text-2xl font-bold text-white">
+                                                        <Label className="text-on-surface-variant">{lang === 'ko' ? 'Sharpe' : 'Sharpe Ratio'}</Label>
+                                                        <div className="text-2xl font-bold text-on-surface">
                                                             {analysisResult.backtest.sharpeRatio.toFixed(2)}
                                                         </div>
                                                     </div>
@@ -725,9 +725,9 @@ export default function AnalysisPage() {
                                 )}
 
                                 {/* Position Status Card */}
-                                <Card className="bg-gray-900 border-gray-800">
+                                <Card className="bg-surface-container-lowest border-outline-variant">
                                     <CardHeader>
-                                        <CardTitle className="text-sm font-medium text-gray-400 uppercase tracking-wider">
+                                        <CardTitle className="text-sm font-medium text-on-surface-variant uppercase tracking-wider">
                                             {t.analysis.positionStatus}
                                         </CardTitle>
                                     </CardHeader>
@@ -742,7 +742,7 @@ export default function AnalysisPage() {
                                                 <Badge variant={historyData[historyData.length - 1].close > avgPrice ? 'default' : 'destructive'}>
                                                     {historyData[historyData.length - 1].close > avgPrice ? 'PROFIT' : 'LOSS'}
                                                 </Badge>
-                                                <p className="text-gray-300 text-sm">
+                                                <p className="text-on-surface text-sm">
                                                     {historyData[historyData.length - 1].close > avgPrice
                                                         ? t.analysis.profitMsg
                                                         : t.analysis.lossMsg
@@ -750,13 +750,13 @@ export default function AnalysisPage() {
                                                 </p>
                                             </div>
                                         ) : (
-                                            <p className="text-gray-500">{t.analysis.noTradeMsg}</p>
+                                            <p className="text-on-surface-variant">{t.analysis.noTradeMsg}</p>
                                         )}
                                     </CardContent>
                                 </Card>
 
                                 {/* Fractal Engine Card (BETA) */}
-                                <Card className="bg-gray-900 border-indigo-800">
+                                <Card className="bg-surface-container-lowest border-indigo-800">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0">
                                         <CardTitle className="text-sm font-medium text-indigo-400 uppercase tracking-wider flex items-center gap-2">
                                             {t.analysis.fractalTitle}
@@ -769,25 +769,25 @@ export default function AnalysisPage() {
                                         {fractalResult ? (
                                             <div className="flex justify-between items-end">
                                                 <div>
-                                                    <Label className="text-gray-400">{t.analysis.similarity}</Label>
-                                                    <div className="text-white font-bold text-2xl">
+                                                    <Label className="text-on-surface-variant">{t.analysis.similarity}</Label>
+                                                    <div className="text-on-surface font-bold text-2xl">
                                                         {fractalResult.bestMatches.length > 0
                                                             ? `${fractalResult.bestMatches[0].similarity.toFixed(0)}%`
                                                             : 'None'}
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
-                                                    <Label className="text-gray-400">{t.analysis.prediction}</Label>
+                                                    <Label className="text-on-surface-variant">{t.analysis.prediction}</Label>
                                                     <div className={`text-2xl font-black ${
                                                         fractalResult.recommendedPosition === 'BUY' ? 'text-green-400' :
-                                                        fractalResult.recommendedPosition === 'SELL' ? 'text-red-400' : 'text-gray-400'
+                                                        fractalResult.recommendedPosition === 'SELL' ? 'text-red-400' : 'text-on-surface-variant'
                                                     }`}>
                                                         {fractalResult.recommendedPosition}
                                                     </div>
                                                 </div>
                                             </div>
                                         ) : (
-                                            <div className="flex items-center gap-2 text-gray-500 text-sm">
+                                            <div className="flex items-center gap-2 text-on-surface-variant text-sm">
                                                 <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
                                                 {t.analysis.analyzing}
                                             </div>

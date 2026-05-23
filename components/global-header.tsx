@@ -40,16 +40,16 @@ export default function GlobalHeader() {
 
     // 1차 메뉴 5개
     const primary: MenuPrimary[] = [
-        { label: lang === "ko" ? "베스트" : "Best", href: "/" },
-        { label: lang === "ko" ? "자유게시판" : "Free Board", href: "/board/free" },
-        { label: lang === "ko" ? "시세토론" : "Market Talk", href: "/board/market" },
-        { label: lang === "ko" ? "정보공유" : "Info", href: "/board/info" },
+        { label: t.menu.best, href: "/" },
+        { label: t.menu.boardFree, href: "/board/free" },
+        { label: t.menu.boardMarket, href: "/board/market" },
+        { label: t.menu.boardInfo, href: "/board/info" },
         { label: t.menu.news, href: "/news" },
     ];
 
     // 코인룸 드롭다운
     const coinRoom: MenuDropdown = {
-        label: lang === "ko" ? "코인룸" : "Coin Room",
+        label: t.menu.coinRoom,
         items: [
             { label: "BTC", href: "/coin/btc" },
             { label: "ETH", href: "/coin/eth" },
@@ -62,7 +62,7 @@ export default function GlobalHeader() {
 
     // 도구 드롭다운
     const tools: MenuDropdown = {
-        label: lang === "ko" ? "도구" : "Tools",
+        label: t.menu.tools,
         items: [
             { label: t.menu.coinAnalysis, href: "/analysis" },
             { label: t.menu.stockAnalysis, href: "/stock" },
@@ -150,7 +150,7 @@ export default function GlobalHeader() {
                         className="hidden sm:inline-flex items-center gap-1 bg-primary text-on-primary px-3 h-9 rounded-md text-label-bold hover:bg-primary-container transition-colors"
                     >
                         <PenSquare className="w-3.5 h-3.5" />
-                        {lang === "ko" ? "글쓰기" : "Write"}
+                        {t.menu.write}
                     </Link>
 
                     <button
@@ -204,7 +204,7 @@ export default function GlobalHeader() {
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
                                 <PenSquare className="w-3.5 h-3.5" />
-                                {lang === "ko" ? "글쓰기" : "Write"}
+                                {t.menu.write}
                             </Link>
                             <button
                                 onClick={toggleLang}

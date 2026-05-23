@@ -88,11 +88,11 @@ export const StockPanel: React.FC<Props> = ({ symbol, lang }) => {
     // 1. Loading State
     if (isLoading) {
         return (
-            <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 shadow-xl animate-pulse">
-                <div className="h-8 bg-gray-800 rounded w-1/3 mb-4"></div>
+            <div className="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant shadow-xl animate-pulse">
+                <div className="h-8 bg-surface-container rounded w-1/3 mb-4"></div>
                 <div className="space-y-3">
-                    <div className="h-20 bg-gray-800 rounded w-full"></div>
-                    <div className="h-20 bg-gray-800 rounded w-full"></div>
+                    <div className="h-20 bg-surface-container rounded w-full"></div>
+                    <div className="h-20 bg-surface-container rounded w-full"></div>
                 </div>
             </div>
         );
@@ -101,9 +101,9 @@ export const StockPanel: React.FC<Props> = ({ symbol, lang }) => {
     // 2. Error State
     if (error) {
         return (
-            <div className="bg-gray-900 rounded-xl p-10 border border-red-800 text-center">
+            <div className="bg-surface-container-lowest rounded-xl p-10 border border-red-800 text-center">
                 <div className="text-red-500 text-lg font-bold mb-2">⚠️ {t.error}</div>
-                <p className="text-sm text-gray-600">{error}</p>
+                <p className="text-sm text-on-surface-variant">{error}</p>
             </div>
         );
     }
@@ -111,9 +111,9 @@ export const StockPanel: React.FC<Props> = ({ symbol, lang }) => {
     // 3. Insufficient Data
     if (!result || result.uiState === 'insufficient') {
         return (
-            <div className="bg-gray-900 rounded-xl p-10 border border-gray-800 text-center">
-                <div className="text-gray-500 text-lg font-bold mb-2">⚠️ {t.insufficient}</div>
-                <p className="text-sm text-gray-600">Stock data is not available for this symbol.</p>
+            <div className="bg-surface-container-lowest rounded-xl p-10 border border-outline-variant text-center">
+                <div className="text-on-surface-variant text-lg font-bold mb-2">⚠️ {t.insufficient}</div>
+                <p className="text-sm text-on-surface-variant">Stock data is not available for this symbol.</p>
             </div>
         );
     }
@@ -123,28 +123,28 @@ export const StockPanel: React.FC<Props> = ({ symbol, lang }) => {
     const isLocked = uiState === 'pro-locked';
 
     return (
-        <div className="bg-gray-900 rounded-xl p-6 md:p-8 border border-gray-800 shadow-lg space-y-6">
+        <div className="bg-surface-container-lowest rounded-xl p-6 md:p-8 border border-outline-variant shadow-lg space-y-6">
             {/* Title */}
             <h2 className="text-xl md:text-2xl font-bold text-green-400">{t.title}</h2>
 
             {/* Analysis Basis */}
-            <div className="bg-gray-800 rounded-lg p-4 text-sm text-gray-300 border-l-4 border-green-500">
+            <div className="bg-surface-container rounded-lg p-4 text-sm text-on-surface border-l-4 border-green-500">
                 <span className="font-semibold">{t.basis}</span> {candles.length} days of {period} data
             </div>
 
             {/* Main Metrics */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {/* Rise Probability */}
-                <div className="bg-gray-800 rounded-lg p-4 text-center">
-                    <p className="text-gray-400 text-sm mb-2">{t.prob}</p>
+                <div className="bg-surface-container rounded-lg p-4 text-center">
+                    <p className="text-on-surface-variant text-sm mb-2">{t.prob}</p>
                     <p className="text-2xl font-bold text-green-400">
                         {probability?.probability || t.na}%
                     </p>
                 </div>
 
                 {/* Grade */}
-                <div className="bg-gray-800 rounded-lg p-4 text-center">
-                    <p className="text-gray-400 text-sm mb-2">{t.grade}</p>
+                <div className="bg-surface-container rounded-lg p-4 text-center">
+                    <p className="text-on-surface-variant text-sm mb-2">{t.grade}</p>
                     <p className={`text-2xl font-bold ${['A', 'B'].includes(result.confidence?.grade) ? 'text-green-400' :
                             ['C'].includes(result.confidence?.grade) ? 'text-yellow-400' :
                                 'text-red-400'
@@ -154,16 +154,16 @@ export const StockPanel: React.FC<Props> = ({ symbol, lang }) => {
                 </div>
 
                 {/* Regime */}
-                <div className="bg-gray-800 rounded-lg p-4 text-center">
-                    <p className="text-gray-400 text-sm mb-2">Regime</p>
+                <div className="bg-surface-container rounded-lg p-4 text-center">
+                    <p className="text-on-surface-variant text-sm mb-2">Regime</p>
                     <p className="text-sm font-semibold text-blue-400">
                         {probability?.regime || t.na}
                     </p>
                 </div>
 
                 {/* Data Points */}
-                <div className="bg-gray-800 rounded-lg p-4 text-center">
-                    <p className="text-gray-400 text-sm mb-2">Data Points</p>
+                <div className="bg-surface-container rounded-lg p-4 text-center">
+                    <p className="text-on-surface-variant text-sm mb-2">Data Points</p>
                     <p className="text-2xl font-bold text-blue-400">{candles.length}</p>
                 </div>
             </div>
@@ -171,32 +171,32 @@ export const StockPanel: React.FC<Props> = ({ symbol, lang }) => {
             {/* Explanation Sections */}
             <div className="relative">
                 {isLocked && (
-                    <div className="absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm bg-gray-900/50 rounded-lg border border-gray-800">
+                    <div className="absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm bg-surface-container-lowest/80 rounded-lg border border-outline-variant">
                         <PremiumLock feature={t.proLock} lang={lang} className="scale-90" />
                     </div>
                 )}
 
                 <div className={`space-y-4 ${isLocked ? 'blur-sm opacity-50 pointer-events-none select-none grayscale' : ''}`}>
                     {/* Evidence */}
-                    <div className="bg-gray-800 rounded-lg p-4">
+                    <div className="bg-surface-container rounded-lg p-4">
                         <h3 className="font-bold text-green-400 mb-2">📋 {t.evidence}</h3>
-                        <p className="text-gray-300 text-sm leading-relaxed">
+                        <p className="text-on-surface text-sm leading-relaxed">
                             {explanation?.sections?.evidence || t.na}
                         </p>
                     </div>
 
                     {/* Risk */}
-                    <div className="bg-gray-800 rounded-lg p-4">
+                    <div className="bg-surface-container rounded-lg p-4">
                         <h3 className="font-bold text-red-400 mb-2">⚠️ {t.risk}</h3>
-                        <p className="text-gray-300 text-sm leading-relaxed">
+                        <p className="text-on-surface text-sm leading-relaxed">
                             {explanation?.sections?.risk || t.na}
                         </p>
                     </div>
 
                     {/* Watch Points */}
-                    <div className="bg-gray-800 rounded-lg p-4">
+                    <div className="bg-surface-container rounded-lg p-4">
                         <h3 className="font-bold text-blue-400 mb-2">👀 {t.watch}</h3>
-                        <p className="text-gray-300 text-sm leading-relaxed">
+                        <p className="text-on-surface text-sm leading-relaxed">
                             {explanation?.sections?.watch || t.na}
                         </p>
                     </div>
@@ -204,7 +204,7 @@ export const StockPanel: React.FC<Props> = ({ symbol, lang }) => {
             </div>
 
             {/* Disclaimer */}
-            <div className="text-xs text-gray-500 border-t border-gray-700 pt-4">
+            <div className="text-xs text-on-surface-variant border-t border-outline-variant pt-4">
                 * {lang === 'ko'
                     ? '본 분석은 과거 데이터 기반의 참고용이며, 투자 권유가 아닙니다. 미래 성과를 보장하지 않습니다.'
                     : 'This analysis is for reference only based on historical data and does not guarantee future performance.'}

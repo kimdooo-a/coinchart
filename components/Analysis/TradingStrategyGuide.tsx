@@ -71,7 +71,7 @@ export const TradingStrategyGuide: React.FC<Props> = ({ currentPrice, lang, anal
                 recStyle = 'conservative';
                 recTradingStyle = 'breakout';
                 recStopLoss = 3.0;
-                color = 'text-gray-400 border-gray-600 bg-gray-800';
+                color = 'text-on-surface-variant border-outline bg-surface-container';
             }
         } else {
             if (isStrongBuy) {
@@ -101,7 +101,7 @@ export const TradingStrategyGuide: React.FC<Props> = ({ currentPrice, lang, anal
                 recStyle = 'conservative';
                 recTradingStyle = 'breakout';
                 recStopLoss = 3.0;
-                color = 'text-gray-400 border-gray-600 bg-gray-800';
+                color = 'text-on-surface-variant border-outline bg-surface-container';
             }
         }
 
@@ -234,11 +234,11 @@ export const TradingStrategyGuide: React.FC<Props> = ({ currentPrice, lang, anal
 
 
     return (
-        <div className="bg-gray-900 rounded-xl border border-gray-700 overflow-hidden mt-6 shadow-lg">
+        <div className="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden mt-6 shadow-lg">
 
             {/* AI Summary Section */}
             {aiAdvice && (
-                <div className={`p-5 border-b border-gray-800 ${aiAdvice.color}`}>
+                <div className={`p-5 border-b border-outline-variant ${aiAdvice.color}`}>
                     <h3 className="text-lg md:text-xl font-bold mb-1 flex items-center gap-2">
                         {aiAdvice.title}
                     </h3>
@@ -248,8 +248,8 @@ export const TradingStrategyGuide: React.FC<Props> = ({ currentPrice, lang, anal
                 </div>
             )}
 
-            <div className="bg-gray-800 p-4 border-b border-gray-700">
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+            <div className="bg-surface-container p-4 border-b border-outline-variant">
+                <h3 className="text-lg font-bold text-on-surface flex items-center gap-2">
                     {t.title}
                 </h3>
             </div>
@@ -259,7 +259,7 @@ export const TradingStrategyGuide: React.FC<Props> = ({ currentPrice, lang, anal
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Trading Style Selector */}
                     <div className="space-y-2">
-                        <label className="text-xs text-gray-400 font-bold uppercase tracking-wider">{t.labels.tradingStyle}</label>
+                        <label className="text-xs text-on-surface-variant font-bold uppercase tracking-wider">{t.labels.tradingStyle}</label>
                         <div className="grid grid-cols-3 gap-2">
                             {(['trend', 'reversal', 'breakout'] as const).map(style => (
                                 <button
@@ -267,14 +267,14 @@ export const TradingStrategyGuide: React.FC<Props> = ({ currentPrice, lang, anal
                                     onClick={() => setTradingStyle(style)}
                                     className={`p-2 rounded-lg text-xs md:text-sm font-bold border transition-all ${tradingStyle === style
                                         ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/50'
-                                        : 'bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-700'
+                                        : 'bg-surface-container border-outline-variant text-on-surface-variant hover:bg-surface-container-high'
                                         }`}
                                 >
                                     {t.styles[style].split(' (')[0]}
                                 </button>
                             ))}
                         </div>
-                        <p className="text-xs text-gray-500 mt-1 pl-1">
+                        <p className="text-xs text-on-surface-variant mt-1 pl-1">
                             {t.descriptions[tradingStyle]}
                         </p>
                     </div>
@@ -282,67 +282,67 @@ export const TradingStrategyGuide: React.FC<Props> = ({ currentPrice, lang, anal
                     {/* Entry Style & Risk */}
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <label className="text-xs text-gray-400 font-bold uppercase tracking-wider">{t.labels.entryStyle}</label>
-                            <div className="flex bg-gray-800 rounded-lg p-1">
+                            <label className="text-xs text-on-surface-variant font-bold uppercase tracking-wider">{t.labels.entryStyle}</label>
+                            <div className="flex bg-surface-container rounded-lg p-1">
                                 {(['conservative', 'aggressive'] as const).map(style => (
                                     <button
                                         key={style}
                                         onClick={() => setEntryStyle(style)}
                                         className={`flex-1 py-1.5 rounded text-xs font-bold transition-all ${entryStyle === style
-                                            ? 'bg-gray-600 text-white shadow'
-                                            : 'text-gray-400 hover:text-gray-200'
+                                            ? 'bg-surface-container-highest text-on-surface shadow'
+                                            : 'text-on-surface-variant hover:text-on-surface'
                                             }`}
                                     >
                                         {t.entryStyles[style].split(' (')[0]}
                                     </button>
                                 ))}
                             </div>
-                            <p className="text-xs text-gray-500 pl-1">
+                            <p className="text-xs text-on-surface-variant pl-1">
                                 {entryStyle === 'conservative' ? t.descriptions.safe_split : t.descriptions.agg_split}
                             </p>
                         </div>
 
                         <div className="space-y-2">
                             <div className="flex justify-between items-end">
-                                <label className="text-xs text-gray-400 font-bold uppercase tracking-wider">{t.labels.stopLoss}</label>
+                                <label className="text-xs text-on-surface-variant font-bold uppercase tracking-wider">{t.labels.stopLoss}</label>
                                 <span className="text-red-400 font-bold font-mono text-sm">-{stopLossPercent}%</span>
                             </div>
                             <input
                                 type="range" min="1" max="15" step="0.5"
                                 value={stopLossPercent}
                                 onChange={(e) => setStopLossPercent(Number(e.target.value))}
-                                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-red-500"
+                                className="w-full h-2 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-red-500"
                             />
                         </div>
                     </div>
                 </div>
 
-                <div className="h-px bg-gray-800 w-full" />
+                <div className="h-px bg-outline-variant w-full" />
 
                 {/* 2. Results Section (Entry Plan) */}
                 <div>
-                    <h4 className="text-sm font-bold text-gray-300 mb-3 flex items-center gap-2">
+                    <h4 className="text-sm font-bold text-on-surface mb-3 flex items-center gap-2">
                         {t.labels.entryPlan}
                     </h4>
 
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                         {/* Entry 1, 2, 3 */}
                         {[0, 1, 2].map((idx) => (
-                            <div key={idx} className={`relative p-3 rounded-xl border flex flex-col justify-between ${idx === 0 ? 'bg-blue-900/20 border-blue-500/50' : 'bg-gray-800/50 border-gray-700 border-dashed'
+                            <div key={idx} className={`relative p-3 rounded-xl border flex flex-col justify-between ${idx === 0 ? 'bg-blue-900/20 border-blue-500/50' : 'bg-surface-container/80 border-outline-variant border-dashed'
                                 }`}>
                                 <div className="mb-2">
-                                    <span className="text-xs font-bold text-gray-400 block mb-1">
+                                    <span className="text-xs font-bold text-on-surface-variant block mb-1">
                                         {idx + 1}차 진입 ({splits[idx]}%)
                                     </span>
-                                    <span className="text-xs text-gray-500 whitespace-pre-line leading-relaxed">
+                                    <span className="text-xs text-on-surface-variant whitespace-pre-line leading-relaxed">
                                         {getEntryComment(idx)}
                                     </span>
                                 </div>
-                                <div className="text-lg md:text-xl font-black text-white font-mono tracking-tight">
+                                <div className="text-lg md:text-xl font-black text-on-surface font-mono tracking-tight">
                                     ${entryLevels[idx].toLocaleString(undefined, { maximumFractionDigits: 4 })}
                                 </div>
                                 {idx > 0 && (
-                                    <span className="absolute top-2 right-2 text-[10px] bg-gray-700 text-gray-300 px-1.5 py-0.5 rounded">
+                                    <span className="absolute top-2 right-2 text-[10px] bg-surface-container-high text-on-surface px-1.5 py-0.5 rounded">
                                         -{((1 - entryLevels[idx] / currentPrice) * 100).toFixed(1)}%
                                     </span>
                                 )}

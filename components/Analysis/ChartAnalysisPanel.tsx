@@ -26,7 +26,7 @@ const ANALYSIS_INTERVALS = ['1d', '1w'];
 const getIndicatorStatus = (val: number, type: 'RSI' | 'CCI' | 'Stoch' | 'Will' | 'ADX' | 'MACD', lang: 'ko' | 'en') => {
     let status = 'NEUTRAL';
     let label = lang === 'ko' ? '관망' : 'Neutral';
-    let color = 'text-gray-400';
+    let color = 'text-on-surface-variant';
 
     if (type === 'RSI') {
         if (val >= 70) { status = 'SELL'; label = lang === 'ko' ? '과매수' : 'Overbought'; color = 'text-red-500'; }
@@ -143,7 +143,7 @@ export const ChartAnalysisPanel: React.FC<Props> = ({ symbol, lang, apiEndpoint 
     return (
         <div className="bg-card rounded-xl border border-border shadow-lg overflow-hidden">
             {/* Header Area */}
-            <div className="p-6 border-b border-border bg-gray-900/50">
+            <div className="p-6 border-b border-border bg-surface-container-lowest/80">
                 <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
                     <div>
                         <h3 className="text-xl font-bold flex items-center gap-2 mb-2">
@@ -151,10 +151,10 @@ export const ChartAnalysisPanel: React.FC<Props> = ({ symbol, lang, apiEndpoint 
                         </h3>
                         <div className="flex items-center gap-2">
                             <span className="text-xs text-muted-foreground">{t.basis}</span>
-                            <div className="flex bg-gray-800 rounded p-1 gap-1">
+                            <div className="flex bg-surface-container rounded p-1 gap-1">
                                 {ANALYSIS_INTERVALS.map(int => (
                                     <button key={int} onClick={() => setInterval(int)}
-                                        className={`px-3 py-1 rounded text-[10px] font-bold transition-all ${interval === int ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-gray-700'}`}>
+                                        className={`px-3 py-1 rounded text-[10px] font-bold transition-all ${interval === int ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-surface-container-high'}`}>
                                         {int.toUpperCase()}
                                     </button>
                                 ))}
@@ -163,12 +163,12 @@ export const ChartAnalysisPanel: React.FC<Props> = ({ symbol, lang, apiEndpoint 
                     </div>
 
                     <div className="flex gap-4">
-                        <div className="bg-gray-800 rounded-lg p-3 text-center min-w-[100px]">
-                            <div className="text-xs text-gray-400 mb-1">{t.rise}</div>
+                        <div className="bg-surface-container rounded-lg p-3 text-center min-w-[100px]">
+                            <div className="text-xs text-on-surface-variant mb-1">{t.rise}</div>
                             <div className="text-xl font-bold text-green-500">50%</div>
                         </div>
-                        <div className="bg-gray-800 rounded-lg p-3 text-center min-w-[100px]">
-                            <div className="text-xs text-gray-400 mb-1">{t.drop}</div>
+                        <div className="bg-surface-container rounded-lg p-3 text-center min-w-[100px]">
+                            <div className="text-xs text-on-surface-variant mb-1">{t.drop}</div>
                             <div className="text-xl font-bold text-red-500">50%</div>
                         </div>
                     </div>
@@ -180,29 +180,29 @@ export const ChartAnalysisPanel: React.FC<Props> = ({ symbol, lang, apiEndpoint 
 
                 {/* Indicators Grid */}
                 <div>
-                    <h4 className="text-sm font-bold text-gray-400 mb-4 flex items-center cursor-pointer">
+                    <h4 className="text-sm font-bold text-on-surface-variant mb-4 flex items-center cursor-pointer">
                         ▶ {t.manual}
                     </h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {indicators.map((ind, idx) => (
-                            <div key={idx} className="bg-gray-800/50 p-4 rounded-xl border border-gray-700">
+                            <div key={idx} className="bg-surface-container/80 p-4 rounded-xl border border-outline-variant">
                                 <div className="flex justify-between items-start mb-2">
-                                    <span className="text-sm font-bold text-white">{ind.name}</span>
+                                    <span className="text-sm font-bold text-on-surface">{ind.name}</span>
                                     <span className={`text-xs font-bold ${ind.color}`}>{ind.status === 'NEUTRAL' ? 'NEUTRAL' : ind.status}</span>
                                 </div>
-                                <div className="text-xs text-gray-400 mb-4">Val: <span className="text-white">{ind.val}</span></div>
+                                <div className="text-xs text-on-surface-variant mb-4">Val: <span className="text-on-surface">{ind.val}</span></div>
 
-                                <div className="border-t border-gray-700 pt-2 flex justify-between items-center">
+                                <div className="border-t border-outline-variant pt-2 flex justify-between items-center">
                                     <span className={`text-xs ${ind.color}`}>{ind.label}</span>
                                     <div className="text-right">
-                                        <div className="text-[10px] text-gray-500">{t.prob}</div>
-                                        <div className="text-sm font-bold text-white">{ind.prob}%</div>
+                                        <div className="text-[10px] text-on-surface-variant">{t.prob}</div>
+                                        <div className="text-sm font-bold text-on-surface">{ind.prob}%</div>
                                     </div>
                                 </div>
                             </div>
                         ))}
                     </div>
-                    <p className="text-[10px] text-gray-500 mt-2">
+                    <p className="text-[10px] text-on-surface-variant mt-2">
                         * {lang === 'ko' ? '상승 확률은 최근 500개의 데이터 중 현재와 같은 신호가 떴을 때, 34h 뒤 실제로 가격이 올랐던 비율입니다.' : 'Rising probability based on last 500 candles historical backtest.'}
                     </p>
                 </div>
@@ -220,7 +220,7 @@ export const ChartAnalysisPanel: React.FC<Props> = ({ symbol, lang, apiEndpoint 
 
                 {/* Strategy Guide */}
                 <div>
-                    <h4 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                    <h4 className="text-lg font-bold text-on-surface mb-6 flex items-center gap-2">
                         {t.strategy}
                     </h4>
 
@@ -228,12 +228,12 @@ export const ChartAnalysisPanel: React.FC<Props> = ({ symbol, lang, apiEndpoint 
                         {/* Left: Style */}
                         <div className="space-y-6">
                             <div>
-                                <h5 className="text-sm text-gray-400 font-bold mb-3">{t.style}</h5>
+                                <h5 className="text-sm text-on-surface-variant font-bold mb-3">{t.style}</h5>
                                 <div className="flex flex-col gap-2">
-                                    <div className="bg-gray-800 p-3 rounded-lg text-gray-500 text-sm flex items-center gap-2 opacity-50">
+                                    <div className="bg-surface-container p-3 rounded-lg text-on-surface-variant text-sm flex items-center gap-2 opacity-50">
                                         {t.trend}
                                     </div>
-                                    <div className="bg-gray-800 p-3 rounded-lg text-gray-500 text-sm flex items-center gap-2 opacity-50">
+                                    <div className="bg-surface-container p-3 rounded-lg text-on-surface-variant text-sm flex items-center gap-2 opacity-50">
                                         {t.counter}
                                     </div>
                                     <div className="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 border border-blue-500/50 p-3 rounded-lg text-blue-400 text-sm flex flex-col gap-1">
@@ -244,50 +244,50 @@ export const ChartAnalysisPanel: React.FC<Props> = ({ symbol, lang, apiEndpoint 
                             </div>
 
                             <div>
-                                <h5 className="text-sm text-gray-400 font-bold mb-3">{t.riskTol}</h5>
+                                <h5 className="text-sm text-on-surface-variant font-bold mb-3">{t.riskTol}</h5>
                                 <div className="text-2xl font-black text-red-500">-3.0%</div>
                             </div>
                         </div>
 
                         {/* Right: Plan Table */}
                         <div>
-                            <h5 className="text-sm text-gray-400 font-bold mb-3">{t.plan}</h5>
+                            <h5 className="text-sm text-on-surface-variant font-bold mb-3">{t.plan}</h5>
                             <div className="space-y-3">
                                 {/* Entry 1 */}
-                                <div className="bg-gray-800/80 p-3 rounded-lg flex justify-between items-center border border-gray-700 relative overflow-hidden">
+                                <div className="bg-surface-container/80 p-3 rounded-lg flex justify-between items-center border border-outline-variant relative overflow-hidden">
                                     <div className="absolute left-0 top-0 h-full w-1 bg-blue-500"></div>
                                     <div>
                                         <div className="text-xs text-blue-400 font-bold mb-0.5">{t.entry1}</div>
-                                        <div className="text-xs text-gray-400">{t.breakBuy}</div>
+                                        <div className="text-xs text-on-surface-variant">{t.breakBuy}</div>
                                     </div>
                                     <div className="text-right">
-                                        <div className="text-white font-bold font-mono">${entry1.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
-                                        <div className="text-[10px] text-gray-500">(Resistance Break)</div>
+                                        <div className="text-on-surface font-bold font-mono">${entry1.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
+                                        <div className="text-[10px] text-on-surface-variant">(Resistance Break)</div>
                                     </div>
                                 </div>
 
                                 {/* Entry 2 */}
-                                <div className="bg-gray-800/80 p-3 rounded-lg flex justify-between items-center border border-gray-700 relative overflow-hidden">
+                                <div className="bg-surface-container/80 p-3 rounded-lg flex justify-between items-center border border-outline-variant relative overflow-hidden">
                                     <div className="absolute left-0 top-0 h-full w-1 bg-indigo-500"></div>
                                     <div>
                                         <div className="text-xs text-indigo-400 font-bold mb-0.5">{t.entry2}</div>
-                                        <div className="text-xs text-gray-400">{t.retest}</div>
+                                        <div className="text-xs text-on-surface-variant">{t.retest}</div>
                                     </div>
                                     <div className="text-right">
-                                        <div className="text-white font-bold font-mono">${entry2.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
+                                        <div className="text-on-surface font-bold font-mono">${entry2.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
                                         <div className="text-[10px] text-green-500">-0.8%</div>
                                     </div>
                                 </div>
 
                                 {/* Entry 3 */}
-                                <div className="bg-gray-800/80 p-3 rounded-lg flex justify-between items-center border border-gray-700 relative overflow-hidden">
+                                <div className="bg-surface-container/80 p-3 rounded-lg flex justify-between items-center border border-outline-variant relative overflow-hidden">
                                     <div className="absolute left-0 top-0 h-full w-1 bg-purple-500"></div>
                                     <div>
                                         <div className="text-xs text-purple-400 font-bold mb-0.5">{t.entry3}</div>
-                                        <div className="text-xs text-gray-400">{t.maginot}</div>
+                                        <div className="text-xs text-on-surface-variant">{t.maginot}</div>
                                     </div>
                                     <div className="text-right">
-                                        <div className="text-white font-bold font-mono">${entry3.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
+                                        <div className="text-on-surface font-bold font-mono">${entry3.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
                                         <div className="text-[10px] text-yellow-500">-2.8%</div>
                                     </div>
                                 </div>

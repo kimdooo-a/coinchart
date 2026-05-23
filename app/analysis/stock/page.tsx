@@ -19,19 +19,19 @@ export default function StockAnalysisPage() {
     };
 
     return (
-        <main className="min-h-screen bg-black text-white p-4 md:p-8">
+        <main className="min-h-screen bg-surface text-on-surface p-4 md:p-8">
             {/* Spacer for GlobalHeader */}
             <div className="h-24 w-full" aria-hidden="true" />
 
             <div className="max-w-7xl mx-auto space-y-6 md:space-y-8">
                 {/* Header */}
-                <header className="border-b border-gray-800 pb-6">
+                <header className="border-b border-outline-variant pb-6">
                     <h1 className="text-3xl font-bold text-green-400">{t.title}</h1>
-                    <p className="text-gray-500 mt-2">{t.subtitle}</p>
+                    <p className="text-on-surface-variant mt-2">{t.subtitle}</p>
                 </header>
 
                 {/* Stock Selector */}
-                <section className="bg-gray-900 rounded-xl p-6 border border-gray-800">
+                <section className="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant">
                     <label className="block text-lg font-semibold mb-4">{t.selectStock}</label>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         {SUPPORTED_STOCKS.map(stock => (
@@ -41,7 +41,7 @@ export default function StockAnalysisPage() {
                                 className={`p-3 rounded-lg font-bold transition ${
                                     selectedStock === stock
                                         ? 'bg-green-500 text-black'
-                                        : 'bg-gray-800 text-white hover:bg-gray-700'
+                                        : 'bg-surface-container text-on-surface hover:bg-surface-container-low'
                                 }`}
                             >
                                 {stock}
@@ -61,8 +61,8 @@ export default function StockAnalysisPage() {
                 </section>
 
                 {/* Info */}
-                <section className="bg-gray-900 rounded-xl p-6 border border-gray-800">
-                    <p className="text-gray-400 text-sm">{t.noData}</p>
+                <section className="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant">
+                    <p className="text-on-surface-variant text-sm">{t.noData}</p>
                 </section>
             </div>
         </main>

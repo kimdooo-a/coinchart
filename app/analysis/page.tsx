@@ -104,7 +104,7 @@ export default function AnalysisPage() {
                                         onClick={() => setSymbol(item.symbol + 'USDT')}
                                         className={`flex-none text-xs md:text-sm px-4 py-2 rounded-lg border whitespace-nowrap transition-all duration-300 font-bold tracking-wide relative overflow-hidden group ${symbol === (item.symbol + 'USDT')
                                             ? 'bg-gradient-to-br from-blue-600 to-indigo-600 border-blue-400/50 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)] scale-105'
-                                            : 'bg-gray-800/50 border-gray-700 text-gray-400 hover:border-gray-600 hover:bg-gray-800 hover:text-white'
+                                            : 'bg-surface-container/80 border-outline-variant text-on-surface-variant hover:border-outline hover:bg-surface-container hover:text-on-surface'
                                             }`}
                                     >
                                         <span className="relative z-10">{item.symbol}</span>
@@ -125,24 +125,24 @@ export default function AnalysisPage() {
                 </section>
 
                 {/* Chart Section */}
-                <section className="bg-gray-900/50 backdrop-blur-sm rounded-2xl p-4 md:p-6 shadow-2xl border border-gray-800 relative overflow-hidden w-full h-[60vh] min-h-[400px] max-h-[700px] flex flex-col">
+                <section className="bg-surface-container-lowest/80 backdrop-blur-sm rounded-2xl p-4 md:p-6 shadow-2xl border border-outline-variant relative overflow-hidden w-full h-[60vh] min-h-[400px] max-h-[700px] flex flex-col">
                     {/* Decorative Gradient Background */}
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-50"></div>
 
                     <div className="mb-4 flex-none flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div className="flex flex-col gap-1">
-                            <h2 className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">{symbol} {t.chartTitle} (Snapshot)</h2>
-                            <p className="text-xs text-gray-500 font-mono">Powered by Supabase DB (SSOT) & Advanced Algorithm</p>
+                            <h2 className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-on-surface to-on-surface-variant">{symbol} {t.chartTitle} (Snapshot)</h2>
+                            <p className="text-xs text-on-surface-variant font-mono">Powered by Supabase DB (SSOT) & Advanced Algorithm</p>
                         </div>
                     </div>
 
                     <div className="flex-1 w-full min-h-0 relative">
                         {isLoading ? (
-                            <div className="w-full h-full flex items-center justify-center text-gray-500 animate-pulse bg-gray-900 rounded-xl">
+                            <div className="w-full h-full flex items-center justify-center text-on-surface-variant animate-pulse bg-surface-container-lowest rounded-xl">
                                 Loading Chart...
                             </div>
                         ) : historyData.length === 0 ? (
-                            <div className="w-full h-full flex flex-col items-center justify-center text-gray-500 bg-gray-900 rounded-xl space-y-2">
+                            <div className="w-full h-full flex flex-col items-center justify-center text-on-surface-variant bg-surface-container-lowest rounded-xl space-y-2">
                                 <span className="text-4xl">📉</span>
                                 <span className="font-bold">No Chart Data Available</span>
                                 <span className="text-xs">Database has no records for {symbol}</span>

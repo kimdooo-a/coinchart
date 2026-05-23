@@ -34,7 +34,18 @@ export const TRANSLATIONS = {
             watchlist: "관심종목",
             settings: "설정",
             contact: "문의하기",
-            terms: "이용약관"
+            terms: "이용약관",
+
+            // v2.0 커뮤니티 피벗 — 5+2 메뉴 구조
+            best: "베스트",
+            boardFree: "자유게시판",
+            boardMarket: "시세토론",
+            boardInfo: "정보공유",
+            coinRoom: "코인룸",
+            tools: "도구",
+            write: "글쓰기",
+            search: "검색",
+            login: "로그인"
         },
         dashboard: {
             badge: "시장 개요",
@@ -297,7 +308,18 @@ export const TRANSLATIONS = {
             watchlist: "Watchlist",
             settings: "Settings",
             contact: "Contact",
-            terms: "Terms"
+            terms: "Terms",
+
+            // v2.0 community pivot — 5+2 menu structure
+            best: "Best",
+            boardFree: "Free Board",
+            boardMarket: "Market Talk",
+            boardInfo: "Info",
+            coinRoom: "Coin Room",
+            tools: "Tools",
+            write: "Write",
+            search: "Search",
+            login: "Login"
         },
         dashboard: {
             badge: "Market Overview",

@@ -639,3 +639,209 @@ R1 (2026-05-23) 추가. Alternative.me Fear & Greed Index 프록시.
 - **캐시**: 1시간 (Next `revalidate = 3600` + 모듈 메모리)
 - **인증**: 불필요
 - **사용처**: 메인페이지 사이드바 `FngGaugeWidget` (T15)
+
+---
+
+## 커뮤니티 (R1 2026-05-23, T12)
+
+v2.0 커뮤니티 피벗(자유/시세/정보 + 코인룸 6종)을 위한 게시글·댓글·추천 CRUD.
+공통 사항:
+- **익명 작성**: `middleware.ts`가 `/api/board/*`, `/api/community/*`에 `x-client-ip-masked`, `x-client-ip-hash` 헤더 주입 (T07)
+- **회원 식별**: `cookies()` 기반 supabase `auth.getUser()` — body의 `postAsAnonymous: true`로 회원이 익명 작성 가능
+- **권한**: 회원은 `author_id == auth.uid()`, 익명은 `guestPassword` bcrypt 검증
+- **유효 board slug**: `free`, `market`, `info`, `coin-btc`, `coin-eth`, `coin-xrp`, `coin-sol`, `coin-altcoin`, `coin-kimp` (9종)
+- **DB**: `community_posts`, `community_comments`, `community_post_likes` (T01 마이그레이션)
+
+---
+
+### GET /api/board/[slug]
+
+게시판 글 목록 조회.
+
+- **파일**: `app/api/board/[slug]/route.ts`
+- **경로 파라미터**: `slug` — 위 9종 중 하나
+- **쿼리 파라미터**:
+  | 이름 | 필수 | 타입 | 기본값 | 설명 |
+  |------|------|------|--------|------|
+  | page | X | number | `1` | 페이지 번호 (1-base) |
+  | limit | X | number | `30` | 페이지당 항목 수 (max 100) |
+  | sort | X | string | `recent` | `recent` / `popular` / `views` / `comments` |
+  | search | X | string | - | 제목 부분 일치 (ilike) |
+  | category | X | string | - | `'전체'`/빈문자열이면 필터 없음 |
+- **응답 (200)**:
+  ```json
+  {
+    "notices": [ /* community_posts row[] (is_notice=true) */ ],
+    "posts":   [ /* community_posts row[] (is_notice=false) */ ],
+    "total":   123,
+    "page":    1,
+    "limit":   30
+  }
+  ```
+  각 행: `id, board_slug, title, author_id, guest_nickname, guest_ip_masked, category, tags, coin_symbol, view_count, like_count, comment_count, is_notice, is_hot, created_at, updated_at`
+- **에러**: `404 Unknown board`, `500`
+- **인증**: 불필요
+
+---
+
+### POST /api/board/[slug]
+
+새 글 작성. 회원 또는 익명.
+
+- **파일**: `app/api/board/[slug]/route.ts`
+- **Body**:
+  ```ts
+  {
+    title:           string,   // 1~200자
+    contentHtml:     string,   // HTML
+    category?:       string,   // 기본 '전체'
+    tags?:           string[], // max 10
+    coinSymbol?:     string,   // 자동 uppercase
+    postAsAnonymous?: boolean, // 회원이 익명 작성 시 true
+    guestNickname?:  string,   // 익명 필수 (2~12자)
+    guestPassword?:  string    // 익명 필수 (≥4자, bcrypt 해시 저장)
+  }
+  ```
+- **응답 (201)**: `{ id: string }`
+- **에러**: `400`(검증) / `404`(slug) / `500`
+- **헤더 사용**: `x-client-ip-masked` (익명 작성 시 `guest_ip_masked`로 저장)
+
+---
+
+### GET /api/board/[slug]/[postId]
+
+게시글 상세 + 첫 페이지 댓글 + view_count +1.
+
+- **파일**: `app/api/board/[slug]/[postId]/route.ts`
+- **응답 (200)**:
+  ```json
+  {
+    "post":     { /* community_posts row */ },
+    "comments": [ /* community_comments row[] (max 100, created_at ASC) */ ]
+  }
+  ```
+- **에러**: `400`(invalid uuid) / `404`(not found 또는 deleted)
+- **부수 효과**: `view_count += 1` (비동기, 응답 차단 안 함)
+
+---
+
+### PATCH /api/board/[slug]/[postId]
+
+게시글 수정.
+
+- **Body**:
+  ```ts
+  {
+    title?:        string,
+    contentHtml?:  string,
+    category?:     string,
+    tags?:         string[],
+    coinSymbol?:   string,
+    guestPassword?: string  // 익명 글 수정 시 필수
+  }
+  ```
+- **권한**: 회원=`auth.uid() === post.author_id` / 익명=`bcrypt.compare(guestPassword, guest_password_hash)`
+- **응답 (200)**: `{ ok: true }`
+- **에러**: `401`(비번 누락) / `403`(권한/비번 불일치) / `404`(없음) / `410`(이미 삭제)
+
+---
+
+### DELETE /api/board/[slug]/[postId]
+
+게시글 soft delete (`is_deleted=true`).
+
+- **권한**: PATCH와 동일
+- **`guestPassword` 전달**: query `?guestPassword=` 또는 body JSON (DELETE에 body 허용)
+- **응답 (200)**: `{ ok: true }`
+
+---
+
+### POST /api/community/comment
+
+댓글/대댓글 작성.
+
+- **파일**: `app/api/community/comment/route.ts`
+- **Body**:
+  ```ts
+  {
+    postId:           string,   // uuid
+    parentId?:        string,   // 대댓글이면 부모 댓글 uuid
+    content:          string,   // 1~2000자
+    postAsAnonymous?: boolean,
+    guestNickname?:   string,   // 익명 필수
+    guestPassword?:   string    // 익명 필수
+  }
+  ```
+- **응답 (201)**: `{ comment: { id, post_id, parent_id, content, author_id, guest_nickname, guest_ip_masked, like_count, created_at } }`
+- **부수 효과**: `community_posts.comment_count += 1` (DB 트리거)
+- **에러**: `400`(검증) / `404`(게시글 없음 또는 삭제)
+
+---
+
+### DELETE /api/community/comment
+
+댓글 soft delete.
+
+- **쿼리 또는 body**: `commentId` (필수), `guestPassword` (익명 댓글이면 필수)
+- **권한**: 회원=`auth.uid() === comment.author_id` / 익명=bcrypt 검증
+- **응답 (200)**: `{ ok: true }` (이미 삭제된 경우도 `ok: true`)
+
+---
+
+### POST /api/community/like
+
+추천/비추 토글.
+
+- **파일**: `app/api/community/like/route.ts`
+- **Body**: `{ postId: string, value: 1 | -1 }`
+- **dedup**:
+  - 회원: `(post_id, user_id)` UNIQUE 부분 인덱스
+  - 익명: `(post_id, ip_hash)` UNIQUE 부분 인덱스 (`x-client-ip-hash` 헤더)
+- **토글 로직**:
+  - 기존 레코드 없음 → INSERT
+  - 기존 레코드의 `value`가 같음 → DELETE (취소)
+  - 기존 레코드의 `value`가 다름 → UPDATE (추천↔비추 전환)
+- **응답 (200)**: `{ liked: boolean, likeCount: number }`
+  - `liked`: 최종 상태가 추천(value=1)이면 true (취소/비추는 false)
+  - `likeCount`: `community_posts.like_count` (트리거 합산, 음수 가능)
+- **에러**: `400`(invalid postId/value, 또는 익명인데 ip_hash 헤더 없음) / `404`(게시글 없음)
+
+---
+
+### GET /api/coins/hot-issues
+
+R1 (2026-05-23) 추가. 메인페이지 사이드바 `HotIssueWidget` 실데이터 공급용.
+
+- **파일**: `app/api/coins/hot-issues/route.ts`
+- **데이터 소스**: Supabase RPC `community_hot_issues(hours_window int, result_limit int)`
+- **파라미터** (query)
+
+  | 쿼리 | 기본값 | 유효 범위 | 설명 |
+  |---|---|---|---|
+  | `hours` | 24 | 1~168 (서버 클램프) | 집계 윈도우 (시간) |
+  | `limit` | 10 | 1~50 (서버 클램프) | 결과 개수 |
+
+- **응답 (200)**:
+  ```json
+  {
+    "items": [
+      { "rank": 1, "symbol": "BTC", "count": 87, "trend": "UP",   "score": 91.6 },
+      { "rank": 2, "symbol": "ETH", "count": 42, "trend": "FLAT", "score": 53.3 },
+      { "rank": 3, "symbol": "SOL", "count": 18, "trend": "NEW",  "score": 18.0 }
+    ],
+    "ts": 1747958400000
+  }
+  ```
+  - `rank`: 1-based 정렬 순위 (score 내림차순)
+  - `symbol`: `community_posts.coin_symbol` 원본 값 (예: BTC/ETH/XRP/SOL/ALT/KIMP)
+  - `count`: 최근 `hours`시간 내 게시글 수
+  - `trend`: `"UP" | "DOWN" | "FLAT" | "NEW"`
+    - 임계: 최근/직전 비율 > 1.2 → `UP`, < 0.8 → `DOWN`, 그 외 → `FLAT`. 직전 윈도우 0건 → `NEW`.
+  - `score`: 정렬 가중치 `recent + prev * 0.3`
+  - `ts`: 응답 생성 unix ms
+- **에러 응답**:
+  - `500`: `{ "error": "..." }` (RPC 실패 / Supabase 연결 오류)
+- **캐시**: 5분 (Next `revalidate = 300`)
+- **인증**: 불필요 (RPC는 `anon` / `authenticated` 모두 EXECUTE 가능)
+- **사용처**: 메인페이지 사이드바 `HotIssueWidget` (T15에서 연동)
+- **의존 마이그레이션**: `supabase/migrations/20260523_create_hot_issues_rpc.sql` (`community_posts` 선행)

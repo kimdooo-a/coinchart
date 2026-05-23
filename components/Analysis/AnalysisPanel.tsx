@@ -156,11 +156,11 @@ export const AnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
     // 1. Loading State
     if (isLoading) {
         return (
-            <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 shadow-xl animate-pulse">
-                <div className="h-8 bg-gray-800 rounded w-1/3 mb-4"></div>
+            <div className="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant shadow-xl animate-pulse">
+                <div className="h-8 bg-surface-container rounded w-1/3 mb-4"></div>
                 <div className="space-y-3">
-                    <div className="h-20 bg-gray-800 rounded w-full"></div>
-                    <div className="h-20 bg-gray-800 rounded w-full"></div>
+                    <div className="h-20 bg-surface-container rounded w-full"></div>
+                    <div className="h-20 bg-surface-container rounded w-full"></div>
                 </div>
             </div>
         );
@@ -169,9 +169,9 @@ export const AnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
     // 2. Insufficient Data State
     if (!result || result.uiState === 'insufficient') {
         return (
-            <div className="bg-gray-900 rounded-xl p-10 border border-gray-800 text-center">
-                <div className="text-gray-500 text-lg font-bold mb-2">⚠️ {t.insufficient}</div>
-                <p className="text-sm text-gray-600">Chart data is not available for this timeframe.</p>
+            <div className="bg-surface-container-lowest rounded-xl p-10 border border-outline-variant text-center">
+                <div className="text-on-surface-variant text-lg font-bold mb-2">⚠️ {t.insufficient}</div>
+                <p className="text-sm text-on-surface-variant">Chart data is not available for this timeframe.</p>
             </div>
         );
     }
@@ -197,7 +197,7 @@ export const AnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
                     <h3 className="text-xl md:text-2xl font-bold flex items-center gap-2 mb-2">
                         {t.title}
                     </h3>
-                    <div className="flex bg-gray-800 rounded p-1 gap-1 self-start">
+                    <div className="flex bg-surface-container rounded p-1 gap-1 self-start">
                         {ANALYSIS_INTERVALS.map(int => (
                             <button key={int} onClick={() => setInterval(int)}
                                 className={`px-3 py-1 rounded text-xs font-bold transition-all ${interval === int ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted'}`}>
@@ -221,7 +221,7 @@ export const AnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
                 {/* Probability Card (Summary) */}
                 <div className="bg-muted/50 p-4 rounded-xl border border-border flex items-center gap-6">
                     <div className="text-center">
-                        <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">{t.grade}</div>
+                        <div className="text-xs text-on-surface-variant uppercase tracking-wide mb-1">{t.grade}</div>
                         <div className={`text-3xl font-black ${gradeColor(result.confidence.grade)}`}>
                             {result.confidence.grade}
                         </div>
@@ -243,7 +243,7 @@ export const AnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
                     <h4 className="text-primary font-bold text-sm mb-2 flex items-center gap-2">
                         🔍 {t.evidence}
                     </h4>
-                    <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
+                    <p className="text-sm text-on-surface leading-relaxed whitespace-pre-wrap">
                         {explanation.sections.evidence}
                     </p>
                 </div>
@@ -253,7 +253,7 @@ export const AnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
                     <h4 className="text-chart-3 font-bold text-sm mb-2 flex items-center gap-2">
                         ⚠️ {t.risk}
                     </h4>
-                    <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
+                    <p className="text-sm text-on-surface leading-relaxed whitespace-pre-wrap">
                         {explanation.sections.risk}
                     </p>
                 </div>
@@ -263,20 +263,20 @@ export const AnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
                     <h4 className="text-chart-4 font-bold text-sm mb-2 flex items-center gap-2">
                         👀 {t.watch}
                     </h4>
-                    <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
+                    <p className="text-sm text-on-surface leading-relaxed whitespace-pre-wrap">
                         {explanation.sections.watch}
                     </p>
                 </div>
             </div>
 
             {/* Backtest Section (Free/Pro) */}
-            <div className="pt-4 border-t border-gray-800">
+            <div className="pt-4 border-t border-outline-variant">
                 <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-lg font-bold text-gray-200 flex items-center gap-2">
+                    <h4 className="text-lg font-bold text-on-surface flex items-center gap-2">
                         {t.backtestTitle}
                         <button
                             onClick={() => setShowBacktestGuide(!showBacktestGuide)}
-                            className="text-xs font-normal text-muted-foreground bg-muted hover:bg-gray-700 px-2 py-0.5 rounded transition-colors flex items-center gap-1"
+                            className="text-xs font-normal text-muted-foreground bg-muted hover:bg-surface-container-low px-2 py-0.5 rounded transition-colors flex items-center gap-1"
                         >
                             <span className="text-indigo-400">?</span> {t.bt_guideBtn}
                         </button>
@@ -285,35 +285,35 @@ export const AnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
 
                 {/* Collapsible Guide */}
                 {showBacktestGuide && (
-                    <div className="mb-4 bg-gray-900/50 p-4 rounded-lg border border-gray-700 text-sm space-y-3 animate-in fade-in slide-in-from-top-2">
+                    <div className="mb-4 bg-surface-container-lowest/80 p-4 rounded-lg border border-outline-variant text-sm space-y-3 animate-in fade-in slide-in-from-top-2">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <span className="font-bold text-gray-200 block mb-1">🎯 {t.bt_winRate} (Win Rate)</span>
-                                <p className="text-gray-400 text-xs leading-relaxed">
+                                <span className="font-bold text-on-surface block mb-1">🎯 {t.bt_winRate} (Win Rate)</span>
+                                <p className="text-on-surface-variant text-xs leading-relaxed">
                                     {lang === 'ko'
                                         ? '전체 매매 신호 중 수익으로 마감된 거래의 비율입니다. 50% 이상이면 긍정적입니다.'
                                         : 'Percentage of trades that ended in profit. >50% is generally positive.'}
                                 </p>
                             </div>
                             <div>
-                                <span className="font-bold text-gray-200 block mb-1">💰 {t.bt_totalReturn} (Total Return)</span>
-                                <p className="text-gray-400 text-xs leading-relaxed">
+                                <span className="font-bold text-on-surface block mb-1">💰 {t.bt_totalReturn} (Total Return)</span>
+                                <p className="text-on-surface-variant text-xs leading-relaxed">
                                     {lang === 'ko'
                                         ? '시뮬레이션 기간 동안의 단순 누적 수익률입니다. (복리 미적용)'
                                         : 'Cumulative return over the simulation period (non-compounded).'}
                                 </p>
                             </div>
                             <div>
-                                <span className="font-bold text-gray-200 block mb-1">📉 {t.bt_maxDD} (MDD)</span>
-                                <p className="text-gray-400 text-xs leading-relaxed">
+                                <span className="font-bold text-on-surface block mb-1">📉 {t.bt_maxDD} (MDD)</span>
+                                <p className="text-on-surface-variant text-xs leading-relaxed">
                                     {lang === 'ko'
                                         ? '자산 고점 대비 최대 하락폭입니다. 수치가 낮을수록(0에 가까울수록) 안정적인 전략입니다.'
                                         : 'Maximum loss from a peak to a trough. Lower (closer to 0) implies better stability.'}
                                 </p>
                             </div>
                             <div>
-                                <span className="font-bold text-gray-200 block mb-1">⚖️ {t.bt_profitFactor} (Profit Factor)</span>
-                                <p className="text-gray-400 text-xs leading-relaxed">
+                                <span className="font-bold text-on-surface block mb-1">⚖️ {t.bt_profitFactor} (Profit Factor)</span>
+                                <p className="text-on-surface-variant text-xs leading-relaxed">
                                     {lang === 'ko'
                                         ? '총 이익 / 총 손실 비율입니다. 1.5 이상이면 훌륭한 전략, 1 미만이면 손실 전략입니다.'
                                         : 'Ratio of gross profit to gross loss. >1.5 is excellent, <1 implies a losing strategy.'}
@@ -338,14 +338,14 @@ export const AnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
                     </div>
                     {/* Pro Locked Slots */}
                     {/* Max Drawdown - Unlocked */}
-                    <div className="bg-gray-800 p-3 rounded-lg relative overflow-hidden group">
-                        <div className="text-xs text-gray-500">{t.bt_maxDD}</div>
+                    <div className="bg-surface-container p-3 rounded-lg relative overflow-hidden group">
+                        <div className="text-xs text-on-surface-variant">{t.bt_maxDD}</div>
                         <div className="text-lg font-bold text-red-400">-{result.backtest.maxDrawdownPercent.toFixed(1)}%</div>
                     </div>
 
                     {/* Profit Factor - Unlocked */}
-                    <div className="bg-gray-800 p-3 rounded-lg relative overflow-hidden group">
-                        <div className="text-xs text-gray-500">{t.bt_profitFactor}</div>
+                    <div className="bg-surface-container p-3 rounded-lg relative overflow-hidden group">
+                        <div className="text-xs text-on-surface-variant">{t.bt_profitFactor}</div>
                         <div className="text-lg font-bold text-blue-400">
                             {result.backtest.profitFactor >= 999 ? 'Inf' : result.backtest.profitFactor.toFixed(2)}
                         </div>

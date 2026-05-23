@@ -76,6 +76,7 @@ interface EditorToolbarProps {
   onViewModeChange: (mode: ViewMode) => void;
   isFullscreen: boolean;
   onToggleFullscreen: () => void;
+  tone?: 'light' | 'dark';
 }
 
 export default function EditorToolbar({
@@ -85,6 +86,7 @@ export default function EditorToolbar({
   onViewModeChange,
   isFullscreen,
   onToggleFullscreen,
+  tone = 'light',
 }: EditorToolbarProps) {
   if (!editor) return null;
 
@@ -108,8 +110,13 @@ export default function EditorToolbar({
 
   const isWysiwyg = viewMode === 'wysiwyg';
 
+  const wrapperClass =
+    tone === 'dark'
+      ? 'flex flex-wrap items-center gap-0.5 p-2 border-b border-white/10 bg-white/5'
+      : 'flex flex-wrap items-center gap-0.5 p-2 border-b border-outline-variant bg-surface-container text-on-surface';
+
   return (
-    <div className="flex flex-wrap items-center gap-0.5 p-2 border-b border-white/10 bg-white/5">
+    <div className={wrapperClass}>
       {/* 실행 취소/재실행 */}
       <ToolButton
         onClick={() => editor.chain().focus().undo().run()}
