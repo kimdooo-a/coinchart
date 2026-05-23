@@ -66,9 +66,9 @@ export default function RSIHeatmap() {
     };
 
     return (
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-2xl">
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 shadow-2xl">
             <div className="flex items-center gap-3 mb-6">
-                <h3 className="text-xl md:text-2xl font-bold text-white">🔥 RSI Heatmap (4H)</h3>
+                <h3 className="text-xl md:text-2xl font-bold text-on-surface">🔥 RSI Heatmap (4H)</h3>
                 <div className="flex gap-2">
                     <span className="px-2 py-1 bg-red-600 rounded text-[10px] uppercase font-bold tracking-wider text-white">{lang === 'ko' ? '과열' : 'Hot'}</span>
                     <span className="px-2 py-1 bg-green-600 rounded text-[10px] uppercase font-bold tracking-wider text-white">{lang === 'ko' ? '침체' : 'Cold'}</span>
@@ -78,7 +78,7 @@ export default function RSIHeatmap() {
             {loading ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-pulse">
                     {[...Array(8)].map((_, i) => (
-                        <div key={i} className="h-24 bg-gray-800 rounded-xl"></div>
+                        <div key={i} className="h-24 bg-surface-container rounded-xl"></div>
                     ))}
                 </div>
             ) : (
@@ -97,7 +97,7 @@ export default function RSIHeatmap() {
                     ))}
                 </div>
             )}
-            <p className="text-gray-500 text-xs mt-4 text-center">
+            <p className="text-on-surface-variant text-xs mt-4 text-center">
                 {lang === 'ko' ? 'RSI가 70 이상이면 매도 고려, 30 이하이면 매수 고려 구간입니다.' : 'RSI > 70: Potentially Overbought. RSI < 30: Potentially Oversold.'}
             </p>
         </div>

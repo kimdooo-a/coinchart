@@ -43,7 +43,7 @@ export default function SignalPage() {
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
                     </span>
-                    <span className="text-xs text-gray-400 font-mono">{t.signal.lastScan}: {new Date().toLocaleTimeString()}</span>
+                    <span className="text-xs text-on-surface-variant font-mono">{t.signal.lastScan}: {new Date().toLocaleTimeString()}</span>
                 </div>
             </header>
 
@@ -65,7 +65,7 @@ export default function SignalPage() {
                                 SIGNAL SCAN
                             </div>
                         </div>
-                        <p className="text-gray-400 animate-pulse text-lg">{t.signal.scanning}</p>
+                        <p className="text-on-surface-variant animate-pulse text-lg">{t.signal.scanning}</p>
                     </div>
                 ) : signals.length > 0 ? (
                     <div className="w-full grid gap-4">
@@ -74,8 +74,8 @@ export default function SignalPage() {
                 ) : (
                     <div className="text-center p-12 bg-card/50 rounded-3xl border border-border backdrop-blur-sm max-w-lg">
                         <div className="text-6xl mb-6">🔭</div>
-                        <h3 className="text-2xl font-bold mb-4 text-gray-200">{t.signal.noSignalsTitle}</h3>
-                        <p className="text-gray-400 leading-relaxed">
+                        <h3 className="text-2xl font-bold mb-4 text-on-surface">{t.signal.noSignalsTitle}</h3>
+                        <p className="text-on-surface-variant leading-relaxed">
                             {t.signal.noSignalsDesc}
                         </p>
                     </div>
@@ -86,7 +86,7 @@ export default function SignalPage() {
                 <WhaleAlert />
             </div>
 
-            <footer className="mt-auto pt-12 text-center text-xs text-gray-600 max-w-2xl px-4">
+            <footer className="mt-auto pt-12 text-center text-xs text-on-surface-variant max-w-2xl px-4">
                 {t.signal.footer}
             </footer>
         </main>

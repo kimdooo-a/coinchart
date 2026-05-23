@@ -41,7 +41,7 @@ export default function KimchiPremium() {
     };
 
     return (
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 shadow-2xl relative overflow-hidden">
             {/* Decor */}
             <div className="absolute top-0 right-0 p-8 opacity-5 font-black text-8xl pointer-events-none select-none">
                 K-PREMIUM
@@ -49,16 +49,16 @@ export default function KimchiPremium() {
 
             <div className="flex items-center justify-between mb-6 relative z-10">
                 <div>
-                    <h3 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
+                    <h3 className="text-xl md:text-2xl font-bold text-on-surface flex items-center gap-2">
                         🇰🇷 {lang === 'ko' ? '김치 프리미엄' : 'Kimchi Premium'}
                     </h3>
-                    <p className="text-gray-500 text-sm mt-1">
+                    <p className="text-on-surface-variant text-sm mt-1">
                         {lang === 'ko' ? '업비트 vs 바이낸스 가격 차이 (실시간)' : 'Upbit (KR) vs Binance (Global) Price Gap'}
                     </p>
                 </div>
                 {data.length > 0 && (
                     <div className="text-right hidden md:block">
-                        <div className="text-xs text-gray-500">USD/KRW</div>
+                        <div className="text-xs text-on-surface-variant">USD/KRW</div>
                         <div className="font-mono font-bold text-blue-400">₩{formatPrice(data[0].exchangeRate)}</div>
                     </div>
                 )}
@@ -67,7 +67,7 @@ export default function KimchiPremium() {
             <div className="overflow-x-auto relative z-10">
                 <table className="w-full text-left border-collapse">
                     <thead>
-                        <tr className="text-gray-400 text-xs font-semibold uppercase tracking-wider border-b border-gray-800">
+                        <tr className="text-on-surface-variant text-xs font-semibold uppercase tracking-wider border-b border-outline-variant">
                             <th className="py-3 pl-2">Coin</th>
                             <th className="py-3 text-right">Premium</th>
                             <th className="py-3 text-right hidden md:table-cell">Upbit (KRW)</th>
@@ -78,15 +78,15 @@ export default function KimchiPremium() {
                         {loading ? (
                             [1, 2, 3, 4, 5].map((i) => (
                                 <tr key={i} className="animate-pulse">
-                                    <td className="py-4"><div className="h-4 w-12 bg-gray-800 rounded"></div></td>
-                                    <td className="py-4"><div className="h-4 w-16 bg-gray-800 rounded ml-auto"></div></td>
-                                    <td className="py-4 hidden md:table-cell"><div className="h-4 w-24 bg-gray-800 rounded ml-auto"></div></td>
-                                    <td className="py-4 hidden md:table-cell"><div className="h-4 w-24 bg-gray-800 rounded ml-auto"></div></td>
+                                    <td className="py-4"><div className="h-4 w-12 bg-surface-container rounded"></div></td>
+                                    <td className="py-4"><div className="h-4 w-16 bg-surface-container rounded ml-auto"></div></td>
+                                    <td className="py-4 hidden md:table-cell"><div className="h-4 w-24 bg-surface-container rounded ml-auto"></div></td>
+                                    <td className="py-4 hidden md:table-cell"><div className="h-4 w-24 bg-surface-container rounded ml-auto"></div></td>
                                 </tr>
                             ))
                         ) : (
                             data.map((item) => (
-                                <tr key={item.symbol} className="border-b border-gray-800/50 hover:bg-white/5 transition-colors">
+                                <tr key={item.symbol} className="border-b border-outline-variant/50 hover:bg-on-surface/5 transition-colors">
                                     <td className="py-3 pl-2 font-bold text-base">{item.symbol}</td>
                                     <td className="py-3 text-right">
                                         <span className={`px-2 py-0.5 rounded text-xs font-bold ${item.premium > 5 ? 'bg-red-900/50 text-red-500' :
@@ -97,10 +97,10 @@ export default function KimchiPremium() {
                                             {item.premium > 0 ? '+' : ''}{item.premium.toFixed(2)}%
                                         </span>
                                     </td>
-                                    <td className="py-3 text-right font-mono text-gray-300 hidden md:table-cell">
+                                    <td className="py-3 text-right font-mono text-on-surface hidden md:table-cell">
                                         ₩{formatPrice(item.krwPrice)}
                                     </td>
-                                    <td className="py-3 text-right font-mono text-gray-500 hidden md:table-cell">
+                                    <td className="py-3 text-right font-mono text-on-surface-variant hidden md:table-cell">
                                         ${item.usdPrice.toFixed(2)}
                                     </td>
                                 </tr>
@@ -110,7 +110,7 @@ export default function KimchiPremium() {
                 </table>
             </div>
 
-            <div className="mt-4 text-xs text-gray-600 text-center">
+            <div className="mt-4 text-xs text-on-surface-variant text-center">
                 * {lang === 'ko' ? '환율 및 거래소 가격 변동에 따라 오차가 있을 수 있습니다.' : 'Prices may vary due to exchange rate volatility.'}
             </div>
         </div>

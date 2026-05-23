@@ -91,7 +91,7 @@ export default function WhaleAlert() {
                             exit={{ opacity: 0, height: 0 }}
                             className={`p-4 rounded-xl border flex items-center justify-between shadow-lg backdrop-blur-md ${tx.type === 'INFLOW' ? 'bg-red-900/20 border-red-900/50' :
                                     tx.type === 'OUTFLOW' ? 'bg-green-900/20 border-green-900/50' :
-                                        'bg-gray-800/40 border-gray-700'
+                                        'bg-surface-container/40 border-outline-variant'
                                 }`}
                         >
                             <div className="flex items-center gap-4">
@@ -102,18 +102,18 @@ export default function WhaleAlert() {
                                     {tx.type === 'INFLOW' ? '📉' : tx.type === 'OUTFLOW' ? '📈' : '↔️'}
                                 </div>
                                 <div>
-                                    <div className="font-bold text-white text-lg">
+                                    <div className="font-bold text-on-surface text-lg">
                                         {tx.amount.toLocaleString()} {tx.symbol}
-                                        <span className="text-gray-400 text-sm font-normal ml-2">({formatMoney(tx.valueUSD)})</span>
+                                        <span className="text-on-surface-variant text-sm font-normal ml-2">({formatMoney(tx.valueUSD)})</span>
                                     </div>
-                                    <div className="text-sm text-gray-400 flex items-center gap-2">
+                                    <div className="text-sm text-on-surface-variant flex items-center gap-2">
                                         <span>{tx.from}</span>
-                                        <span className="text-gray-600">➔</span>
-                                        <span className={tx.type === 'INFLOW' ? 'text-white font-bold' : ''}>{tx.to}</span>
+                                        <span className="text-on-surface-variant">➔</span>
+                                        <span className={tx.type === 'INFLOW' ? 'text-on-surface font-bold' : ''}>{tx.to}</span>
                                     </div>
                                 </div>
                             </div>
-                            <div className="text-right text-xs text-gray-500 font-mono">
+                            <div className="text-right text-xs text-on-surface-variant font-mono">
                                 {new Date(tx.timestamp).toLocaleTimeString()}
                             </div>
                         </motion.div>

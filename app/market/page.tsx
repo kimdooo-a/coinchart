@@ -74,7 +74,7 @@ const Gauge = ({ score, label, description }: GaugeProps) => {
     return (
         <div className="bg-card rounded-2xl p-6 border border-border shadow-2xl flex flex-col items-center relative overflow-hidden w-full">
             <div className="absolute top-0 w-full h-2 bg-gradient-to-r from-red-600 via-yellow-500 to-green-500 opacity-30"></div>
-            <h3 className="text-gray-400 mb-6 text-xl font-bold">{label}</h3>
+            <h3 className="text-on-surface-variant mb-6 text-xl font-bold">{label}</h3>
 
             <div className="relative w-64 h-32 overflow-hidden mb-4">
                 <div className="absolute top-0 left-0 w-full h-64 rounded-full border-[20px] border-border box-border"></div>
@@ -102,7 +102,7 @@ const Gauge = ({ score, label, description }: GaugeProps) => {
                 </motion.div>
             </div>
 
-            <p className="text-gray-500 mt-6 text-sm text-center">
+            <p className="text-on-surface-variant mt-6 text-sm text-center">
                 {description}
             </p>
         </div>
@@ -386,16 +386,16 @@ export default function MarketPage() {
                 </h2>
 
                 {/* Basis Toggle */}
-                <div className="bg-gray-800 p-1 rounded-lg flex">
+                <div className="bg-surface-container p-1 rounded-lg flex">
                     <button
                         onClick={() => setBasis('daily')}
-                        className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${basis === 'daily' ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
+                        className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${basis === 'daily' ? 'bg-indigo-600 text-white shadow-lg' : 'text-on-surface-variant hover:text-on-surface'}`}
                     >
                         {t.market.dailyBasis}
                     </button>
                     <button
                         onClick={() => setBasis('realtime')}
-                        className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${basis === 'realtime' ? 'bg-rose-600 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
+                        className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${basis === 'realtime' ? 'bg-rose-600 text-white shadow-lg' : 'text-on-surface-variant hover:text-on-surface'}`}
                     >
                         {t.market.realtimeBasis}
                     </button>
@@ -403,7 +403,7 @@ export default function MarketPage() {
             </div>
 
             {loading ? (
-                <div className="w-full max-w-7xl h-96 bg-gray-900 rounded-2xl animate-pulse"></div>
+                <div className="w-full max-w-7xl h-96 bg-surface-container-lowest rounded-2xl animate-pulse"></div>
             ) : (
                 <div className="w-full max-w-7xl space-y-6">
                     {/* Gauges Grid */}
@@ -423,15 +423,15 @@ export default function MarketPage() {
                     {/* Individual Coin Analysis */}
                     <div className="bg-card/50 rounded-2xl p-6 border border-border">
                         <div className="flex items-center gap-3 mb-6">
-                            <h3 className="text-xl font-bold text-gray-300">💎 {t.market.detailTitle}</h3>
-                            <span className="text-xs px-2 py-1 rounded bg-gray-800 text-gray-400 border border-gray-700">
+                            <h3 className="text-xl font-bold text-on-surface">💎 {t.market.detailTitle}</h3>
+                            <span className="text-xs px-2 py-1 rounded bg-surface-container text-on-surface-variant border border-outline-variant">
                                 {basis === 'daily' ? t.market.dailyBasis : t.market.realtimeBasis}
                             </span>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                             {coinMoods.map((coin) => (
                                 <div key={coin.symbol} className="bg-background/50 p-4 rounded-xl border border-border flex flex-col items-center hover:border-primary/50 transition-colors">
-                                    <div className="text-base font-bold text-gray-200 mb-2">{coin.symbol}</div>
+                                    <div className="text-base font-bold text-on-surface mb-2">{coin.symbol}</div>
                                     <div className={`text-2xl md:text-3xl font-black mb-1 ${getColor(coin.score)}`}>
                                         {coin.score}
                                     </div>
@@ -461,13 +461,13 @@ export default function MarketPage() {
                                 <h3 className={`text-2xl md:text-3xl font-bold mb-3 ${getColor(todayScore)}`}>{insight.title}</h3>
 
                                 <div className="space-y-4">
-                                    <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700">
+                                    <div className="bg-surface-container/50 p-4 rounded-xl border border-outline-variant">
                                         <span className="text-blue-400 text-sm font-bold uppercase tracking-wide block mb-1">💡 {lang === 'ko' ? '추천 전략' : 'Strategy'}</span>
-                                        <p className="text-gray-300 font-medium">{insight.strategy}</p>
+                                        <p className="text-on-surface font-medium">{insight.strategy}</p>
                                     </div>
                                     <div>
-                                        <span className="text-gray-500 font-bold block mb-2 text-sm uppercase tracking-wide">AI Commentary</span>
-                                        <p className="text-gray-300 leading-relaxed font-light md:font-normal text-lg">
+                                        <span className="text-on-surface-variant font-bold block mb-2 text-sm uppercase tracking-wide">AI Commentary</span>
+                                        <p className="text-on-surface leading-relaxed font-light md:font-normal text-lg">
                                             {insight.story}
                                         </p>
                                     </div>
@@ -479,11 +479,11 @@ export default function MarketPage() {
                     {/* History Section */}
                     {basis === 'daily' && (
                         <div className="bg-card/30 p-6 rounded-2xl border border-border">
-                            <h3 className="text-gray-400 mb-4 font-bold text-center">📅 BTC {lang === 'ko' ? '심리 변화' : 'History'}</h3>
+                            <h3 className="text-on-surface-variant mb-4 font-bold text-center">📅 BTC {lang === 'ko' ? '심리 변화' : 'History'}</h3>
                             <div className="flex justify-center gap-4 md:gap-8 overflow-x-auto pb-2">
                                 {data.slice(1, 5).map((item, i) => (
                                     <div key={i} className="flex flex-col items-center min-w-[80px]">
-                                        <span className="text-gray-500 text-xs mb-1">
+                                        <span className="text-on-surface-variant text-xs mb-1">
                                             {lang === 'ko' ?
                                                 (i === 0 ? '어제' : i === 1 ? '2일 전' : `${i + 1}일 전`) :
                                                 (i === 0 ? 'Yesterday' : `${i + 1} days ago`)

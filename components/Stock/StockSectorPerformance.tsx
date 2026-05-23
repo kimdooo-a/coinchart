@@ -130,7 +130,7 @@ export const StockSectorPerformance: React.FC = () => {
                                                 <span className={`font-bold ${getStatusColor(item.rsi)}`}>
                                                     {item.rsi.toFixed(0)}
                                                 </span>
-                                                <div className="w-16 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                                                <div className="w-16 h-1.5 bg-surface-container-high rounded-full overflow-hidden">
                                                     <div
                                                         className={`h-full ${item.rsi > 70 ? 'bg-red-500' : item.rsi < 30 ? 'bg-green-500' : 'bg-blue-500'}`}
                                                         style={{ width: `${item.rsi}%` }}
