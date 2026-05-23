@@ -10,6 +10,8 @@ export async function GET(req: Request) {
         const { searchParams } = new URL(req.url);
         const queryParam = searchParams.get('query');
         const langParam = searchParams.get('lang'); // 'ko' or 'en' or 'ko,en'
+        const categoryParam = searchParams.get('category'); // R1/T06: 'regulation' | 'tech' | ...
+        const minImportanceParam = searchParams.get('minImportance'); // R1/T06: 1~10
 
         const pageParam = searchParams.get('page');
         const page = parseInt(pageParam || '0', 10);
@@ -19,7 +21,7 @@ export async function GET(req: Request) {
 
         let dbQuery = supabase
             .from('news')
-            .select('*')
+            .select('id, title, link, pub_date, source, sentiment, snippet, symbol, category, importance_score, sentiment_score, language, created_at')
             .order('pub_date', { ascending: false })
             .range(from, to);
 
@@ -27,6 +29,19 @@ export async function GET(req: Request) {
         if (langParam && langParam !== 'ALL') {
             const languages = langParam.split(',');
             dbQuery = dbQuery.in('language', languages);
+        }
+
+        // R1/T06: Category Filter
+        if (categoryParam && categoryParam !== 'ALL') {
+            dbQuery = dbQuery.eq('category', categoryParam);
+        }
+
+        // R1/T06: 중요도 하한 Filter
+        if (minImportanceParam) {
+            const minImportance = parseInt(minImportanceParam, 10);
+            if (Number.isFinite(minImportance) && minImportance >= 1 && minImportance <= 10) {
+                dbQuery = dbQuery.gte('importance_score', minImportance);
+            }
         }
 
         // Coin/Symbol Filter
@@ -41,14 +56,19 @@ export async function GET(req: Request) {
 
         if (error) throw error;
 
-        // Transform to frontend format if needed (DB columns match frontend expectation mostly)
+        // Transform to frontend format
+        // R1/T06: category/importance_score/sentiment_score 추가 노출 (T15 메인 NewsRow 소비)
         const items = data.map(item => ({
             title: item.title,
             link: item.link,
             pubDate: item.pub_date,
             publisher: item.source,
             sentiment: item.sentiment,
-            snippet: item.snippet
+            snippet: item.snippet,
+            symbol: item.symbol,
+            category: item.category,
+            importance: item.importance_score,
+            sentimentScore: item.sentiment_score,
         }));
 
         return NextResponse.json({ items });

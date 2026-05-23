@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin';
+import { classify } from '@/lib/news/classifier';
 import { NextResponse } from 'next/server';
 
 export async function GET(req: Request) {
@@ -27,7 +28,20 @@ export async function GET(req: Request) {
         const xmlText = await res.text();
 
         // 2. Parse XML (Simple regex parser for RSS items to avoid dependency issues)
-        const items = [];
+        //    파싱 직후 classify() 호출하여 4차원(coin/category/sentiment/importance) 분류 결과를 함께 적재.
+        const items: Array<{
+            title: string;
+            link: string;
+            pub_date: string;
+            source: string;
+            snippet: string;
+            language: string;
+            sentiment: 'positive' | 'negative' | 'neutral' | 'mixed';
+            symbol: string;
+            category: string;
+            importance_score: number;
+            sentiment_score: number;
+        }> = [];
         const itemRegex = /<item>([\s\S]*?)<\/item>/g;
         let match;
 
@@ -39,15 +53,33 @@ export async function GET(req: Request) {
             const sourceMatch = itemContent.match(/<source url=".*?">(.*?)<\/source>/);
 
             if (titleMatch && linkMatch) {
+                const title = titleMatch[1].replace(/<!\[CDATA\[|\]\]>/g, '');
+                const pub_date = pubDateMatch ? new Date(pubDateMatch[1]).toISOString() : new Date().toISOString();
+                const source = sourceMatch ? sourceMatch[1] : 'Google News';
+                const snippet = title; // RSS에 description 없음 → 일단 title 재사용
+
+                // ── R1/T06: 룰베이스 분류 (T05 산출물) ─────────────────────
+                const result = classify({
+                    title,
+                    snippet,
+                    source,
+                    pubDate: pub_date,
+                });
+
                 items.push({
-                    title: titleMatch[1].replace(/<!\[CDATA\[|\]\]>/g, ''), // Clean CDATA
+                    title,
                     link: linkMatch[1],
-                    pub_date: pubDateMatch ? new Date(pubDateMatch[1]).toISOString() : new Date().toISOString(),
-                    source: sourceMatch ? sourceMatch[1] : 'Google News',
-                    snippet: titleMatch[1].replace(/<!\[CDATA\[|\]\]>/g, ''), // Use title as snippet for now
+                    pub_date,
+                    source,
+                    snippet,
                     language: lang,
-                    sentiment: 'neutral', // Default, placeholder for AI
-                    symbol: 'GENERAL' // Default tag
+                    // classifier 결과로 덮어쓰기 (스키마 enum과 1:1 일치)
+                    sentiment: result.sentiment,
+                    // coinTag "ALL" → DB 기본값 'ALL' 유지
+                    symbol: result.coinTag,
+                    category: result.category,
+                    importance_score: result.importance,
+                    sentiment_score: result.sentimentScore,
                 });
             }
         }
@@ -60,7 +92,6 @@ export async function GET(req: Request) {
 
         // 3. Deduplicate & Insert
         // Check duplication by Link
-
         for (const item of items) {
             // Check existence
             const { data: existing } = await supabase
@@ -70,17 +101,6 @@ export async function GET(req: Request) {
                 .limit(1);
 
             if (!existing || existing.length === 0) {
-                // Determine symbol tag based on content
-                let symbol = 'GENERAL';
-                const lowerTitle = item.title.toLowerCase();
-                if (lowerTitle.includes('bitcoin') || lowerTitle.includes('btc') || lowerTitle.includes('비트코인')) symbol = 'BTC';
-                else if (lowerTitle.includes('ethereum') || lowerTitle.includes('eth') || lowerTitle.includes('이더리움')) symbol = 'ETH';
-                else if (lowerTitle.includes('xrp') || lowerTitle.includes('ripple') || lowerTitle.includes('리플')) symbol = 'XRP';
-                else if (lowerTitle.includes('solana') || lowerTitle.includes('sol') || lowerTitle.includes('솔라나')) symbol = 'SOL';
-                else if (lowerTitle.includes('stock') || lowerTitle.includes('sp500') || lowerTitle.includes('주식')) symbol = 'STOCK';
-
-                item.symbol = symbol;
-
                 const { error } = await supabase.from('news').insert(item);
                 if (error) {
                     report.errors.push(error.message);

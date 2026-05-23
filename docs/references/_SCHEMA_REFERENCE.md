@@ -85,10 +85,21 @@
 | `snippet` | TEXT | - | - | 요약 |
 | `symbol` | TEXT | - | `ALL` | 관련 종목 |
 | `language` | VARCHAR(2) | - | `ko` | 언어 코드 |
+| `category` | TEXT | - | `market` | R1/T06 확장. enum: `regulation` / `tech` / `exchange` / `onchain` / `etf` / `altcoin_news` / `macro` / `market` |
+| `importance_score` | SMALLINT | - | `5` | R1/T06 확장. 1~10 정수 (CHECK 제약) |
+| `sentiment_score` | INTEGER | - | `0` | R1/T06 확장. classifier 원점수 (디버그용) |
 | `created_at` | TIMESTAMPTZ | - | NOW() | |
 
-**인덱스**: `idx_news_pub_date`, `idx_news_symbol`, `idx_news_language`
+**인덱스**: `idx_news_pub_date`, `idx_news_symbol`, `idx_news_language`, `idx_news_category_pubdate` (R1), `idx_news_importance` (R1)
 **RLS**: SELECT 공개, INSERT/DELETE는 service_role
+
+### news (R1 2026-05-23 확장)
+- 마이그레이션: `supabase/migrations/20260523_alter_news_classify.sql`
+- 신규 컬럼: `category`, `importance_score`, `sentiment_score`
+- 인덱스: `idx_news_category_pubdate`, `idx_news_importance`
+- 분류 라이브러리: `lib/news/classifier.ts` (T05)
+- 통합 위치: `app/api/admin/news-crawl/route.ts` (RSS 파싱 직후 `classify()` 호출)
+- API 노출: `app/api/news/route.ts` 응답 필드 `category` / `importance` / `sentimentScore` 추가, 쿼리 파라미터 `?category=` / `?minImportance=` 지원
 
 ---
 

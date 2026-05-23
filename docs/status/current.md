@@ -2,17 +2,18 @@
 
 | 항목 | 값 |
 |------|-----|
-| **마지막 세션** | 2026-05-23 (세션 10 — R1/T07 일꾼, T01/T08/T14와 동시 발사) |
-| **작업 내용** | 익명 게스트 bcrypt 해시/검증 + IP 마스킹/해시 + Next.js middleware 머지. `/board/*`, `/api/board/*`, `/api/community/*` 경로에 `x-client-ip-*` 3종 헤더 주입. (R1 dispatch, T07 일꾼) |
+| **마지막 세션** | 2026-05-23 (세션 11 — R1/T06 일꾼, T04/T10 등과 동시 발사) |
+| **작업 내용** | `news` 테이블 3컬럼 ALTER(`category`/`importance_score`/`sentiment_score`) + crawler에 T05 `classify()` 통합 + API 응답 4차원 확장 + `?category=`/`?minImportance=` 필터. T15가 메인 NewsRow에서 소비. (R1 dispatch, T06 일꾼) |
 | **브랜치** | main |
-| **빌드 상태** | ⚠️ TS 1건 (`bcryptjs` 미설치, 패키지 추가 시 해소). `ip-mask.ts`/`middleware.ts`는 통과. eslint 0 errors |
-| **마지막 커밋** | (T07 commit 예정) — R1 다른 일꾼 T01/T05/T08/T14 산출물 워킹트리 잔존, 컨덕터 통합 대기 |
+| **빌드 상태** | ✅ T06 영역(news 관련) tsc 에러 0. ESLint clean. 무관 에러 1건(`bcryptjs` 미설치, T07 영역) 잔존 |
+| **마지막 커밋** | (T06 commit 예정) — R1 다른 일꾼 T04/T10 산출물 워킹트리 잔존, 컨덕터 통합 대기 |
 | **프로젝트 방향성** | **v2.0 커뮤니티 피벗** ([PROJECT_DIRECTION.md](../PROJECT_DIRECTION.md)) |
 
 ## 최근 작업 이력
 
 | 날짜 | 작업 | 결과 |
 |------|------|------|
+| 2026-05-23 | R1/T06 — 뉴스 분류 4차원 DB·API 통합 (세션 11, 일꾼) | `supabase/migrations/20260523_alter_news_classify.sql` 신규 (`category`/`importance_score`/`sentiment_score` 3컬럼 + 인덱스 2). `app/api/admin/news-crawl/route.ts`에 T05 `classify()` 호출 통합 (인라인 symbol 매칭 7줄 제거). `app/api/news/route.ts` 응답 필드 4종 확장 + `?category=`/`?minImportance=` 필터. T15 의존 산출물 |
 | 2026-05-23 | R1/T07 — 익명 bcrypt + IP 마스킹 + middleware (세션 10, 일꾼) | `lib/community/auth.ts`(bcrypt 해시/검증 + 닉네임) + `lib/community/ip-mask.ts`(IP 추출/마스킹/HMAC 해시) 신규. `middleware.ts`에 IP 헤더 3종 주입 + matcher 확장. T12(board API) 의존 산출물. PARTIAL: bcryptjs 패키지 미설치 |
 | 2026-05-23 | R1/T08 — 차트 라이트 테마 + BlogEditor `tone` prop (세션 9, 일꾼) | `lib/chart/theme.ts` 신규 (`getChartTheme`/`getCandleColors`, KR 빨/파 + US 녹/빨), `BlogEditor`/`EditorToolbar`에 `tone?: 'light'\|'dark'` prop 추가. T09·T10·T11 의존 산출물 |
 | 2026-05-23 | R1/T14 — 번역 키 정리 + 헤더 인라인 분기 제거 (세션 9, 일꾼) | `lib/translations.ts` menu 9키(ko/en) append + `components/global-header.tsx` 인라인 한/영 분기 8건 → `t.menu.*` 교체. 잔여 분기 4건(altcoin/kimp/EN-KR 토글 ×2) 의도적 잔류 |
@@ -46,6 +47,7 @@
 | 9 | 2026-05-23 | R1/T08 일꾼 — 차트 라이트 테마 + BlogEditor `tone` prop | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T08-chart-theme-editor-tone.md) |
 | 9 | 2026-05-23 | R1/T14 일꾼 — 번역 키 정리 + 헤더 인라인 분기 제거 | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T14-translations-cleanup.md) |
 | 10 | 2026-05-23 | R1/T07 일꾼 — 익명 bcrypt + IP 마스킹 + middleware 머지 | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T07-auth-middleware.md) |
+| 11 | 2026-05-23 | R1/T06 일꾼 — 뉴스 분류 4차원 DB·API 통합 | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T06-news-classify-integration.md) |
 
 ## v2.0 피벗 핵심 (2026-05-10 결정)
 
@@ -115,7 +117,7 @@
 - [x] ~~IP 마스킹 미들웨어 (X-Forwarded-For 앞 2옥텟)~~ → 완료 (T07, `lib/community/ip-mask.ts` + `middleware.ts` 머지, 헤더 3종 주입)
 - [ ] API 라우트: `/api/board/*`, `/api/community/*`
 - [ ] 더미 데이터(`lib/community/mock-*`) → Supabase 연동
-- [ ] 뉴스 룰베이스 분류 로직 (`lib/news/classifier.ts`, `lib/news/keyword-dict.ts`)
-- [ ] `news` 테이블 스키마 추가 (`category`, `importance_score`)
+- [x] ~~뉴스 룰베이스 분류 로직 (`lib/news/classifier.ts`, `lib/news/keyword-dict.ts`)~~ → T05 완료 (세션 미상, 다른 터미널)
+- [x] ~~`news` 테이블 스키마 추가 (`category`, `importance_score`)~~ → **T06 세션 11 완료** (3컬럼 + 인덱스 2 + crawler/API 통합). 실 DB 적용은 컨덕터 또는 별도 작업
 - [ ] AI 분석 페이지를 "도구" 드롭다운 라우트와 시각적 일관성 맞추기
 - [ ] /history 페이지 메뉴 정리 (도구 드롭다운에서 제외하거나 추가)

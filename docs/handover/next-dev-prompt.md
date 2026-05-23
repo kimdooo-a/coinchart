@@ -4,6 +4,7 @@
 
 ## 최근 완료된 작업
 
+- **세션 11 (2026-05-23)**: R1/T06 일꾼 — 뉴스 분류 4차원 DB·API 통합. `supabase/migrations/20260523_alter_news_classify.sql` 신규 (`category` text + 8값 enum CHECK / `importance_score` smallint 1~10 / `sentiment_score` integer, 인덱스 2). `app/api/admin/news-crawl/route.ts`에 T05 `classify()` 호출 통합하여 RSS item 파싱 직후 4차원 결과를 적재 (기존 인라인 symbol 매칭 7줄 제거). `app/api/news/route.ts`에 `?category=` / `?minImportance=` 쿼리 파라미터 + 응답 필드 4종(camelCase) 추가. T15가 메인 NewsRow에서 소비. 실 DB 적용은 컨덕터 또는 별도 작업.
 - **세션 10 (2026-05-23)**: R1/T07 일꾼 — 익명 게스트 bcrypt 해시/검증 (`lib/community/auth.ts`) + IP 마스킹/HMAC 해시 (`lib/community/ip-mask.ts`) + 기존 `middleware.ts`에 IP 헤더 3종(`x-client-ip`/`-masked`/`-hash`) 주입 로직 머지 + matcher에 `/api/board/:path*`, `/api/community/:path*` 추가. T12(board API)가 의존할 헤더 명세 handover에 코드 예시로 명시. **PARTIAL**: `npm install bcryptjs @types/bcryptjs` 후속 필요.
 - **세션 9 (2026-05-23)**: R1/T08 일꾼 — `lib/chart/theme.ts` 신규 (`getChartTheme('light'|'dark')` + `getCandleColors('kr'|'us')`, KR 빨/파 + US 녹/빨) + `BlogEditor`/`EditorToolbar`에 `tone?: 'light'|'dark'` prop 추가 (default `light`). lightweight-charts v5 `ColorType.Solid` enum 호환성 솔루션 별도 기록(`docs/solutions/2026-05-23-lightweight-charts-v5-colortype-enum.md`). 페이지 적용은 T09(signal)·T10(analysis)·T11(market) 의존.
 - **세션 9 (2026-05-23)**: R1/T14 일꾼 — `lib/translations.ts` menu 그룹에 신규 키 9개(ko/en) append(`best`, `boardFree`, `boardMarket`, `boardInfo`, `coinRoom`, `tools`, `write`, `search`, `login`; `news`는 기존 존재) + `components/global-header.tsx` 인라인 한/영 분기 8건 → `t.menu.*` 호출로 교체. JSX 구조·아이콘 무변경. 잔여 분기 4건(altcoin/김치프리미엄/EN-KR 토글 ×2) 의도적 잔류.
@@ -34,11 +35,11 @@
 8. **API 라우트** — `/api/board/[slug]`, `/api/board/[slug]/[postId]`, `/api/community/comment`, `/api/community/like` — T12 영역
 9. **더미 → 실데이터** — `lib/community/mock-*` → Supabase 연동 — T02 + T15 영역
 
-### 세션 10 — 뉴스 룰베이스 분류
+### 뉴스 룰베이스 분류 (완료)
 
-10. **분류 로직** — `lib/news/classifier.ts`, `lib/news/keyword-dict.ts`
-11. **`news` 테이블 확장** — `category`, `importance_score` 컬럼 추가
-12. **크롤러 통합** — `app/api/admin/news-crawl/route.ts`에 분류 호출
+10. ~~**분류 로직** — `lib/news/classifier.ts`, `lib/news/keyword-dict.ts`~~ → **T05 완료** (다른 터미널 세션)
+11. ~~**`news` 테이블 확장** — `category`, `importance_score` 컬럼 추가~~ → **세션 11(T06) 완료** (`sentiment_score`도 함께 추가 + 인덱스 2)
+12. ~~**크롤러 통합** — `app/api/admin/news-crawl/route.ts`에 분류 호출~~ → **세션 11(T06) 완료** (인라인 매칭 제거 + `classify()` 호출 통합)
 
 ### 후순위
 
