@@ -199,7 +199,7 @@ export default function AdminBlogNewPage() {
             />
 
             {/* 에디터 */}
-            <BlogEditor content={content} onChange={setContent} />
+            <BlogEditor content={content} onChange={setContent} tone="light" />
           </div>
 
           {/* 사이드바 */}

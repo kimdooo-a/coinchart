@@ -22,8 +22,8 @@ export default function BlogCategoryFilter({
         onClick={() => onSelect(null)}
         className={`px-4 py-1.5 text-sm rounded-full border transition-colors ${
           selected === null
-            ? 'bg-white text-black border-white font-medium'
-            : 'text-gray-400 border-white/10 hover:text-white hover:border-white/30'
+            ? 'bg-primary text-on-primary border-primary font-medium'
+            : 'text-on-surface-variant border-outline-variant hover:text-on-surface hover:border-outline'
         }`}
       >
         {lang === 'ko' ? '전체' : 'All'}
@@ -35,7 +35,7 @@ export default function BlogCategoryFilter({
           className={`px-4 py-1.5 text-sm rounded-full border transition-colors ${
             selected === cat.slug
               ? 'font-medium'
-              : 'text-gray-400 border-white/10 hover:text-white hover:border-white/30'
+              : 'text-on-surface-variant border-outline-variant hover:text-on-surface hover:border-outline'
           }`}
           style={
             selected === cat.slug

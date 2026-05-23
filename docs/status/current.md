@@ -2,17 +2,18 @@
 
 | 항목 | 값 |
 |------|-----|
-| **마지막 세션** | 2026-05-23 (세션 19 — R1/T11 signal-market 라이트화, 6파일 45/45 대칭 교체. 본래 18 시작 → T15 슬롯 충돌로 19 정정) |
-| **작업 내용** | 사용자 T11 발사(2번째 터미널). `app/signal·market·stock-market` + `components/Signal·Market·Stock` 다크 톤 클래스(gray/black) → 라이트 토큰(`bg-surface-container*`/`text-on-surface*`/`border-outline-variant`) 교체. T09 매핑표 + T10 차트 패턴 + T08 `lib/chart/theme.ts` 참조. 수정 6파일(signal·market page + WhaleAlert·KimchiPremium·RSIHeatmap·StockSectorPerformance), `git diff --stat` **45/45 좌우 대칭**(순수 클래스 교체). 의미 컬러 보존: RSI 히트맵 셀(red/orange/gray/teal/green-600 + 셀 위 흰 글씨), 토글/범례 강조 뱃지, 정보 카드(red/green-900/20). 수정 불필요 4파일(stock-market page·InvestmentQuotes·StockAnalysisPanel = 다크톤 부재 / StockRSIHeatmap = 이미 shadcn 토큰). 차트 옵션 호출은 본 영역 부재(T10과 동일, 외부 Chart 컴포넌트 위임). |
+| **마지막 세션** | 2026-05-23 (세션 20 — R1/T09 blog 라이트화, 18파일: app/blog 페이지 4 + components/Blog 11(editor 제외) + BlogEditor 사용처 3에 `tone="light"`. 19 다음 정정) |
+| **작업 내용** | 사용자 T09 발사(3번째 터미널). `app/blog` 4페이지(BlogPageClient·CategoryPageClient·TagPageClient·BlogPostDetail) + `components/Blog` 11컴포넌트(editor 제외)의 다크 톤(`bg-black`/`text-white`/`text-gray-*`/`bg-white|border-white/*`) → 라이트 토큰(`bg-surface-container*`/`text-on-surface*`/`border-outline-variant`, 선택 pill `bg-primary text-on-primary`) 교체. `components/community/Badge.tsx` SOT 패턴 정렬. **의도적 다크 보존**: 코드블록(`prose-pre:bg-black/60`) + 복사버튼(useEffect 동적 생성) — `prose-invert` 제거 시 Tailwind Typography 기본 다크 코드블록 + T08 textarea 결정과 일관. `text-green-400`(복사완료 Check) 시맨틱 보존, Giscus `data-theme: 'dark_dimmed'`(로직) R2 권장. 카드 그림자 0.3/0.4→0.06/0.10 완화. BlogEditor 사용처 3곳(admin/blog/new·edit, board/[slug]/write)에 `tone="light"` 명시(default도 light). `components/Blog/editor/`는 T08 영역으로 미터치. |
 | **브랜치** | main |
-| **빌드 상태** | ✅ `npx tsc --noEmit` 0 에러 / `npm run build` PASS (`/signal`·`/market`·`/stock-market` 모두 ○ 정적 프리렌더, 에러 0건). T10이 언급한 bcryptjs 사전 이슈는 후속 세션에서 해소되어 현재 클린 |
-| **마지막 커밋** | (세션 19 cs commit) — 본 일꾼 책임 산출물 T11 6파일 + handover 1종 + cs 5종만 명시적 staging. **다른 일꾼 잔존 산출물은 컨덕터 통합 커밋에 위임**: T09(blog 페이지·components/Blog), T10(analysis 페이지·components/Analysis), T12(api/board·community·queries.ts·_API_REFERENCE 일부), T14(global-header·translations), T15(app/page·mock-*), 그리고 `.claude/`·`docs/orchestration/`·`docs/solutions/`·`lib/chart/`·`package.json/-lock`(bcryptjs)·기타 handover 6종 시스템 미커밋 |
+| **빌드 상태** | ✅ `npx tsc --noEmit` 0 에러 / 잔여 다크 톤(spec grep, editor 제외) **0건** / 라이트 토큰 **70건** / `npm run build` Compiled OK (`/blog`·`/blog/[slug]`·`/blog/category/[category]`·`/blog/tag/[tag]` 4 라우트 정상). 빌드 첫 시도 `.next\lock` 점유(병렬 터미널) → 락 해제 확인 후 재시도 PASS |
+| **마지막 커밋** | (세션 20 cs commit) — 본 일꾼 책임 산출물 T09 18파일 + handover 1종 + cs 문서만 명시적 staging. **다른 일꾼 잔존 산출물은 컨덕터 통합 커밋에 위임**: T08(components/Blog/editor·lib/chart·colortype solution), T10(analysis 페이지·components/Analysis), T12(api/board·community·queries.ts·_API_REFERENCE 일부), T14(global-header·translations), T15(app/page·mock-*), 그리고 `.claude/`·`docs/orchestration/`·`package.json/-lock`(bcryptjs)·기타 handover 미커밋 |
 | **프로젝트 방향성** | **v2.0 커뮤니티 피벗** ([PROJECT_DIRECTION.md](../PROJECT_DIRECTION.md)) |
 
 ## 최근 작업 이력
 
 | 날짜 | 작업 | 결과 |
 |------|------|------|
+| 2026-05-23 | R1/T09 — 블로그 라이트화 (세션 20, 일꾼) | 사용자 T09 발사(3번째 터미널). `app/blog` 4페이지 + `components/Blog` 11컴포넌트(editor 제외) 다크 톤 → 라이트 토큰 교체(18파일, 클래스 only). 코드블록(`prose-pre`)·복사버튼·`text-green-400`·Giscus theme 의도적 보존. BlogEditor 사용처 3곳 `tone="light"` 명시. tsc 0 / 잔여 다크 grep 0건 / 라이트 토큰 70건 / build PASS(blog 4라우트). 빌드 첫 시도 `.next\lock` 점유 → 해제 후 재시도 PASS. handover `2026-05-23-R1-T09-blog-lightify.md` 신규 |
 | 2026-05-23 | R1/T11 — 시그널·마켓·주식마켓 라이트화 (세션 19, 일꾼) | 사용자 T11 발사(2번째 터미널). `app/signal·market·stock-market` + `components/Signal·Market·Stock` 다크 톤(gray/black) → 라이트 토큰 교체. 수정 6파일 `git diff --stat` 45/45 대칭(순수 클래스). RSI 히트맵 셀 색상·강조 뱃지·정보 카드 의미 컬러 보존. 수정 불필요 4파일(다크톤 부재 3 + 이미 shadcn 토큰 1). 차트 옵션 호출 영역 외(T10 동일). tsc 0 / build PASS. handover `2026-05-23-R1-T11-signal-market-lightify.md` 신규. 본래 18 시작 → T15 슬롯 충돌로 19 정정 |
 | 2026-05-23 | R1/T15 — 메인페이지 실데이터 전환 (세션 18, 일꾼) | `app/page.tsx` `"use client"` 제거 → async SSR + `revalidate=300`, **mock-\* import 0건**. `lib/community/queries.ts` 신규(`fetchMainPageData`: community_posts 베스트30·게시판3컬럼, news 10, blog_posts 공식글3, `community_hot_issues` RPC, Binance ticker, FNG 병렬 fetch + 외부 API `.catch` 격리). 사용자 지시대로 `await createClient()` 사용. 컴포넌트 props 변환 헬퍼 5종(Ticker/BoardRow/NewsRow/HotIssue/Official). `mock-coins`/`mock-posts` deprecated 주석(삭제 X — /news·/coin·/board 4개 페이지가 위젯에서 여전히 사용). tsc/build PASS, `/`=ƒ dynamic(cookies()→동적). T01·T02·T03·T04·T06·T12·T13 산출물 통합 |
 | 2026-05-23 | R1/T13 — hot-issues 집계 RPC + API (세션 17, 일꾼) | 사용자 T13 발사 + SessionStart hook 마커 T11 → 사용자 명시 우선 채택. T13 코드 산출물 일체(SQL `community_hot_issues(int,int)` RPC + `/api/coins/hot-issues` 라우트 + `_API_REFERENCE.md` append)가 이전 세션에 이미 완성·존재 발견. 코드 0줄 추가, handover 157줄만 본 세션 신규 작성(T15 인계 trend `FLAT→same` 매핑·keyword 사전·delta 계산·502 폴백 4종). tsc/eslint/grep 2개 PASS, build Compiled OK 사후 인지. 본래 16 시작 → T02 슬롯 충돌로 17 정정 |
@@ -62,7 +63,9 @@
 | 15 | 2026-05-23 | R1/T03 사후 검증 전용 — 사전 완료 확인 + 보고 (코드 변경 0건) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-session15-t03-reverify.md) |
 | 16 | 2026-05-23 | R1/T02 일꾼 — community 시드 스크립트 (`scripts/seed-community.ts`, 156행) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T02-community-seed.md) |
 | 17 | 2026-05-23 | R1/T13 일꾼 — hot-issues RPC + `/api/coins/hot-issues` (코드 사전 완료·handover 신규) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T13-hot-issues-rpc.md) |
+| 18 | 2026-05-23 | R1/T15 일꾼 — 메인페이지 실데이터 전환 (mock 제거 + SSR + `queries.ts`) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T15-mainpage-realdata.md) |
 | 19 | 2026-05-23 | R1/T11 일꾼 — 시그널·마켓·주식마켓 라이트화 (6파일 45/45 대칭, 18→19 정정) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T11-signal-market-lightify.md) |
+| 20 | 2026-05-23 | R1/T09 일꾼 — 블로그 라이트화 (app/blog 4 + components/Blog 11 + BlogEditor tone 3, 18파일) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T09-blog-lightify.md) |
 
 ## v2.0 피벗 핵심 (2026-05-10 결정)
 
@@ -121,7 +124,7 @@
 
 ### 다음 세션 (Step 4~5 + 백엔드)
 - [ ] Step 4: 기존 다크 톤 페이지 라이트화 (페이지 25개)
-  - 우선순위 1: `/blog`, `/blog/[slug]`, `/blog/category`, `/blog/tag` (커뮤니티와 직접 연결)
+  - [x] 우선순위 1: `/blog`, `/blog/[slug]`, `/blog/category`, `/blog/tag` (커뮤니티와 직접 연결) ✅ R1/T09 세션 20 완료 (18파일, 코드블록 의도적 다크 보존)
   - 우선순위 2: `/analysis`, `/analysis/[symbol]`, `/signal`, `/market` (코인룸 진입)
   - 우선순위 3: `/stock`, `/stock-market`, `/portfolio`, `/watchlist`, `/calendar`
   - 우선순위 4: `/admin/*`, `/auth/*`, `/settings`, `/secure-memo`, `/contact`, `/terms`, `/privacy`

@@ -28,12 +28,12 @@ export default function BlogPostDetail({ post, relatedPosts }: BlogPostDetailPro
   }, [post.id]);
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-surface-container-lowest text-on-surface">
       <div className="container mx-auto px-4 pt-24 pb-12">
         {/* 뒤로 가기 */}
         <Link
           href="/blog"
-          className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors mb-8"
+          className="inline-flex items-center gap-2 text-sm text-on-surface-variant hover:text-on-surface transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
           {lang === 'ko' ? '블로그로 돌아가기' : 'Back to Blog'}
@@ -63,7 +63,7 @@ export default function BlogPostDetail({ post, relatedPosts }: BlogPostDetailPro
             </h1>
 
             {/* 메타 */}
-            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-8">
+            <div className="flex flex-wrap items-center gap-4 text-sm text-on-surface-variant mb-8">
               <span className="flex items-center gap-1.5">
                 <Calendar className="w-4 h-4" />
                 {post.published_at
@@ -82,7 +82,7 @@ export default function BlogPostDetail({ post, relatedPosts }: BlogPostDetailPro
 
             {/* 대표 이미지 */}
             {post.featured_image && (
-              <div className="relative aspect-[16/9] rounded-xl overflow-hidden border border-white/10 mb-8">
+              <div className="relative aspect-[16/9] rounded-xl overflow-hidden border border-outline-variant mb-8">
                 <Image
                   src={post.featured_image}
                   alt={post.title}
@@ -99,7 +99,7 @@ export default function BlogPostDetail({ post, relatedPosts }: BlogPostDetailPro
 
             {/* 태그 */}
             {post.tags && post.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-8 pt-8 border-t border-white/10">
+              <div className="flex flex-wrap gap-2 mt-8 pt-8 border-t border-outline-variant">
                 {post.tags.map((tag) => (
                   <BlogTagBadge key={tag.id} tag={tag} />
                 ))}
@@ -107,7 +107,7 @@ export default function BlogPostDetail({ post, relatedPosts }: BlogPostDetailPro
             )}
 
             {/* 공유 */}
-            <div className="mt-8 pt-6 border-t border-white/10">
+            <div className="mt-8 pt-6 border-t border-outline-variant">
               <BlogShareButtons title={post.title} slug={post.slug} />
             </div>
 

@@ -57,11 +57,11 @@ export default function BlogComments({ slug }: BlogCommentsProps) {
   // Giscus 미설정 시 안내 메시지
   if (!GISCUS_CONFIG.repoId) {
     return (
-      <div className="mt-12 pt-8 border-t border-white/10">
+      <div className="mt-12 pt-8 border-t border-outline-variant">
         <h3 className="text-lg font-bold mb-4">
           {lang === 'ko' ? '댓글' : 'Comments'}
         </h3>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-on-surface-variant">
           {lang === 'ko'
             ? '댓글 기능은 Giscus 설정 후 활성화됩니다.'
             : 'Comments will be enabled after Giscus configuration.'}
@@ -71,7 +71,7 @@ export default function BlogComments({ slug }: BlogCommentsProps) {
   }
 
   return (
-    <div className="mt-12 pt-8 border-t border-white/10">
+    <div className="mt-12 pt-8 border-t border-outline-variant">
       <h3 className="text-lg font-bold mb-4">
         {lang === 'ko' ? '댓글' : 'Comments'}
       </h3>

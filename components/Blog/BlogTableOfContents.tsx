@@ -56,8 +56,8 @@ export default function BlogTableOfContents({ content }: BlogTableOfContentsProp
   };
 
   return (
-    <nav className="p-5 border border-white/10 rounded-xl bg-white/5 sticky top-24">
-      <h3 className="text-sm font-semibold text-white mb-3 uppercase tracking-wider">
+    <nav className="p-5 border border-outline-variant rounded-xl bg-surface-container sticky top-24">
+      <h3 className="text-sm font-semibold text-on-surface mb-3 uppercase tracking-wider">
         {lang === 'ko' ? '목차' : 'Table of Contents'}
       </h3>
       <ul className="space-y-1.5">
@@ -70,7 +70,7 @@ export default function BlogTableOfContents({ content }: BlogTableOfContentsProp
               } ${
                 activeId === h.id
                   ? 'text-primary font-medium border-l-2 border-primary pl-3'
-                  : 'text-gray-400 hover:text-white'
+                  : 'text-on-surface-variant hover:text-on-surface'
               }`}
             >
               {h.text}

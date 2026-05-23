@@ -15,8 +15,8 @@ export default function BlogRelatedPosts({ posts }: BlogRelatedPostsProps) {
   if (posts.length === 0) return null;
 
   return (
-    <div className="mt-16 pt-8 border-t border-white/10">
-      <h3 className="text-xl font-bold text-white mb-6">
+    <div className="mt-16 pt-8 border-t border-outline-variant">
+      <h3 className="text-xl font-bold text-on-surface mb-6">
         {lang === 'ko' ? '관련 글' : 'Related Posts'}
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -24,7 +24,7 @@ export default function BlogRelatedPosts({ posts }: BlogRelatedPostsProps) {
           <Link
             key={post.id}
             href={`/blog/${post.slug}`}
-            className="group border border-white/10 rounded-xl overflow-hidden bg-white/5 shadow-[0_2px_8px_rgba(0,0,0,0.3)] hover:bg-white/10 hover:shadow-[0_8px_24px_rgba(0,0,0,0.4)] transition-all duration-300"
+            className="group border border-outline-variant rounded-xl overflow-hidden bg-surface-container shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:bg-surface-container-high hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] transition-all duration-300"
           >
             {post.featured_image && (
               <div className="relative aspect-[16/9] overflow-hidden">
@@ -38,10 +38,10 @@ export default function BlogRelatedPosts({ posts }: BlogRelatedPostsProps) {
               </div>
             )}
             <div className="p-4">
-              <h4 className="text-sm font-medium text-white line-clamp-2 group-hover:text-primary transition-colors">
+              <h4 className="text-sm font-medium text-on-surface line-clamp-2 group-hover:text-primary transition-colors">
                 {post.title}
               </h4>
-              <span className="text-xs text-gray-500 mt-2 block">
+              <span className="text-xs text-on-surface-variant mt-2 block">
                 {post.published_at
                   ? new Date(post.published_at).toLocaleDateString()
                   : new Date(post.created_at).toLocaleDateString()}

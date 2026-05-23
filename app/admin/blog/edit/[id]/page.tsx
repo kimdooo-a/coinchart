@@ -231,7 +231,7 @@ export default function AdminBlogEditPage({
               placeholder={lang === 'ko' ? '제목을 입력하세요' : 'Enter title'}
               className="w-full text-3xl font-bold bg-transparent border-none outline-none placeholder:text-gray-600"
             />
-            <BlogEditor content={content} onChange={setContent} />
+            <BlogEditor content={content} onChange={setContent} tone="light" />
           </div>
 
           {/* 사이드바 */}

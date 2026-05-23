@@ -24,7 +24,7 @@ export default function BlogPostCard({ post, index = 0 }: BlogPostCardProps) {
     >
       <Link
         href={`/blog/${post.slug}`}
-        className="group flex flex-col h-full border border-white/10 rounded-xl overflow-hidden bg-white/5 shadow-[0_2px_8px_rgba(0,0,0,0.3)] hover:bg-white/10 hover:border-white/20 hover:shadow-[0_8px_24px_rgba(0,0,0,0.4)] transition-all duration-300"
+        className="group flex flex-col h-full border border-outline-variant rounded-xl overflow-hidden bg-surface-container shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:bg-surface-container-high hover:border-outline hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] transition-all duration-300"
       >
         {/* 대표 이미지 */}
         {post.featured_image && (
@@ -55,19 +55,19 @@ export default function BlogPostCard({ post, index = 0 }: BlogPostCardProps) {
           )}
 
           {/* 제목 */}
-          <h2 className="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+          <h2 className="text-lg font-bold text-on-surface mb-2 line-clamp-2 group-hover:text-primary transition-colors">
             {post.title}
           </h2>
 
           {/* 요약 */}
           {post.excerpt && (
-            <p className="text-sm text-gray-400 mb-4 line-clamp-2">
+            <p className="text-sm text-on-surface-variant mb-4 line-clamp-2">
               {post.excerpt}
             </p>
           )}
 
           {/* 메타 정보 */}
-          <div className="flex items-center gap-4 text-xs text-gray-500 mt-auto">
+          <div className="flex items-center gap-4 text-xs text-on-surface-variant mt-auto">
             <span className="flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5" />
               {post.published_at
@@ -90,7 +90,7 @@ export default function BlogPostCard({ post, index = 0 }: BlogPostCardProps) {
               {post.tags.slice(0, 3).map((tag) => (
                 <span
                   key={tag.id}
-                  className="px-2 py-0.5 text-xs text-gray-400 bg-white/5 border border-white/10 rounded-full"
+                  className="px-2 py-0.5 text-xs text-on-surface-variant bg-surface-container border border-outline-variant rounded-full"
                 >
                   #{tag.name}
                 </span>

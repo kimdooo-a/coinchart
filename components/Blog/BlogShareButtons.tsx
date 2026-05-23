@@ -47,12 +47,12 @@ export default function BlogShareButtons({ title, slug }: BlogShareButtonsProps)
 
   return (
     <div className="flex items-center gap-3">
-      <span className="text-sm text-gray-500">
+      <span className="text-sm text-on-surface-variant">
         {lang === 'ko' ? '공유' : 'Share'}:
       </span>
       <button
         onClick={copyLink}
-        className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-gray-400 border border-white/10 rounded-lg hover:text-white hover:border-white/20 transition-colors"
+        className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-on-surface-variant border border-outline-variant rounded-lg hover:text-on-surface hover:border-outline transition-colors"
         title={lang === 'ko' ? '링크 복사' : 'Copy link'}
       >
         {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Link2 className="w-3.5 h-3.5" />}
@@ -62,7 +62,7 @@ export default function BlogShareButtons({ title, slug }: BlogShareButtonsProps)
       </button>
       <button
         onClick={shareToX}
-        className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-gray-400 border border-white/10 rounded-lg hover:text-white hover:border-white/20 transition-colors"
+        className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-on-surface-variant border border-outline-variant rounded-lg hover:text-on-surface hover:border-outline transition-colors"
         title="Share on X"
       >
         <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">

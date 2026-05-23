@@ -168,7 +168,7 @@ export default function PostWritePage({
                     {/* 본문 (TipTap 에디터) */}
                     <label className="text-label-bold text-on-surface-variant block mb-1">본문</label>
                     <div className="mb-4">
-                        <BlogEditor content="" onChange={setContent} />
+                        <BlogEditor content="" onChange={setContent} tone="light" />
                     </div>
 
                     {/* 태그 */}

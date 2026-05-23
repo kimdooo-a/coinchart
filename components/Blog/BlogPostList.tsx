@@ -30,14 +30,14 @@ export default function BlogPostList({
         {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
-            className="border border-white/10 rounded-xl overflow-hidden bg-white/5 animate-pulse"
+            className="border border-outline-variant rounded-xl overflow-hidden bg-surface-container animate-pulse"
           >
-            <div className="aspect-[16/9] bg-white/10" />
+            <div className="aspect-[16/9] bg-surface-container-high" />
             <div className="p-5 space-y-3">
-              <div className="h-4 w-20 bg-white/10 rounded" />
-              <div className="h-5 w-3/4 bg-white/10 rounded" />
-              <div className="h-4 w-full bg-white/10 rounded" />
-              <div className="h-3 w-1/3 bg-white/10 rounded" />
+              <div className="h-4 w-20 bg-surface-container-high rounded" />
+              <div className="h-5 w-3/4 bg-surface-container-high rounded" />
+              <div className="h-4 w-full bg-surface-container-high rounded" />
+              <div className="h-3 w-1/3 bg-surface-container-high rounded" />
             </div>
           </div>
         ))}
@@ -48,7 +48,7 @@ export default function BlogPostList({
   if (posts.length === 0) {
     return (
       <div className="text-center py-16">
-        <p className="text-gray-400 text-lg">
+        <p className="text-on-surface-variant text-lg">
           {lang === 'ko' ? '게시된 글이 없습니다.' : 'No posts found.'}
         </p>
       </div>
@@ -69,7 +69,7 @@ export default function BlogPostList({
           <button
             onClick={() => onPageChange(page - 1)}
             disabled={page <= 1}
-            className="px-4 py-2 text-sm border border-white/10 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2 text-sm border border-outline-variant rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
             {lang === 'ko' ? '이전' : 'Prev'}
           </button>
@@ -80,13 +80,13 @@ export default function BlogPostList({
               const showDots = i > 0 && arr[i - 1] !== p - 1;
               return (
                 <span key={p} className="flex items-center gap-2">
-                  {showDots && <span className="text-gray-500">...</span>}
+                  {showDots && <span className="text-on-surface-variant">...</span>}
                   <button
                     onClick={() => onPageChange(p)}
                     className={`w-10 h-10 text-sm rounded-lg transition-colors ${
                       p === page
-                        ? 'bg-primary text-white'
-                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                        ? 'bg-primary text-on-primary'
+                        : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low'
                     }`}
                   >
                     {p}
@@ -98,7 +98,7 @@ export default function BlogPostList({
           <button
             onClick={() => onPageChange(page + 1)}
             disabled={page >= totalPages}
-            className="px-4 py-2 text-sm border border-white/10 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2 text-sm border border-outline-variant rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
             {lang === 'ko' ? '다음' : 'Next'}
           </button>

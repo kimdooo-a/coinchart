@@ -58,22 +58,22 @@ export default function BlogPostContent({ content }: BlogPostContentProps) {
   return (
     <div
       ref={contentRef}
-      className="prose prose-invert prose-lg max-w-none
-        prose-headings:text-white prose-headings:font-bold
+      className="prose prose-lg max-w-none
+        prose-headings:text-on-surface prose-headings:font-bold
         prose-headings:mt-8 prose-headings:mb-4
         prose-h2:text-2xl prose-h3:text-xl
-        prose-p:text-gray-300 prose-p:leading-[1.8]
+        prose-p:text-on-surface prose-p:leading-[1.8]
         prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-        prose-strong:text-white
-        prose-code:text-primary prose-code:bg-white/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded
+        prose-strong:text-on-surface
+        prose-code:text-primary prose-code:bg-surface-container-high prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded
         prose-pre:bg-black/60 prose-pre:border prose-pre:border-white/10 prose-pre:relative
-        prose-blockquote:border-l-primary prose-blockquote:text-gray-400
-        prose-img:rounded-xl prose-img:border prose-img:border-white/10
-        prose-hr:border-white/10
-        prose-li:text-gray-300 prose-li:leading-[1.8]
+        prose-blockquote:border-l-primary prose-blockquote:text-on-surface-variant
+        prose-img:rounded-xl prose-img:border prose-img:border-outline-variant
+        prose-hr:border-outline-variant
+        prose-li:text-on-surface prose-li:leading-[1.8]
         prose-table:border-collapse
-        prose-th:border prose-th:border-white/10 prose-th:bg-white/5 prose-th:p-2 prose-th:text-left
-        prose-td:border prose-td:border-white/10 prose-td:p-2"
+        prose-th:border prose-th:border-outline-variant prose-th:bg-surface-container prose-th:p-2 prose-th:text-left
+        prose-td:border prose-td:border-outline-variant prose-td:p-2"
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );

@@ -29,7 +29,7 @@
 
 ### 세션 8 — 라이트화 (Step 4)
 
-1. **블로그 라이트화** (필수, 커뮤니티 직접 연결) — `/blog`, `/blog/[slug]`, `/blog/category/[category]`, `/blog/tag/[tag]`. ~~BlogEditor의 `prose-invert` 제거 또는 props 옵션화.~~ → **세션 9(T08) 완료** (`tone?: 'light'|'dark'`, default light, EditorToolbar에도 전파). 페이지에서는 `<BlogEditor tone="light" />` 또는 default 사용.
+1. ~~**블로그 라이트화** (필수, 커뮤니티 직접 연결) — `/blog`, `/blog/[slug]`, `/blog/category/[category]`, `/blog/tag/[tag]`.~~ → **세션 20(T09) 완료** (18파일: 페이지 4 + components/Blog 11(editor 제외) + BlogEditor 사용처 3에 `tone="light"`). 코드블록(`prose-pre`)·복사버튼·`text-green-400` 의도적 다크 보존. **잔여(R2)**: Giscus `data-theme` `'dark_dimmed'`→`'light'` 전환, `components/Blog/editor/` 내부 ToolButton 색상 tone-aware 분기. (BlogEditor `tone` prop은 세션 9(T08) 완료)
 2. **AI 분석 도구 라이트화** (높음) — `/analysis/*`, `/signal`, `/market`. ~~차트 라이트 테마 분리 (`lib/chart/theme.ts` 신규).~~ → **세션 9(T08) 완료** (`getChartTheme('light')` + `getCandleColors('kr')`). ~~`/analysis/*` 페이지·컴포넌트 라이트화~~ → **세션(T10) 완료**. ~~`/signal`·`/market`·`/stock-market` 페이지·컴포넌트 라이트화~~ → **세션 19(T11) 완료** (6파일 클래스 교체). **잔여**: 차트 컴포넌트 자체(`components/Chart/*`·`DetailedChart`·`hero-chart`)에 T08 헬퍼 적용은 후속 라운드 — 그래야 페이지 안 실제 차트도 라이트화.
 3. ~~**번역 키 정리** — `lib/translations.ts`의 `menu` 그룹에 `best`, `boardFree`, `boardMarket`, `boardInfo`, `coinRoom`, `tools`, `write` 키 추가.~~ → **세션 9(T14) 완료** (9키 append + 헤더 인라인 분기 8건 교체). 잔여: altcoin/kimp 라벨, EN-KR 토글 — 후속 라운드 처리 권고.
 4. **나머지 페이지 라이트화** (중간) — `/stock`, `/stock-market`, `/portfolio`, `/watchlist`, `/calendar`, `/secure-memo`, `/admin/*`, `/auth/*`, 정책 페이지.

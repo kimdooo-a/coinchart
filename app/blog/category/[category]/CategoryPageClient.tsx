@@ -67,11 +67,11 @@ export default function CategoryPageClient({
     : categorySlug;
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-surface-container-lowest text-on-surface">
       <div className="container mx-auto px-4 pt-24 pb-12">
         <Link
           href="/blog"
-          className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors mb-8"
+          className="inline-flex items-center gap-2 text-sm text-on-surface-variant hover:text-on-surface transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
           {t.blog.backToBlog}
@@ -87,7 +87,7 @@ export default function CategoryPageClient({
             )}
             <h1 className="text-3xl font-bold">{categoryName}</h1>
           </div>
-          <p className="text-gray-400">
+          <p className="text-on-surface-variant">
             {total} {lang === 'ko' ? '개의 글' : 'posts'}
           </p>
         </div>

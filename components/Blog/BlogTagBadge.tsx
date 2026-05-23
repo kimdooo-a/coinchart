@@ -10,7 +10,7 @@ interface BlogTagBadgeProps {
 
 export default function BlogTagBadge({ tag, linked = true }: BlogTagBadgeProps) {
   const className =
-    'inline-block px-2.5 py-0.5 text-xs text-gray-400 bg-white/5 border border-white/10 rounded-full hover:text-white hover:border-white/20 transition-colors';
+    'inline-block px-2.5 py-0.5 text-xs text-on-surface-variant bg-surface-container border border-outline-variant rounded-full hover:text-on-surface hover:border-outline transition-colors';
 
   if (linked) {
     return (
