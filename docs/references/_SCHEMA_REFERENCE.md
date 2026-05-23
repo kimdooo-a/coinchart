@@ -219,3 +219,133 @@
 | 확장 | 용도 |
 |------|------|
 | `pg_cron` | 정기 데이터 정리 스케줄링 |
+
+---
+
+## community_* (R1 2026-05-23 추가)
+
+> v2.0 커뮤니티 피벗 — 익명+회원 혼용 작성 권한 모델.
+> 마이그레이션: `supabase/migrations/20260523_create_community_tables.sql`
+
+### community_boards
+
+> 게시판 메타 (자유/시세/정보 + 코인룸 6종)
+
+| 컬럼 | 타입 | NULL | 기본값 | 설명 |
+|---|---|---|---|---|
+| `slug` | TEXT | N (PK) | - | `free` / `market` / `info` / `coin-btc` / `coin-eth` / `coin-xrp` / `coin-sol` / `coin-altcoin` / `coin-kimp` |
+| `name` | TEXT | N | - | 한국어 표시명 |
+| `name_en` | TEXT | Y | - | 영어 표시명 |
+| `emoji` | TEXT | Y | - | 게시판 아이콘 이모지 |
+| `description` | TEXT | Y | - | 게시판 소개 한 줄 |
+| `sort_order` | INTEGER | N | 0 | 메뉴 정렬 순서 |
+| `created_at` | TIMESTAMPTZ | N | `now()` | |
+
+**시드**: 위 9개 slug 모두 자동 삽입 (ON CONFLICT DO NOTHING).
+
+### community_posts
+
+> 게시글 (익명+회원 혼용)
+
+| 컬럼 | 타입 | NULL | 기본값 | 설명 |
+|---|---|---|---|---|
+| `id` | UUID | N (PK) | `gen_random_uuid()` | |
+| `board_slug` | TEXT | N (FK→community_boards) | - | 소속 게시판 |
+| `title` | TEXT | N | - | 1~200자 (CHECK) |
+| `content_html` | TEXT | N | - | TipTap 출력 HTML |
+| `author_id` | UUID | Y (FK→auth.users, ON DELETE SET NULL) | - | 회원 작성 시 |
+| `guest_nickname` | TEXT | Y | - | 익명 닉네임 2~12자 (CHECK) |
+| `guest_password_hash` | TEXT | Y | - | bcrypt 해시 ≥60자 (CHECK) |
+| `guest_ip_masked` | TEXT | Y | - | 표시용 IP 앞 2옥텟 `\d+\.\d+\.\*\.\*` (CHECK regex) |
+| `category` | TEXT | N | `'전체'` | 게시판 내 카테고리 |
+| `tags` | TEXT[] | N | `ARRAY[]` | 해시태그 배열 |
+| `coin_symbol` | TEXT | Y | - | `BTC`/`ETH`/... — NULL은 **코인과 무관한 일반 글** |
+| `view_count` | INTEGER | N | 0 | 조회수 |
+| `like_count` | INTEGER | N | 0 | 추천 합(value 합산) |
+| `comment_count` | INTEGER | N | 0 | 댓글 수(트리거 동기화) |
+| `is_notice` | BOOLEAN | N | false | 공지 |
+| `is_hot` | BOOLEAN | N | false | 베스트 진입 캐시 |
+| `is_deleted` | BOOLEAN | N | false | soft delete |
+| `created_at` | TIMESTAMPTZ | N | `now()` | |
+| `updated_at` | TIMESTAMPTZ | N | `now()` | 트리거 자동 갱신 |
+
+**CHECK 제약 (author XOR guest)**:
+```
+author_id IS NOT NULL
+OR (guest_nickname IS NOT NULL
+    AND guest_password_hash IS NOT NULL
+    AND guest_ip_masked IS NOT NULL)
+```
+회원 식별이 없으면 익명 3요소(닉/비번/IP마스킹)가 전부 채워져야 INSERT 가능. UI/서버에서 익명 토글에 따라 적절히 매핑.
+
+### community_comments
+
+> 댓글·대댓글 (`parent_id`로 self-reference)
+
+| 컬럼 | 타입 | NULL | 기본값 | 설명 |
+|---|---|---|---|---|
+| `id` | UUID | N (PK) | `gen_random_uuid()` | |
+| `post_id` | UUID | N (FK→community_posts, ON DELETE CASCADE) | - | |
+| `parent_id` | UUID | Y (FK→community_comments, ON DELETE CASCADE) | - | 대댓글이면 부모 댓글 |
+| `content` | TEXT | N | - | 1~2000자 (CHECK) |
+| `author_id` | UUID | Y (FK→auth.users) | - | 회원 작성 |
+| `guest_nickname` | TEXT | Y | - | posts와 동일 패턴 |
+| `guest_password_hash` | TEXT | Y | - | posts와 동일 패턴 |
+| `guest_ip_masked` | TEXT | Y | - | posts와 동일 패턴 |
+| `like_count` | INTEGER | N | 0 | |
+| `is_deleted` | BOOLEAN | N | false | soft delete |
+| `created_at` | TIMESTAMPTZ | N | `now()` | |
+| `updated_at` | TIMESTAMPTZ | N | `now()` | 트리거 자동 갱신 |
+
+**CHECK 제약**: posts와 동일 (author XOR guest 3요소).
+
+### community_post_likes
+
+> 추천/비추 토글 적재. **작성과 다른 식별 단위** — 익명은 IP의 sha256 해시(전체 IP, 마스킹 X)로 dedup.
+
+| 컬럼 | 타입 | NULL | 기본값 | 설명 |
+|---|---|---|---|---|
+| `id` | UUID | N (PK) | `gen_random_uuid()` | |
+| `post_id` | UUID | N (FK→community_posts, ON DELETE CASCADE) | - | |
+| `user_id` | UUID | Y (FK→auth.users, ON DELETE CASCADE) | - | 회원 dedup용 |
+| `ip_hash` | TEXT | Y | - | 익명 dedup용 sha256(전체 IP) |
+| `value` | SMALLINT | N | - | `1`=추천 / `-1`=비추 (CHECK) |
+| `created_at` | TIMESTAMPTZ | N | `now()` | |
+
+**UNIQUE 부분 인덱스** (NULL 안전):
+- `uniq_community_post_likes_user (post_id, user_id) WHERE user_id IS NOT NULL`
+- `uniq_community_post_likes_iphash (post_id, ip_hash) WHERE ip_hash IS NOT NULL`
+
+**CHECK**: `user_id IS NOT NULL OR ip_hash IS NOT NULL`
+
+### 인덱스 요약
+
+| 인덱스 | 대상 | 필터 |
+|---|---|---|
+| `idx_community_posts_board_created` | (board_slug, created_at DESC) | is_deleted=false |
+| `idx_community_posts_coin_created` | (coin_symbol, created_at DESC) | is_deleted=false |
+| `idx_community_posts_hot` | (is_hot, created_at DESC) | is_deleted=false AND is_hot=true |
+| `idx_community_comments_post` | (post_id, created_at) | is_deleted=false |
+
+### RLS 요약
+
+| 테이블 | SELECT | INSERT | UPDATE | DELETE |
+|---|---|---|---|---|
+| `community_boards` | 공개 | service_role | service_role | service_role |
+| `community_posts` | `is_deleted=false` 공개 | 모두 허용 (CHECK가 강제) | 본인(`author_id=auth.uid()`) | 본인 |
+| `community_comments` | `is_deleted=false` 공개 | 모두 허용 | 본인 | 본인 |
+| `community_post_likes` | 공개 | 모두 허용 | (없음) | 본인 |
+
+> **익명 글의 수정/삭제**는 RLS로 허용하지 않음. 서버 라우트(API)가 비밀번호 검증 후 service_role 키로 처리한다.
+
+### 트리거 요약
+
+| 트리거 | 대상 | 시점 | 함수 |
+|---|---|---|---|
+| `trg_community_posts_updated_at` | community_posts | BEFORE UPDATE | `community_touch_updated_at()` |
+| `trg_community_comments_updated_at` | community_comments | BEFORE UPDATE | `community_touch_updated_at()` |
+| `trg_community_comments_count` | community_comments | AFTER INSERT/UPDATE/DELETE | `community_sync_comment_count()` (soft-delete 토글 포함) |
+| `trg_community_post_likes_count` | community_post_likes | AFTER INSERT/UPDATE/DELETE | `community_sync_like_count()` (value 부호 합산) |
+
+> `like_count` = `SUM(value)` 누적. 비추(-1)도 합산되므로 음수 가능 — 화면에서 추천만 노출하려면 별도 집계 또는 컬럼 분리 검토(차후).
+

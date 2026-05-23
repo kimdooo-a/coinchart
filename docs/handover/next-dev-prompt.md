@@ -1,9 +1,12 @@
 # 다음 개발 프롬프트
 
-> 최종 갱신: 2026-05-10
+> 최종 갱신: 2026-05-23
 
 ## 최근 완료된 작업
 
+- **세션 9 (2026-05-23)**: R1/T14 일꾼 — `lib/translations.ts` menu 그룹에 신규 키 9개(ko/en) append(`best`, `boardFree`, `boardMarket`, `boardInfo`, `coinRoom`, `tools`, `write`, `search`, `login`; `news`는 기존 존재) + `components/global-header.tsx` 인라인 한/영 분기 8건 → `t.menu.*` 호출로 교체. JSX 구조·아이콘 무변경. 잔여 분기 4건(altcoin/김치프리미엄/EN-KR 토글 ×2) 의도적 잔류.
+- **세션 9 (2026-05-23)**: R1/T01 일꾼 — `community_boards/posts/comments/post_likes` 4테이블 마이그레이션 SQL (`supabase/migrations/20260523_create_community_tables.sql`) + 시드 9행(`free`/`market`/`info` + 코인룸 6종) + 트리거 4 + RLS 15 + 인덱스 6. `_SCHEMA_REFERENCE.md` 신규 섹션 append. 익명 XOR 회원 CHECK 제약 DB 레벨 강제.
+- **세션 8 (2026-05-23)**: R1/T03 일꾼 — Binance 24h ticker SSOT 추가 (`lib/supabase/crypto.ts`의 `fetchBinanceTickers`/`fetchCommunityTickers`) + `/api/coins/ticker` 신규 라우트. 60s 이중 캐시.
 - **세션 7 (2026-05-10)**: Stitch 시안 → 코드 적용 1차 — Material 3 디자인 토큰 통합 (한국식 빨↑/파↓), Noto Sans KR, 헤더·푸터 라이트화 + 메뉴 5+2 구조, 공통 컴포넌트 13개(`components/community/`), 더미 데이터 모듈 3종, 신규/리디자인 페이지 6개(홈·뉴스·게시판×3·코인룸), 41개 라우트 빌드 통과 → 커밋 `a79fe24`
 - **세션 6 (2026-05-10)**: v2.0 커뮤니티 피벗 — `docs/PROJECT_DIRECTION.md`로 코인판×네이버 하이브리드 정체성 정의, Stitch 의뢰서 7종 작성(`docs/design-brief/`), Stitch 반환 시안 6세트 검토
 - **세션 5 (2026-03-08)**: 블로그 에디터 티스토리급 강화 — TipTap extension 10개, HTML 저장, 자동저장, DOMPurify
@@ -18,16 +21,16 @@
 
 1. **블로그 라이트화** (필수, 커뮤니티 직접 연결) — `/blog`, `/blog/[slug]`, `/blog/category/[category]`, `/blog/tag/[tag]`. BlogEditor의 `prose-invert` 제거 또는 props 옵션화.
 2. **AI 분석 도구 라이트화** (높음) — `/analysis/*`, `/signal`, `/market`. 차트 라이트 테마 분리 (`lib/chart/theme.ts` 신규).
-3. **번역 키 정리** — `lib/translations.ts`의 `menu` 그룹에 `best`, `boardFree`, `boardMarket`, `boardInfo`, `coinRoom`, `tools`, `write` 키 추가.
+3. ~~**번역 키 정리** — `lib/translations.ts`의 `menu` 그룹에 `best`, `boardFree`, `boardMarket`, `boardInfo`, `coinRoom`, `tools`, `write` 키 추가.~~ → **세션 9(T14) 완료** (9키 append + 헤더 인라인 분기 8건 교체). 잔여: altcoin/kimp 라벨, EN-KR 토글 — 후속 라운드 처리 권고.
 4. **나머지 페이지 라이트화** (중간) — `/stock`, `/stock-market`, `/portfolio`, `/watchlist`, `/calendar`, `/secure-memo`, `/admin/*`, `/auth/*`, 정책 페이지.
 
-### 세션 9 — 백엔드 (DB + API)
+### R1 (in progress) — 백엔드 (DB + API) — dispatch 일꾼별
 
-5. **DB 마이그레이션** — `community_boards`, `community_posts`, `community_comments`, `community_post_likes` (스키마 초안: `docs/PROJECT_DIRECTION.md` §3-2)
-6. **익명 비밀번호 해싱** — bcrypt 권장 (`lib/community/auth.ts`)
-7. **IP 마스킹 미들웨어** — `X-Forwarded-For` 앞 2옥텟만 저장
-8. **API 라우트** — `/api/board/[slug]`, `/api/board/[slug]/[postId]`, `/api/community/comment`, `/api/community/like`
-9. **더미 → 실데이터** — `lib/community/mock-*` → Supabase 연동
+5. ~~**DB 마이그레이션** — `community_boards`, `community_posts`, `community_comments`, `community_post_likes`~~ → **세션 9(T01) 완료** (`supabase/migrations/20260523_create_community_tables.sql`). 실 DB 적용은 컨덕터 또는 별도 작업
+6. **익명 비밀번호 해싱** — bcrypt 권장 (`lib/community/auth.ts`) — T07 진행 중
+7. **IP 마스킹 미들웨어** — `X-Forwarded-For` 앞 2옥텟만 저장 — T07 진행 중
+8. **API 라우트** — `/api/board/[slug]`, `/api/board/[slug]/[postId]`, `/api/community/comment`, `/api/community/like` — T12 영역
+9. **더미 → 실데이터** — `lib/community/mock-*` → Supabase 연동 — T02 + T15 영역
 
 ### 세션 10 — 뉴스 룰베이스 분류
 

@@ -2,17 +2,20 @@
 
 | 항목 | 값 |
 |------|-----|
-| **마지막 세션** | 2026-05-23 (세션 8 — R1/T03 일꾼) |
-| **작업 내용** | Binance 24h ticker SSOT 추가 + `/api/coins/ticker` 신규 라우트 (R1 dispatch, T03 단일 일꾼) |
+| **마지막 세션** | 2026-05-23 (세션 9 — R1/T14 일꾼, T01과 동시 발사) |
+| **작업 내용** | translations.ts menu 9키 append + global-header.tsx 인라인 한/영 분기 8건 → `t.menu.*` 교체 (R1 dispatch, T14 일꾼) |
 | **브랜치** | main |
-| **빌드 상태** | ✅ tsc/eslint 통과 (T03 산출물 한정) |
-| **마지막 커밋** | 2cc5c2e (R1 다른 일꾼 T01/T07/T14 산출물은 워킹트리 잔존, 컨덕터 통합 대기) |
+| **빌드 상태** | ✅ tsc 통과 (T14 산출물 한정, 사전 에러 3건은 본 작업 무관) |
+| **마지막 커밋** | 본 세션 비커밋 (R1 다른 일꾼 T01/T05/T07/T08 + T14 산출물 모두 워킹트리 잔존, 컨덕터 통합 대기) |
 | **프로젝트 방향성** | **v2.0 커뮤니티 피벗** ([PROJECT_DIRECTION.md](../PROJECT_DIRECTION.md)) |
 
 ## 최근 작업 이력
 
 | 날짜 | 작업 | 결과 |
 |------|------|------|
+| 2026-05-23 | R1/T08 — 차트 라이트 테마 + BlogEditor `tone` prop (세션 9, 일꾼) | `lib/chart/theme.ts` 신규 (`getChartTheme`/`getCandleColors`, KR 빨/파 + US 녹/빨), `BlogEditor`/`EditorToolbar`에 `tone?: 'light'\|'dark'` prop 추가. T09·T10·T11 의존 산출물 |
+| 2026-05-23 | R1/T14 — 번역 키 정리 + 헤더 인라인 분기 제거 (세션 9, 일꾼) | `lib/translations.ts` menu 9키(ko/en) append + `components/global-header.tsx` 인라인 한/영 분기 8건 → `t.menu.*` 교체. 잔여 분기 4건(altcoin/kimp/EN-KR 토글 ×2) 의도적 잔류 |
+| 2026-05-23 | R1/T01 — community_* 4테이블 마이그레이션 (세션 9, 일꾼) | `community_boards/posts/comments/post_likes` + 시드 9행 + 트리거 4 + RLS 15 + 인덱스 6. `_SCHEMA_REFERENCE.md` 신규 섹션 append |
 | 2026-05-23 | R1/T03 — Binance ticker SSOT (세션 8, 일꾼) | `fetchBinanceTickers`/`fetchCommunityTickers` + `/api/coins/ticker` 신규. 60s 이중 캐시. T15가 메인페이지 hydrate에 사용 |
 | 2026-05-10 | Stitch 시안 코드 적용 Step 1~3 (세션 7) | 디자인 토큰 통합(Material 3 + 한국식 빨/파), Noto Sans KR, 공통 컴포넌트 13개, 더미 페이지 6개(홈·뉴스·게시판×3·코인룸), 빌드 통과 |
 | 2026-05-10 | v2.0 방향성 정의 + 디자인 의뢰서 6종 (세션 6) | 코인판×네이버 하이브리드 커뮤니티로 피벗. Stitch 의뢰용 design-brief/ 작성 |
@@ -38,6 +41,9 @@
 | 6 | 2026-05-10 | v2.0 방향성 피벗 + 디자인 의뢰서 6종 | [로그](../logs/2026-05.md) | [handover (6+7 통합)](../handover/2026-05-10-session7-stitch-applied.md) |
 | 7 | 2026-05-10 | Stitch 시안 코드 적용 Step 1~3 | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-10-session7-stitch-applied.md) |
 | 8 | 2026-05-23 | R1/T03 일꾼 — Binance ticker SSOT + `/api/coins/ticker` | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T03-ticker-ssot.md) |
+| 9 | 2026-05-23 | R1/T01 일꾼 — community_* 4테이블 마이그레이션 | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T01-community-migrations.md) |
+| 9 | 2026-05-23 | R1/T08 일꾼 — 차트 라이트 테마 + BlogEditor `tone` prop | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T08-chart-theme-editor-tone.md) |
+| 9 | 2026-05-23 | R1/T14 일꾼 — 번역 키 정리 + 헤더 인라인 분기 제거 | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T14-translations-cleanup.md) |
 
 ## v2.0 피벗 핵심 (2026-05-10 결정)
 
@@ -100,9 +106,9 @@
   - 우선순위 2: `/analysis`, `/analysis/[symbol]`, `/signal`, `/market` (코인룸 진입)
   - 우선순위 3: `/stock`, `/stock-market`, `/portfolio`, `/watchlist`, `/calendar`
   - 우선순위 4: `/admin/*`, `/auth/*`, `/settings`, `/secure-memo`, `/contact`, `/terms`, `/privacy`
-  - TradingView 차트 색상 라이트 톤 옵션 추가 (`lib/chart/theme.ts`)
-- [ ] BlogEditor의 `prose-invert` → 라이트 톤 옵션 props 추가
-- [ ] DB 마이그레이션: `community_boards`, `community_posts`, `community_comments`, `community_post_likes`
+  - [x] TradingView 차트 색상 라이트 톤 옵션 추가 (`lib/chart/theme.ts`) ✅ R1/T08 세션 9 완료 — 페이지 적용은 T09·T10·T11 후속
+- [x] BlogEditor의 `prose-invert` → 라이트 톤 옵션 props 추가 ✅ R1/T08 세션 9 완료 (`tone?: 'light'|'dark'`, default light, EditorToolbar에도 전파)
+- [x] DB 마이그레이션: `community_boards`, `community_posts`, `community_comments`, `community_post_likes` ✅ R1/T01 세션 9 완료 (`supabase/migrations/20260523_create_community_tables.sql` — 실 DB 적용은 컨덕터 또는 별도 작업)
 - [ ] 익명 글 비밀번호 해싱 (bcrypt 권장)
 - [ ] IP 마스킹 미들웨어 (X-Forwarded-For 앞 2옥텟)
 - [ ] API 라우트: `/api/board/*`, `/api/community/*`
