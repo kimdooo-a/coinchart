@@ -4,6 +4,7 @@
 
 ## 최근 완료된 작업
 
+- **세션 16 (2026-05-23)**: R1/T02 일꾼 — community 시드 스크립트. 사용자 T09 발사 + SessionStart hook T02 마커 충돌 → hook 우선 채택 (R1 5번째 사례). `scripts/seed-community.ts` 신규(~180줄): `MOCK_POSTS` 3 보드 × 52행 = **156행**을 `community_posts` 스키마로 매핑 + 100행 chunk INSERT + `--force` 가드 + bcrypt 1회 공유 해시(`seed123!`) + 랜덤 `created_at`(0~30일). `toMaskedIp` 헬퍼로 mock IP("211.34") → CHECK 정규식("211.34.*.*") 변환. 모든 시드 글 익명(`author_id=null`), 운영자 공지도 `guest_*` 3요소로 적재. 검증 4/4 PASS (tsc 빈 출력 / 컬럼 grep 27회 / ESLint 0 / tsx import "OK"+가드 동작). **실 DB INSERT는 사용자 직접 실행** (`npx tsx scripts/seed-community.ts`, T01 SQL 적용 환경 필요). (handover `2026-05-23-R1-T02-community-seed.md`)
 - **세션 15 (2026-05-23)**: R1/T03 사후 검증 전용 세션 — 사용자 T02 발사 + SessionStart hook T03 마커 충돌 → hook 우선 채택. T03 산출물 일체(`types/coins.ts` + `lib/supabase/crypto.ts` append 영역 L68~110 + `app/api/coins/ticker/route.ts` + references 2종)가 세션 8에 이미 완료/머지된 상태 발견. 신규 코드 변경 0건, spec 1:1 일치 + `npx tsc --noEmit` 전역 0 에러 + ESLint 0 에러. **부수 발견**: 세션 10~14의 PARTIAL(`bcryptjs` 미설치)이 본 세션 시점에 이미 해소 — 워킹트리 `M package.json/-lock.json` 흔적. (handover `2026-05-23-session15-t03-reverify.md`)
 - **세션 14 (2026-05-23)**: R1/T07 검증 전용 세션 — 사용자 T07 발사 명령에 대응했으나 산출물 일체(`lib/community/auth.ts`/`ip-mask.ts`/`middleware.ts` + references 2종 + handover)가 세션 10(`30350f5`)에 이미 완료/머지된 상태 발견. 신규 코드 변경 0건, spec 1:1 일치 + PARTIAL(bcryptjs 미설치) 유지 보고. (PARTIAL은 세션 15에서 해소 확인됨)
 - **세션 13 (2026-05-23)**: R1/T05 일꾼 (검증·인수) — 다른 T05 일꾼이 이미 워킹트리에 생성한 산출물 4종(`lib/news/classifier.ts` 144 LoC, `lib/news/keyword-dict.ts` 159 LoC, `__tests__/lib/news-classifier.test.ts` 86 LoC/8 tests, handover 229 LoC)을 작업 지시서 사양과 1:1 대조 + TS·런타임·Vitest·ESLint 4종 검증 PASS 후 인수. 코드 0줄 추가, 공유 문서만 갱신. T05 ↔ T06(세션 11) 통합은 사실상 완료.
@@ -36,8 +37,9 @@
 5. ~~**DB 마이그레이션** — `community_boards`, `community_posts`, `community_comments`, `community_post_likes`~~ → **세션 9(T01) 완료** (`supabase/migrations/20260523_create_community_tables.sql`). 실 DB 적용은 컨덕터 또는 별도 작업
 6. ~~**익명 비밀번호 해싱** — bcrypt 권장~~ → **세션 10(T07) 완료** (`lib/community/auth.ts`, PARTIAL: `npm install bcryptjs @types/bcryptjs` 후속 필요)
 7. ~~**IP 마스킹 미들웨어** — `X-Forwarded-For` 앞 2옥텟만 저장~~ → **세션 10(T07) 완료** (`lib/community/ip-mask.ts` + `middleware.ts` 머지, 3종 헤더 주입)
-8. **API 라우트** — `/api/board/[slug]`, `/api/board/[slug]/[postId]`, `/api/community/comment`, `/api/community/like` — T12 영역
-9. **더미 → 실데이터** — `lib/community/mock-*` → Supabase 연동 — T02 + T15 영역
+8. **API 라우트** — `/api/board/[slug]`, `/api/board/[slug]/[postId]`, `/api/community/comment`, `/api/community/like` — T12 영역 (워킹트리에 다른 일꾼 untracked 잔존)
+9. **더미 → 실데이터** — `lib/community/mock-*` → Supabase 연동 — T15 영역
+   - ~~**community 시드 스크립트** (`scripts/seed-community.ts`, 156행 적재)~~ → **세션 16(T02) 완료**. 사용자가 `npx tsx scripts/seed-community.ts` 직접 실행 (T01 SQL 적용 후). 기존 행 있으면 `--force` 필요
    - ~~**FngGaugeWidget 하드코딩(`value=72, prevValue=68`) → `/api/fng` hydrate**~~ → **세션 12(T04) 산출물 준비 완료** (`/api/fng`). 메인페이지 통합은 T15에서 수행 (502 시 fallback UI 권장)
 
 ### 뉴스 룰베이스 분류 (완료)
