@@ -45,7 +45,7 @@ export default function BlogComments({ slug }: BlogCommentsProps) {
     script.setAttribute('data-reactions-enabled', '1');
     script.setAttribute('data-emit-metadata', '0');
     script.setAttribute('data-input-position', 'top');
-    script.setAttribute('data-theme', 'dark_dimmed');
+    script.setAttribute('data-theme', 'light');
     script.setAttribute('data-lang', lang === 'ko' ? 'ko' : 'en');
     script.setAttribute('data-loading', 'lazy');
     script.crossOrigin = 'anonymous';

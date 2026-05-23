@@ -3,6 +3,11 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { extractClientIp, maskIp, hashIp } from '@/lib/community/ip-mask'
 
+// Node.js 런타임 명시 (R2/T05, 2026-05-23):
+//   ip-mask.ts가 `node:crypto`(hashIp)를 import → Edge 런타임에서 빌드 경고 발생.
+//   미들웨어를 Node.js 런타임으로 고정해 경고를 해소한다. (인증/헤더 주입 로직 불변)
+export const runtime = 'nodejs'
+
 // 익명 게스트 IP 헤더 주입 대상 경로 (R1 2026-05-23, T07)
 const IP_INJECT_PATHS = ['/board', '/api/board', '/api/community']
 

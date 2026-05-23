@@ -2,7 +2,7 @@
 
 | 항목 | 값 |
 |------|-----|
-| **마지막 세션** | 2026-05-23 (세션 22 — R2/T04 차트 라이트화, 4파일: CryptoChart·StockChart·DetailedChart·hero-chart 하드코딩 다크 → `getChartTheme("light")`+`getCandleColors("kr")`. 컨덕터 21 점유 후 22, 병렬 R2 충돌 시 정정) |
+| **마지막 세션** | 2026-05-23 (세션 23 — R2/T05 인프라 마무리, 3파일: `app/page.tsx` cookies 비의존 anon 클라이언트로 `/` 정적 ISR화(ƒ→○) · `middleware.ts` `runtime='nodejs'`로 node:crypto 경고 해소 · `BlogComments.tsx` Giscus light. 지휘자 21·T04 22 점유 → 23 채택, 병렬 R2 충돌 시 정정) |
 | **작업 내용** | 사용자 R2-T04 발사. TradingView Lightweight Charts 4종의 하드코딩 다크 색상(#1E1E1E 배경·#D9D9D9 텍스트·#2B2B43 그리드·#26a69a/#ef5350 캔들)을 `lib/chart/theme.ts`(T08 SOT) 헬퍼로 교체. 각 파일 **모듈 레벨 상수** `CHART_THEME=getChartTheme('light')`/`CANDLE_COLORS=getCandleColors('kr')` 1회 평가 후 `createChart(el,{...CHART_THEME, timeScale:{...CHART_THEME.timeScale, timeVisible:true}})` + `addSeries(CandlestickSeries,{...CANDLE_COLORS, borderVisible:false})`. 4종 모두 한국식 빨↑(#ba1a1a)/파↓(#0050cb) — StockChart도 한국 투자자 관례로 'kr' 통일(US 필요 시 'us' 교체). 미사용된 `ColorType` import 제거, `colors` prop 다크 기본값 제거(인터페이스 유지). **의도적 보존(범위 밖)**: 볼륨 막대·MACD 히스토그램 방향 색(녹↑/빨↓, 캔들과 불일치 — 후속 KR 정렬 권장), RSI/MACD/MA/BB 라인 색(데이터 식별), CSS 오버레이(hero `text-white` 등 R1 이전 잔재). 데이터 로직 무변경, 색상/테마만. |
 | **브랜치** | main |
 | **빌드 상태** | ✅ `npx tsc --noEmit` 0 에러 / `grep getChartTheme\|getCandleColors components/` **4/4 파일** / 다크 리터럴(#1E1E1E·#2B2B43·#D9D9D9) 잔여 **0** / `npx eslint`(4파일) 신규 이슈 0(기존 `prefer-const`/`lang` deps 경고만) / `npm run build` Compiled successfully(전체 라우트, T08 시점 bcryptjs 이슈 R1에서 해소) |
@@ -13,6 +13,7 @@
 
 | 날짜 | 작업 | 결과 |
 |------|------|------|
+| 2026-05-23 | R2/T05 — 인프라 마무리 (세션 23, 일꾼) | 사용자 R2-T05 발사(배너는 R2-T02 표시 → 사용자 지시 우선). R1 잔여 인프라 3건: **(1)** `app/page.tsx`에 cookies 비의존 anon 클라이언트 로더(`loadMainPageData`+매퍼 4종) 내장 → `/` 렌더 모드 **`ƒ`→`○` 정적 ISR 전환**(supabase-js `global.fetch`에 `next.revalidate=300` 주입 필수, 라우트 revalidate는 ticker 60s 최솟값으로 `1m`). **(2)** `middleware.ts` `export const runtime = 'nodejs'` → `node:crypto`(ip-mask) edge 경고 해소(matcher·헤더·인증 로직 불변). **(3)** `BlogComments.tsx` Giscus `data-theme` `dark_dimmed`→`light`. queries.ts·server.ts·ip-mask(R1 read-only) 미수정 — fetchMainPageData 미사용화 부수효과는 지휘자 SSOT 환원 후속 권장(handover §6). tsc 0 / build PASS(`┌ ○ /`·경고 부재). handover `2026-05-23-R2-T05-infra-finish.md` 신규 |
 | 2026-05-23 | R2/T04 — 차트 라이트화 (세션 22, 일꾼) | 사용자 R2-T04 발사(배너는 R2-T03 표시 → 사용자 지시 우선). TradingView 차트 4종(CryptoChart·StockChart·DetailedChart·hero-chart) 하드코딩 다크(#1E1E1E/#D9D9D9/#2B2B43/#26a69a·#ef5350) → `lib/chart/theme.ts`(T08) `getChartTheme('light')`+`getCandleColors('kr')` 교체. 모듈 레벨 상수 + 테마 객체 spread(timeScale/crosshair 머지로 borderColor 보존). 4종 모두 한국식 빨↑/파↓. 미사용 `ColorType` import·`colors` prop 다크 기본값 제거. 볼륨/MACD 히스토그램 방향 색(녹/빨)·RSI/MACD/MA/BB 라인·CSS 오버레이는 범위 밖 보존(후속 권장 handover 명시). tsc 0 / grep 4·4·0 / eslint 신규 0 / build PASS. handover `2026-05-23-R2-T04-chart-lightify.md` 신규 |
 | 2026-05-23 | R1/T09 — 블로그 라이트화 (세션 20, 일꾼) | 사용자 T09 발사(3번째 터미널). `app/blog` 4페이지 + `components/Blog` 11컴포넌트(editor 제외) 다크 톤 → 라이트 토큰 교체(18파일, 클래스 only). 코드블록(`prose-pre`)·복사버튼·`text-green-400`·Giscus theme 의도적 보존. BlogEditor 사용처 3곳 `tone="light"` 명시. tsc 0 / 잔여 다크 grep 0건 / 라이트 토큰 70건 / build PASS(blog 4라우트). 빌드 첫 시도 `.next\lock` 점유 → 해제 후 재시도 PASS. handover `2026-05-23-R1-T09-blog-lightify.md` 신규 |
 | 2026-05-23 | R1/T11 — 시그널·마켓·주식마켓 라이트화 (세션 19, 일꾼) | 사용자 T11 발사(2번째 터미널). `app/signal·market·stock-market` + `components/Signal·Market·Stock` 다크 톤(gray/black) → 라이트 토큰 교체. 수정 6파일 `git diff --stat` 45/45 대칭(순수 클래스). RSI 히트맵 셀 색상·강조 뱃지·정보 카드 의미 컬러 보존. 수정 불필요 4파일(다크톤 부재 3 + 이미 shadcn 토큰 1). 차트 옵션 호출 영역 외(T10 동일). tsc 0 / build PASS. handover `2026-05-23-R1-T11-signal-market-lightify.md` 신규. 본래 18 시작 → T15 슬롯 충돌로 19 정정 |
@@ -68,6 +69,7 @@
 | 19 | 2026-05-23 | R1/T11 일꾼 — 시그널·마켓·주식마켓 라이트화 (6파일 45/45 대칭, 18→19 정정) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T11-signal-market-lightify.md) |
 | 20 | 2026-05-23 | R1/T09 일꾼 — 블로그 라이트화 (app/blog 4 + components/Blog 11 + BlogEditor tone 3, 18파일) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T09-blog-lightify.md) |
 | 22 | 2026-05-23 | R2/T04 일꾼 — 차트 라이트화 (CryptoChart·StockChart·DetailedChart·hero-chart 4파일, getChartTheme('light')+getCandleColors('kr')) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R2-T04-chart-lightify.md) |
+| 23 | 2026-05-23 | R2/T05 일꾼 — 인프라 마무리 (`/` ƒ→○ ISR anon 클라이언트 · middleware runtime=nodejs · Giscus light, 3파일) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-session23-r2t05-infra.md) |
 
 ## v2.0 피벗 핵심 (2026-05-10 결정)
 
