@@ -4,6 +4,7 @@
 
 ## 최근 완료된 작업
 
+- **세션 13 (2026-05-23)**: R1/T05 일꾼 (검증·인수) — 다른 T05 일꾼이 이미 워킹트리에 생성한 산출물 4종(`lib/news/classifier.ts` 144 LoC, `lib/news/keyword-dict.ts` 159 LoC, `__tests__/lib/news-classifier.test.ts` 86 LoC/8 tests, handover 229 LoC)을 작업 지시서 사양과 1:1 대조 + TS·런타임·Vitest·ESLint 4종 검증 PASS 후 인수. 코드 0줄 추가, 공유 문서만 갱신. T05 ↔ T06(세션 11) 통합은 사실상 완료.
 - **세션 12 (2026-05-23)**: R1/T04 일꾼 — Alternative.me Fear & Greed Index 프록시. `lib/community/fng.ts` 신규(`fetchFng()` + `FngSnapshot` 인터페이스 + 1시간 모듈 메모리 캐시 + `next: { revalidate: 3600 }`) + `app/api/fng/route.ts` 신규(`GET /api/fng`, 실패 시 502). `_API_REFERENCE.md`에 `### GET /api/fng` 항목 append. `_ENV_REFERENCE.md` FNG 섹션은 T07 커밋(`30350f5`)이 이미 동일 텍스트를 포함하고 있어 idempotent(git diff 0). 라이브 fetch 검증 PASS(`value=28, classification="Fear"`). **T15 메모**: 메인페이지 `FngGaugeWidget`에서 `/api/fng` 호출, 502 시 fallback UI(현재 하드코딩 72/68 재사용 가능) 권장. ENV 추가 없음·`FngGaugeWidget.tsx`/`app/page.tsx` 미수정.
 - **세션 11 (2026-05-23)**: R1/T06 일꾼 — 뉴스 분류 4차원 DB·API 통합. `supabase/migrations/20260523_alter_news_classify.sql` 신규 (`category` text + 8값 enum CHECK / `importance_score` smallint 1~10 / `sentiment_score` integer, 인덱스 2). `app/api/admin/news-crawl/route.ts`에 T05 `classify()` 호출 통합하여 RSS item 파싱 직후 4차원 결과를 적재 (기존 인라인 symbol 매칭 7줄 제거). `app/api/news/route.ts`에 `?category=` / `?minImportance=` 쿼리 파라미터 + 응답 필드 4종(camelCase) 추가. T15가 메인 NewsRow에서 소비. 실 DB 적용은 컨덕터 또는 별도 작업.
 - **세션 10 (2026-05-23)**: R1/T07 일꾼 — 익명 게스트 bcrypt 해시/검증 (`lib/community/auth.ts`) + IP 마스킹/HMAC 해시 (`lib/community/ip-mask.ts`) + 기존 `middleware.ts`에 IP 헤더 3종(`x-client-ip`/`-masked`/`-hash`) 주입 로직 머지 + matcher에 `/api/board/:path*`, `/api/community/:path*` 추가. T12(board API)가 의존할 헤더 명세 handover에 코드 예시로 명시. **PARTIAL**: `npm install bcryptjs @types/bcryptjs` 후속 필요.
@@ -39,7 +40,7 @@
 
 ### 뉴스 룰베이스 분류 (완료)
 
-10. ~~**분류 로직** — `lib/news/classifier.ts`, `lib/news/keyword-dict.ts`~~ → **T05 완료** (다른 터미널 세션)
+10. ~~**분류 로직** — `lib/news/classifier.ts`, `lib/news/keyword-dict.ts`~~ → **T05 완료** (세션 13에서 검증·인수 확정, Vitest 8/8 PASS)
 11. ~~**`news` 테이블 확장** — `category`, `importance_score` 컬럼 추가~~ → **세션 11(T06) 완료** (`sentiment_score`도 함께 추가 + 인덱스 2)
 12. ~~**크롤러 통합** — `app/api/admin/news-crawl/route.ts`에 분류 호출~~ → **세션 11(T06) 완료** (인라인 매칭 제거 + `classify()` 호출 통합)
 
