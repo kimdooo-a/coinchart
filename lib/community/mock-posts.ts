@@ -218,6 +218,8 @@ export function getTotalPages(slug: BoardSlug, perPage = 30): number {
   return Math.max(1, Math.ceil(regular.length / perPage));
 }
 
+// R1/T15(2026-05-23): 메인페이지 베스트 섹션은 community_posts 실데이터(lib/community/queries.ts)로 전환됨.
+// 현재 import하는 페이지 없음 — R2에서 BOARD_META/MOCK_POSTS 등과 함께 일괄 정리 예정.
 export function getBestPosts(limit = 30): MockPost[] {
   // 모든 게시판에서 hot/likes 상위
   const all = (Object.keys(MOCK_POSTS) as BoardSlug[]).flatMap((s) => MOCK_POSTS[s]);

@@ -159,7 +159,11 @@ export function getCoin(slug: string): CoinDetail | null {
   return COINS[slug.toLowerCase()] ?? null;
 }
 
-/** 메인 시세 위젯 / 시세 스트립 */
+/**
+ * 시세 위젯 / 시세 스트립용 더미.
+ * R1/T15(2026-05-23): 메인페이지(app/page.tsx)는 실데이터(lib/community/queries.ts)로 전환되어 더 이상 사용하지 않음.
+ * /news, /coin/[symbol], /board/* 사이드바가 아직 사용 중 → 보존. R2에서 실데이터 전환 후 정리 예정.
+ */
 export const TICKER_LIST: TickerItem[] = [
   { symbol: "BTC", name: "비트코인", price: 132400, changePct: 1.58, href: "/coin/btc" },
   { symbol: "ETH", name: "이더리움", price: 4520, changePct: -0.5, href: "/coin/eth" },
@@ -173,6 +177,7 @@ export const TICKER_LIST: TickerItem[] = [
   { symbol: "AAPL", name: "애플", price: 248, changePct: 0.3, href: "/analysis/stock/AAPL" },
 ];
 
+// R1/T15: 메인페이지는 community_hot_issues RPC 실데이터로 전환됨. /news·/coin·/board 사이드바가 아직 사용 → 보존(R2 정리 예정).
 export const HOT_ISSUES = [
   { rank: 1, keyword: "비트코인 ETF", trend: "up" as const, delta: 2 },
   { rank: 2, keyword: "이더리움 업그레이드", trend: "up" as const, delta: 1 },
@@ -186,6 +191,7 @@ export const HOT_ISSUES = [
   { rank: 10, keyword: "단타 수익", trend: "same" as const },
 ];
 
+// R1/T15: 메인페이지는 blog_posts(published) 실데이터로 전환됨. /news·/coin·/board 사이드바가 아직 사용 → 보존(R2 정리 예정).
 export const OFFICIAL_POSTS = [
   { slug: "btc-cycle-analysis", title: "비트코인 사이클 분석 가이드 (2026)", date: "2026-05-08" },
   { slug: "exchange-comparison", title: "거래소 비교 정리 (수수료·보안)", date: "2026-05-05" },

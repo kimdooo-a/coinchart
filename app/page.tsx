@@ -1,30 +1,127 @@
-"use client";
-
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import BoardRow, { BoardTableHeader } from "@/components/community/BoardRow";
+import BoardRow, { BoardTableHeader, type BoardPost } from "@/components/community/BoardRow";
 import NewsRow from "@/components/community/NewsRow";
-import PriceTickerWidget from "@/components/community/widgets/PriceTickerWidget";
-import HotIssueWidget from "@/components/community/widgets/HotIssueWidget";
+import type { NewsHeadlineItem } from "@/components/community/NewsHeadlineCard";
+import PriceTickerWidget, {
+    type TickerItem,
+} from "@/components/community/widgets/PriceTickerWidget";
+import HotIssueWidget, {
+    type HotIssue,
+    type HotIssueTrend,
+} from "@/components/community/widgets/HotIssueWidget";
 import FngGaugeWidget from "@/components/community/widgets/FngGaugeWidget";
-import OfficialPostsWidget from "@/components/community/widgets/OfficialPostsWidget";
+import OfficialPostsWidget, {
+    type OfficialPost,
+} from "@/components/community/widgets/OfficialPostsWidget";
 import ToolsShortcutWidget from "@/components/community/widgets/ToolsShortcutWidget";
 import FooterSection from "@/components/footer-section";
-import { TICKER_LIST, HOT_ISSUES, OFFICIAL_POSTS, COINS } from "@/lib/community/mock-coins";
 import {
-    BOARD_META,
-    MOCK_POSTS,
-    getBestPosts,
-    type BoardSlug,
-} from "@/lib/community/mock-posts";
-import { MOCK_NEWS } from "@/lib/community/mock-news";
+    fetchMainPageData,
+    COIN_META,
+    type MainBestPost,
+    type MainNewsItem,
+    type MainHotIssue,
+    type MainOfficialPost,
+} from "@/lib/community/queries";
+import type { CoinTicker } from "@/types/coins";
 import { cn } from "@/lib/utils";
 
-const COIN_ROOM_CARDS = ["btc", "eth", "xrp", "sol", "altcoin", "kimp"] as const;
+// 5분 ISR (핫이슈 RPC·뉴스·게시글 캐시 정책과 정렬)
+export const revalidate = 300;
 
-export default function HomePage() {
-    const bestPosts = getBestPosts(30);
-    const latestNews = MOCK_NEWS.slice(0, 10);
+const BOARD_PREVIEW_META: Record<string, { name: string; emoji: string }> = {
+    free: { name: "자유게시판", emoji: "💬" },
+    market: { name: "시세토론", emoji: "📈" },
+    info: { name: "정보공유", emoji: "📚" },
+};
+
+const HOT_TREND_MAP: Record<MainHotIssue["trend"], HotIssueTrend> = {
+    UP: "up",
+    DOWN: "down",
+    NEW: "new",
+    FLAT: "same",
+};
+
+// ─── Main* → 컴포넌트 props 변환 헬퍼 (디자인 회귀 방지: 기존 JSX 계약 유지) ───
+
+function toTickerItem(t: CoinTicker): TickerItem {
+    const meta = COIN_META[t.baseSymbol];
+    return {
+        symbol: t.baseSymbol,
+        name: meta?.nameKo ?? t.baseSymbol,
+        price: t.price,
+        changePct: t.changePct,
+        href: meta?.href ?? `/coin/${t.baseSymbol.toLowerCase()}`,
+    };
+}
+
+function toBoardPost(p: MainBestPost, index: number): BoardPost {
+    return {
+        id: index + 1,
+        number: index + 1,
+        title: p.title,
+        author: p.authorName,
+        // "211.34.*.*" → "211.34" (BoardRow가 (앞2옥텟.*.*)로 표시)
+        authorIp: p.authorMasked ? p.authorMasked.replace(/\.\*\.\*$/, "") : undefined,
+        createdAt: formatRelativeTime(p.createdAt),
+        views: p.viewCount,
+        likes: p.likeCount,
+        commentCount: p.commentCount,
+        isNotice: p.isNotice,
+        isHot: p.isHot,
+        category: p.category && p.category !== "전체" ? p.category : undefined,
+    };
+}
+
+function toNewsItem(n: MainNewsItem): NewsHeadlineItem & { coinTag?: string } {
+    return {
+        id: n.id,
+        title: n.title,
+        summary: "",
+        sentiment: n.sentiment,
+        category: n.category,
+        source: n.source ?? "출처 미상",
+        timeLabel: formatRelativeTime(n.pubDate),
+        importance: n.importance,
+        link: n.link,
+        discussionHref: "/board/info",
+        coinTag: n.coinTag ?? undefined,
+    };
+}
+
+function toHotIssue(h: MainHotIssue): HotIssue {
+    return {
+        rank: h.rank,
+        keyword: COIN_META[h.symbol]?.nameKo ?? h.symbol,
+        trend: HOT_TREND_MAP[h.trend],
+        href: COIN_META[h.symbol]?.href,
+    };
+}
+
+function toOfficialPost(o: MainOfficialPost): OfficialPost {
+    return { slug: o.slug, title: o.title, date: o.createdAt.slice(0, 10) };
+}
+
+function formatRelativeTime(iso: string): string {
+    const then = new Date(iso).getTime();
+    if (Number.isNaN(then)) return "";
+    const diffMin = Math.floor((Date.now() - then) / 60000);
+    if (diffMin < 1) return "방금 전";
+    if (diffMin < 60) return `${diffMin}분전`;
+    const diffH = Math.floor(diffMin / 60);
+    if (diffH < 24) return `${diffH}시간전`;
+    const diffD = Math.floor(diffH / 24);
+    if (diffD < 7) return `${diffD}일전`;
+    return `${Math.floor(diffD / 7)}주전`;
+}
+
+export default async function HomePage() {
+    const data = await fetchMainPageData();
+
+    const tickerItems = data.tickers.map(toTickerItem);
+    const bestPosts = data.bestPosts;
+    const latestNews = data.latestNews;
 
     return (
         <main className="flex-1 bg-surface-container-low">
@@ -33,7 +130,7 @@ export default function HomePage() {
                 <div className="max-w-[1200px] mx-auto flex items-center h-9">
                     <div className="flex items-center overflow-x-auto no-scrollbar w-full">
                         <div className="flex items-center gap-6 px-4 ticker-scroll whitespace-nowrap">
-                            {[...TICKER_LIST, ...TICKER_LIST].map((t, i) => {
+                            {[...tickerItems, ...tickerItems].map((t, i) => {
                                 const isUp = t.changePct >= 0;
                                 return (
                                     <Link
@@ -82,15 +179,21 @@ export default function HomePage() {
                                 </div>
                             </header>
                             <BoardTableHeader />
-                            <div className="divide-y divide-outline-variant">
-                                {bestPosts.map((p, i) => (
-                                    <BoardRow
-                                        key={p.id}
-                                        post={{ ...p, number: i + 1 }}
-                                        href={`/board/${p.boardSlug}/${p.id}`}
-                                    />
-                                ))}
-                            </div>
+                            {bestPosts.length > 0 ? (
+                                <div className="divide-y divide-outline-variant">
+                                    {bestPosts.map((p, i) => (
+                                        <BoardRow
+                                            key={p.id}
+                                            post={toBoardPost(p, i)}
+                                            href={`/board/${p.boardSlug}/${p.id}`}
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="px-4 py-10 text-center text-body-sm text-on-surface-variant">
+                                    아직 게시글이 없습니다. 첫 글을 작성해보세요!
+                                </div>
+                            )}
                         </section>
 
                         {/* 최신 뉴스 */}
@@ -101,17 +204,24 @@ export default function HomePage() {
                                     더보기 ›
                                 </Link>
                             </header>
-                            <div className="divide-y divide-outline-variant">
-                                {latestNews.map((n) => <NewsRow key={n.id} item={n} />)}
-                            </div>
+                            {latestNews.length > 0 ? (
+                                <div className="divide-y divide-outline-variant">
+                                    {latestNews.map((n) => (
+                                        <NewsRow key={n.id} item={toNewsItem(n)} />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="px-4 py-10 text-center text-body-sm text-on-surface-variant">
+                                    표시할 뉴스가 없습니다.
+                                </div>
+                            )}
                         </section>
 
                         {/* 게시판 미리보기 (3컬럼) */}
                         <section>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {(["free", "market", "info"] as BoardSlug[]).map((slug) => {
-                                    const meta = BOARD_META[slug];
-                                    const previewPosts = MOCK_POSTS[slug].filter((p) => !p.isNotice).slice(0, 5);
+                                {data.boardPreviews.map(({ slug, posts }) => {
+                                    const meta = BOARD_PREVIEW_META[slug];
                                     return (
                                         <div
                                             key={slug}
@@ -119,7 +229,7 @@ export default function HomePage() {
                                         >
                                             <header className="px-3 py-2.5 border-b border-outline-variant flex items-center justify-between">
                                                 <h3 className="text-body-sm font-bold">
-                                                    {meta.emoji} {meta.name}
+                                                    {meta?.emoji} {meta?.name}
                                                 </h3>
                                                 <Link
                                                     href={`/board/${slug}`}
@@ -128,24 +238,30 @@ export default function HomePage() {
                                                     더보기 <ChevronRight className="w-3 h-3" />
                                                 </Link>
                                             </header>
-                                            <ul className="divide-y divide-outline-variant">
-                                                {previewPosts.map((p) => (
-                                                    <li key={p.id}>
-                                                        <Link
-                                                            href={`/board/${slug}/${p.id}`}
-                                                            className="block px-3 py-2 hover:bg-surface-container-low transition-colors"
-                                                        >
-                                                            <div className="text-body-sm truncate">{p.title}</div>
-                                                            <div className="text-meta text-on-surface-variant mt-0.5">
-                                                                {p.createdAt}
-                                                                {p.commentCount && p.commentCount > 0 && (
-                                                                    <span className="ml-2 text-primary">[{p.commentCount}]</span>
-                                                                )}
-                                                            </div>
-                                                        </Link>
-                                                    </li>
-                                                ))}
-                                            </ul>
+                                            {posts.length > 0 ? (
+                                                <ul className="divide-y divide-outline-variant">
+                                                    {posts.map((p) => (
+                                                        <li key={p.id}>
+                                                            <Link
+                                                                href={`/board/${slug}/${p.id}`}
+                                                                className="block px-3 py-2 hover:bg-surface-container-low transition-colors"
+                                                            >
+                                                                <div className="text-body-sm truncate">{p.title}</div>
+                                                                <div className="text-meta text-on-surface-variant mt-0.5">
+                                                                    {formatRelativeTime(p.createdAt)}
+                                                                    {p.commentCount > 0 && (
+                                                                        <span className="ml-2 text-primary">[{p.commentCount}]</span>
+                                                                    )}
+                                                                </div>
+                                                            </Link>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            ) : (
+                                                <div className="px-3 py-6 text-center text-meta text-on-surface-variant">
+                                                    아직 글이 없습니다
+                                                </div>
+                                            )}
                                         </div>
                                     );
                                 })}
@@ -156,14 +272,12 @@ export default function HomePage() {
                         <section>
                             <h2 className="text-body-base font-bold mb-3">🪙 코인룸</h2>
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                                {COIN_ROOM_CARDS.map((slug) => {
-                                    const c = COINS[slug];
-                                    if (!c) return null;
+                                {data.coinCards.map((c) => {
                                     const isUp = c.changePct >= 0;
                                     return (
                                         <Link
-                                            key={slug}
-                                            href={`/coin/${slug}`}
+                                            key={c.slug}
+                                            href={`/coin/${c.slug}`}
                                             className="bg-surface-container-lowest border border-outline-variant rounded-md p-3 hover:border-primary hover:bg-surface-container-low transition-colors"
                                         >
                                             <div className="flex items-center gap-2 mb-1">
@@ -199,10 +313,10 @@ export default function HomePage() {
 
                     {/* Sidebar */}
                     <aside className="w-full lg:w-[300px] flex-shrink-0 space-y-4">
-                        <PriceTickerWidget items={TICKER_LIST.slice(0, 8)} />
-                        <HotIssueWidget items={HOT_ISSUES} />
-                        <FngGaugeWidget value={72} prevValue={68} />
-                        <OfficialPostsWidget posts={OFFICIAL_POSTS} />
+                        <PriceTickerWidget items={tickerItems.slice(0, 8)} />
+                        <HotIssueWidget items={data.hotIssues.map(toHotIssue)} />
+                        <FngGaugeWidget value={data.fng.value} prevValue={data.fng.prevValue} />
+                        <OfficialPostsWidget posts={data.officialPosts.map(toOfficialPost)} />
                         <ToolsShortcutWidget />
                     </aside>
                 </div>
