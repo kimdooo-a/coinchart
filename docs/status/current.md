@@ -2,17 +2,18 @@
 
 | 항목 | 값 |
 |------|-----|
-| **마지막 세션** | 2026-05-23 (세션 16 — R1/T02 일꾼 community 시드 스크립트) |
-| **작업 내용** | 사용자 T09 발사 명령 → SessionStart hook 마커 T02 → hook 우선 원칙으로 T02 채택 (R1 5번째 사례). `scripts/seed-community.ts` 신규 작성 (~180줄). `MOCK_POSTS` 3 보드 × 52행 = 156행을 `community_posts` 스키마로 매핑 + 100행 chunk INSERT + `--force` 가드 + bcrypt 1회 공유 해시 + 랜덤 `created_at`(0~30일). 검증 4/4 PASS (tsc/grep27회/eslint/tsx import). 실 DB INSERT는 사용자 별도 실행 (`npx tsx scripts/seed-community.ts`). |
+| **마지막 세션** | 2026-05-23 (세션 17 — R1/T13 hot-issues-rpc, 코드 사전 완료·handover 신규) |
+| **작업 내용** | 사용자 T13 발사 명령 vs SessionStart hook 마커 T11(시각 페이지 라이트화) — 사용자 명시 지시 우선으로 T13 채택. T13 코드 산출물(`supabase/migrations/20260523_create_hot_issues_rpc.sql` + `app/api/coins/hot-issues/route.ts` + `_API_REFERENCE.md` L645~681 append)이 이전 세션에 이미 완성·존재 — 코드 0줄 추가, handover `docs/handover/2026-05-23-R1-T13-hot-issues-rpc.md`만 본 세션이 신규 작성(157줄, T15 인계 trend/keyword/delta/graceful-degrade 4종 명시). 검증 4종 PASS(tsc/eslint/grep 2개), npm run build 사후 갱신 결과도 Compiled OK 확인. 본래 16으로 시작했으나 T02 슬롯 충돌로 17 정정. |
 | **브랜치** | main |
-| **빌드 상태** | ✅ `npx tsc --noEmit` 출력 없음(전역 0 에러) — bcryptjs 설치 상태 유지. ESLint 0 에러 |
-| **마지막 커밋** | (세션 16 cs commit 예정) — 본 세션은 T02 산출물 2개 + cs 문서 4종만 책임. R1 다른 일꾼(T08/T10/T13/T14) 미커밋 산출물은 컨덕터 통합 대기 |
+| **빌드 상태** | ✅ `npx tsc --noEmit` 0 에러 / ESLint 0 에러 / `npm run build` Compiled successfully (35.4s, `/api/coins/hot-issues` 동적 라우트 등록 확인) |
+| **마지막 커밋** | (세션 17 cs commit 예정) — 본 일꾼 책임 산출물 T13 3종(SQL + 라우트 + handover) + cs 5종만 명시적 staging. **`_API_REFERENCE.md`는 T12 미커밋 board/community API 섹션(170줄)과 본 세션 T13 섹션(38줄)이 동일 파일에 혼재** → 단일 워킹트리 변경분을 분리 staging 불가, **컨덕터 통합 커밋에 위임**. R1 다른 일꾼 잔존 산출물(T02 seed-community / T08 후속 BlogEditor / T10 분석 페이지 / T12 board API / T14 후속 헤더) + `.claude/hooks/`·`docs/orchestration/`·`docs/solutions/` 시스템 미커밋도 컨덕터 통합 대기 |
 | **프로젝트 방향성** | **v2.0 커뮤니티 피벗** ([PROJECT_DIRECTION.md](../PROJECT_DIRECTION.md)) |
 
 ## 최근 작업 이력
 
 | 날짜 | 작업 | 결과 |
 |------|------|------|
+| 2026-05-23 | R1/T13 — hot-issues 집계 RPC + API (세션 17, 일꾼) | 사용자 T13 발사 + SessionStart hook 마커 T11 → 사용자 명시 우선 채택. T13 코드 산출물 일체(SQL `community_hot_issues(int,int)` RPC + `/api/coins/hot-issues` 라우트 + `_API_REFERENCE.md` append)가 이전 세션에 이미 완성·존재 발견. 코드 0줄 추가, handover 157줄만 본 세션 신규 작성(T15 인계 trend `FLAT→same` 매핑·keyword 사전·delta 계산·502 폴백 4종). tsc/eslint/grep 2개 PASS, build Compiled OK 사후 인지. 본래 16 시작 → T02 슬롯 충돌로 17 정정 |
 | 2026-05-23 | R1/T02 — community 시드 스크립트 (세션 16, 일꾼) | 사용자 T09 발사 + SessionStart hook T02 → hook 우선 채택 (R1 5번째). `scripts/seed-community.ts` 신규 (~180줄). MOCK_POSTS 3 보드 × 52행 = 156행을 community_posts 스키마로 매핑 + 100행 chunk INSERT + `--force` 가드 + bcrypt 1회 공유 해시 + 랜덤 created_at(0~30일). 검증 4/4 PASS. 실 DB INSERT는 사용자 별도 실행 |
 | 2026-05-23 | R1/T03 — 사후 검증 전용 세션 (세션 15, 일꾼) | 사용자 T02 발사 + SessionStart hook T03 → hook 우선 채택. T03 산출물 일체(`types/coins.ts`/`lib/supabase/crypto.ts` append/`app/api/coins/ticker/route.ts` + references 2종)가 세션 8에 이미 완료/커밋 상태 발견. 신규 코드 0건, spec 1:1 일치 재검증 + tsc/eslint 0 에러 (bcryptjs 누락 해소도 부수 확인) |
 | 2026-05-23 | R1/T07 — 검증 전용 세션 (세션 14, 일꾼) | 사용자 T07 발사 명령 → 산출물 일체가 세션 10(`30350f5`)에 사전 완료 머지된 상태 발견. 신규 코드 0건, spec 1:1 일치 재확인 + PARTIAL(bcryptjs 미설치) 유지 보고. 본래 13으로 시작 → 병렬 슬롯 충돌로 14로 정정 |
@@ -58,6 +59,7 @@
 | 14 | 2026-05-23 | R1/T07 검증 전용 — 사전 완료 확인 + 보고 (코드 변경 0건) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-session14-t07-verification.md) |
 | 15 | 2026-05-23 | R1/T03 사후 검증 전용 — 사전 완료 확인 + 보고 (코드 변경 0건) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-session15-t03-reverify.md) |
 | 16 | 2026-05-23 | R1/T02 일꾼 — community 시드 스크립트 (`scripts/seed-community.ts`, 156행) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T02-community-seed.md) |
+| 17 | 2026-05-23 | R1/T13 일꾼 — hot-issues RPC + `/api/coins/hot-issues` (코드 사전 완료·handover 신규) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T13-hot-issues-rpc.md) |
 
 ## v2.0 피벗 핵심 (2026-05-10 결정)
 
