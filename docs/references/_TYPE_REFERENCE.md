@@ -481,3 +481,35 @@
   - `isDisabledAutomation: boolean`
   - `isDisabledProGate: boolean`
   - `isDevelopment, isStaging, isProduction: boolean`
+
+---
+
+### CoinTicker / CoinSnapshot (R1 2026-05-23)
+- 파일: `types/coins.ts`
+- 사용: `app/api/coins/ticker/route.ts`, `lib/supabase/crypto.ts`, 메인페이지(T15)
+
+### auth · ip-mask 모듈 (R1 2026-05-23, T07)
+- `lib/community/auth.ts`
+  - `hashGuestPassword(plain: string): Promise<string>` — bcrypt 10 rounds
+  - `verifyGuestPassword(plain: string, hash: string): Promise<boolean>`
+  - `validateGuestNickname(nickname: string): { ok: boolean; reason?: string }` — 2~12자
+- `lib/community/ip-mask.ts`
+  - `extractClientIp(req: { headers: Headers } | Request): string`
+  - `maskIp(ip: string): string` — `211.34.123.45` → `211.34.*.*`
+  - `hashIp(ip: string): string` — HMAC-SHA256 (`IP_HASH_SECRET` 사용)
+- `middleware.ts`가 주입하는 헤더 (T12 board API가 소비):
+  - `x-client-ip` (원본 IP)
+  - `x-client-ip-masked` (게시글 표시용)
+  - `x-client-ip-hash` (추천 dedup용)
+- 적용 경로: `/board/*`, `/api/board/*`, `/api/community/*`
+
+### NewsSentiment / NewsCategory / ClassifyResult (R1 2026-05-23, T05)
+- 파일: `lib/news/classifier.ts`, `lib/news/keyword-dict.ts`
+- 설명: 룰베이스 뉴스 분류기 (AI 미사용). `classify(input)` 단일 진입점이 4차원 산출 → `coinTag`, `category`, `sentiment`, `importance(1~10)`
+- 타입:
+  - `NewsSentiment = "positive" | "negative" | "mixed" | "neutral"`
+  - `NewsCategory = "regulation" | "tech" | "exchange" | "onchain" | "etf" | "altcoin_news" | "macro" | "market"`
+  - `ClassifyInput { title; snippet?; source?; pubDate? }`
+  - `ClassifyResult { coinTag; category; sentiment; importance; sentimentScore; matchedKeywords }`
+- 키워드 사전: COIN_KEYWORDS(8그룹), CATEGORY_KEYWORDS(8그룹), POSITIVE_KEYWORDS(23개), NEGATIVE_KEYWORDS(23개), SOURCE_WEIGHTS(9개)
+- 소비자: T06 (news-crawl 통합), T15 (메인페이지 최신 뉴스 표시)

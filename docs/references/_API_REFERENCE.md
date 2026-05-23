@@ -598,3 +598,16 @@
 | `CONTACT_EMAIL_PASS` | `/api/contact` | 필수 |
 | `CONTACT_EMAIL_TO` | `/api/contact` | 선택 |
 | Supabase 환경변수 | 대부분의 엔드포인트 | 필수 |
+
+---
+
+### GET /api/coins/ticker
+
+R1 (2026-05-23) 추가.
+
+| 쿼리 | 타입 | 기본값 | 설명 |
+|---|---|---|---|
+| symbols | string (CSV) | (기본 10개) | Binance pair (예: BTCUSDT,ETHUSDT) |
+
+응답: `{ tickers: CoinTicker[], ts: number }` — `types/coins.ts#CoinTicker`
+캐시: 60초 (Next revalidate + 메모리 Map)

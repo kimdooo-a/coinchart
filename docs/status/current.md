@@ -2,17 +2,18 @@
 
 | 항목 | 값 |
 |------|-----|
-| **마지막 세션** | 2026-05-10 (세션 7) |
-| **작업 내용** | Stitch 시안 → 코드 적용 1차 (디자인 토큰·공통 컴포넌트·5개 더미 페이지) |
+| **마지막 세션** | 2026-05-23 (세션 8 — R1/T03 일꾼) |
+| **작업 내용** | Binance 24h ticker SSOT 추가 + `/api/coins/ticker` 신규 라우트 (R1 dispatch, T03 단일 일꾼) |
 | **브랜치** | main |
-| **빌드 상태** | ✅ 성공 (Next.js 16.0.7, 41개 라우트 정상) |
-| **마지막 커밋** | f8c24e0 (이번 세션 미커밋, Step 1~3 완료) |
+| **빌드 상태** | ✅ tsc/eslint 통과 (T03 산출물 한정) |
+| **마지막 커밋** | 2cc5c2e (R1 다른 일꾼 T01/T07/T14 산출물은 워킹트리 잔존, 컨덕터 통합 대기) |
 | **프로젝트 방향성** | **v2.0 커뮤니티 피벗** ([PROJECT_DIRECTION.md](../PROJECT_DIRECTION.md)) |
 
 ## 최근 작업 이력
 
 | 날짜 | 작업 | 결과 |
 |------|------|------|
+| 2026-05-23 | R1/T03 — Binance ticker SSOT (세션 8, 일꾼) | `fetchBinanceTickers`/`fetchCommunityTickers` + `/api/coins/ticker` 신규. 60s 이중 캐시. T15가 메인페이지 hydrate에 사용 |
 | 2026-05-10 | Stitch 시안 코드 적용 Step 1~3 (세션 7) | 디자인 토큰 통합(Material 3 + 한국식 빨/파), Noto Sans KR, 공통 컴포넌트 13개, 더미 페이지 6개(홈·뉴스·게시판×3·코인룸), 빌드 통과 |
 | 2026-05-10 | v2.0 방향성 정의 + 디자인 의뢰서 6종 (세션 6) | 코인판×네이버 하이브리드 커뮤니티로 피벗. Stitch 의뢰용 design-brief/ 작성 |
 | 2026-03-08 | 에디터 강화 + HTML 전환 (세션 5) | TipTap 확장 10개, HTML 저장, 자동저장, 뷰모드, 전체화면, DOMPurify |
@@ -36,6 +37,7 @@
 | 5 | 2026-03-08 | 블로그 에디터 강화 + HTML 전환 | [로그](../logs/2026-03.md) | [handover](../handover/2026-03-08-session5-editor-upgrade.md) |
 | 6 | 2026-05-10 | v2.0 방향성 피벗 + 디자인 의뢰서 6종 | [로그](../logs/2026-05.md) | [handover (6+7 통합)](../handover/2026-05-10-session7-stitch-applied.md) |
 | 7 | 2026-05-10 | Stitch 시안 코드 적용 Step 1~3 | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-10-session7-stitch-applied.md) |
+| 8 | 2026-05-23 | R1/T03 일꾼 — Binance ticker SSOT + `/api/coins/ticker` | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T03-ticker-ssot.md) |
 
 ## v2.0 피벗 핵심 (2026-05-10 결정)
 
