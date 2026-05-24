@@ -329,6 +329,31 @@ OR (guest_nickname IS NOT NULL
 
 **CHECK**: `user_id IS NOT NULL OR ip_hash IS NOT NULL`
 
+**분리 집계 RPC (R3 2026-05-24, T07)** — 마이그레이션: `supabase/migrations/20260524_post_likes_rpc.sql`
+- `community_post_like_counts(p_post_id UUID) RETURNS (like_count BIGINT, dislike_count BIGINT)` — value=1 합 / value=-1 합 (각 ≥0). `community_posts.like_count` 컬럼(순합산)과 별개.
+- `community_toggle_post_like(p_post_id UUID, p_user_id UUID, p_ip_hash TEXT, p_value SMALLINT) RETURNS (liked BOOLEAN, like_count BIGINT, dislike_count BIGINT)` — 회원전이 dedup + 원자적 토글 + 분리집계를 단일 트랜잭션 처리. 정책: `docs/rules/community-like-dedup.md`
+
+### community_comment_likes (R3 2026-05-24, T08)
+
+> 댓글 추천/비추 토글 적재. `community_post_likes` 패턴을 `post_id → comment_id`로 치환. 마이그레이션: `supabase/migrations/20260524_comment_likes.sql`
+
+| 컬럼 | 타입 | NULL | 기본값 | 설명 |
+|---|---|---|---|---|
+| `id` | UUID | N (PK) | `gen_random_uuid()` | |
+| `comment_id` | UUID | N (FK→community_comments, ON DELETE CASCADE) | - | |
+| `user_id` | UUID | Y (FK→auth.users, ON DELETE CASCADE) | - | 회원 dedup용 |
+| `ip_hash` | TEXT | Y | - | 익명 dedup용 sha256(전체 IP) |
+| `value` | SMALLINT | N | - | `1`=추천 / `-1`=비추 (CHECK) |
+| `created_at` | TIMESTAMPTZ | N | `now()` | |
+
+**UNIQUE 부분 인덱스** (NULL 안전):
+- `uniq_community_comment_likes_user (comment_id, user_id) WHERE user_id IS NOT NULL`
+- `uniq_community_comment_likes_iphash (comment_id, ip_hash) WHERE ip_hash IS NOT NULL`
+
+**추가 인덱스**: `idx_community_comment_likes_comment (comment_id)` — 집계 조회 가속
+**CHECK**: `user_id IS NOT NULL OR ip_hash IS NOT NULL`
+**카운터**: `community_comments.like_count`를 트리거 `community_sync_comment_like_count()`(value 부호 합산)가 동기화. 집계 RPC 없이 트리거 카운터 방식(post_likes와 동일).
+
 ### 인덱스 요약
 
 | 인덱스 | 대상 | 필터 |
@@ -346,6 +371,7 @@ OR (guest_nickname IS NOT NULL
 | `community_posts` | `is_deleted=false` 공개 | 모두 허용 (CHECK가 강제) | 본인(`author_id=auth.uid()`) | 본인 |
 | `community_comments` | `is_deleted=false` 공개 | 모두 허용 | 본인 | 본인 |
 | `community_post_likes` | 공개 | 모두 허용 | (없음) | 본인 |
+| `community_comment_likes` | 공개 | 모두 허용 | (없음) | 본인 |
 
 > **익명 글의 수정/삭제**는 RLS로 허용하지 않음. 서버 라우트(API)가 비밀번호 검증 후 service_role 키로 처리한다.
 
@@ -357,6 +383,7 @@ OR (guest_nickname IS NOT NULL
 | `trg_community_comments_updated_at` | community_comments | BEFORE UPDATE | `community_touch_updated_at()` |
 | `trg_community_comments_count` | community_comments | AFTER INSERT/UPDATE/DELETE | `community_sync_comment_count()` (soft-delete 토글 포함) |
 | `trg_community_post_likes_count` | community_post_likes | AFTER INSERT/UPDATE/DELETE | `community_sync_like_count()` (value 부호 합산) |
+| `trg_community_comment_likes_count` | community_comment_likes | AFTER INSERT/UPDATE/DELETE | `community_sync_comment_like_count()` (value 부호 합산, R3/T08) |
 
 > `like_count` = `SUM(value)` 누적. 비추(-1)도 합산되므로 음수 가능 — 화면에서 추천만 노출하려면 별도 집계 또는 컬럼 분리 검토(차후).
 

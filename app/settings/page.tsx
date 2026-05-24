@@ -34,7 +34,7 @@ export default function SettingsPage() {
             </div>
 
             <div className="relative z-10 w-full max-w-4xl px-4 py-8">
-                <header className="mb-12 text-center border-b border-white/10 pb-8">
+                <header className="mb-12 text-center border-b border-border pb-8">
                     <div className="flex items-center justify-center gap-3 mb-6">
                         <Settings className="w-10 h-10 text-blue-400" />
                         <h1 className="text-3xl md:text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-cyan-500">
@@ -50,13 +50,13 @@ export default function SettingsPage() {
                     {settingsGroups.map((group) => (
                         <section
                             key={group.title}
-                            className="bg-card/30 backdrop-blur-md border border-white/10 p-8 rounded-3xl shadow-xl transition-all hover:bg-card/40"
+                            className="bg-card/30 backdrop-blur-md border border-border p-8 rounded-3xl shadow-xl transition-all hover:bg-card/40"
                         >
                             <div className="flex items-center gap-4 mb-4">
                                 <group.icon className="w-6 h-6 text-blue-400" />
                                 <h2 className="text-2xl font-bold text-foreground">{group.title}</h2>
                             </div>
-                            <p className="text-gray-300 leading-relaxed">{group.description}</p>
+                            <p className="text-foreground leading-relaxed">{group.description}</p>
                             <p className="mt-4 text-sm text-muted-foreground italic">
                                 {lang === 'ko' ? '구현 예정입니다.' : 'Coming soon.'}
                             </p>

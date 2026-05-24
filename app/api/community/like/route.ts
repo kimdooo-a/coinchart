@@ -1,8 +1,11 @@
 // R1 2026-05-23 / T12 — community like (추천/비추 토글) API
+// R3 2026-05-24 / T07 — 원자적 토글 RPC 전환 + 회원전이 dedup + dislikeCount 분리 응답
 // POST /api/community/like   — body: { postId, value: 1 | -1 }
-//   - 회원: user_id dedup
+//   - 회원: user_id dedup (+ 본인 ip_hash 익명 추천 흡수/정리 = 회원전이 dedup)
 //   - 익명: x-client-ip-hash dedup
-//   - 토글: 같은 value면 삭제, 다른 value면 UPDATE
+//   - 토글: 같은 value면 삭제(취소), 다른 value면 전환(추천↔비추)
+//   - dedup→토글→집계를 단일 RPC(community_toggle_post_like)로 원자 처리
+//   - 응답: { liked, likeCount, dislikeCount } — likeCount=추천 수, dislikeCount=비추 수
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -13,6 +16,13 @@ const isUuid = (s: string): boolean => UUID_REGEX.test(s);
 interface LikeBody {
   postId?: unknown;
   value?: unknown;
+}
+
+// community_toggle_post_like RPC 반환 행 (RETURNS TABLE → 배열 첫 행)
+interface ToggleLikeRow {
+  liked: boolean;
+  like_count: number;
+  dislike_count: number;
 }
 
 export async function POST(req: NextRequest) {
@@ -38,69 +48,35 @@ export async function POST(req: NextRequest) {
   // 게시글 존재 확인
   const { data: post, error: postErr } = await admin
     .from("community_posts")
-    .select("id, is_deleted, like_count")
+    .select("id, is_deleted")
     .eq("id", postId)
     .single();
   if (postErr || !post || post.is_deleted) {
     return NextResponse.json({ error: "게시글 없음" }, { status: 404 });
   }
 
-  let existingQuery = admin
-    .from("community_post_likes")
-    .select("id, value, user_id, ip_hash")
-    .eq("post_id", postId);
-
-  let ipHash: string | null = null;
-  if (user) {
-    existingQuery = existingQuery.eq("user_id", user.id);
-  } else {
-    ipHash = req.headers.get("x-client-ip-hash");
-    if (!ipHash) return NextResponse.json({ error: "추천 식별 헤더 없음" }, { status: 400 });
-    existingQuery = existingQuery.eq("ip_hash", ipHash);
+  // ip_hash: 회원/익명 공통으로 읽음
+  //   - 익명: dedup 식별자(필수)
+  //   - 회원: 본인 익명 추천 흡수(회원전이 dedup)용 (없어도 토글은 동작)
+  const ipHash = req.headers.get("x-client-ip-hash");
+  if (!user && !ipHash) {
+    return NextResponse.json({ error: "추천 식별 헤더 없음" }, { status: 400 });
   }
 
-  const { data: existing } = await existingQuery.maybeSingle();
+  // 원자적 토글 + 회원전이 dedup + 분리 집계 (RPC 단일 트랜잭션)
+  const { data: rows, error: rpcErr } = await admin.rpc("community_toggle_post_like", {
+    p_post_id: postId,
+    p_user_id: user?.id ?? null,
+    p_ip_hash: ipHash,
+    p_value: value,
+  });
+  if (rpcErr) return NextResponse.json({ error: rpcErr.message }, { status: 500 });
 
-  let liked = false; // 최종 상태: 추천이 활성인지 여부 (value=1만 liked로 간주)
-
-  if (existing) {
-    if (existing.value === value) {
-      // 토글 OFF: 삭제
-      const { error: delErr } = await admin
-        .from("community_post_likes")
-        .delete()
-        .eq("id", existing.id);
-      if (delErr) return NextResponse.json({ error: delErr.message }, { status: 500 });
-      liked = false;
-    } else {
-      // 추천 <-> 비추 전환
-      const { error: updErr } = await admin
-        .from("community_post_likes")
-        .update({ value })
-        .eq("id", existing.id);
-      if (updErr) return NextResponse.json({ error: updErr.message }, { status: 500 });
-      liked = value === 1;
-    }
-  } else {
-    const insertRow: Record<string, unknown> = { post_id: postId, value };
-    if (user) insertRow.user_id = user.id;
-    else insertRow.ip_hash = ipHash;
-    const { error: insErr } = await admin
-      .from("community_post_likes")
-      .insert(insertRow);
-    if (insErr) return NextResponse.json({ error: insErr.message }, { status: 500 });
-    liked = value === 1;
-  }
-
-  // 갱신된 like_count 재조회 (트리거가 반영)
-  const { data: refreshed } = await admin
-    .from("community_posts")
-    .select("like_count")
-    .eq("id", postId)
-    .single();
+  const result = (Array.isArray(rows) ? rows[0] : rows) as ToggleLikeRow | undefined;
 
   return NextResponse.json({
-    liked,
-    likeCount: refreshed?.like_count ?? 0,
+    liked: !!result?.liked,           // 하위호환: 최종 추천 활성 여부
+    likeCount: Number(result?.like_count ?? 0),     // 추천 수 (value=1 합)
+    dislikeCount: Number(result?.dislike_count ?? 0), // 비추 수 (value=-1 합) — 신규
   });
 }

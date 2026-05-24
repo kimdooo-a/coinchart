@@ -1,6 +1,8 @@
 // R1 2026-05-23 / T12 — community comment API
 // POST   /api/community/comment  — 댓글/대댓글 작성 (회원/익명)
 // DELETE /api/community/comment  — soft delete (회원: 본인 / 익명: 비번 일치)
+// PATCH  /api/community/comment  — 댓글 추천 토글 (R3 / T08, 2026-05-24)
+//   body: { commentId, value: 1 | -1 } — 회원=user_id / 익명=x-client-ip-hash dedup
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -133,4 +135,102 @@ export async function DELETE(req: NextRequest) {
 
   if (delErr) return NextResponse.json({ error: delErr.message }, { status: 500 });
   return NextResponse.json({ ok: true });
+}
+
+// PATCH — 댓글 추천 토글 (R3 / T08)
+//   body: { commentId, value?: 1 | -1 }  (value 미지정 시 1=추천)
+//   - 회원: user_id dedup / 익명: x-client-ip-hash dedup
+//   - 토글: 같은 value면 삭제(OFF), 다른 value면 전환(UPDATE)
+//   - 응답: { liked, likeCount }  (liked = value=1 추천이 활성인지)
+interface CommentLikeBody {
+  commentId?: unknown;
+  value?: unknown;
+}
+
+export async function PATCH(req: NextRequest) {
+  let body: CommentLikeBody;
+  try {
+    body = (await req.json()) as CommentLikeBody;
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const commentId = typeof body.commentId === "string" ? body.commentId : "";
+  // value 미지정/잘못된 값은 1(추천)로 기본 처리
+  const value = body.value === -1 ? -1 : 1;
+
+  if (!isUuid(commentId)) return NextResponse.json({ error: "Invalid commentId" }, { status: 400 });
+
+  const supabaseUser = await createClient();
+  const { data: { user } } = await supabaseUser.auth.getUser();
+  const admin = createAdminClient();
+
+  // 댓글 존재/삭제 여부 확인
+  const { data: comment, error: commentErr } = await admin
+    .from("community_comments")
+    .select("id, is_deleted")
+    .eq("id", commentId)
+    .single();
+  if (commentErr || !comment || comment.is_deleted) {
+    return NextResponse.json({ error: "댓글 없음" }, { status: 404 });
+  }
+
+  let existingQuery = admin
+    .from("community_comment_likes")
+    .select("id, value, user_id, ip_hash")
+    .eq("comment_id", commentId);
+
+  let ipHash: string | null = null;
+  if (user) {
+    existingQuery = existingQuery.eq("user_id", user.id);
+  } else {
+    ipHash = req.headers.get("x-client-ip-hash");
+    if (!ipHash) return NextResponse.json({ error: "추천 식별 헤더 없음" }, { status: 400 });
+    existingQuery = existingQuery.eq("ip_hash", ipHash);
+  }
+
+  const { data: existing } = await existingQuery.maybeSingle();
+
+  let liked = false; // 최종 상태: 추천(value=1)이 활성인지 여부
+
+  if (existing) {
+    if (existing.value === value) {
+      // 토글 OFF: 삭제
+      const { error: delErr } = await admin
+        .from("community_comment_likes")
+        .delete()
+        .eq("id", existing.id);
+      if (delErr) return NextResponse.json({ error: delErr.message }, { status: 500 });
+      liked = false;
+    } else {
+      // 추천 <-> 비추 전환
+      const { error: updErr } = await admin
+        .from("community_comment_likes")
+        .update({ value })
+        .eq("id", existing.id);
+      if (updErr) return NextResponse.json({ error: updErr.message }, { status: 500 });
+      liked = value === 1;
+    }
+  } else {
+    const insertRow: Record<string, unknown> = { comment_id: commentId, value };
+    if (user) insertRow.user_id = user.id;
+    else insertRow.ip_hash = ipHash;
+    const { error: insErr } = await admin
+      .from("community_comment_likes")
+      .insert(insertRow);
+    if (insErr) return NextResponse.json({ error: insErr.message }, { status: 500 });
+    liked = value === 1;
+  }
+
+  // 갱신된 like_count 재조회 (트리거가 반영)
+  const { data: refreshed } = await admin
+    .from("community_comments")
+    .select("like_count")
+    .eq("id", commentId)
+    .single();
+
+  return NextResponse.json({
+    liked,
+    likeCount: refreshed?.like_count ?? 0,
+  });
 }

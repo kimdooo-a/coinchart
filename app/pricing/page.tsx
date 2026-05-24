@@ -52,7 +52,7 @@ export default function PricingPage() {
             </div>
 
             <div className="relative z-10 w-full max-w-5xl px-4 py-8">
-                <header className="mb-12 text-center border-b border-white/10 pb-8">
+                <header className="mb-12 text-center border-b border-border pb-8">
                     <h1 className="text-3xl md:text-5xl font-black mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-indigo-500">
                         {lang === 'ko' ? '요금제' : 'Pricing'}
                     </h1>
@@ -67,11 +67,11 @@ export default function PricingPage() {
                     {plans.map((plan) => (
                         <div
                             key={plan.name}
-                            className={`bg-card/30 backdrop-blur-md border ${plan.borderColor} p-8 rounded-3xl shadow-xl transition-all hover:bg-card/40 hover:scale-[1.02]`}
+                            className={`bg-card border ${plan.borderColor} p-8 rounded-3xl shadow-xl transition-all hover:bg-muted/50 hover:scale-[1.02]`}
                         >
                             <div className="flex items-center gap-3 mb-4">
                                 <div className={`p-2 rounded-xl bg-gradient-to-br ${plan.color}`}>
-                                    <plan.icon className="w-5 h-5 text-white" />
+                                    <plan.icon className="w-5 h-5 text-on-primary" />
                                 </div>
                                 <h2 className="text-xl font-bold text-foreground">{plan.name}</h2>
                             </div>
@@ -81,7 +81,7 @@ export default function PricingPage() {
                             </div>
                             <ul className="space-y-3">
                                 {plan.features.map((feature) => (
-                                    <li key={feature} className="flex items-center gap-2 text-gray-300">
+                                    <li key={feature} className="flex items-center gap-2 text-foreground">
                                         <Check className="w-4 h-4 text-green-400 shrink-0" />
                                         <span className="text-sm">{feature}</span>
                                     </li>

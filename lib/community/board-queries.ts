@@ -12,14 +12,16 @@ import type { TickerItem } from "@/components/community/widgets/PriceTickerWidge
 import type { HotIssue, HotIssueTrend } from "@/components/community/widgets/HotIssueWidget";
 import type { OfficialPost } from "@/components/community/widgets/OfficialPostsWidget";
 import type { CoinTicker } from "@/types/coins";
+import type { BoardSlug } from "@/lib/community/board-meta";
 
-export type BoardSlug = "free" | "market" | "info";
+// BoardSlug는 board-meta.ts(SSOT)에서 재노출 — 기존 import 경로 호환 유지 (R3/T02)
+export type { BoardSlug };
 
 // ─────────────────────────────────────────────────────────────
 // DB row 형태 (T12 API 응답 — snake_case)
 // ─────────────────────────────────────────────────────────────
 
-interface PostListRow {
+export interface PostListRow {
   id: string;
   board_slug: string;
   title: string;
@@ -38,12 +40,12 @@ interface PostListRow {
   updated_at: string;
 }
 
-interface PostDetailRow extends PostListRow {
+export interface PostDetailRow extends PostListRow {
   content_html: string | null;
   is_deleted: boolean;
 }
 
-interface CommentRow {
+export interface CommentRow {
   id: string;
   post_id: string;
   parent_id: string | null;
@@ -124,7 +126,7 @@ function relativeTime(iso: string): string {
 // row → props 매퍼
 // ─────────────────────────────────────────────────────────────
 
-function toBoardListItem(row: PostListRow): BoardListItem {
+export function toBoardListItem(row: PostListRow): BoardListItem {
   const isAnon = !row.author_id;
   return {
     uuid: row.id,
@@ -142,7 +144,7 @@ function toBoardListItem(row: PostListRow): BoardListItem {
   };
 }
 
-function toBoardPostDetail(row: PostDetailRow): BoardPostDetail {
+export function toBoardPostDetail(row: PostDetailRow): BoardPostDetail {
   const isAnon = !row.author_id;
   return {
     id: row.id,
@@ -164,7 +166,7 @@ function toBoardPostDetail(row: PostDetailRow): BoardPostDetail {
   };
 }
 
-function toBoardComment(row: CommentRow): BoardCommentItem {
+export function toBoardComment(row: CommentRow): BoardCommentItem {
   const isAnon = !row.author_id;
   return {
     id: row.id,

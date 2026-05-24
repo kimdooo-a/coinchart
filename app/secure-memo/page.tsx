@@ -141,8 +141,8 @@ export default function SecureMemoPage() {
                         animate={{ opacity: 1 }}
                         className="flex flex-col items-center justify-center py-20 text-center"
                     >
-                        <div className="w-20 h-20 rounded-full bg-gray-800/50 flex items-center justify-center mb-4">
-                            <Lock className="w-10 h-10 text-gray-600" />
+                        <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mb-4">
+                            <Lock className="w-10 h-10 text-muted-foreground" />
                         </div>
                         <p className="text-muted-foreground text-lg">{t.secureMemo.noMemos}</p>
                         <button

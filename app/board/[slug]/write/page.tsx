@@ -6,7 +6,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { Info } from "lucide-react";
 import FooterSection from "@/components/footer-section";
-import { BOARD_META, type BoardSlug } from "@/lib/community/mock-posts";
+import { BOARD_META, type BoardSlug } from "@/lib/community/board-meta";
 import { createBoardPost } from "@/lib/community/board-queries";
 
 const BlogEditor = dynamic(() => import("@/components/Blog/editor/BlogEditor"), {

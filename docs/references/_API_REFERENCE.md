@@ -466,6 +466,40 @@
 
 ---
 
+### GET /api/admin/board (R3 2026-05-24, T06)
+- **파일**: `app/api/admin/board/route.ts`
+- **설명**: 보드별 공지(`is_notice=true`) 목록 + 최근 일반글 30개(공지 승격 후보) 조회. 관리자 공지 관리 UI(`/admin/board`) 전용.
+- **쿼리 파라미터**: `slug` (필수, board API와 동일한 9종 화이트리스트)
+- **응답 (200)**:
+  ```json
+  {
+    "notices": [ /* community_posts row[] (is_notice=true) */ ],
+    "posts":   [ /* community_posts row[] (is_notice=false, 최근 30) */ ]
+  }
+  ```
+  각 행 필드는 `GET /api/board/[slug]`와 동일.
+- **에러**: `401`(미인증) / `403`(비관리자) / `404`(slug) / `500`
+- **인증**: Admin (`isAdminEmail` 서버 검증, `smartkdy7@gmail.com`)
+
+### POST /api/admin/board (R3 2026-05-24, T06)
+- **파일**: `app/api/admin/board/route.ts`
+- **설명**: 새 공지 작성. 관리자 본인 `author_id`로 적재, `is_notice=true` 고정.
+- **Body**: `{ slug: string, title: string(1~200), contentHtml: string, category?: string(기본 '공지') }`
+- **응답 (201)**: `{ id: string }`
+- **에러**: `400`(검증/JSON) / `401`(미인증) / `403`(비관리자) / `404`(slug) / `500`
+- **인증**: Admin (서버 role 검증)
+
+### PATCH /api/admin/board (R3 2026-05-24, T06)
+- **파일**: `app/api/admin/board/route.ts`
+- **설명**: 기존 글의 `is_notice` 토글(일반글↔공지 승격/해제). service_role로 RLS 우회.
+- **Body**: `{ postId: string, isNotice: boolean }`
+- **응답 (200)**: `{ id: string, isNotice: boolean }`
+- **에러**: `400`(검증/JSON) / `401`(미인증) / `403`(비관리자) / `404`(글 없음)
+- **인증**: Admin (서버 role 검증)
+- **참고**: 공개 `board API`(`app/api/board/[slug]/route.ts`)는 **일절 미수정** — 본 admin 라우트만 추가하여 board 응답 계약(`notices/posts/total/page/limit`)을 하위호환 유지.
+
+---
+
 ## 블로그 관련
 
 ### GET /api/blog
@@ -574,6 +608,9 @@
 | GET | `/api/admin/market-data` | 시장 데이터 수집 실행 | 필요 |
 | GET | `/api/admin/news-crawl` | 뉴스 크롤링 실행 | 필요 |
 | POST | `/api/admin/cleanup-data` | 데이터 정리 실행 | 필요 |
+| GET | `/api/admin/board` | 보드별 공지+최근글 조회 | Admin |
+| POST | `/api/admin/board` | 공지 작성 (is_notice) | Admin |
+| PATCH | `/api/admin/board` | is_notice 토글 (승격/해제) | Admin |
 | GET | `/api/blog` | 블로그 포스트 목록 | 불필요 |
 | POST | `/api/blog` | 블로그 포스트 생성 | Admin |
 | GET | `/api/blog/[id]` | 포스트 상세 (관리자) | Admin |
@@ -788,22 +825,46 @@ v2.0 커뮤니티 피벗(자유/시세/정보 + 코인룸 6종)을 위한 게시
 
 ---
 
+### PATCH /api/community/comment (R3 2026-05-24, T08)
+
+댓글 추천/비추 토글. `community_comment_likes` 테이블 기반 (post_like 패턴 차용).
+
+- **파일**: `app/api/community/comment/route.ts` (POST/DELETE와 충돌 없이 PATCH 메서드 추가)
+- **Body**: `{ commentId: string, value?: 1 | -1 }` — `value` 생략/잘못된 값 → `1`(추천) 기본
+- **헤더**: 익명일 경우 `x-client-ip-hash: <hashIp(전체 IP)>` 필수 (게시글 추천과 동일 dedup)
+- **dedup**:
+  - 회원: `(comment_id, user_id)` UNIQUE 부분 인덱스
+  - 익명: `(comment_id, ip_hash)` UNIQUE 부분 인덱스
+- **토글 로직** (post_like와 동일):
+  - 기존 행 없음 → INSERT
+  - 기존 행 value === 요청 value → DELETE (토글 OFF)
+  - 기존 행 value ≠ 요청 value → UPDATE (전환)
+- **응답 (200)**: `{ liked: boolean, likeCount: number }`
+  - `liked`: 추천(value=1) 현재 활성 여부
+  - `likeCount`: 트리거 반영 후 `community_comments.like_count` (부호 합산 = 순추천수)
+- **에러**: `400`(invalid JSON/commentId, 또는 익명인데 ip_hash 헤더 없음) / `404`(댓글 없음) / `500`(DB 오류)
+
+---
+
 ### POST /api/community/like
 
-추천/비추 토글.
+추천/비추 토글. **(R3 2026-05-24, T07)** — 원자적 토글 RPC + 회원전이 dedup으로 전환.
 
 - **파일**: `app/api/community/like/route.ts`
 - **Body**: `{ postId: string, value: 1 | -1 }`
 - **dedup**:
   - 회원: `(post_id, user_id)` UNIQUE 부분 인덱스
   - 익명: `(post_id, ip_hash)` UNIQUE 부분 인덱스 (`x-client-ip-hash` 헤더)
-- **토글 로직**:
+  - **회원전이**: 회원 요청 + ip_hash 보유 시, 토글 전에 본인 익명 추천 행을 승계(회원행 부재) 또는 삭제(중복 정리). 정책: `docs/rules/community-like-dedup.md`
+- **토글 로직** (단일 plpgsql RPC `community_toggle_post_like`로 원자 처리):
   - 기존 레코드 없음 → INSERT
   - 기존 레코드의 `value`가 같음 → DELETE (취소)
   - 기존 레코드의 `value`가 다름 → UPDATE (추천↔비추 전환)
-- **응답 (200)**: `{ liked: boolean, likeCount: number }`
+- **응답 (200)**: `{ liked: boolean, likeCount: number, dislikeCount: number }`
   - `liked`: 최종 상태가 추천(value=1)이면 true (취소/비추는 false)
-  - `likeCount`: `community_posts.like_count` (트리거 합산, 음수 가능)
+  - `likeCount`: **추천 수**(value=1 합, ≥0). ⚠️ 이전 의미(`community_posts.like_count` 순합산, 음수 가능)에서 **추천 수로 변경**. 필드명·타입 동일 → 기존 소비처(`togglePostLike`/UI) 무파손
+  - `dislikeCount`: **(신규)** 비추 수(value=-1 합, ≥0)
+  - 분리 집계는 RPC `community_post_like_counts(p_post_id)`가 제공. `community_posts.like_count` 컬럼(순합산)은 인기순 정렬용으로 유지
 - **에러**: `400`(invalid postId/value, 또는 익명인데 ip_hash 헤더 없음) / `404`(게시글 없음)
 
 ---

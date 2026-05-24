@@ -74,7 +74,7 @@ export default function ContactPage() {
                     </p>
                 </header>
 
-                <div className="bg-card/30 backdrop-blur-md border border-white/10 p-8 rounded-3xl shadow-xl">
+                <div className="bg-card border border-border p-8 rounded-3xl shadow-xl">
                     {status === 'success' ? (
                         <div className="text-center py-12 animate-in fade-in zoom-in duration-300">
                             <CheckCircle className="w-20 h-20 text-green-400 mx-auto mb-6" />
@@ -107,7 +107,7 @@ export default function ContactPage() {
                                         required
                                         value={formData.name}
                                         onChange={handleChange}
-                                        className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-muted-foreground/50"
+                                        className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-muted-foreground/50"
                                         placeholder={lang === 'ko' ? '홍길동' : 'John Doe'}
                                     />
                                 </div>
@@ -122,7 +122,7 @@ export default function ContactPage() {
                                         required
                                         value={formData.email}
                                         onChange={handleChange}
-                                        className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-muted-foreground/50"
+                                        className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-muted-foreground/50"
                                         placeholder="name@example.com"
                                     />
                                 </div>
@@ -139,7 +139,7 @@ export default function ContactPage() {
                                     required
                                     value={formData.subject}
                                     onChange={handleChange}
-                                    className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-muted-foreground/50"
+                                    className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-muted-foreground/50"
                                     placeholder={lang === 'ko' ? '문의 제목을 입력해주세요' : 'How can we help?'}
                                 />
                             </div>
@@ -155,7 +155,7 @@ export default function ContactPage() {
                                     rows={5}
                                     value={formData.message}
                                     onChange={handleChange}
-                                    className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-muted-foreground/50 resize-none"
+                                    className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-muted-foreground/50 resize-none"
                                     placeholder={lang === 'ko' ? '자세한 내용을 적어주세요...' : 'Tell us more...'}
                                 ></textarea>
                             </div>

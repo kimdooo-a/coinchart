@@ -148,18 +148,18 @@ export default function AdminBlogEditPage({
 
   if (checking) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <p className="text-gray-400">{t.admin.checking}</p>
+      <div className="min-h-screen bg-surface-container-lowest text-on-surface flex items-center justify-center">
+        <p className="text-on-surface-variant">{t.admin.checking}</p>
       </div>
     );
   }
 
   if (!authorized) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="min-h-screen bg-surface-container-lowest text-on-surface flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2">{t.admin.accessDenied}</h1>
-          <p className="text-gray-400">{t.admin.accessDeniedMsg}</p>
+          <p className="text-on-surface-variant">{t.admin.accessDeniedMsg}</p>
         </div>
       </div>
     );
@@ -167,26 +167,26 @@ export default function AdminBlogEditPage({
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <p className="text-gray-400">{t.common.loading}</p>
+      <div className="min-h-screen bg-surface-container-lowest text-on-surface flex items-center justify-center">
+        <p className="text-on-surface-variant">{t.common.loading}</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-surface-container-lowest text-on-surface">
       <div className="container mx-auto px-4 pt-24 pb-12">
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Link href="/admin/blog" className="text-gray-400 hover:text-white transition-colors">
+            <Link href="/admin/blog" className="text-on-surface-variant hover:text-on-surface transition-colors">
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <h1 className="text-2xl font-bold">
               {lang === 'ko' ? '글 수정' : 'Edit Post'}
             </h1>
             {lastSaved && (
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-on-surface-variant">
                 자동저장됨 {lastSaved.toLocaleTimeString('ko-KR')}
               </span>
             )}
@@ -196,7 +196,7 @@ export default function AdminBlogEditPage({
               <button
                 onClick={() => handleSave('archived')}
                 disabled={saving}
-                className="flex items-center gap-2 px-4 py-2 border border-orange-500/30 text-orange-400 rounded-lg hover:bg-orange-500/10 transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 border border-tertiary/40 text-tertiary rounded-lg hover:bg-tertiary/10 transition-colors disabled:opacity-50"
               >
                 <Archive className="w-4 h-4" />
                 {lang === 'ko' ? '보관' : 'Archive'}
@@ -205,7 +205,7 @@ export default function AdminBlogEditPage({
             <button
               onClick={() => handleSave('draft')}
               disabled={saving}
-              className="flex items-center gap-2 px-4 py-2 border border-white/20 text-gray-300 rounded-lg hover:bg-white/5 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 border border-outline text-on-surface rounded-lg hover:bg-surface-container transition-colors disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
               {lang === 'ko' ? '초안 저장' : 'Save Draft'}
@@ -213,7 +213,7 @@ export default function AdminBlogEditPage({
             <button
               onClick={() => handleSave('published')}
               disabled={saving}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-lg hover:bg-primary/80 transition-colors disabled:opacity-50"
             >
               <Send className="w-4 h-4" />
               {lang === 'ko' ? '발행' : 'Publish'}
@@ -229,31 +229,31 @@ export default function AdminBlogEditPage({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={lang === 'ko' ? '제목을 입력하세요' : 'Enter title'}
-              className="w-full text-3xl font-bold bg-transparent border-none outline-none placeholder:text-gray-600"
+              className="w-full text-3xl font-bold bg-transparent border-none outline-none placeholder:text-on-surface-variant"
             />
             <BlogEditor content={content} onChange={setContent} tone="light" />
           </div>
 
           {/* 사이드바 */}
           <div className="space-y-6">
-            <div className="p-4 border border-white/10 rounded-xl bg-white/5">
-              <label className="block text-sm font-medium text-gray-400 mb-2">Slug</label>
+            <div className="p-4 border border-outline-variant rounded-xl bg-surface-container">
+              <label className="block text-sm font-medium text-on-surface-variant mb-2">Slug</label>
               <input
                 type="text"
                 value={slug}
                 onChange={(e) => setSlug(e.target.value)}
-                className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-primary"
+                className="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-sm text-on-surface focus:outline-none focus:border-primary"
               />
             </div>
 
-            <div className="p-4 border border-white/10 rounded-xl bg-white/5">
-              <label className="block text-sm font-medium text-gray-400 mb-2">
+            <div className="p-4 border border-outline-variant rounded-xl bg-surface-container">
+              <label className="block text-sm font-medium text-on-surface-variant mb-2">
                 {lang === 'ko' ? '카테고리' : 'Category'}
               </label>
               <select
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
-                className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-primary"
+                className="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-sm text-on-surface focus:outline-none focus:border-primary"
               >
                 <option value="">{lang === 'ko' ? '선택 안 함' : 'None'}</option>
                 {categories.map((cat) => (
@@ -264,59 +264,59 @@ export default function AdminBlogEditPage({
               </select>
             </div>
 
-            <div className="p-4 border border-white/10 rounded-xl bg-white/5">
-              <label className="block text-sm font-medium text-gray-400 mb-2">
+            <div className="p-4 border border-outline-variant rounded-xl bg-surface-container">
+              <label className="block text-sm font-medium text-on-surface-variant mb-2">
                 {lang === 'ko' ? '태그 (쉼표 구분)' : 'Tags (comma separated)'}
               </label>
               <input
                 type="text"
                 value={tagsInput}
                 onChange={(e) => setTagsInput(e.target.value)}
-                className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-primary"
+                className="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary"
               />
             </div>
 
-            <div className="p-4 border border-white/10 rounded-xl bg-white/5">
-              <label className="block text-sm font-medium text-gray-400 mb-2">
+            <div className="p-4 border border-outline-variant rounded-xl bg-surface-container">
+              <label className="block text-sm font-medium text-on-surface-variant mb-2">
                 {lang === 'ko' ? '요약 (Excerpt)' : 'Excerpt'}
               </label>
               <textarea
                 value={excerpt}
                 onChange={(e) => setExcerpt(e.target.value)}
                 rows={3}
-                className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-primary resize-none"
+                className="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary resize-none"
               />
             </div>
 
-            <div className="p-4 border border-white/10 rounded-xl bg-white/5">
-              <label className="block text-sm font-medium text-gray-400 mb-2">
+            <div className="p-4 border border-outline-variant rounded-xl bg-surface-container">
+              <label className="block text-sm font-medium text-on-surface-variant mb-2">
                 {lang === 'ko' ? '언어' : 'Language'}
               </label>
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value as 'ko' | 'en')}
-                className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-primary"
+                className="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-sm text-on-surface focus:outline-none focus:border-primary"
               >
                 <option value="ko">한국어</option>
                 <option value="en">English</option>
               </select>
             </div>
 
-            <div className="p-4 border border-white/10 rounded-xl bg-white/5">
-              <label className="block text-sm font-medium text-gray-400 mb-2">SEO</label>
+            <div className="p-4 border border-outline-variant rounded-xl bg-surface-container">
+              <label className="block text-sm font-medium text-on-surface-variant mb-2">SEO</label>
               <input
                 type="text"
                 value={metaTitle}
                 onChange={(e) => setMetaTitle(e.target.value)}
                 placeholder="Meta Title"
-                className="w-full px-3 py-2 mb-3 bg-black/40 border border-white/10 rounded-lg text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-primary"
+                className="w-full px-3 py-2 mb-3 bg-surface-container-lowest border border-outline-variant rounded-lg text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary"
               />
               <textarea
                 value={metaDescription}
                 onChange={(e) => setMetaDescription(e.target.value)}
                 placeholder="Meta Description"
                 rows={2}
-                className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-primary resize-none"
+                className="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary resize-none"
               />
             </div>
           </div>

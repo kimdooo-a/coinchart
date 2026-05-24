@@ -211,25 +211,25 @@ export default function PortfolioPage() {
 
                 {/* Summary Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="bg-card/30 backdrop-blur-md border border-white/10 p-6 rounded-2xl shadow-xl">
+                    <div className="bg-card/30 backdrop-blur-md border border-border p-6 rounded-2xl shadow-xl">
                         <p className="text-muted-foreground text-sm font-medium mb-1">{t.portfolio.totalBalance}</p>
                         <p className="text-3xl font-bold text-foreground">
                             ${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                     </div>
-                    <div className="bg-card/30 backdrop-blur-md border border-white/10 p-6 rounded-2xl shadow-xl">
+                    <div className="bg-card/30 backdrop-blur-md border border-border p-6 rounded-2xl shadow-xl">
                         <p className="text-muted-foreground text-sm font-medium mb-1">{t.portfolio.totalInvested}</p>
                         <p className="text-2xl font-bold text-foreground">
                             ${totalInvested.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                     </div>
-                    <div className="bg-card/30 backdrop-blur-md border border-white/10 p-6 rounded-2xl shadow-xl">
+                    <div className="bg-card/30 backdrop-blur-md border border-border p-6 rounded-2xl shadow-xl">
                         <p className="text-muted-foreground text-sm font-medium mb-1">{t.portfolio.pl}</p>
                         <p className={`text-2xl font-bold ${totalPnL >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                             {totalPnL >= 0 ? '+' : ''}${totalPnL.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                     </div>
-                    <div className="bg-card/30 backdrop-blur-md border border-white/10 p-6 rounded-2xl shadow-xl">
+                    <div className="bg-card/30 backdrop-blur-md border border-border p-6 rounded-2xl shadow-xl">
                         <p className="text-muted-foreground text-sm font-medium mb-1">{t.portfolio.return}</p>
                         <p className={`text-2xl font-bold ${totalPnLPercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                             {totalPnLPercent >= 0 ? '+' : ''}{totalPnLPercent.toFixed(2)}%
@@ -238,13 +238,13 @@ export default function PortfolioPage() {
                 </div>
 
                 {/* Holdings Section */}
-                <div className="bg-card/30 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden shadow-xl">
-                    <div className="p-6 border-b border-white/10">
+                <div className="bg-card/30 backdrop-blur-md border border-border rounded-2xl overflow-hidden shadow-xl">
+                    <div className="p-6 border-b border-border">
                         <h2 className="text-xl font-bold text-foreground">{t.portfolio.holdings}</h2>
                     </div>
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm text-gray-400">
-                            <thead className="bg-black/40 text-gray-200 uppercase font-bold text-xs">
+                        <table className="w-full text-left text-sm text-muted-foreground">
+                            <thead className="bg-muted text-foreground uppercase font-bold text-xs">
                                 <tr>
                                     <th className="px-6 py-4">{t.portfolio.asset}</th>
                                     <th className="px-6 py-4 text-right">{t.portfolio.price}</th>
@@ -253,7 +253,7 @@ export default function PortfolioPage() {
                                     <th className="px-6 py-4 text-right">{t.portfolio.return}</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-white/10 bg-black/20">
+                            <tbody className="divide-y divide-border bg-muted/30">
                                 {isLoading ? (
                                     <tr>
                                         <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground animate-pulse">
@@ -268,7 +268,7 @@ export default function PortfolioPage() {
                                     </tr>
                                 ) : (
                                     holdings.map((h) => (
-                                        <tr key={h.symbol} className="hover:bg-white/5 transition-colors">
+                                        <tr key={h.symbol} className="hover:bg-muted/50 transition-colors">
                                             <td className="px-6 py-4 font-bold text-foreground">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold shadow-lg shadow-indigo-500/20">
@@ -287,7 +287,7 @@ export default function PortfolioPage() {
                                                 <div className="text-foreground font-bold">${h.currentValue.toLocaleString()}</div>
                                                 <div className="text-xs text-muted-foreground">{t.portfolio.total}: ${h.totalCost.toLocaleString()}</div>
                                             </td>
-                                            <td className="px-6 py-4 text-right text-gray-300 font-mono">
+                                            <td className="px-6 py-4 text-right text-foreground font-mono">
                                                 ${h.avgPrice.toLocaleString()}
                                             </td>
                                             <td className={`px-6 py-4 text-right font-bold font-mono ${h.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
@@ -305,13 +305,13 @@ export default function PortfolioPage() {
                 </div>
 
                 {/* Recent Trades Section */}
-                <div className="bg-card/30 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden shadow-xl mb-12">
-                    <div className="p-6 border-b border-white/10">
+                <div className="bg-card/30 backdrop-blur-md border border-border rounded-2xl overflow-hidden shadow-xl mb-12">
+                    <div className="p-6 border-b border-border">
                         <h2 className="text-xl font-bold text-foreground">{t.portfolio.recentTrades}</h2>
                     </div>
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm text-gray-400">
-                            <thead className="bg-black/40 text-gray-200 uppercase font-bold text-xs">
+                        <table className="w-full text-left text-sm text-muted-foreground">
+                            <thead className="bg-muted text-foreground uppercase font-bold text-xs">
                                 <tr>
                                     <th className="px-6 py-4">{t.portfolio.date}</th>
                                     <th className="px-6 py-4">{t.portfolio.asset}</th>
@@ -320,7 +320,7 @@ export default function PortfolioPage() {
                                     <th className="px-6 py-4 text-right">{t.portfolio.price}</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-white/10 bg-black/20">
+                            <tbody className="divide-y divide-border bg-muted/30">
                                 {isLoading ? (
                                     <tr>
                                         <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground animate-pulse">
@@ -335,16 +335,16 @@ export default function PortfolioPage() {
                                     </tr>
                                 ) : (
                                     trades.map((t) => (
-                                        <tr key={t.id} className="hover:bg-white/5 transition-colors">
-                                            <td className="px-6 py-4 text-gray-400">{new Date(t.executed_at).toLocaleDateString()}</td>
+                                        <tr key={t.id} className="hover:bg-muted/50 transition-colors">
+                                            <td className="px-6 py-4 text-muted-foreground">{new Date(t.executed_at).toLocaleDateString()}</td>
                                             <td className="px-6 py-4 font-bold text-foreground">{t.symbol}</td>
                                             <td className="px-6 py-4 text-center">
                                                 <span className={`px-2 py-1 rounded text-xs font-bold ${t.side === 'BUY' ? 'bg-green-900/40 text-green-400 border border-green-500/20' : 'bg-red-900/40 text-red-400 border border-red-500/20'}`}>
                                                     {t.side}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 text-right text-gray-300">{t.qty}</td>
-                                            <td className="px-6 py-4 text-right text-gray-300">${t.price.toLocaleString()}</td>
+                                            <td className="px-6 py-4 text-right text-foreground">{t.qty}</td>
+                                            <td className="px-6 py-4 text-right text-foreground">${t.price.toLocaleString()}</td>
                                         </tr>
                                     ))
                                 )}

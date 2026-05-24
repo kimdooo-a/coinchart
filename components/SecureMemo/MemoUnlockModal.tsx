@@ -73,16 +73,16 @@ export function MemoUnlockModal({ isOpen, memo, onClose, onUnlock, t }: MemoUnlo
 
     return (
         <AnimatePresence>
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/60 backdrop-blur-sm">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="bg-[#111] border border-gray-800 rounded-2xl p-6 w-full max-w-md shadow-2xl relative"
+                    className="bg-popover border border-border rounded-2xl p-6 w-full max-w-md shadow-2xl relative"
                 >
                     <button
                         onClick={handleClose}
-                        className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"
+                        className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -92,20 +92,20 @@ export function MemoUnlockModal({ isOpen, memo, onClose, onUnlock, t }: MemoUnlo
                             <Lock className="w-6 h-6" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-white">{memo.title}</h2>
-                            <p className="text-sm text-gray-400">{t.enterPassword}</p>
+                            <h2 className="text-xl font-bold text-foreground">{memo.title}</h2>
+                            <p className="text-sm text-muted-foreground">{t.enterPassword}</p>
                         </div>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {/* Password */}
                         <div>
-                            <label className="block text-xs text-gray-400 mb-1">{t.password}</label>
+                            <label className="block text-xs text-muted-foreground mb-1">{t.password}</label>
                             <input
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full bg-[#1a1a1a] border border-gray-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-indigo-500"
+                                className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:border-indigo-500"
                                 autoFocus
                                 required
                             />
@@ -123,7 +123,7 @@ export function MemoUnlockModal({ isOpen, memo, onClose, onUnlock, t }: MemoUnlo
                             <button
                                 type="button"
                                 onClick={handleClose}
-                                className="flex-1 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg text-gray-300 font-medium transition-all"
+                                className="flex-1 py-3 bg-muted hover:bg-muted/70 rounded-lg text-foreground font-medium transition-all"
                             >
                                 {t.cancel}
                             </button>

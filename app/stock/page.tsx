@@ -46,7 +46,7 @@ export default function StockAnalysisPage() {
                         <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2 drop-shadow-sm">
                             {t.title}
                         </h1>
-                        <div className="text-sm text-gray-500 mt-1 font-medium">{t.subtitle}</div>
+                        <div className="text-sm text-muted-foreground mt-1 font-medium">{t.subtitle}</div>
                     </div>
                 </header>
 

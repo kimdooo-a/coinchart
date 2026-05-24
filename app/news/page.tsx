@@ -1,141 +1,109 @@
-"use client";
+// /news — 뉴스 대시보드 (R3/T03, 2026-05-24): 클라이언트 fetch → SSR 전환
+//
+// R2/T02에서 클라 fetch로 실데이터화됐던 페이지를 SEO 강화를 위해 async Server Component로 전환.
+// 초기 목록·헤드라인·사이드바를 서버 렌더하고, 4차원 필터(코인/분류/감정/정렬)는 searchParams로
+// 해석한다. 필터 UI만 클라이언트 하위 컴포넌트(NewsFilters)로 분리해 searchParams를 갱신한다.
+// 데이터는 lib/community/news-server.ts(anon Supabase 직접 쿼리, 정적 ISR)가 담당한다.
 
-import { useState, useMemo, useEffect } from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import NewsHeadlineCard from "@/components/community/NewsHeadlineCard";
 import NewsRow from "@/components/community/NewsRow";
 import SidebarWidget from "@/components/community/SidebarWidget";
-import PriceTickerWidget, { type TickerItem } from "@/components/community/widgets/PriceTickerWidget";
-import HotIssueWidget, { type HotIssue } from "@/components/community/widgets/HotIssueWidget";
+import PriceTickerWidget from "@/components/community/widgets/PriceTickerWidget";
+import HotIssueWidget from "@/components/community/widgets/HotIssueWidget";
 import FngGaugeWidget from "@/components/community/widgets/FngGaugeWidget";
-import OfficialPostsWidget, { type OfficialPost } from "@/components/community/widgets/OfficialPostsWidget";
+import OfficialPostsWidget from "@/components/community/widgets/OfficialPostsWidget";
 import FooterSection from "@/components/footer-section";
-// 라벨 사전만 유지 (데이터는 /api/news 실데이터로 전환 — R2/T02)
-import { NEWS_CATEGORIES, COIN_FILTERS } from "@/lib/community/mock-news";
+import NewsFilters from "@/components/community/NewsFilters";
+import { NEWS_CATEGORIES, COIN_FILTERS } from "@/lib/community/news-meta";
 import {
-    fetchNews,
-    fetchTickerItems,
-    fetchHotIssueItems,
-    fetchFngData,
-    fetchOfficialPosts,
-    type NewsListItem,
-    type FngData,
-} from "@/lib/community/news-queries";
+    fetchNewsPageData,
+    type NewsFilters as NewsFilterValues,
+    type NewsSort,
+} from "@/lib/community/news-server";
 import type { NewsSentiment } from "@/components/community/NewsHeadlineCard";
 import { cn } from "@/lib/utils";
 
-const SENTIMENT_FILTERS: { key: NewsSentiment | "all"; label: string; dotClass: string }[] = [
-    { key: "all", label: "전체", dotClass: "bg-on-surface-variant" },
-    { key: "positive", label: "🔴 호재", dotClass: "bg-[var(--color-positive)]" },
-    { key: "negative", label: "🔵 악재", dotClass: "bg-[var(--color-negative)]" },
-    { key: "mixed", label: "🟣 혼조", dotClass: "bg-[var(--color-mixed)]" },
-    { key: "neutral", label: "⚪ 중립", dotClass: "bg-outline-variant" },
-];
+// 5분 ISR (뉴스·핫이슈 RPC 캐시 정책과 정렬 — 메인페이지와 동일)
+export const revalidate = 300;
 
-const SORTS = [
-    { key: "latest", label: "최신순" },
-    { key: "importance", label: "중요도순" },
-    { key: "popular", label: "토론많은순" },
-];
+// 허용 키 화이트리스트 — 잘못된 searchParams는 기본값으로 폴백
+const COIN_KEYS = new Set(COIN_FILTERS.map((c) => c.key));
+const CATEGORY_KEYS = new Set(NEWS_CATEGORIES.map((c) => c.key));
+const SENTIMENT_KEYS = new Set<NewsSentiment | "all">([
+    "all",
+    "positive",
+    "negative",
+    "mixed",
+    "neutral",
+]);
+const SORT_KEYS = new Set<NewsSort>(["latest", "importance", "popular"]);
 
-export default function NewsPage() {
-    const [coinFilter, setCoinFilter] = useState("ALL");
-    const [categoryFilter, setCategoryFilter] = useState("all");
-    const [sentimentFilter, setSentimentFilter] = useState<NewsSentiment | "all">("all");
-    const [sort, setSort] = useState<"latest" | "importance" | "popular">("latest");
-    const [page, setPage] = useState(1);
+type RawSearchParams = Record<string, string | string[] | undefined>;
 
-    // /api/news 실데이터 (코인·분류는 서버 위임, 감정·정렬은 아래 클라 처리)
-    const [news, setNews] = useState<NewsListItem[]>([]);
-    const [headlines, setHeadlines] = useState<NewsListItem[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [reloadKey, setReloadKey] = useState(0);
+function pick(sp: RawSearchParams, key: string): string | undefined {
+    const v = sp[key];
+    return Array.isArray(v) ? v[0] : v;
+}
 
-    // 사이드바 위젯 실데이터
-    const [tickers, setTickers] = useState<TickerItem[]>([]);
-    const [hotIssues, setHotIssues] = useState<HotIssue[]>([]);
-    const [fng, setFng] = useState<FngData | null>(null);
-    const [officialPosts, setOfficialPosts] = useState<OfficialPost[]>([]);
+// searchParams → 검증된 NewsFilters
+function parseFilters(sp: RawSearchParams): NewsFilterValues {
+    const coin = pick(sp, "coin") ?? "ALL";
+    const category = pick(sp, "category") ?? "all";
+    const sentiment = (pick(sp, "sentiment") ?? "all") as NewsSentiment | "all";
+    const sort = (pick(sp, "sort") ?? "latest") as NewsSort;
+    const pageNum = parseInt(pick(sp, "page") ?? "1", 10);
 
-    // 뉴스 목록 — 코인/분류 변경 시 서버 재조회
-    useEffect(() => {
-        let alive = true;
-        setLoading(true);
-        setError(false);
-        setPage(1);
-        fetchNews({ coin: coinFilter, category: categoryFilter })
-            .then((items) => {
-                if (alive) setNews(items);
-            })
-            .catch(() => {
-                if (alive) {
-                    setError(true);
-                    setNews([]);
-                }
-            })
-            .finally(() => {
-                if (alive) setLoading(false);
-            });
-        return () => {
-            alive = false;
-        };
-    }, [coinFilter, categoryFilter, reloadKey]);
+    return {
+        coin: COIN_KEYS.has(coin) ? coin : "ALL",
+        category: CATEGORY_KEYS.has(category) ? category : "all",
+        sentiment: SENTIMENT_KEYS.has(sentiment) ? sentiment : "all",
+        sort: SORT_KEYS.has(sort) ? sort : "latest",
+        page: Number.isFinite(pageNum) && pageNum >= 1 ? pageNum : 1,
+    };
+}
 
-    // 헤드라인 3개 — 마운트 1회, 필터와 독립 (전체 중 중요도 상위)
-    useEffect(() => {
-        let alive = true;
-        fetchNews({})
-            .then((items) => {
-                if (!alive) return;
-                const top3 = [...items]
-                    .sort((a, b) => (b.importance ?? 0) - (a.importance ?? 0))
-                    .slice(0, 3);
-                setHeadlines(top3);
-            })
-            .catch(() => {});
-        return () => {
-            alive = false;
-        };
-    }, []);
+// 필터 보존 href 생성 ("더 보기"·"필터 초기화"용)
+function buildHref(f: NewsFilterValues, page: number): string {
+    const qs = new URLSearchParams();
+    if (f.coin !== "ALL") qs.set("coin", f.coin);
+    if (f.category !== "all") qs.set("category", f.category);
+    if (f.sentiment !== "all") qs.set("sentiment", f.sentiment);
+    if (f.sort !== "latest") qs.set("sort", f.sort);
+    if (page > 1) qs.set("page", String(page));
+    const s = qs.toString();
+    return s ? `/news?${s}` : "/news";
+}
 
-    // 사이드바 위젯 — 마운트 1회 병렬 fetch (각 fetch는 실패 시 빈 배열/null)
-    useEffect(() => {
-        let alive = true;
-        Promise.all([
-            fetchTickerItems(),
-            fetchHotIssueItems(),
-            fetchFngData(),
-            fetchOfficialPosts(),
-        ]).then(([t, h, f, o]) => {
-            if (!alive) return;
-            setTickers(t);
-            setHotIssues(h);
-            setFng(f);
-            setOfficialPosts(o);
-        });
-        return () => {
-            alive = false;
-        };
-    }, []);
+interface PageProps {
+    searchParams: Promise<RawSearchParams>;
+}
 
-    // 감정 필터 + 정렬 (클라 — /api/news 미지원 차원)
-    const filtered = useMemo(() => {
-        let items = news.slice();
-        if (sentimentFilter !== "all") {
-            items = items.filter((n) => n.sentiment === sentimentFilter);
-        }
-        if (sort === "importance" || sort === "popular") {
-            // popular(토론많은순)는 뉴스별 토론 실데이터가 없어 중요도순으로 대체
-            items.sort((a, b) => (b.importance ?? 0) - (a.importance ?? 0));
-        }
-        // latest는 /api/news가 pub_date desc로 반환한 순서를 그대로 유지
-        return items;
-    }, [news, sentimentFilter, sort]);
+// 필터(코인)를 반영한 SEO 메타 — canonical은 /news로 통합(중복 콘텐츠 방지)
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+    const f = parseFilters(await searchParams);
+    const coinLabel = COIN_FILTERS.find((c) => c.key === f.coin)?.label;
+    const scoped = f.coin !== "ALL" && coinLabel;
 
-    const PER_PAGE = 20;
-    const pageItems = filtered.slice(0, page * PER_PAGE);
-    const hasMore = pageItems.length < filtered.length;
+    const title = scoped ? `${coinLabel} 뉴스` : "뉴스 대시보드";
+    const description = scoped
+        ? `${coinLabel} 관련 코인·시장 뉴스 큐레이션. 자동 분류·호재/악재 감정 분석·중요도순 정렬.`
+        : "코인·주식 시장 뉴스 큐레이션. 자동 분류·호재/악재 감정 분석·카테고리별 큐레이션, 매 시간 갱신.";
+
+    return {
+        title,
+        description,
+        openGraph: { title, description, type: "website" },
+        alternates: { canonical: "/news" },
+    };
+}
+
+export default async function NewsPage({ searchParams }: PageProps) {
+    const filters = parseFilters(await searchParams);
+    const data = await fetchNewsPageData(filters);
+
+    const hasMore = data.news.length < data.total;
 
     return (
         <main className="flex-1 bg-surface-container-low">
@@ -160,53 +128,20 @@ export default function NewsPage() {
 
                 <div className="flex flex-col lg:flex-row gap-6">
                     <div className="flex-1 min-w-0">
-                        {/* 필터 바 */}
-                        <div className="bg-surface-container-lowest border border-outline-variant rounded-md p-3 mb-4 space-y-2">
-                            <FilterRow
-                                label="코인"
-                                items={COIN_FILTERS.map((c) => ({ key: c.key, label: c.label }))}
-                                value={coinFilter}
-                                onChange={setCoinFilter}
-                            />
-                            <FilterRow
-                                label="분류"
-                                items={NEWS_CATEGORIES.map((c) => ({ key: c.key, label: c.label }))}
-                                value={categoryFilter}
-                                onChange={setCategoryFilter}
-                            />
-                            <FilterRow
-                                label="감정"
-                                items={SENTIMENT_FILTERS.map((s) => ({ key: s.key, label: s.label }))}
-                                value={sentimentFilter}
-                                onChange={(k) => setSentimentFilter(k as typeof sentimentFilter)}
-                            />
-                            <div className="flex items-center gap-3 pt-2 border-t border-outline-variant">
-                                <span className="text-meta font-bold text-on-surface-variant w-12 flex-shrink-0">정렬</span>
-                                <div className="flex gap-2">
-                                    {SORTS.map((s) => (
-                                        <button
-                                            key={s.key}
-                                            onClick={() => setSort(s.key as typeof sort)}
-                                            className={cn(
-                                                "text-meta px-2 py-1 rounded transition-colors",
-                                                sort === s.key
-                                                    ? "bg-primary text-on-primary font-bold"
-                                                    : "text-on-surface-variant hover:bg-surface-container"
-                                            )}
-                                        >
-                                            {s.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
+                        {/* 필터 바 (클라이언트 하위 컴포넌트 — searchParams 갱신) */}
+                        <NewsFilters
+                            coin={filters.coin}
+                            category={filters.category}
+                            sentiment={filters.sentiment}
+                            sort={filters.sort}
+                        />
 
                         {/* 헤드라인 3개 */}
-                        {headlines.length > 0 && (
+                        {data.headlines.length > 0 && (
                             <section className="mb-4">
                                 <h2 className="text-body-base font-bold mb-3">오늘의 헤드라인</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                    {headlines.map((h) => (
+                                    {data.headlines.map((h) => (
                                         <NewsHeadlineCard key={h.id} item={h} />
                                     ))}
                                 </div>
@@ -217,50 +152,33 @@ export default function NewsPage() {
                         <section className="bg-surface-container-lowest border border-outline-variant rounded-md overflow-hidden">
                             <header className="px-4 py-2.5 border-b border-outline-variant flex items-center justify-between">
                                 <h2 className="text-body-base font-bold">
-                                    뉴스 ({filtered.length.toLocaleString()})
+                                    뉴스 ({data.total.toLocaleString()})
                                 </h2>
                             </header>
                             <div className="divide-y divide-outline-variant">
-                                {loading ? (
-                                    <div className="py-12 text-center text-on-surface-variant text-body-sm">
-                                        뉴스를 불러오는 중…
-                                    </div>
-                                ) : error ? (
-                                    <div className="py-12 text-center text-on-surface-variant text-body-sm">
-                                        뉴스를 불러오지 못했습니다.{" "}
-                                        <button
-                                            onClick={() => setReloadKey((k) => k + 1)}
-                                            className="text-primary font-bold hover:underline"
-                                        >
-                                            다시 시도
-                                        </button>
-                                    </div>
-                                ) : pageItems.length === 0 ? (
+                                {data.news.length === 0 ? (
                                     <div className="py-12 text-center text-on-surface-variant text-body-sm">
                                         조건에 맞는 뉴스가 없습니다.{" "}
-                                        <button
-                                            onClick={() => {
-                                                setCoinFilter("ALL");
-                                                setCategoryFilter("all");
-                                                setSentimentFilter("all");
-                                            }}
+                                        <Link
+                                            href="/news"
                                             className="text-primary font-bold hover:underline"
                                         >
                                             필터 초기화
-                                        </button>
+                                        </Link>
                                     </div>
                                 ) : (
-                                    pageItems.map((n) => <NewsRow key={n.id} item={n} />)
+                                    data.news.map((n) => <NewsRow key={n.id} item={n} />)
                                 )}
                             </div>
                             {hasMore && (
                                 <div className="p-3 text-center border-t border-outline-variant">
-                                    <button
-                                        onClick={() => setPage((p) => p + 1)}
+                                    <Link
+                                        href={buildHref(filters, filters.page + 1)}
+                                        scroll={false}
                                         className="text-body-sm text-primary font-bold hover:underline"
                                     >
                                         더 보기 ↓
-                                    </button>
+                                    </Link>
                                 </div>
                             )}
                         </section>
@@ -268,9 +186,9 @@ export default function NewsPage() {
 
                     {/* Sidebar */}
                     <aside className="w-full lg:w-[300px] flex-shrink-0 space-y-4">
-                        <PriceTickerWidget items={tickers.slice(0, 6)} />
-                        <HotIssueWidget items={hotIssues} />
-                        {fng && <FngGaugeWidget value={fng.value} prevValue={fng.prevValue} />}
+                        <PriceTickerWidget items={data.tickers.slice(0, 6)} />
+                        <HotIssueWidget items={data.hotIssues} />
+                        {data.fng && <FngGaugeWidget value={data.fng.value} prevValue={data.fng.prevValue} />}
 
                         {/* 코인별 뉴스 랭킹 — 정적 데모 (집계 소스 없음, R2 후속 과제) */}
                         <SidebarWidget title="📊 코인별 뉴스 (오늘)">
@@ -298,42 +216,11 @@ export default function NewsPage() {
                             </ol>
                         </SidebarWidget>
 
-                        <OfficialPostsWidget posts={officialPosts} />
+                        <OfficialPostsWidget posts={data.officialPosts} />
                     </aside>
                 </div>
             </div>
             <FooterSection />
         </main>
-    );
-}
-
-interface FilterRowProps {
-    label: string;
-    items: { key: string; label: string }[];
-    value: string;
-    onChange: (v: string) => void;
-}
-
-function FilterRow({ label, items, value, onChange }: FilterRowProps) {
-    return (
-        <div className="flex items-center gap-3">
-            <span className="text-meta font-bold text-on-surface-variant w-12 flex-shrink-0">{label}</span>
-            <div className="flex flex-wrap gap-1.5">
-                {items.map((it) => (
-                    <button
-                        key={it.key}
-                        onClick={() => onChange(it.key)}
-                        className={cn(
-                            "text-meta px-2 py-1 rounded border transition-colors",
-                            value === it.key
-                                ? "bg-primary text-on-primary border-primary font-bold"
-                                : "bg-surface-container-lowest text-on-surface-variant border-outline-variant hover:border-primary"
-                        )}
-                    >
-                        {it.label}
-                    </button>
-                ))}
-            </div>
-        </div>
     );
 }

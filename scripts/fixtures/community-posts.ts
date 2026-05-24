@@ -1,6 +1,13 @@
-import type { BoardPost } from "@/components/community/BoardRow";
+// 커뮤니티 게시판 시드용 더미 게시글 fixture.
+// R3/T05(2026-05-24): lib/community/mock-posts.ts 삭제에 따라 시드 전용 데이터부를 이곳으로 이관.
+// 앱/lib/components는 실데이터(community_posts)로 전환 완료되어 이 fixture는 scripts/seed-community.ts 에서만 사용한다.
+// 게시판 슬러그·메타(BOARD_META)는 lib/community/board-meta.ts(SSOT)를 그대로 참조한다.
 
-export type BoardSlug = "free" | "market" | "info";
+import type { BoardPost } from "../../components/community/BoardRow";
+import { BOARD_META, type BoardSlug } from "../../lib/community/board-meta";
+
+// 슬러그 타입은 board-meta(SSOT)에서 재노출 — seed 스크립트가 단일 경로로 import 가능하게.
+export type { BoardSlug };
 
 export interface MockPost extends BoardPost {
   boardSlug: BoardSlug;
@@ -9,33 +16,6 @@ export interface MockPost extends BoardPost {
   tags?: string[];
   coinSymbol?: string; // 코인 태그 (BTC 등)
 }
-
-export const BOARD_META: Record<
-  BoardSlug,
-  { name: string; nameEn: string; emoji: string; description: string; categories: string[] }
-> = {
-  free: {
-    name: "자유게시판",
-    nameEn: "Free Board",
-    emoji: "💬",
-    description: "일상·잡담·뉴스 반응을 자유롭게",
-    categories: ["전체", "잡담", "질문", "후기", "인증", "공지"],
-  },
-  market: {
-    name: "시세토론",
-    nameEn: "Market Talk",
-    emoji: "📈",
-    description: "차트·진입가·전략을 함께 나눠요",
-    categories: ["전체", "비트코인", "이더리움", "알트코인", "주식", "분석글"],
-  },
-  info: {
-    name: "정보공유",
-    nameEn: "Info",
-    emoji: "📚",
-    description: "분석글·자료·뉴스 정리",
-    categories: ["전체", "뉴스정리", "자료", "분석글", "거래소", "가이드"],
-  },
-};
 
 const NICKNAMES = [
   "차트마스터", "존버9년차", "김씨네아저씨", "BTC홀더", "이더리움맘",
@@ -199,92 +179,3 @@ export const MOCK_POSTS: Record<BoardSlug, MockPost[]> = {
   market: generatePosts("market", DUMMY_TITLES_MARKET, 5200),
   info: generatePosts("info", DUMMY_TITLES_INFO, 3100),
 };
-
-export function getPost(slug: BoardSlug, id: number): MockPost | null {
-  return MOCK_POSTS[slug]?.find((p) => p.id === id) ?? null;
-}
-
-export function getPostsByBoard(slug: BoardSlug, page = 1, perPage = 30): MockPost[] {
-  const posts = MOCK_POSTS[slug] ?? [];
-  const notices = posts.filter((p) => p.isNotice);
-  const regular = posts.filter((p) => !p.isNotice);
-  const start = (page - 1) * perPage;
-  return [...notices, ...regular.slice(start, start + perPage)];
-}
-
-export function getTotalPages(slug: BoardSlug, perPage = 30): number {
-  const posts = MOCK_POSTS[slug] ?? [];
-  const regular = posts.filter((p) => !p.isNotice);
-  return Math.max(1, Math.ceil(regular.length / perPage));
-}
-
-// R1/T15(2026-05-23): 메인페이지 베스트 섹션은 community_posts 실데이터(lib/community/queries.ts)로 전환됨.
-// 현재 import하는 페이지 없음 — R2에서 BOARD_META/MOCK_POSTS 등과 함께 일괄 정리 예정.
-export function getBestPosts(limit = 30): MockPost[] {
-  // 모든 게시판에서 hot/likes 상위
-  const all = (Object.keys(MOCK_POSTS) as BoardSlug[]).flatMap((s) => MOCK_POSTS[s]);
-  return all
-    .filter((p) => !p.isNotice)
-    .sort((a, b) => b.likes + b.views * 0.01 - (a.likes + a.views * 0.01))
-    .slice(0, limit);
-}
-
-export function getPostsForCoin(symbol: string, limit = 20): MockPost[] {
-  const all = (Object.keys(MOCK_POSTS) as BoardSlug[]).flatMap((s) => MOCK_POSTS[s]);
-  return all
-    .filter((p) => !p.isNotice && p.coinSymbol === symbol)
-    .slice(0, limit);
-}
-
-export interface MockComment {
-  id: number;
-  parentId?: number;
-  author: string;
-  authorIp?: string;
-  isAdmin?: boolean;
-  content: string;
-  createdAt: string;
-  likes: number;
-}
-
-export const MOCK_COMMENTS: MockComment[] = [
-  {
-    id: 1,
-    author: "존버9년차",
-    content: "진짜 어디까지 갈지 궁금하네요. 14만 가면 절반 청산할 듯",
-    createdAt: "2시간전",
-    likes: 12,
-  },
-  {
-    id: 2,
-    parentId: 1,
-    author: "익명",
-    authorIp: "211.34",
-    content: "저도 그게 궁금... 14만 vs 15만",
-    createdAt: "1시간전",
-    likes: 3,
-  },
-  {
-    id: 3,
-    author: "김씨네아저씨",
-    content: "이번엔 좀 다른 것 같아요. 기관 매수가 진짜네요",
-    createdAt: "1시간전",
-    likes: 8,
-  },
-  {
-    id: 4,
-    author: "익명",
-    authorIp: "218.55",
-    content: "나만 못탔네 ㅠㅠ 다음 사이클 기다려야 할 듯",
-    createdAt: "1시간전",
-    likes: 2,
-  },
-  {
-    id: 5,
-    author: "차트마스터",
-    isAdmin: true,
-    content: "차트 분석 글로 별도 정리해서 올리겠습니다.",
-    createdAt: "30분전",
-    likes: 15,
-  },
-];

@@ -37,10 +37,10 @@ export default function HistoryPage() {
 
     const getBadgeColor = (type: HistoryEvent['type']) => {
         switch (type) {
-            case 'milestone': return 'bg-yellow-900/40 text-yellow-500 border-yellow-700';
-            case 'tech': return 'bg-blue-900/40 text-blue-500 border-blue-700';
-            case 'market': return 'bg-green-900/40 text-green-500 border-green-700';
-            case 'drama': return 'bg-destructive/40 text-destructive border-destructive';
+            case 'milestone': return 'bg-yellow-100 text-yellow-700 border-yellow-300';
+            case 'tech': return 'bg-blue-100 text-blue-700 border-blue-300';
+            case 'market': return 'bg-green-100 text-green-700 border-green-300';
+            case 'drama': return 'bg-destructive/10 text-destructive border-destructive/30';
         }
     };
 
@@ -175,7 +175,7 @@ export default function HistoryPage() {
                             {selectedEvent.year}.{selectedEvent.month}
                         </h3>
 
-                        <div className="prose prose-invert max-w-none mt-6">
+                        <div className="prose max-w-none mt-6">
                             <p className="text-lg text-muted-foreground leading-relaxed whitespace-pre-line">
                                 {lang === 'ko' ? selectedEvent.detailsKo : selectedEvent.detailsEn}
                             </p>

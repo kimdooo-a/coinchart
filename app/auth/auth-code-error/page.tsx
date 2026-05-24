@@ -5,14 +5,14 @@ import Link from 'next/link'
 
 export default function AuthErrorPage() {
     return (
-        <div className="flex min-h-screen items-center justify-center bg-[#0a0a0a] text-white">
+        <div className="flex min-h-screen items-center justify-center bg-background text-foreground">
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="w-full max-w-md rounded-2xl bg-[#111] p-8 text-center shadow-xl border border-red-900/30"
+                className="w-full max-w-md rounded-2xl bg-card p-8 text-center shadow-xl border border-destructive/30"
             >
                 <div className="mb-6 flex justify-center">
-                    <div className="rounded-full bg-red-900/20 p-4">
+                    <div className="rounded-full bg-destructive/10 p-4">
                         <svg
                             className="h-8 w-8 text-red-500"
                             fill="none"
@@ -29,24 +29,24 @@ export default function AuthErrorPage() {
                     </div>
                 </div>
 
-                <h1 className="mb-2 text-2xl font-bold text-white">
+                <h1 className="mb-2 text-2xl font-bold text-foreground">
                     Authentication Error
                 </h1>
 
-                <p className="mb-8 text-gray-400">
+                <p className="mb-8 text-muted-foreground">
                     There was a problem signing you in. Please try again or contact support if the problem persists.
                 </p>
 
                 <div className="flex flex-col gap-3">
                     <Link
                         href="/auth/login"
-                        className="w-full rounded-lg bg-white px-6 py-3 font-medium text-black transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                        className="w-full rounded-lg bg-primary px-6 py-3 font-medium text-primary-foreground transition-transform hover:scale-[1.02] active:scale-[0.98]"
                     >
                         Try Again
                     </Link>
                     <Link
                         href="/"
-                        className="w-full rounded-lg px-6 py-3 font-medium text-gray-400 hover:text-white transition-colors"
+                        className="w-full rounded-lg px-6 py-3 font-medium text-muted-foreground hover:text-foreground transition-colors"
                     >
                         Go Home
                     </Link>

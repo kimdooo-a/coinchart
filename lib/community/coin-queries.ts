@@ -1,24 +1,23 @@
-// 코인룸(/coin/[symbol]) 클라이언트 데이터 쿼리 + 정적 메타 사전 (R2/T03, 2026-05-23)
+// 코인룸(/coin/[symbol]) 정적 메타 사전 + 순수 뷰 헬퍼 (R2/T03 → R3/T04 SSR 전환, 2026-05-24)
 //
-// 더미(mock-coins / mock-posts / mock-news) 대체. 실데이터 소스:
-//   - 시세    : GET /api/coins/ticker          (R1/T03 — Binance 60초 캐시 프록시)
-//   - 게시글  : GET /api/board/coin-{symbol}    (R1/T12 — coin-* slug 화이트리스트 6종)
-//   - 뉴스    : GET /api/news?query={symbol}    (R1/T06 — symbol.eq + title/snippet ilike)
-//   - 핫이슈  : GET /api/coins/hot-issues        (R1/T13 — community_hot_issues RPC)
-//   - FNG     : GET /api/fng                     (R1/T04 — Alternative.me 프록시)
-//   - 공식글  : GET /api/blog?limit=3            (blog_posts published)
+// R2/T03에서는 본 파일이 "클라이언트 fetch 래퍼 + 정적 메타"를 함께 보유했으나,
+// R3/T04에서 /coin/[symbol]을 SSR(async 서버 컴포넌트)로 전환하면서 데이터 fetch 책임은
+// lib/community/coin-server.ts(server-only, anon Supabase 직접 쿼리)로 이관했다.
+// 본 파일은 이제 다음만 보유한다 — 서버/클라 양쪽에서 안전하게 import 가능한 순수 모듈:
+//   - 코인 브랜드 메타(COIN_META) / 코인룸 6종 정적 메타(COIN_ROOMS) + 접근자
+//   - 정적 메타 + 실시세 병합 뷰 빌더(buildCoinView)
+//   - 시세 배열 순수 헬퍼(findTicker / toTickerItems) + 상대시간 포맷터(formatRelativeTime)
+//   - 게시글/뉴스/FNG 뷰 타입(coin-server·CoinRoomTabs 공유)
 //
-// 코인 정적 메타(이름·심볼·로고색·설명·태그·시총·도미넌스·7d/30d 등 — 실시간 단일 소스가
-// 없는 표시값)는 본 파일의 정적 사전으로 보유한다. 시세(price/changePct/24h고저/거래량)는
-// /api/coins/ticker 실데이터로 덮어쓴다. mock-* 파일에 의존하지 않으므로(클라 번들에 서버
-// 전용 코드가 섞이지 않도록) lib/community/queries.ts(서버 전용)도 import 하지 않는다.
+// 더미(mock-*) 의존 0건: 정적 메타(이름·심볼·로고색·설명·태그·시총·도미넌스·7d/30d 등 실시간 단일
+// 소스가 없는 표시값)는 본 파일이 자체 보유하고, 시세(price/changePct/24h고저/거래량)는
+// coin-server가 /api/coins/ticker 실데이터(Binance)로 덮어쓴다. mock-coins/mock-posts/mock-news를
+// import하지 않으므로 T05(mock-* 삭제)의 차단점이 되지 않는다.
 
 import type { CoinHeroData } from "@/components/community/CoinHero";
 import type { BoardPost } from "@/components/community/BoardRow";
-import type { NewsHeadlineItem, NewsSentiment } from "@/components/community/NewsHeadlineCard";
+import type { NewsHeadlineItem } from "@/components/community/NewsHeadlineCard";
 import type { TickerItem } from "@/components/community/widgets/PriceTickerWidget";
-import type { HotIssue, HotIssueTrend } from "@/components/community/widgets/HotIssueWidget";
-import type { OfficialPost } from "@/components/community/widgets/OfficialPostsWidget";
 import type { CoinTicker } from "@/types/coins";
 
 // ─────────────────────────────────────────────────────────────
@@ -156,6 +155,9 @@ const COIN_ROOMS: Record<string, CoinRoomMeta> = {
   },
 };
 
+/** 코인룸 슬러그 6종 (btc/eth/xrp/sol/altcoin/kimp) — 라우트 검증·생성용 */
+export const COIN_ROOM_SLUGS = Object.keys(COIN_ROOMS);
+
 export function getCoinRoomMeta(slug: string): CoinRoomMeta | null {
   return COIN_ROOMS[slug.toLowerCase()] ?? null;
 }
@@ -204,9 +206,10 @@ export function buildCoinView(meta: CoinRoomMeta, ticker: CoinTicker | null): Co
 }
 
 // ─────────────────────────────────────────────────────────────
-// 게시글 뷰 (BoardRow용 — 표시 번호 id + href용 uuid/boardSlug 동반)
+// 게시글 / 뉴스 / FNG 뷰 타입 (coin-server 산출 · CoinRoomTabs 소비 공유 계약)
 // ─────────────────────────────────────────────────────────────
 
+/** 게시글 행: BoardRow에 넘길 BoardPost + 라우팅/key용 uuid·boardSlug */
 export interface CoinBoardPost extends BoardPost {
   uuid: string; // community_posts.id (href용)
   boardSlug: string; // coin-btc 등
@@ -217,127 +220,18 @@ export interface CoinPostsResult {
   posts: CoinBoardPost[];
 }
 
-// ─────────────────────────────────────────────────────────────
-// 변환 사전 / 헬퍼
-// ─────────────────────────────────────────────────────────────
+/** NewsRow가 소비하는 형태 (coinTag 포함) */
+export type CoinNewsItem = NewsHeadlineItem & { coinTag?: string };
 
-const NEWS_CATEGORY_LABEL: Record<string, string> = {
-  regulation: "규제",
-  tech: "기술",
-  exchange: "거래소",
-  onchain: "온체인",
-  etf: "ETF",
-  altcoin_news: "알트",
-  macro: "매크로",
-  market: "시장동향",
-};
-
-const TREND_MAP: Record<string, HotIssueTrend> = {
-  UP: "up",
-  DOWN: "down",
-  NEW: "new",
-  FLAT: "same",
-};
-
-/** ISO → "방금 전 / N분 전 / N시간 전 / N일 전 / N주 전" (클라 기준 현재 시각) */
-export function formatRelativeTime(iso: string | null | undefined): string {
-  if (!iso) return "";
-  const t = new Date(iso).getTime();
-  if (Number.isNaN(t)) return "";
-  const diffMin = Math.floor((Date.now() - t) / 60000);
-  if (diffMin < 1) return "방금 전";
-  if (diffMin < 60) return `${diffMin}분 전`;
-  const h = Math.floor(diffMin / 60);
-  if (h < 24) return `${h}시간 전`;
-  const d = Math.floor(h / 24);
-  if (d < 7) return `${d}일 전`;
-  return `${Math.floor(d / 7)}주 전`;
-}
-
-interface RawBoardRow {
-  id: string;
-  board_slug: string;
-  title: string;
-  author_id: string | null;
-  guest_nickname: string | null;
-  guest_ip_masked: string | null;
-  category: string | null;
-  view_count: number | null;
-  like_count: number | null;
-  comment_count: number | null;
-  is_notice: boolean | null;
-  is_hot: boolean | null;
-  created_at: string;
-}
-
-function mapBoardRow(row: RawBoardRow, index: number): CoinBoardPost {
-  const created = new Date(row.created_at).getTime();
-  return {
-    id: index + 1,
-    number: index + 1,
-    uuid: row.id,
-    boardSlug: row.board_slug,
-    title: row.title,
-    author: row.guest_nickname ?? "회원",
-    authorIp: row.guest_ip_masked
-      ? row.guest_ip_masked.split(".").slice(0, 2).join(".")
-      : undefined,
-    isAdmin: false,
-    createdAt: formatRelativeTime(row.created_at),
-    views: row.view_count ?? 0,
-    likes: row.like_count ?? 0,
-    commentCount: row.comment_count ?? 0,
-    isNotice: row.is_notice ?? false,
-    isHot: row.is_hot ?? false,
-    isNew: !Number.isNaN(created) && Date.now() - created < 24 * 3600 * 1000,
-    category: row.category ?? undefined,
-  };
-}
-
-interface RawNewsItem {
-  title: string;
-  link: string;
-  pubDate: string;
-  publisher: string | null;
-  sentiment: string | null;
-  snippet: string | null;
-  symbol: string | null;
-  category: string | null;
-  importance: number | null;
-}
-
-type NewsRowItem = NewsHeadlineItem & { coinTag?: string };
-
-function mapNewsItem(item: RawNewsItem, index: number): NewsRowItem {
-  return {
-    id: item.link || `news-${index}`,
-    title: item.title,
-    summary: item.snippet ?? "",
-    sentiment: (item.sentiment ?? "neutral") as NewsSentiment,
-    category: item.category ? NEWS_CATEGORY_LABEL[item.category] ?? item.category : undefined,
-    source: item.publisher ?? "출처 미상",
-    timeLabel: formatRelativeTime(item.pubDate),
-    importance: item.importance ?? undefined,
-    link: item.link,
-    coinTag: item.symbol && item.symbol !== "ALL" ? item.symbol : undefined,
-  };
+export interface FngView {
+  value: number;
+  label: string;
+  prevValue?: number;
 }
 
 // ─────────────────────────────────────────────────────────────
-// 클라이언트 fetch 래퍼 — 모두 실패 시 안전 폴백([] / null) 반환
+// 순수 헬퍼 (서버/클라 공용 — fetch 없음)
 // ─────────────────────────────────────────────────────────────
-
-/** /api/coins/ticker 기본 10종 시세. 실패 시 []. */
-export async function fetchTickers(): Promise<CoinTicker[]> {
-  try {
-    const res = await fetch("/api/coins/ticker", { cache: "no-store" });
-    if (!res.ok) return [];
-    const json = (await res.json()) as { tickers?: CoinTicker[] };
-    return json.tickers ?? [];
-  } catch {
-    return [];
-  }
-}
 
 /** tickers 배열에서 특정 base 심볼(BTC 등)의 ticker. 없으면 null. */
 export function findTicker(tickers: CoinTicker[], baseSymbol: string): CoinTicker | null {
@@ -355,90 +249,17 @@ export function toTickerItems(tickers: CoinTicker[]): TickerItem[] {
   }));
 }
 
-/** /api/board/coin-{symbol} — 공지/일반글. 실패 시 빈 결과. */
-export async function fetchCoinPosts(boardSlug: string): Promise<CoinPostsResult> {
-  try {
-    const res = await fetch(`/api/board/${boardSlug}?limit=30&sort=recent`, { cache: "no-store" });
-    if (!res.ok) return { notices: [], posts: [] };
-    const json = (await res.json()) as { notices?: RawBoardRow[]; posts?: RawBoardRow[] };
-    return {
-      notices: (json.notices ?? []).map(mapBoardRow),
-      posts: (json.posts ?? []).map(mapBoardRow),
-    };
-  } catch {
-    return { notices: [], posts: [] };
-  }
-}
-
-/** /api/news?query={coinTag} — coinTag="ALL"이면 필터 없이 최신 뉴스. 실패 시 []. */
-export async function fetchCoinNews(coinTag: string): Promise<NewsRowItem[]> {
-  try {
-    const qs = coinTag && coinTag !== "ALL" ? `?query=${encodeURIComponent(coinTag)}` : "";
-    const res = await fetch(`/api/news${qs}`, { cache: "no-store" });
-    if (!res.ok) return [];
-    const json = (await res.json()) as { items?: RawNewsItem[] };
-    return (json.items ?? []).map(mapNewsItem);
-  } catch {
-    return [];
-  }
-}
-
-/** /api/coins/hot-issues — 핫이슈 위젯용. 실패 시 []. */
-export async function fetchHotIssues(): Promise<HotIssue[]> {
-  try {
-    const res = await fetch("/api/coins/hot-issues", { cache: "no-store" });
-    if (!res.ok) return [];
-    const json = (await res.json()) as {
-      items?: { rank: number; symbol: string; trend: string }[];
-    };
-    return (json.items ?? []).map((it) => ({
-      rank: it.rank,
-      keyword: COIN_META[it.symbol]?.nameKo ?? it.symbol,
-      trend: TREND_MAP[it.trend] ?? "same",
-      href: COIN_META[it.symbol]?.href,
-    }));
-  } catch {
-    return [];
-  }
-}
-
-export interface FngView {
-  value: number;
-  label: string;
-  prevValue?: number;
-}
-
-/** /api/fng — 공포·탐욕 지수. 실패/에러 응답 시 null. */
-export async function fetchFng(): Promise<FngView | null> {
-  try {
-    const res = await fetch("/api/fng", { cache: "no-store" });
-    if (!res.ok) return null;
-    const json = (await res.json()) as {
-      value?: number;
-      classification?: string;
-      prevValue?: number;
-    };
-    if (typeof json.value !== "number") return null;
-    return { value: json.value, label: json.classification ?? "", prevValue: json.prevValue };
-  } catch {
-    return null;
-  }
-}
-
-/** /api/blog?limit=3 — 공식글 위젯용. 실패 시 []. */
-export async function fetchOfficialPosts(): Promise<OfficialPost[]> {
-  try {
-    const res = await fetch("/api/blog?limit=3", { cache: "no-store" });
-    if (!res.ok) return [];
-    const json = (await res.json()) as {
-      posts?: { slug: string; title: string; published_at?: string | null; created_at?: string | null }[];
-    };
-    return (json.posts ?? []).slice(0, 3).map((p) => ({
-      slug: p.slug,
-      title: p.title,
-      date: (p.published_at ?? p.created_at ?? "").slice(0, 10),
-    }));
-  } catch {
-    return [];
-  }
+/** ISO → "방금 전 / N분 전 / N시간 전 / N일 전 / N주 전" (렌더 시점 기준 시각) */
+export function formatRelativeTime(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return "";
+  const diffMin = Math.floor((Date.now() - t) / 60000);
+  if (diffMin < 1) return "방금 전";
+  if (diffMin < 60) return `${diffMin}분 전`;
+  const h = Math.floor(diffMin / 60);
+  if (h < 24) return `${h}시간 전`;
+  const d = Math.floor(h / 24);
+  if (d < 7) return `${d}일 전`;
+  return `${Math.floor(d / 7)}주 전`;
 }

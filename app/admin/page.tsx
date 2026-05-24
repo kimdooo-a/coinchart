@@ -146,10 +146,10 @@ export default function AdminPage() {
                     <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-red-500/10 rounded-full blur-[120px]" />
                     <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-orange-500/10 rounded-full blur-[120px]" />
                 </div>
-                <div className="relative z-10 bg-card/30 backdrop-blur-md border border-white/10 p-8 rounded-3xl shadow-xl text-center max-w-md w-full">
+                <div className="relative z-10 bg-surface-container border border-outline-variant p-8 rounded-3xl shadow-xl text-center max-w-md w-full">
                     <h1 className="text-3xl font-black mb-4 text-red-500">{t.admin.accessDenied}</h1>
                     <p className="text-muted-foreground mb-8">{t.admin.accessDeniedMsg}</p>
-                    <Link href="/" className="px-8 py-3 bg-gray-800 hover:bg-gray-700 rounded-full font-bold transition-all text-white inline-block">
+                    <Link href="/" className="px-8 py-3 bg-surface-container-high hover:bg-surface-container-highest rounded-full font-bold transition-all text-on-surface inline-block">
                         {t.common.back}
                     </Link>
                 </div>
@@ -165,7 +165,7 @@ export default function AdminPage() {
                 <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-orange-500/10 rounded-full blur-[120px]" />
             </div>
 
-            <header className="relative z-10 max-w-5xl mx-auto flex items-center gap-4 mb-10 border-b border-white/10 pb-6">
+            <header className="relative z-10 max-w-5xl mx-auto flex items-center gap-4 mb-10 border-b border-outline-variant pb-6">
                 <Link
                     href="/"
                     className="text-2xl font-black bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent hover:opacity-80 transition-opacity flex items-center gap-2"
@@ -177,7 +177,7 @@ export default function AdminPage() {
             <div className="relative z-10 max-w-5xl mx-auto space-y-12">
 
                 {/* 블로그 관리 바로가기 */}
-                <section className="bg-card/30 backdrop-blur-md border border-white/10 p-8 rounded-3xl shadow-xl">
+                <section className="bg-surface-container border border-outline-variant p-8 rounded-3xl shadow-xl">
                     <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-foreground">
                         {lang === 'ko' ? '블로그 관리' : 'Blog Management'}
                     </h2>
@@ -199,15 +199,33 @@ export default function AdminPage() {
                         </Link>
                         <Link
                             href="/blog"
-                            className="bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-gray-900/20 text-white"
+                            className="bg-surface-container-high hover:bg-surface-container-highest px-6 py-3 rounded-xl font-bold transition-all shadow-sm text-on-surface"
                         >
                             {lang === 'ko' ? '블로그 보기' : 'View Blog'}
                         </Link>
                     </div>
                 </section>
 
+                {/* 공지 게시판 관리 바로가기 (R3/T06) */}
+                <section className="bg-surface-container border border-outline-variant p-8 rounded-3xl shadow-xl">
+                    <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-foreground">
+                        📌 {lang === 'ko' ? '공지 게시판 관리' : 'Notice Management'}
+                    </h2>
+                    <p className="text-muted-foreground mb-6 text-sm">
+                        {lang === 'ko' ? '게시판별 공지 작성 및 공지 등록/해제를 관리합니다.' : 'Create board notices and toggle notice status.'}
+                    </p>
+                    <div className="flex flex-wrap gap-4">
+                        <Link
+                            href="/admin/board"
+                            className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-900/20 text-white"
+                        >
+                            {lang === 'ko' ? '공지 관리' : 'Manage Notices'}
+                        </Link>
+                    </div>
+                </section>
+
                 {/* News Control Section */}
-                <section className="bg-card/30 backdrop-blur-md border border-white/10 p-8 rounded-3xl shadow-xl">
+                <section className="bg-surface-container border border-outline-variant p-8 rounded-3xl shadow-xl">
                     <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-foreground">
                         📰 {t.admin.newsControl}
                         {loading && <span className="text-xs text-yellow-500 animate-pulse font-mono bg-yellow-500/10 px-2 py-1 rounded">({t.admin.processing})</span>}
@@ -225,14 +243,14 @@ export default function AdminPage() {
                             {t.admin.triggerCrawler}
                         </button>
 
-                        <div className="flex-1 bg-black/40 p-4 rounded-xl font-mono text-xs text-green-400 overflow-x-auto h-32 border border-white/10 custom-scrollbar">
+                        <div className="flex-1 bg-surface-container-high p-4 rounded-xl font-mono text-xs text-secondary overflow-x-auto h-32 border border-outline-variant custom-scrollbar">
                             {crawlResult || t.admin.status.ready}
                         </div>
                     </div>
                 </section>
 
                 {/* Market Data Control Section */}
-                <section className="bg-card/30 backdrop-blur-md border border-white/10 p-8 rounded-3xl shadow-xl">
+                <section className="bg-surface-container border border-outline-variant p-8 rounded-3xl shadow-xl">
                     <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-foreground">
                         📈 {t.admin.marketControl}
                         {loading && <span className="text-xs text-yellow-500 animate-pulse font-mono bg-yellow-500/10 px-2 py-1 rounded">({t.admin.processing})</span>}
@@ -250,7 +268,7 @@ export default function AdminPage() {
                             {t.admin.updatePrices}
                         </button>
 
-                        <div className="flex-1 bg-black/40 p-4 rounded-xl font-mono text-xs text-blue-400 overflow-x-auto h-32 border border-white/10 custom-scrollbar">
+                        <div className="flex-1 bg-surface-container-high p-4 rounded-xl font-mono text-xs text-primary overflow-x-auto h-32 border border-outline-variant custom-scrollbar">
                             {marketResult || t.admin.status.ready}
                         </div>
                     </div>
@@ -258,7 +276,7 @@ export default function AdminPage() {
 
 
                 {/* Data Cleanup Section */}
-                <section className="bg-card/30 backdrop-blur-md border border-white/10 p-8 rounded-3xl shadow-xl">
+                <section className="bg-surface-container border border-outline-variant p-8 rounded-3xl shadow-xl">
                     <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-foreground">
                         🧹 {t.admin.dataCleanup}
                         {loading && <span className="text-xs text-yellow-500 animate-pulse font-mono bg-yellow-500/10 px-2 py-1 rounded">({t.admin.processing})</span>}
@@ -276,27 +294,27 @@ export default function AdminPage() {
                             {t.admin.startCleanup}
                         </button>
 
-                        <div className="flex-1 bg-black/40 p-4 rounded-xl font-mono text-xs text-red-400 overflow-x-auto h-32 border border-white/10 custom-scrollbar">
+                        <div className="flex-1 bg-surface-container-high p-4 rounded-xl font-mono text-xs text-error overflow-x-auto h-32 border border-outline-variant custom-scrollbar">
                             {cleanupResult || t.admin.status.ready}
                         </div>
                     </div>
                 </section>
 
                 {/* User Management Section */}
-                <section className="bg-card/30 backdrop-blur-md border border-white/10 p-8 rounded-3xl shadow-xl">
+                <section className="bg-surface-container border border-outline-variant p-8 rounded-3xl shadow-xl">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-2xl font-bold text-foreground">👥 {t.admin.userManagement} ({users.length})</h2>
                         <button
                             onClick={fetchUsers}
-                            className="text-sm bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg font-bold transition-all border border-white/10 text-white"
+                            className="text-sm bg-surface-container-high hover:bg-surface-container-highest px-4 py-2 rounded-lg font-bold transition-all border border-outline-variant text-on-surface"
                         >
                             {t.admin.refresh}
                         </button>
                     </div>
 
-                    <div className="overflow-x-auto rounded-xl border border-white/10">
-                        <table className="w-full text-left text-sm text-gray-400">
-                            <thead className="bg-black/40 text-gray-200 uppercase font-bold text-xs">
+                    <div className="overflow-x-auto rounded-xl border border-outline-variant">
+                        <table className="w-full text-left text-sm text-on-surface-variant">
+                            <thead className="bg-surface-container-high text-on-surface uppercase font-bold text-xs">
                                 <tr>
                                     <th className="p-4">{t.admin.table.email}</th>
                                     <th className="p-4">{t.admin.table.created}</th>
@@ -304,15 +322,15 @@ export default function AdminPage() {
                                     <th className="p-4 text-right">{t.admin.table.action}</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-white/10 bg-black/20">
+                            <tbody className="divide-y divide-outline-variant bg-surface-container-lowest">
                                 {users.length === 0 ? (
                                     <tr>
                                         <td colSpan={4} className="p-8 text-center text-muted-foreground">{t.admin.table.noUsers}</td>
                                     </tr>
                                 ) : (
                                     users.map((u) => (
-                                        <tr key={u.id} className="hover:bg-white/5 transition-colors">
-                                            <td className="p-4 text-white font-medium">{u.email}</td>
+                                        <tr key={u.id} className="hover:bg-surface-container transition-colors">
+                                            <td className="p-4 text-on-surface font-medium">{u.email}</td>
                                             <td className="p-4 text-muted-foreground">{new Date(u.created_at).toLocaleDateString()}</td>
                                             <td className="p-4 text-muted-foreground">{u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleString() : '-'}</td>
                                             <td className="p-4 text-right">

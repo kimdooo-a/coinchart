@@ -1,116 +1,72 @@
-"use client";
+// /coin/[symbol] — 코인룸 (R3/T04, 2026-05-24): 클라이언트 fetch → SSR 전환
+//
+// R2/T03의 "use client" + coin-queries.ts 클라 fetch 구조를 async 서버 컴포넌트로 전환.
+// 시세·게시글·뉴스·핫이슈·FNG·공식글을 서버에서 초기 fetch(lib/community/coin-server.ts,
+// anon Supabase 직접 쿼리 + 5분 ISR)하여 렌더한다. 히어로·사이드바는 서버 렌더,
+// 탭 전환 인터랙션만 클라 하위 컴포넌트(CoinRoomTabs)로 분리한다. JSX·디자인은 그대로 보존하고
+// altcoin/kimp 집계형은 ticker 미존재 → 정적 폴백을 유지한다(buildCoinView). generateMetadata로 SEO.
 
-import { use, useState, useEffect } from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Activity } from "lucide-react";
 import CoinHero from "@/components/community/CoinHero";
-import CommunityTabs from "@/components/community/CommunityTabs";
-import BoardRow, { BoardTableHeader } from "@/components/community/BoardRow";
-import NewsRow from "@/components/community/NewsRow";
+import CoinRoomTabs from "@/components/community/CoinRoomTabs";
 import SidebarWidget from "@/components/community/SidebarWidget";
 import PriceTickerWidget from "@/components/community/widgets/PriceTickerWidget";
 import HotIssueWidget from "@/components/community/widgets/HotIssueWidget";
 import FngGaugeWidget from "@/components/community/widgets/FngGaugeWidget";
 import OfficialPostsWidget from "@/components/community/widgets/OfficialPostsWidget";
 import FooterSection from "@/components/footer-section";
-import {
-    getCoinRoomMeta,
-    buildCoinView,
-    fetchTickers,
-    findTicker,
-    toTickerItems,
-    fetchCoinPosts,
-    fetchCoinNews,
-    fetchHotIssues,
-    fetchFng,
-    fetchOfficialPosts,
-    type CoinBoardPost,
-} from "@/lib/community/coin-queries";
-import type { CoinTicker } from "@/types/coins";
-import type { NewsHeadlineItem } from "@/components/community/NewsHeadlineCard";
-import type { HotIssue } from "@/components/community/widgets/HotIssueWidget";
-import type { OfficialPost } from "@/components/community/widgets/OfficialPostsWidget";
-import type { FngView } from "@/lib/community/coin-queries";
+import { getCoinRoomMeta, COIN_ROOM_SLUGS } from "@/lib/community/coin-queries";
+import { fetchCoinRoomData } from "@/lib/community/coin-server";
 
-const TABS = [
-    { key: "all", label: "전체" },
-    { key: "discussion", label: "💬 토론" },
-    { key: "news", label: "📰 뉴스" },
-    { key: "analysis", label: "📊 시세·분석" },
-    { key: "notice", label: "📌 공지" },
-];
+// 5분 ISR (시세/핫이슈 캐시 정책과 정렬 — 메인페이지·/news와 동일)
+export const revalidate = 300;
 
-type NewsItem = NewsHeadlineItem & { coinTag?: string };
-
-interface CoinRoomData {
-    symbol: string; // 데이터를 가져온 시점의 meta.slug
-    tickers: CoinTicker[];
-    posts: CoinBoardPost[];
-    notices: CoinBoardPost[];
-    news: NewsItem[];
-    hotIssues: HotIssue[];
-    fng: FngView | null;
-    officialPosts: OfficialPost[];
+// 코인룸 6종(btc/eth/xrp/sol/altcoin/kimp)은 슬러그가 고정 → 빌드 시 프리렌더(SSG+ISR)로 SEO 강화.
+// 목록 밖 슬러그는 notFound() 처리되므로 fallback은 허용하지 않는다(dynamicParams=false).
+export const dynamicParams = false;
+export function generateStaticParams() {
+    return COIN_ROOM_SLUGS.map((symbol) => ({ symbol }));
 }
 
-export default function CoinRoomPage({
+// ─────────────────────────────────────────────────────────────
+// SEO 메타 — 코인별 (집계형 altcoin/kimp 포함)
+// ─────────────────────────────────────────────────────────────
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ symbol: string }>;
+}): Promise<Metadata> {
+    const { symbol } = await params;
+    const meta = getCoinRoomMeta(symbol);
+    if (!meta) return { title: "코인룸" };
+
+    const title = `${meta.nameKo}(${meta.symbol}) 시세·뉴스·토론 - 코인 커뮤니티`;
+    const description = meta.description;
+    return {
+        title,
+        description,
+        openGraph: { title, description, type: "website" },
+        alternates: { canonical: `/coin/${meta.slug}` },
+    };
+}
+
+// ─────────────────────────────────────────────────────────────
+// 페이지
+// ─────────────────────────────────────────────────────────────
+export default async function CoinRoomPage({
     params,
 }: {
     params: Promise<{ symbol: string }>;
 }) {
-    const { symbol } = use(params);
+    const { symbol } = await params;
     const meta = getCoinRoomMeta(symbol);
     if (!meta) notFound();
 
-    const [activeTab, setActiveTab] = useState("all");
-
-    // 실데이터 — 단일 상태 객체(symbol 포함)로 보관해 effect 내 동기 setState 회피.
-    const [data, setData] = useState<CoinRoomData | null>(null);
-
-    useEffect(() => {
-        let alive = true;
-        Promise.all([
-            fetchTickers(),
-            fetchCoinPosts(meta.boardSlug),
-            fetchCoinNews(meta.coinTagFilter),
-            fetchHotIssues(),
-            fetchFng(),
-            fetchOfficialPosts(),
-        ]).then(([tk, pr, nw, hi, f, op]) => {
-            if (!alive) return;
-            setData({
-                symbol: meta.slug,
-                tickers: tk,
-                posts: pr.posts,
-                notices: pr.notices,
-                news: nw,
-                hotIssues: hi,
-                fng: f,
-                officialPosts: op,
-            });
-        });
-        return () => {
-            alive = false;
-        };
-    }, [meta.slug, meta.boardSlug, meta.coinTagFilter]);
-
-    // 현재 symbol 데이터가 준비됐을 때만 사용(심볼 전환 시 이전 데이터 노출 방지)
-    const ready = data && data.symbol === meta.slug ? data : null;
-    const loading = ready === null;
-    const tickers = ready?.tickers ?? [];
-    const posts = ready?.posts ?? [];
-    const notices = ready?.notices ?? [];
-    const news = ready?.news ?? [];
-    const hotIssues = ready?.hotIssues ?? [];
-    const fng = ready?.fng ?? null;
-    const officialPosts = ready?.officialPosts ?? [];
-
-    // 정적 메타 + 실시세 병합 (집계형 altcoin/kimp는 ticker 미존재 → 정적 폴백)
-    const coin = buildCoinView(meta, findTicker(tickers, meta.symbol));
-    // 인기글: 추천수 상위 10 (실데이터 클라 정렬)
-    const trending = [...posts].sort((a, b) => b.likes - a.likes).slice(0, 10);
-    const tickerItems = toTickerItems(tickers).slice(0, 6);
+    const data = await fetchCoinRoomData(meta);
+    const { coin, tickerItems, hotIssues, fng, officialPosts } = data;
 
     return (
         <main className="flex-1 bg-surface-container-low">
@@ -134,167 +90,15 @@ export default function CoinRoomPage({
 
                 <div className="flex flex-col lg:flex-row gap-6">
                     <div className="flex-1 min-w-0">
-                        {/* 탭 */}
-                        <CommunityTabs
-                            items={TABS}
-                            activeKey={activeTab}
-                            onChange={setActiveTab}
-                            className="mb-5"
+                        {/* 탭 + 탭 패널 (클라 인터랙션 — 이미 로드된 데이터 위 즉시 토글) */}
+                        <CoinRoomTabs
+                            symbol={coin.symbol}
+                            boardSlug={meta.boardSlug}
+                            posts={data.posts}
+                            notices={data.notices}
+                            trending={data.trending}
+                            news={data.news}
                         />
-
-                        {activeTab === "all" && (
-                            <>
-                                {/* Trending 섹션 */}
-                                <section className="bg-surface-container-lowest border border-outline-variant rounded-md mb-4 overflow-hidden">
-                                    <header className="px-4 py-2.5 border-b border-outline-variant flex items-center justify-between">
-                                        <h2 className="text-body-base font-bold">🔥 인기글 (오늘)</h2>
-                                        <Link href={`/board/${meta.boardSlug}`} className="text-meta text-on-surface-variant hover:text-primary">
-                                            더보기 ›
-                                        </Link>
-                                    </header>
-                                    <BoardTableHeader />
-                                    <div className="divide-y divide-outline-variant">
-                                        {loading ? (
-                                            <div className="py-12 text-center text-on-surface-variant text-body-sm">
-                                                불러오는 중…
-                                            </div>
-                                        ) : trending.length === 0 ? (
-                                            <div className="py-12 text-center text-on-surface-variant text-body-sm">
-                                                아직 {coin.symbol} 관련 글이 없습니다.{" "}
-                                                <Link href={`/board/free/write?coin=${coin.symbol}`} className="text-primary font-bold hover:underline">
-                                                    첫 글을 작성해보세요 →
-                                                </Link>
-                                            </div>
-                                        ) : (
-                                            trending.map((p, i) => (
-                                                <BoardRow
-                                                    key={p.uuid}
-                                                    post={{ ...p, number: i + 1 }}
-                                                    href={`/board/${p.boardSlug}/${p.uuid}`}
-                                                    compact
-                                                />
-                                            ))
-                                        )}
-                                    </div>
-                                </section>
-
-                                {/* 뉴스 섹션 */}
-                                <section className="bg-surface-container-lowest border border-outline-variant rounded-md mb-4 overflow-hidden">
-                                    <header className="px-4 py-2.5 border-b border-outline-variant flex items-center justify-between">
-                                        <h2 className="text-body-base font-bold">📰 {coin.symbol} 뉴스</h2>
-                                        <Link href={`/news?coin=${coin.symbol}`} className="text-meta text-on-surface-variant hover:text-primary">
-                                            더보기 ›
-                                        </Link>
-                                    </header>
-                                    <div className="divide-y divide-outline-variant">
-                                        {loading ? (
-                                            <div className="py-8 text-center text-on-surface-variant text-body-sm">
-                                                불러오는 중…
-                                            </div>
-                                        ) : news.length === 0 ? (
-                                            <div className="py-8 text-center text-on-surface-variant text-body-sm">
-                                                관련 뉴스가 없습니다.
-                                            </div>
-                                        ) : (
-                                            news.slice(0, 10).map((n) => <NewsRow key={n.id} item={n} />)
-                                        )}
-                                    </div>
-                                </section>
-
-                                {/* 토론 (최신) 섹션 */}
-                                <section className="bg-surface-container-lowest border border-outline-variant rounded-md overflow-hidden">
-                                    <header className="px-4 py-2.5 border-b border-outline-variant flex items-center justify-between">
-                                        <h2 className="text-body-base font-bold">💬 최신 토론</h2>
-                                        <Link href={`/board/${meta.boardSlug}`} className="text-meta text-on-surface-variant hover:text-primary">
-                                            더보기 ›
-                                        </Link>
-                                    </header>
-                                    <BoardTableHeader />
-                                    <div className="divide-y divide-outline-variant">
-                                        {loading ? (
-                                            <div className="py-8 text-center text-on-surface-variant text-body-sm">
-                                                불러오는 중…
-                                            </div>
-                                        ) : posts.length === 0 ? (
-                                            <div className="py-8 text-center text-on-surface-variant text-body-sm">
-                                                아직 글이 없습니다.
-                                            </div>
-                                        ) : (
-                                            posts.slice(0, 20).map((p) => (
-                                                <BoardRow
-                                                    key={p.uuid}
-                                                    post={p}
-                                                    href={`/board/${p.boardSlug}/${p.uuid}`}
-                                                    compact
-                                                />
-                                            ))
-                                        )}
-                                    </div>
-                                </section>
-                            </>
-                        )}
-
-                        {activeTab === "discussion" && (
-                            <section className="bg-surface-container-lowest border border-outline-variant rounded-md overflow-hidden">
-                                <BoardTableHeader />
-                                <div className="divide-y divide-outline-variant">
-                                    {loading ? (
-                                        <div className="py-8 text-center text-on-surface-variant text-body-sm">불러오는 중…</div>
-                                    ) : posts.length === 0 ? (
-                                        <div className="py-8 text-center text-on-surface-variant text-body-sm">아직 글이 없습니다.</div>
-                                    ) : (
-                                        posts.map((p) => (
-                                            <BoardRow key={p.uuid} post={p} href={`/board/${p.boardSlug}/${p.uuid}`} />
-                                        ))
-                                    )}
-                                </div>
-                            </section>
-                        )}
-
-                        {activeTab === "news" && (
-                            <section className="bg-surface-container-lowest border border-outline-variant rounded-md overflow-hidden">
-                                <div className="divide-y divide-outline-variant">
-                                    {loading ? (
-                                        <div className="py-8 text-center text-on-surface-variant text-body-sm">불러오는 중…</div>
-                                    ) : news.length === 0 ? (
-                                        <div className="py-8 text-center text-on-surface-variant text-body-sm">관련 뉴스가 없습니다.</div>
-                                    ) : (
-                                        news.map((n) => <NewsRow key={n.id} item={n} />)
-                                    )}
-                                </div>
-                            </section>
-                        )}
-
-                        {activeTab === "analysis" && (
-                            <section className="bg-surface-container-lowest border border-outline-variant rounded-md p-6 text-center">
-                                <p className="text-body-base mb-3">전체 차트 분석은 도구 페이지에서 확인하세요.</p>
-                                <Link
-                                    href={`/analysis/${coin.symbol.toLowerCase()}`}
-                                    className="inline-flex items-center gap-1 bg-primary text-on-primary text-label-bold px-4 py-2 rounded-md hover:bg-primary-container"
-                                >
-                                    📊 {coin.symbol} 차트 분석 보기
-                                </Link>
-                            </section>
-                        )}
-
-                        {activeTab === "notice" && (
-                            <section className="bg-surface-container-lowest border border-outline-variant rounded-md overflow-hidden">
-                                {loading ? (
-                                    <div className="p-6 text-center text-on-surface-variant text-body-sm">불러오는 중…</div>
-                                ) : notices.length === 0 ? (
-                                    <div className="p-6 text-center text-on-surface-variant">현재 공지가 없습니다.</div>
-                                ) : (
-                                    <>
-                                        <BoardTableHeader />
-                                        <div className="divide-y divide-outline-variant">
-                                            {notices.map((p) => (
-                                                <BoardRow key={p.uuid} post={p} href={`/board/${p.boardSlug}/${p.uuid}`} />
-                                            ))}
-                                        </div>
-                                    </>
-                                )}
-                            </section>
-                        )}
                     </div>
 
                     {/* Sidebar */}
@@ -385,7 +189,7 @@ export default function CoinRoomPage({
 
                         {tickerItems.length > 0 && <PriceTickerWidget items={tickerItems} />}
                         {fng && <FngGaugeWidget value={fng.value} label={fng.label} prevValue={fng.prevValue} />}
-                        {hotIssues.length > 0 && <HotIssueWidget items={hotIssues.slice(0, 5)} />}
+                        {hotIssues.length > 0 && <HotIssueWidget items={hotIssues} />}
                         {officialPosts.length > 0 && <OfficialPostsWidget posts={officialPosts} />}
                     </aside>
                 </div>

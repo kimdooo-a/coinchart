@@ -123,16 +123,16 @@ export function MemoViewModal({ isOpen, memo, decryptedContent, onClose, onDelet
 
     return (
         <AnimatePresence>
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/60 backdrop-blur-sm">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="bg-[#111] border border-gray-800 rounded-2xl p-6 w-full max-w-lg shadow-2xl relative max-h-[90vh] overflow-y-auto"
+                    className="bg-popover border border-border rounded-2xl p-6 w-full max-w-lg shadow-2xl relative max-h-[90vh] overflow-y-auto"
                 >
                     <button
                         onClick={handleClose}
-                        className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"
+                        className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -141,18 +141,18 @@ export function MemoViewModal({ isOpen, memo, decryptedContent, onClose, onDelet
                         /* View Mode */
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                                <h2 className="text-xl font-bold text-white">{memo.title}</h2>
+                                <h2 className="text-xl font-bold text-foreground">{memo.title}</h2>
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => setIsEditing(true)}
-                                        className="p-2 text-gray-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-all"
+                                        className="p-2 text-muted-foreground hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-all"
                                         title={t.edit}
                                     >
                                         <Edit2 className="w-4 h-4" />
                                     </button>
                                     <button
                                         onClick={handleDelete}
-                                        className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                                        className="p-2 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
                                         title={t.delete}
                                     >
                                         <Trash2 className="w-4 h-4" />
@@ -160,15 +160,15 @@ export function MemoViewModal({ isOpen, memo, decryptedContent, onClose, onDelet
                                 </div>
                             </div>
 
-                            <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-4 min-h-[200px]">
-                                <pre className="text-gray-200 whitespace-pre-wrap font-sans text-sm leading-relaxed">
+                            <div className="bg-muted border border-border rounded-lg p-4 min-h-[200px]">
+                                <pre className="text-foreground whitespace-pre-wrap font-sans text-sm leading-relaxed">
                                     {decryptedContent}
                                 </pre>
                             </div>
 
                             <button
                                 onClick={handleClose}
-                                className="w-full py-3 bg-gray-800 hover:bg-gray-700 rounded-lg text-gray-300 font-medium transition-all"
+                                className="w-full py-3 bg-muted hover:bg-muted/70 rounded-lg text-foreground font-medium transition-all"
                             >
                                 {t.close}
                             </button>
@@ -176,51 +176,51 @@ export function MemoViewModal({ isOpen, memo, decryptedContent, onClose, onDelet
                     ) : (
                         /* Edit Mode */
                         <form onSubmit={handleSave} className="space-y-4">
-                            <h2 className="text-xl font-bold text-white">{t.edit}</h2>
+                            <h2 className="text-xl font-bold text-foreground">{t.edit}</h2>
 
                             {/* Title */}
                             <div>
-                                <label className="block text-xs text-gray-400 mb-1">{t.memoTitle}</label>
+                                <label className="block text-xs text-muted-foreground mb-1">{t.memoTitle}</label>
                                 <input
                                     type="text"
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
-                                    className="w-full bg-[#1a1a1a] border border-gray-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500"
+                                    className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-indigo-500"
                                     required
                                 />
                             </div>
 
                             {/* Content */}
                             <div>
-                                <label className="block text-xs text-gray-400 mb-1">{t.memoContent}</label>
+                                <label className="block text-xs text-muted-foreground mb-1">{t.memoContent}</label>
                                 <textarea
                                     value={content}
                                     onChange={(e) => setContent(e.target.value)}
-                                    className="w-full bg-[#1a1a1a] border border-gray-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-indigo-500 min-h-[150px] resize-none"
+                                    className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:border-indigo-500 min-h-[150px] resize-none"
                                     required
                                 />
                             </div>
 
                             {/* New Password */}
                             <div>
-                                <label className="block text-xs text-gray-400 mb-1">{t.password}</label>
+                                <label className="block text-xs text-muted-foreground mb-1">{t.password}</label>
                                 <input
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full bg-[#1a1a1a] border border-gray-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500"
+                                    className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-indigo-500"
                                     required
                                 />
                             </div>
 
                             {/* Confirm Password */}
                             <div>
-                                <label className="block text-xs text-gray-400 mb-1">{t.confirmPassword}</label>
+                                <label className="block text-xs text-muted-foreground mb-1">{t.confirmPassword}</label>
                                 <input
                                     type="password"
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
-                                    className="w-full bg-[#1a1a1a] border border-gray-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500"
+                                    className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-indigo-500"
                                     required
                                 />
                             </div>
@@ -250,7 +250,7 @@ export function MemoViewModal({ isOpen, memo, decryptedContent, onClose, onDelet
                                         setTitle(memo.title)
                                         setContent(decryptedContent)
                                     }}
-                                    className="flex-1 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg text-gray-300 font-medium transition-all"
+                                    className="flex-1 py-3 bg-muted hover:bg-muted/70 rounded-lg text-foreground font-medium transition-all"
                                 >
                                     {t.cancel}
                                 </button>

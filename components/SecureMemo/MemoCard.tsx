@@ -40,7 +40,7 @@ export function MemoCard({ memo, onClick, onDelete, t }: MemoCardProps) {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="group bg-card/30 backdrop-blur-md border border-white/10 rounded-2xl p-5 shadow-xl hover:border-indigo-500/30 transition-all cursor-pointer"
+            className="group bg-card/30 backdrop-blur-md border border-border rounded-2xl p-5 shadow-xl hover:border-indigo-500/30 transition-all cursor-pointer"
             onClick={onClick}
         >
             <div className="flex items-start justify-between gap-3">
@@ -65,14 +65,14 @@ export function MemoCard({ memo, onClick, onDelete, t }: MemoCardProps) {
                         e.stopPropagation()
                         onDelete()
                     }}
-                    className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                    className="p-2 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
                     title={t.delete}
                 >
                     <Trash2 className="w-4 h-4" />
                 </button>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-white/5 flex justify-between text-xs text-muted-foreground">
+            <div className="mt-4 pt-3 border-t border-border flex justify-between text-xs text-muted-foreground">
                 <span>{t.createdAt}: {formatDate(memo.created_at)}</span>
                 <span>{t.updatedAt}: {formatDate(memo.updated_at)}</span>
             </div>

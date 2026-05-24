@@ -1,7 +1,7 @@
 "use client";
 
 // 게시판 목록/상세 공용 사이드바 (R2/T01, 2026-05-23)
-// 시세·핫이슈·FNG·공식글을 클라이언트 fetch로 실데이터화 (기존 mock-coins 의존 제거).
+// 시세·핫이슈·FNG·공식글을 board-queries 클라이언트 fetch로 실데이터화 (더미 의존 0건).
 // 각 위젯은 데이터가 없거나 fetch 실패 시 조용히 숨김 → 전체 페이지 깨짐 방지.
 
 import { useEffect, useState } from "react";

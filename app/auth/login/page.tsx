@@ -16,16 +16,16 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="flex-1 flex items-center justify-center bg-[#0a0a0a] text-white">
+        <div className="flex-1 flex items-center justify-center bg-background text-foreground">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="w-full max-w-md rounded-2xl bg-[#111] p-8 text-center shadow-xl border border-gray-800"
+                className="w-full max-w-md rounded-2xl bg-card p-8 text-center shadow-xl border border-border"
             >
                 <h1 className="mb-6 text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
                     Welcome Back
                 </h1>
-                <p className="mb-8 text-gray-400">
+                <p className="mb-8 text-muted-foreground">
                     Sign in or create an account to access your portfolio.
                 </p>
 

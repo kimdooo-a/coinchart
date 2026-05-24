@@ -57,18 +57,18 @@ export default function AdminBlogPage() {
 
   if (checking) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <p className="text-gray-400">{t.admin.checking}</p>
+      <div className="min-h-screen bg-surface-container-lowest text-on-surface flex items-center justify-center">
+        <p className="text-on-surface-variant">{t.admin.checking}</p>
       </div>
     );
   }
 
   if (!authorized) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="min-h-screen bg-surface-container-lowest text-on-surface flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2">{t.admin.accessDenied}</h1>
-          <p className="text-gray-400">{t.admin.accessDeniedMsg}</p>
+          <p className="text-on-surface-variant">{t.admin.accessDeniedMsg}</p>
         </div>
       </div>
     );
@@ -78,7 +78,7 @@ export default function AdminBlogPage() {
     const colors = {
       published: 'bg-green-500/20 text-green-400 border-green-500/30',
       draft: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-      archived: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
+      archived: 'bg-gray-500/20 text-on-surface-variant border-gray-500/30',
     };
     const labels = {
       published: lang === 'ko' ? '발행' : 'Published',
@@ -93,12 +93,12 @@ export default function AdminBlogPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-surface-container-lowest text-on-surface">
       <div className="container mx-auto px-4 pt-24 pb-12">
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Link href="/admin" className="text-gray-400 hover:text-white transition-colors">
+            <Link href="/admin" className="text-on-surface-variant hover:text-on-surface transition-colors">
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <h1 className="text-2xl font-bold">
@@ -107,7 +107,7 @@ export default function AdminBlogPage() {
           </div>
           <Link
             href="/admin/blog/new"
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-lg hover:bg-primary/80 transition-colors"
           >
             <Plus className="w-4 h-4" />
             {lang === 'ko' ? '새 글 작성' : 'New Post'}
@@ -116,17 +116,17 @@ export default function AdminBlogPage() {
 
         {/* 테이블 */}
         {loading ? (
-          <div className="text-center py-12 text-gray-400">
+          <div className="text-center py-12 text-on-surface-variant">
             {t.common.loading}
           </div>
         ) : posts.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-400 mb-4">
+            <p className="text-on-surface-variant mb-4">
               {lang === 'ko' ? '아직 작성된 포스트가 없습니다.' : 'No posts yet.'}
             </p>
             <Link
               href="/admin/blog/new"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-lg hover:bg-primary/80 transition-colors"
             >
               <Plus className="w-4 h-4" />
               {lang === 'ko' ? '첫 글 작성하기' : 'Write your first post'}
@@ -136,23 +136,23 @@ export default function AdminBlogPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10">
-                  <th className="text-left py-3 px-4 text-gray-400 font-medium">
+                <tr className="border-b border-outline-variant">
+                  <th className="text-left py-3 px-4 text-on-surface-variant font-medium">
                     {lang === 'ko' ? '제목' : 'Title'}
                   </th>
-                  <th className="text-left py-3 px-4 text-gray-400 font-medium">
+                  <th className="text-left py-3 px-4 text-on-surface-variant font-medium">
                     {lang === 'ko' ? '상태' : 'Status'}
                   </th>
-                  <th className="text-left py-3 px-4 text-gray-400 font-medium">
+                  <th className="text-left py-3 px-4 text-on-surface-variant font-medium">
                     {lang === 'ko' ? '카테고리' : 'Category'}
                   </th>
-                  <th className="text-right py-3 px-4 text-gray-400 font-medium">
+                  <th className="text-right py-3 px-4 text-on-surface-variant font-medium">
                     {lang === 'ko' ? '조회수' : 'Views'}
                   </th>
-                  <th className="text-left py-3 px-4 text-gray-400 font-medium">
+                  <th className="text-left py-3 px-4 text-on-surface-variant font-medium">
                     {lang === 'ko' ? '작성일' : 'Created'}
                   </th>
-                  <th className="text-right py-3 px-4 text-gray-400 font-medium">
+                  <th className="text-right py-3 px-4 text-on-surface-variant font-medium">
                     {lang === 'ko' ? '작업' : 'Actions'}
                   </th>
                 </tr>
@@ -161,14 +161,14 @@ export default function AdminBlogPage() {
                 {posts.map((post) => (
                   <tr
                     key={post.id}
-                    className="border-b border-white/5 hover:bg-white/5 transition-colors"
+                    className="border-b border-outline-variant hover:bg-surface-container transition-colors"
                   >
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
                         {post.status === 'published' ? (
                           <Eye className="w-4 h-4 text-green-400 shrink-0" />
                         ) : (
-                          <EyeOff className="w-4 h-4 text-gray-500 shrink-0" />
+                          <EyeOff className="w-4 h-4 text-on-surface-variant shrink-0" />
                         )}
                         <span className="font-medium truncate max-w-[300px]">
                           {post.title}
@@ -176,31 +176,31 @@ export default function AdminBlogPage() {
                       </div>
                     </td>
                     <td className="py-3 px-4">{statusBadge(post.status)}</td>
-                    <td className="py-3 px-4 text-gray-400">
+                    <td className="py-3 px-4 text-on-surface-variant">
                       {post.category
                         ? lang === 'ko'
                           ? post.category.name_ko
                           : post.category.name_en
                         : '-'}
                     </td>
-                    <td className="py-3 px-4 text-right text-gray-400">
+                    <td className="py-3 px-4 text-right text-on-surface-variant">
                       {post.view_count.toLocaleString()}
                     </td>
-                    <td className="py-3 px-4 text-gray-400">
+                    <td className="py-3 px-4 text-on-surface-variant">
                       {new Date(post.created_at).toLocaleDateString()}
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2 justify-end">
                         <Link
                           href={`/admin/blog/edit/${post.id}`}
-                          className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                          className="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-colors"
                           title={lang === 'ko' ? '수정' : 'Edit'}
                         >
                           <Edit className="w-4 h-4" />
                         </Link>
                         <button
                           onClick={() => handleDelete(post.id, post.title)}
-                          className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                          className="p-1.5 text-on-surface-variant hover:text-error hover:bg-red-500/10 rounded-lg transition-colors"
                           title={lang === 'ko' ? '삭제' : 'Delete'}
                         >
                           <Trash2 className="w-4 h-4" />

@@ -2,7 +2,7 @@
  * scripts/seed-community.ts
  *
  * 커뮤니티 게시판(free/market/info) 더미 게시글 시드 스크립트.
- * lib/community/mock-posts.ts 의 MOCK_POSTS 를 community_posts 테이블에 INSERT.
+ * scripts/fixtures/community-posts.ts 의 MOCK_POSTS 를 community_posts 테이블에 INSERT.
  *
  * 사용:
  *   npx tsx scripts/seed-community.ts            # 기존 행 있으면 중단
@@ -18,7 +18,7 @@ import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
 import path from "path";
 import bcrypt from "bcryptjs";
-import { MOCK_POSTS, type BoardSlug, type MockPost } from "../lib/community/mock-posts";
+import { MOCK_POSTS, type BoardSlug, type MockPost } from "./fixtures/community-posts";
 
 dotenv.config({ path: path.resolve(__dirname, "../.env.local") });
 
