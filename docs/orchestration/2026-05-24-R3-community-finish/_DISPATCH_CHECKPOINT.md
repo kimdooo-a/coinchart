@@ -11,7 +11,7 @@
 | 태그 | community-finish |
 | 터미널 수 | 12 (평면) |
 | 발사 방식 | Wave 1 동시 9개 → Wave 2 (T01 후) 3개 → Wave 3 (T02~T04 후) 1개 |
-| 상태 | **round-3-completed** — 12/12 verified. tsc 0·build green(54/54). _SUMMARY.md 작성완료. 통합커밋·SOT갱신 대기 |
+| 상태 | **round-3-committed** — 12/12 verified. 통합커밋 `30cdbd5`(79 files, +5953/−2102). SOT 갱신완료. 후속: 실 DB push + UI wiring(R4) |
 | 선행 | R2 5/5 완료(`81b9624`), R1 15/15 완료(`60d4298`) |
 
 ## 일꾼 진행 상태 (3차 회수 검증 — 2026-05-25)
@@ -60,8 +60,10 @@
 
 ## 다음 액션 (Phase 5)
 
-- [x] T02·T03·T04 회수·검증 완료 (3차 회수)
-- [ ] **Wave 3 (T05) 발사** — 선행 전부 충족. 작업: ① 전역 mock import grep 0 재확인 ② `scripts/seed-community.ts`의 MOCK_POSTS 의존 처리(인라인 fixture 이관 또는 보류·보고) ③ mock-coins/posts/news.ts 3종 + board-meta/news-meta re-export 스텁 삭제 ④ BoardSidebar 정리 ⑤ build 재검증
-- [ ] T05 회수 후 전체 완료 → `_SUMMARY.md` 통합 보고서
-- [ ] **통합 커밋**(SOT 갱신 포함): `_API_REFERENCE.md`(T07 dislike·T08 PATCH 반영), `_SCHEMA_REFERENCE.md`(comment_likes 테이블), 격리위반 2건 정리
-- [ ] 실 DB: `20260524_post_likes_rpc.sql`·`20260524_comment_likes.sql` 운영자 `supabase db push`
+- [x] T01~T12 회수·검증 완료 (12/12)
+- [x] `_SUMMARY.md` 통합 보고서 작성
+- [x] SOT 갱신: `_API_REFERENCE.md`(T07 like dislikeCount·T08 comment PATCH), `_SCHEMA_REFERENCE.md`(community_comment_likes·RPC·트리거·RLS), board-meta/news-meta stale 주석 정정
+- [x] **통합 커밋 `30cdbd5`** (main, 79 files)
+- [ ] R3 마커 `.dispatch/archive/`로 이동 (라운드 종료 정리)
+- [ ] 운영자: `supabase db push` — `20260524_post_likes_rpc.sql`·`20260524_comment_likes.sql`
+- [ ] **R4 후보**: UI wiring 결선(비추 placeholder↔T07 RPC, 댓글추천 미연결↔T08 PATCH) + E2E(kdye2e) + dead code 정리(news-queries 클라 fetch)
