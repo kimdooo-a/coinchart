@@ -1,9 +1,10 @@
 # 다음 개발 프롬프트
 
-> 최종 갱신: 2026-05-23
+> 최종 갱신: 2026-05-25
 
 ## 최근 완료된 작업
 
+- **세션 28 (2026-05-25)**: **R3 지휘자 — community-finish 12/12 회수·통합·커밋/cs**. 직전 1차 회수(7/12)→2차(T03 news·T09 stock 도착)→T04 stale 오판→사용자 "다시확인" 정정(11/12)→Wave3 T05(mock 3종 삭제)로 **12/12 verified**. 트랙 A(T01 메타 SSOT→T02/T03/T04 board/news/coin SSR 전환→T05 mock-coins/posts/news.ts 삭제·시드 `scripts/fixtures/community-posts.ts` 이관) · 트랙 B(T06 관리자 공지 라우트·T07 게시글 dislike 분리RPC+회원전이 dedup·T08 댓글추천 comment_likes 신규) · 트랙 C(T09 stock·T10 admin·T11 계정/유틸+SecureMemo·T12 정적/인증 라이트화). **지휘자 SOT 갱신**: `_API_REFERENCE.md`(like dislikeCount·comment PATCH), `_SCHEMA_REFERENCE.md`(community_comment_likes·RPC·트리거·RLS), board-meta/news-meta stale 주석 정정. **통합 커밋 `30cdbd5`**(79파일 +5953/−2102) + 부기 `c34f264`. 검증 tsc 0·build ✓(54/54, board ƒ·coin ● 6종 프리렌더·news ƒ). 격리위반 2건(T06 additive 허용). R3 마커 12개 아카이브. ⚠️ **로컬 main 미push**(사용자 미선택) · 실 DB 미적용(마이그레이션 2종). (보고서 `2026-05-24-R3-_SUMMARY.md`, handover `session28-r3-conductor.md`, solution `2026-05-25-dispatch-recovery-stale-snapshot.md`)
 - **세션 27 (2026-05-23)**: **R1·R2 지휘자 — 디스패치 라운드 마감**. R1(mainpage, 15 일꾼) 재개 회수→미완 3건(T09·T11·T15) 마커 리셋·부분 재발사로 **15/15 마감**, 통합 커밋 `60d4298`(T08·T10·T12·T14 + `.claude/hooks/`·settings.json + R1 문서). R2(realdata-finish, 5 일꾼) 설계·발사·회수·검증→**5/5**, 통합 커밋 `81b9624`(board/news/coin + `*-queries.ts` 3종 + `BoardSidebar.tsx` + R2 문서). 일꾼 자체 cs 5건(41a8115/e510d0e/4259d1d/1ae0cd6/8fcadb3). **검증**: tsc 0·build Compiled·`/` ○ 정적 ISR(ƒ→○)·node:crypto 경고 0·격리 위반 0(BoardSidebar 1건 허용). **R1·R2 마커 전부 `.dispatch/archive/`로 이동**. write-guard 소프트 가드(env 비전파) 확인 → 동시 발사 안전. 잔여 mock import는 정적 메타/타입뿐 → **R3 정리 이월**. (보고서 `2026-05-23-R1-_SUMMARY.md`·`R2-_SUMMARY.md`, handover `session27-dispatch-conductor.md`)
 - **세션 26 (2026-05-23)**: R2/T02 일꾼 — 뉴스 실데이터 전환. 사용자 R2-T02 발사(배너=R2-T05였으나 사용자 지시 우선 → 마커 재바인딩 승인 후 진행; write-guard는 `$env:DK_DISPATCH_ROLE` 휘발성으로 미차단). `/news`를 `mock-news`(MOCK_NEWS/getHeadlines)·mock-coins → 실데이터: **목록·헤드라인** `/api/news`(코인=`?query=`·분류=`?category=` 서버 위임, **감정·정렬=클라** API 미지원), **사이드바** ticker/hot-issues/fng/blog. `"use client"` 유지 + 클라 fetch(JSX 보존). **신규 `lib/community/news-queries.ts`**(클라 안전 — server-only `queries.ts`와 분리): `NEWS_CATEGORY_LABEL`(영문 enum→한글 8값, `altcoin_news`→"알트코인" 추가로 T06 §7 라벨 누락 해소) + `mapApiNews` + fetch 래퍼 5(graceful) + 클라용 `COIN_DISPLAY`. `NEWS_CATEGORIES`/`COIN_FILTERS`(라벨 사전)만 mock-news import 유지. discussionHref/commentCount 생략(NewsRow "—"), popular→importance 대체, "코인별 뉴스" 위젯 정적 유지(집계 소스 부재). FngGaugeWidget 72/68 제거. tsc 0 / grep mock- 라벨사전 1건 / grep /api/news ≥1 / build PASS(`/news` ○ Static). **3중 병렬 cs**(T01 24·T03 25 점유) → 26. ※`/board`·`/news`·`/coin` 모두 실데이터 전환 완료 → `mock-coins`/`mock-news`/`mock-posts` **완전 삭제 가능**(라벨 사전 이전 후). (handover `2026-05-23-R2-T02-news-realdata.md` + 메타 `session26-r2t02-news.md` + solution `dispatch-marker-rebind-volatile-env.md`)
 - **세션 25 (2026-05-23)**: R2/T03 일꾼 — 코인룸 실데이터 전환. 사용자 R2-T03 발사(디스패치 배너=R2-T04였으나 사용자 **"T03 강행"** 명시 — 마커 PID로 T03/T04 별개 터미널 확인, write-guard는 `$env:DK_DISPATCH_ROLE` 미설정으로 미차단). `/coin/[symbol]` 6종(btc/eth/xrp/sol/altcoin/kimp)을 `mock-coins`/`mock-posts`/`mock-news` → 실데이터: **시세** `/api/coins/ticker`(price/24h/고저/거래량) · **게시글** `/api/board/coin-{slug}`(공지 탭=notices, 인기글=추천순 클라정렬, 최신토론·토론탭) · **뉴스** `/api/news?query={tag}`(지시서 `?coin=`은 미지원→`?query=` 정정, kimp는 ALL→필터없음) · **사이드바** `/api/coins/ticker`·`/api/coins/hot-issues`·`/api/fng`·`/api/blog`. `"use client"` 유지 + 클라 fetch(JSX 보존). **신규 `lib/community/coin-queries.ts`**: 정적 사전 `COIN_ROOMS`(6 — 이름·로고·설명·태그·시총/도미넌스/7d·30d 정적값 + 시세 폴백 + `binanceSymbol`·`isAggregate`)·`COIN_META`(12, 사이드바 라벨) + fetch 래퍼 7 + 매퍼(`buildCoinView`·`mapBoardRow`(UUID 분리)·`mapNewsItem`(English category→한글)·`formatRelativeTime`). 정적 메타는 mock `COINS` 값 **복사**(import 0건)이며, 클라 번들 오염 방지 위해 서버전용 `queries.ts`의 `COIN_META`도 import하지 않고 재정의. **altcoin/kimp**: `isAggregate`=true·`binanceSymbol`=null → ticker 미조회·정적 폴백 설명형(T15 패턴). `/api/kimchi`(실 김프) 존재하나 "kimp 설명형 유지" 준수로 미연동(후속). AI 시그널 위젯은 데이터소스 목록 외라 정적 placeholder 유지(후속 `/api/signals`). **React19 `set-state-in-effect`**: 단일 `data` 상태객체(symbol 동봉)+`.then` 1회 setState+`ready` 파생으로 해소(T01과 동일 패턴 — solution은 T01 `2026-05-23-react19-set-state-in-effect-data-fetch.md` 재활용, 중복 생략). 검증: tsc 0 / eslint(page+coin-queries) 0 / `grep mock- app/coin/` **0건** / `grep "/api/" coin-queries.ts` 6종 / build Compiled(`ƒ /coin/[symbol]`). ⚠️ 배너=T04였으나 T03 실행 → **T04(차트) 미수행 + T03 전용 터미널(PID 75996) 유휴 가능성**(지휘자 회수 판단). 병렬 cs T01 24 선점 → 25 채택. (handover `2026-05-23-R2-T03-coin-realdata.md`)
@@ -34,14 +35,24 @@
 
 ## 추천 다음 작업 (우선순위)
 
-### ★ R3 후보 (다음 라운드 — R1·R2 마감 후 인계)
+### ★ R4 후보 (다음 라운드 — R3 마감 후 인계)
 
-1. **mock-* 완전 정리** (높음) — `/board`·`/news`·`/coin` 모두 실데이터 전환 완료로 데이터부 unused. `lib/community/mock-coins.ts` 삭제(참조 0) + `BOARD_META`/`BoardSlug`→`lib/community/board-meta.ts`, `NEWS_CATEGORIES`/`COIN_FILTERS`→`lib/community/news-meta.ts` 이전 후 `mock-posts`/`mock-news` 데이터부 삭제.
-2. **queries.ts SSOT 환원** (중간) — R2-T05가 `app/page.tsx`에 anon 로더 자급하며 `fetchMainPageData`(queries.ts) 미사용화. queries.ts 클라이언트만 anon 교체 + page.tsx 로더 제거로 단일화.
-3. **관리자 게시판 라우트** (`is_notice` 생성 admin 전용) — T12 §6.
-4. **댓글 추천 토글** + **dislikeCount 분리 RPC** — T12 §6 (현재 `likeCount`는 `SUM(value)`라 음수 가능).
-5. **추천 dedup 회원 전이 정책** — 비로그인→로그인 시 중복 추천 — T12 §6.
+1. **실 DB push** (높음·선행) — `supabase db push`로 `20260524_post_likes_rpc.sql`·`20260524_comment_likes.sql` 적용. ⚠️ `/api/community/like`가 RPC `community_toggle_post_like`를 호출하므로 **함수 생성이 배포 선행조건**. comment_likes는 신규 테이블·트리거.
+2. **UI wiring 결선** (높음) — 백엔드/UI 양측 준비 완료, 결선만: ① 게시글 비추 `components/community/PostVoteButtons.tsx`의 로컬 placeholder(`disliked?1:0`) → T07 응답 `dislikeCount` 표시(`togglePostLike` 반환 타입에 dislikeCount 추가) ② 댓글 추천 `components/community/CommentSection.tsx`의 미연결 ThumbsUp → `PATCH /api/community/comment`(commentId, value:1, 익명은 x-client-ip-hash 헤더).
+3. **E2E** (kdye2e) — board/news/coin SSR + 추천/비추/댓글/관리자 공지 흐름 시나리오.
+4. **dead code 정리** — `news-queries.ts` 클라 fetch 함수들(SSR 전환으로 unused). 순수 헬퍼(`categoryLabel`/`formatRelativeTime`/타입)는 news-server.ts가 사용 중이라 보존.
+5. **queries.ts SSOT 환원** (중간) — R2-T05가 `app/page.tsx`에 anon 로더 자급하며 `fetchMainPageData`(queries.ts) 미사용화. queries.ts 클라이언트만 anon 교체 + page.tsx 로더 제거로 단일화.
 6. **차트 방향 색 KR 정렬** — 볼륨 막대·MACD 히스토그램 녹↑/빨↓ → 빨/파 정렬 (R2-T04 후속) + hero/로딩 CSS 오버레이 라이트화.
+7. **토큰계 통일** — shadcn `*-muted-foreground` vs `*-on-surface-variant` 이원화 단일화 (R1/T10·T11·R3/T09 후속).
+
+### ✅ R3 완료 (세션 28, 2026-05-25 — community-finish 12/12)
+
+- **mock-* 완전 정리** ✅ — `mock-coins.ts`/`mock-posts.ts`/`mock-news.ts` 3종 삭제, 시드데이터 `scripts/fixtures/community-posts.ts` 이관, 메타 SSOT `board-meta.ts`/`news-meta.ts` 분리(T01). 전역 mock import 0.
+- **board/news/coin SSR 전환** ✅ — board ƒ(T02)·news ƒ(T03)·coin ● SSG+ISR 6종(T04).
+- **관리자 공지 라우트** ✅ — `app/admin/board`·`app/api/admin/board`(T06, is_notice 토글).
+- **게시글 dislike 분리 RPC + 회원전이 dedup** ✅ — `community_toggle_post_like`·`community_post_like_counts`(T07).
+- **댓글 추천 토글** ✅ — `community_comment_likes` 신규 + `PATCH /api/community/comment`(T08).
+- **라이트화 4트랙** ✅ — stock(T09)·admin(T10)·계정/유틸+SecureMemo(T11)·정적/인증(T12).
 
 ### 세션 8 — 라이트화 (Step 4) — ✅ 대부분 완료
 
@@ -97,12 +108,12 @@
 
 ## 빌드 상태
 
-- Next.js 빌드 (`npm run build`): ✅ Compiled successfully — `/` ○ **정적 ISR**(ƒ→○ 전환), `/news`·`/market`·`/signal`·`/stock-market` ○ Static, `/board/[slug]`·`/coin/[symbol]` ƒ, **node:crypto 경고 0**
+- Next.js 빌드 (`npm run build`): ✅ Compiled successfully (54/54 static) — `/` ○ 정적 ISR, **`/board/[slug]`·`[postId]`·`write` ƒ SSR**(R3/T02), **`/coin/[symbol]` ● SSG+ISR 6종 프리렌더**(R3/T04), **`/news` ƒ SSR**(R3/T03), node:crypto 경고 0
 - TypeScript (`npx tsc --noEmit`): ✅ 에러 없음
 - ESLint: 신규 코드 0 에러, 기존 `scripts/` any/require 경고는 알려진 항목
-- Vitest: ✅ 동작 중 (커뮤니티 신규 모듈은 테스트 미작성 — 다음 세션 추가 권장)
-- Git: R1 통합 `60d4298` + R2 통합 `81b9624` + 일꾼 cs 5건 푸시 완료. 세션 27 cs 커밋 예정
-- 디스패치: R1·R2 마커 전부 `.dispatch/archive/`로 이동, active teams 비움
+- Vitest: ✅ 동작 중 (커뮤니티 신규 모듈은 테스트 미작성 — R4 E2E 권장)
+- Git: R1 `60d4298` + R2 `81b9624` 푸시 완료. **R3 통합 `30cdbd5` + 부기 `c34f264`는 로컬 main(push 보류 — 세션 28 사용자 미선택)**
+- 디스패치: R1·R2·R3 마커 전부 `.dispatch/archive/`로 이동, active teams 비움
 
 ## v2.0 진행 상태
 
