@@ -4,6 +4,7 @@
 
 ## 최근 완료된 작업
 
+- **세션 31 (2026-05-25)**: **R6 지휘부 — polish 5터미널 회수·통합·AD1 활성화·TipTap 핫픽스**. kdydispatch 평면 5터미널 분산(지시 프롬프트 작성 직후 외부 일꾼 선행 완료) 회수·통합. **T01** 관리자 AD1 storageState(관리자=`smartkdy7@gmail.com` OAuth 전용→`@supabase/ssr` 프로그래밍 로그인, config projects 3분리, 자체생성/정리 안전장치) · **T02** 마이그 14파일명 14자리 정규화(`git mv`)+`config.toml`+`backfill_schema_migrations.sql`(코드만, 운영 DB 미적용) · **T03** `queries.ts` `fetchMainPageData` anon 단일화 + page.tsx `loadMainPageData` 제거(`/` ○ ISR 유지) · **T04** 차트 볼륨·MACD 히스토그램 녹↑/빨↓→빨↑/파↓(theme.ts 헬퍼) · **T05** 토큰 `muted-foreground`→`on-surface-variant` 137건/29파일(`ui/`·globals.css 별칭 보존, 시각 회귀 0). **AD1 활성화**(사용자 지시 — service_role로 관리자 임시 비번 주입): 로그인 성공 → AD1 실행 중 **`/admin/board` 라이브 버그 적발** — `BlogEditor` TipTap `immediatelyRender` 누락으로 클라 크래시(S-AD1 비로그인이라 미발견, AD1이 처음 관리자 렌더로 적발). 핫픽스 1줄(blog 작성/편집 동시 해소) → **AD1 `2 passed`**. 비번 무력화(새 랜덤 폐기, 인증 원복). tsc 0·build green·라이브 잔여 0. 커밋 `94ff3a5`(Wave1)·`a1983a3`(핫픽스)·`f8b3373`(T05+_SUMMARY) origin push(`a729b73..f8b3373`). (handover `session31-r6-conductor.md`, 보고서 `R6-_SUMMARY.md`, solution `2026-05-25-tiptap-immediatelyrender-ssr-crash.md`)
 - **세션 30 (2026-05-25)**: **R5 지휘부 — R5 후보 4건 #4→#3→#2→#1 순차 완결**. **#4** 마이그레이션 CREATE POLICY 18개 멱등화(`DROP IF EXISTS` 선행) + 운영 DB `schema_migrations` 실측 진단(version=파일명 8자리 날짜라 같은 날짜 다수 파일 `20260523`×3·`20260524`×2 version 충돌 → 단순 backfill 불가, 파일명 14자리 정규화 선행 필요 — 런북 §9)[`e75a77c`]. **#3** `coin-queries.ts` 미사용 `CoinPostsResult` 제거(R4/T03이 우려한 unused fetch 래퍼는 R3/T04 SSR 전환 때 이미 제거됨을 직접 확인 — 실 dead 1개뿐)[`e12b6ee`]. **#2** detail 비추집계 노출(`BoardPostDetail.dislikes` + `board-server`가 `community_post_like_counts` RPC를 댓글 조회와 병렬 호출 + `PostVoteButtons` `initialDislikes` 전달; 클라 `fetchBoardPost` 사용처 0이라 detail API route 미변경·SSR 경로만)[`a1f437c`]. **#1** T04 E2E 풀검증(kdye2e): L-B4 실패=시드가 게시글만 적재·댓글 0 → 추천 대상 부재 원인 확정(앱버그 아님), **자체 댓글 생성 + waitForResponse 201/PATCH 확정**으로 spec 개선 → **E2E 29 passed / 0 failed / 1 skipped(AD1)**, E2E 댓글 Management API 정리(잔여 0)[`77d3547`]. tsc 0·build green. 보류분 3 + R5 4커밋 origin push(`d789d07..77d3547`). (handover `2026-05-25-session30-r5.md`, solution `2026-05-25-e2e-db-dependent-test-reliability.md`, 런북 §9)
 - **세션 29 (2026-05-25)**: **R4 지휘자 — community-wiring + 실 DB 적용**. (1) R3 미push 커밋 3종 origin push. (2) **R4(4 일꾼)** 설계·발사·회수: T01 db적용준비(마이그 검증·런북·스모크)·T02 UI wiring(게시글 비추 `dislikeCount` 실집계+댓글추천 `PATCH` 결선, PostVoteButtons 가짜값 제거·CommentSection onClick)·T03 dead code(`news-queries.ts` 248→119줄, 14심볼 제거·7보존)·T04 E2E(Wave2). **Wave1 3/3 자가검증 PASS**, 통합 tsc 0·build green(board ƒ·coin ● 6종·news ƒ), 격리위반 0. (3) **실 DB 적용**(중대): 운영 DB(`enksnhshciyvllwfiwrm`)에 커뮤니티 마이그레이션 **5종 전부 미적용** 발견 → `.env.local`의 `SUPABASE_ACCESS_TOKENS`로 **Management API `database/query`** 순차 적용(create_community_tables→alter_news_classify→hot_issues_rpc→comment_likes→post_likes_rpc, 전부 HTTP 201, DB password 불요). 게시글 시드 156행 + 스모크 PASS 2/SKIP 1(댓글 트리거)/FAIL 0(토글 RPC `like 0→1→0`). **커뮤니티 백엔드 운영 첫 가동**. ⚠️ 마이그레이션 히스토리 미기록(차후 db push 시 CREATE POLICY 3종 DROP 선행). (보고서 `2026-05-25-R4-_SUMMARY.md`, 런북 `docs/db/R4-db-apply-runbook.md`, orchestration `2026-05-25-R4-community-wiring/`)
 - **세션 28 (2026-05-25)**: **R3 지휘자 — community-finish 12/12 회수·통합·커밋/cs**. 직전 1차 회수(7/12)→2차(T03 news·T09 stock 도착)→T04 stale 오판→사용자 "다시확인" 정정(11/12)→Wave3 T05(mock 3종 삭제)로 **12/12 verified**. 트랙 A(T01 메타 SSOT→T02/T03/T04 board/news/coin SSR 전환→T05 mock-coins/posts/news.ts 삭제·시드 `scripts/fixtures/community-posts.ts` 이관) · 트랙 B(T06 관리자 공지 라우트·T07 게시글 dislike 분리RPC+회원전이 dedup·T08 댓글추천 comment_likes 신규) · 트랙 C(T09 stock·T10 admin·T11 계정/유틸+SecureMemo·T12 정적/인증 라이트화). **지휘자 SOT 갱신**: `_API_REFERENCE.md`(like dislikeCount·comment PATCH), `_SCHEMA_REFERENCE.md`(community_comment_likes·RPC·트리거·RLS), board-meta/news-meta stale 주석 정정. **통합 커밋 `30cdbd5`**(79파일 +5953/−2102) + 부기 `c34f264`. 검증 tsc 0·build ✓(54/54, board ƒ·coin ● 6종 프리렌더·news ƒ). 격리위반 2건(T06 additive 허용). R3 마커 12개 아카이브. **✅ origin/main push는 세션 29(2026-05-25)에 완료** · ⚠️ 실 DB 미적용(마이그레이션 2종 — 여전히 R4 선행). (보고서 `2026-05-24-R3-_SUMMARY.md`, handover `session28-r3-conductor.md`, solution `2026-05-25-dispatch-recovery-stale-snapshot.md`)
@@ -51,13 +52,20 @@
 - ~~**coin-queries.ts dead code**~~ → **✅ #3** — fetch 래퍼는 R3/T04에서 이미 제거됨 확인, 실 dead `CoinPostsResult` 1개만 제거.
 - ~~**마이그레이션 히스토리 정합**~~ → **✅ #4(부분)** — CREATE POLICY 18개 멱등화로 차후 db push 재실행 안전 확보. backfill은 파일명 14자리 정규화 선행 필요(R6 이월).
 
-### ★ R6 후보 (다음 라운드)
+### ✅ R6 완료 (세션 31, 2026-05-25 — polish)
 
-1. **AD1 관리자 storageState** — `e2e/auth.setup.ts` + config projects 분리 + 관리자 계정 자격 구성 → AD1(is_notice 토글) E2E 활성화.
-2. **마이그레이션 파일명 14자리 정규화 + schema_migrations backfill** — 정식 db push 환경 구축(런북 §9-4). 같은 날짜 version 충돌 해소 + config.toml + link.
-3. **queries.ts SSOT 환원** (중간) — R2-T05가 `app/page.tsx`에 anon 로더 자급하며 `fetchMainPageData`(queries.ts) 미사용화. 단일화.
-4. **차트 방향 색 KR 정렬** — 볼륨 막대·MACD 히스토그램 녹↑/빨↓ → 빨/파 정렬 (R2-T04 후속) + hero/로딩 CSS 오버레이 라이트화.
-5. **토큰계 통일** — shadcn `*-muted-foreground` vs `*-on-surface-variant` 이원화 단일화 (R1/T10·T11·R3/T09 후속).
+- ~~**AD1 관리자 storageState**~~ → **✅ T01 + AD1 활성화·통과**. `auth.setup.ts`(@supabase/ssr 프로그래밍 로그인)·config projects 3분리·AD1 spec 분리. service_role 비번 주입으로 **AD1 `2 passed`** 검증 후 비번 무력화. **부수 성과: `/admin/board` TipTap 크래시 적발·핫픽스**(`a1983a3`).
+- ~~**마이그 파일명 14자리 정규화**~~ → **✅ T02(코드만)**. 14 `git mv` + `config.toml` + `backfill_schema_migrations.sql`. **운영 DB 적용은 사용자 몫**(`supabase link`+`db push`+backfill, 런북 §9-4).
+- ~~**queries.ts SSOT 환원**~~ → **✅ T03**. `fetchMainPageData` anon 단일화, page.tsx `loadMainPageData` 제거, `/` ○ ISR 유지.
+- ~~**차트 방향 색 KR 정렬**~~ → **✅ T04(히스토그램)**. 볼륨·MACD 히스토그램 빨↑/파↓. **잔여**: RSI/MACD/MA/BB 라인·CSS 오버레이는 범위 밖 보존.
+- ~~**토큰계 통일**~~ → **✅ T05**. `muted-foreground`→`on-surface-variant` 137건/29파일. `ui/`·globals.css 별칭 보존, 시각 회귀 0. **잔여**: `bg-`/`border-` 변형 전수 점검(거의 없음).
+
+### ★ R7 후보 (다음 라운드)
+
+1. **마이그 정합 마무리(운영 DB)** — T02 코드까지 완료. 사용자가 `supabase link --project-ref enksnhshciyvllwfiwrm` + `db push --dry-run` + `backfill_schema_migrations.sql` 실행으로 `schema_migrations` 정합 완료(런북 §9-4).
+2. **AD1 CI 통합** — 현재 비번 무력화로 로컬 재실행 시 비번 재주입 필요. `generateLink`(magiclink) fallback을 `auth.setup`에 구현하면 비번 영구설정 없이 CI 자동화 가능(T01 handover §6 대안).
+3. **차트 라인/오버레이 색 KR 정렬** — T04는 히스토그램만. RSI/MACD/MA/BB 라인·hero CSS 오버레이 후속.
+4. **토큰 `bg-`/`border-` 변형 전수 점검** — T05는 text- 중심. 잔여 변형 1회 점검.
 
 ### ✅ R3 완료 (세션 28, 2026-05-25 — community-finish 12/12)
 
@@ -118,7 +126,9 @@
 - ~~에디터 기능 부족~~ → 28개 버튼, HTML 저장, 자동저장 완비
 - `app/analysis/[symbol]/page.tsx` 807줄 (리팩토링 필요)
 - `BlogPost.content` 타입이 union — 레거시 호환 제거 가능
-- Supabase 마이그레이션 히스토리 동일 날짜 중복 파일 — 리네이밍 권장
+- ~~Supabase 마이그레이션 히스토리 동일 날짜 중복 파일 — 리네이밍 권장~~ → **R6/T02 완료**(14자리 정규화). 운영 DB backfill만 사용자 대기(런북 §9-4)
+- ~~`BlogEditor` TipTap이 SSR/`dynamic(ssr:false)` 환경에서 `immediatelyRender` 누락 시 클라 크래시~~ → **R6 핫픽스 완료**(`a1983a3`, `immediatelyRender:false`). solution `2026-05-25-tiptap-immediatelyrender-ssr-crash.md`
+- **인증 뒤 페이지 E2E 공백**: 비로그인 리다이렉트만 검증하면 보호된 페이지 렌더가 미검증(/admin/board 크래시가 그 사례). 관리자/로그인 storageState로 렌더까지 검증 권장
 
 ## 빌드 상태
 
@@ -126,10 +136,10 @@
 - TypeScript (`npx tsc --noEmit`): ✅ 에러 없음
 - ESLint: 신규 코드 0 에러, 기존 `scripts/` any/require 경고는 알려진 항목
 - Vitest: ✅ 동작 중 (단위 테스트)
-- E2E (Playwright): ✅ **29 passed / 0 failed / 1 skipped(AD1)** (`E2E_DB_READY=1`, 운영 DB + 시드 156행). board/news/coin SSR + 추천/비추/댓글 풀 검증 (R5-#1)
-- Git: R1~R4 + **R5 4커밋(`e75a77c`·`e12b6ee`·`a1f437c`·`77d3547`) origin/main push 완료**(`f3ce509..77d3547`, 세션 30). 워킹트리 clean
-- 실 DB: **커뮤니티 마이그레이션 5종 운영 DB(`enksnhshciyvllwfiwrm`) 적용 완료** (Management API). 게시글 156행 시드. ✅ **R5-#4: CREATE POLICY 18개 멱등화로 재실행 안전 확보**. ⚠️ `schema_migrations` 히스토리는 여전히 미기록 — 정식 db push 정합은 파일명 14자리 정규화 + backfill 선행(런북 §9)
-- 디스패치: R1·R2·R3 마커 전부 `.dispatch/archive/`로 이동, active teams 비움
+- E2E (Playwright): ✅ **29 passed(비인증 chromium) + AD1**(R6/T01 활성화). `E2E_DB_READY=1`, 운영 DB + 시드 156행. AD1은 세션 31에서 service_role 비번 주입으로 **`2 passed`(setup+AD1)** 검증 후 **비번 무력화** → 평상시 graceful skip(재실행 시 비번 재주입 또는 generateLink fallback 필요, R7-2)
+- Git: R1~R5 + **R6 3커밋(`94ff3a5` Wave1·`a1983a3` 핫픽스·`f8b3373` T05+_SUMMARY) origin/main push 완료**(`a729b73..f8b3373`, 세션 31). 워킹트리 clean
+- 실 DB: 커뮤니티 마이그레이션 5종 운영 DB(`enksnhshciyvllwfiwrm`) 적용 완료(Management API) + 시드 156행. **R6/T02: 마이그 파일명 14자리 정규화·`config.toml`·`backfill_schema_migrations.sql` 작성됨(코드만)** — `schema_migrations` 정합은 사용자 `supabase link`+`db push`+backfill 실행 대기(런북 §9-4)
+- 디스패치: R1·R2·R3·R6 마커 전부 `.dispatch/archive/`로 이동, active teams 비움
 
 ## v2.0 진행 상태
 
