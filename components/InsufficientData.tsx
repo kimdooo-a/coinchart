@@ -31,7 +31,7 @@ export function InsufficientData({
     : 'At least 3 indicator signals are required for analysis.';
 
   return (
-    <Card className={`bg-gray-900 border-orange-800/50 ${className}`}>
+    <Card className={`bg-surface-container-lowest border-orange-300 ${className}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center gap-3">
           <div className="relative">
@@ -40,7 +40,7 @@ export function InsufficientData({
               <AlertTriangle className="w-6 h-6 text-orange-400" />
             </div>
           </div>
-          <h3 className="text-lg font-bold text-gray-300">
+          <h3 className="text-lg font-bold text-on-surface">
             {title || defaultTitle}
           </h3>
         </div>
@@ -50,16 +50,16 @@ export function InsufficientData({
       </CardHeader>
 
       <CardContent className="space-y-4">
-        <p className="text-gray-500 text-sm">
+        <p className="text-on-surface-variant text-sm">
           {description || defaultDesc}
         </p>
 
         {reasons.length > 0 && (
-          <div className="pt-4 border-t border-gray-800">
+          <div className="pt-4 border-t border-outline-variant">
             <Label className="text-orange-400 text-xs mb-2 block">
               {lang === 'ko' ? '상세 사유' : 'Details'}
             </Label>
-            <ul className="text-sm text-gray-400 space-y-1.5">
+            <ul className="text-sm text-on-surface-variant space-y-1.5">
               {reasons.map((reason, idx) => (
                 <li key={idx} className="flex items-start gap-2">
                   <span className="text-orange-400 mt-0.5">•</span>

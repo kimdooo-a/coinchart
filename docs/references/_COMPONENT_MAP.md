@@ -102,7 +102,7 @@
 
 | 컴포넌트 | 사용 위치 | lib 의존성 | 컴포넌트 의존성 |
 |----------|----------|------------|----------------|
-| `Badge` | `PremiumLock`, `InsufficientData`, `dashboard-grid`, `app/analysis/[symbol]/page.tsx` | `lib/utils` | 없음 |
+| `Badge` | `PremiumLock`, `InsufficientData`, `app/analysis/[symbol]/page.tsx` | `lib/utils` | 없음 |
 | `Button` | `PremiumLock`, `InsufficientData`, `app/analysis/[symbol]/page.tsx` | `lib/utils` | 없음 |
 | `Card` (Card, CardHeader, CardContent, CardFooter, CardTitle, CardDescription) | `PremiumLock`, `InsufficientData`, `app/analysis/[symbol]/page.tsx` | `lib/utils` | 없음 |
 | `Label` | `PremiumLock`, `InsufficientData`, `app/analysis/[symbol]/page.tsx` | `lib/utils` | 없음 |
@@ -124,14 +124,13 @@
 | `InsufficientData` | 현재 미사용 (페이지에서 import 없음) | 없음 | `ui/card`, `ui/badge`, `ui/button`, `ui/label` |
 | `hero-section` | `app/page.tsx` | `context/LanguageContext`, `lib/translations` | `hero-chart`, `news-rotator` |
 | `hero-chart` | `hero-section` | `lib/api/binance` | 없음 |
-| `about-section` | `app/page.tsx` | 없음 (lucide-react, framer-motion만 사용) | 없음 |
 | `footer-section` | `app/page.tsx` | 없음 (lucide-react만 사용) | 없음 |
 | `global-header` | `app/layout.tsx` (전역) | `context/LanguageContext`, `lib/translations` | `AuthButton` |
-| `dashboard-grid` | `app/page.tsx` | `context/LanguageContext`, `lib/translations`, `lib/utils` | `ui/badge` |
 | `news-rotator` | `hero-section` | `context/LanguageContext` | 없음 |
 | `DetailedChart` | `app/analysis/page.tsx`, `app/analysis/[symbol]/page.tsx` | 없음 (lightweight-charts만 사용) | 없음 |
 | `TradeModal` | `app/portfolio/page.tsx` | `lib/supabase/client`, `lib/constants` | 없음 |
-| `LanguageSwitcher` | 현재 미사용 (페이지에서 import 없음, global-header가 대체) | `context/LanguageContext` | 없음 |
+
+> **세션 34(R8, 2026-05-25)**: `about-section`·`dashboard-grid`·`LanguageSwitcher` 3종 **삭제**(import 0건 dead code — v2.0 커뮤니티 피벗 후 구 다크 랜딩 잔재). 홈은 커뮤니티 SSR로 재구축되어 미사용, 언어 전환은 `global-header` 내장 토글로 대체됨.
 
 ---
 
@@ -139,7 +138,7 @@
 
 | 페이지 | 사용 컴포넌트 |
 |--------|-------------|
-| `app/page.tsx` (홈) | `hero-section`, `dashboard-grid`, `about-section`, `footer-section`, `InvestmentQuotes` |
+| `app/page.tsx` (홈) | 커뮤니티 SSR로 재구축 (베스트30·뉴스·게시판·코인룸·사이드바). 구 `hero-section`/`footer-section` 등 잔재 일부 존재 여부는 재감사 필요 |
 | `app/layout.tsx` (전역 레이아웃) | `global-header` -> `AuthButton` |
 | `app/analysis/page.tsx` | `DetailedChart`, `Ticker`, `AnalysisPanel`, `ChartAnalysisPanel`, `InvestmentQuotes`, `Disclaimer` |
 | `app/analysis/[symbol]/page.tsx` | `DetailedChart`, `Card`, `Badge`, `Button`, `Separator`, `Label` |
@@ -172,8 +171,6 @@ app/page.tsx (홈)
   ├── hero-section
   │     ├── hero-chart ─── lib/api/binance
   │     └── news-rotator ── context/LanguageContext
-  ├── dashboard-grid ─── ui/badge
-  ├── about-section
   ├── footer-section
   └── InvestmentQuotes ── lib/quotes, context/LanguageContext
 
@@ -234,6 +231,7 @@ Analysis/StockPanel (app/analysis/stock/[symbol])
 | `Analysis/TradingStrategyGuide` | 주석 처리됨 (AnalysisPanel에서 import 제거) |
 | `Stock/StockSectorPerformance` | 어떤 페이지에서도 import 되지 않음 |
 | `ErrorState` | 어떤 페이지에서도 import 되지 않음 |
-| `InsufficientData` | 어떤 페이지에서도 import 되지 않음 |
-| `LanguageSwitcher` | 어떤 페이지에서도 import 되지 않음 (global-header가 언어 전환 기능 내장) |
+| `InsufficientData` | 어떤 페이지에서도 import 안 됨. 단 재사용 UI 프리미티브로 **보존**(세션 34 R8에서 라이트화) |
 | `hooks/useSubscription` | 어떤 컴포넌트에서도 import 되지 않음 |
+
+> 세션 34(R8): `about-section`·`dashboard-grid`·`LanguageSwitcher`는 dead code로 **삭제 완료**(더 이상 후보 아님).

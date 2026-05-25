@@ -21,9 +21,9 @@ export function PremiumLock({
   lang = 'ko'
 }: PremiumLockProps) {
   return (
-    <Card className={`relative overflow-hidden bg-gray-900 border-gray-800 ${className}`}>
+    <Card className={`relative overflow-hidden bg-surface-container-lowest border-outline-variant ${className}`}>
       {/* Blur Overlay */}
-      <div className="absolute inset-0 backdrop-blur-md bg-black/40 z-10 rounded-lg" />
+      <div className="absolute inset-0 backdrop-blur-md bg-surface/50 z-10 rounded-lg" />
 
       {/* Lock Icon & CTA */}
       <CardContent className="relative z-20 flex flex-col items-center justify-center gap-4 py-8">
@@ -38,10 +38,10 @@ export function PremiumLock({
           <Badge variant="outline" className="border-yellow-500 text-yellow-500">
             {tier === 'pro' ? 'PRO' : 'ENTERPRISE'}
           </Badge>
-          <p className="text-sm font-semibold text-white">
+          <p className="text-sm font-semibold text-on-surface">
             {tier === 'pro' ? (lang === 'ko' ? 'Pro 기능' : 'Pro Feature') : (lang === 'ko' ? 'Enterprise 기능' : 'Enterprise Feature')}
           </p>
-          <Label className="text-gray-400 text-xs">
+          <Label className="text-on-surface-variant text-xs">
             {feature}
           </Label>
         </div>
@@ -55,7 +55,7 @@ export function PremiumLock({
           </Button>
         </Link>
 
-        <Label className="text-gray-500 text-xs">
+        <Label className="text-on-surface-variant text-xs">
           {lang === 'ko' ? '이 기능은 프리미엄 전용입니다' : 'This feature is Premium only'}
         </Label>
       </CardContent>

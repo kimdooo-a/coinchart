@@ -143,10 +143,7 @@
 | GlobalHeader | components/global-header.tsx | RootLayout (전체) |
 | FooterSection | components/footer-section.tsx | 랜딩 페이지 (app/page.tsx) 직접 포함 |
 | AuthButton | components/AuthButton.tsx | GlobalHeader |
-| LanguageSwitcher | components/LanguageSwitcher.tsx | GlobalHeader (인라인) |
 | HeroSection | components/hero-section.tsx | 랜딩 페이지 |
-| DashboardGrid | components/dashboard-grid.tsx | 랜딩 페이지 |
-| AboutSection | components/about-section.tsx | 랜딩 페이지 |
 | DetailedChart | components/DetailedChart.tsx | /analysis, /analysis/[symbol] |
 | TradeModal | components/TradeModal.tsx | /portfolio |
 | ErrorState | components/ErrorState.tsx | 에러 표시 공통 |
@@ -175,7 +172,7 @@
 
 | 페이지 ID | 주요 컴포넌트 | 공유 컴포넌트 | kdypick 출처 |
 |----------|-------------|-------------|-------------|
-| R-001 | HeroSection, DashboardGrid, AboutSection | GlobalHeader, FooterSection, InvestmentQuotes | - |
+| R-001 | HeroSection | GlobalHeader, FooterSection, InvestmentQuotes | - |
 | R-004 | DetailedChart, Ticker, AnalysisPanel, ChartAnalysisPanel | Disclaimer, InvestmentQuotes | - |
 | R-005 | DetailedChart, Card, Badge, Button, Separator, Label | Disclaimer | - |
 | R-006 | - (드롭다운 선택 UI) | - | - |

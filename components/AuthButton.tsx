@@ -37,10 +37,10 @@ export const AuthButton = () => {
     return (
         <div className="flex items-center gap-3">
             {user ? (
-                <div className="flex items-center gap-3 bg-gray-900/80 backdrop-blur-md border border-gray-700 rounded-full pl-4 pr-2 py-1 shadow-lg">
+                <div className="flex items-center gap-3 bg-surface-container backdrop-blur-md border border-outline-variant rounded-full pl-4 pr-2 py-1 shadow-lg">
                     <div className="flex flex-col items-end hidden md:flex">
-                        <span className="text-[10px] text-gray-400 uppercase tracking-wide">Welcome</span>
-                        <span className="text-xs font-bold text-blue-400 max-w-[100px] truncate">
+                        <span className="text-[10px] text-on-surface-variant uppercase tracking-wide">Welcome</span>
+                        <span className="text-xs font-bold text-primary max-w-[100px] truncate">
                             {user.user_metadata?.full_name || user.email?.split('@')[0]}
                         </span>
                     </div>
@@ -49,7 +49,7 @@ export const AuthButton = () => {
                     {user.email === 'smartkdy7@gmail.com' && (
                         <Link
                             href="/admin"
-                            className="p-2 text-red-400 hover:text-red-300 transition-colors hover:bg-white/10 rounded-full mr-1"
+                            className="p-2 text-red-500 hover:text-red-600 transition-colors hover:bg-surface-container-high rounded-full mr-1"
                             title="Admin Dashboard"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,11 +68,11 @@ export const AuthButton = () => {
                         <div className="absolute inset-0 rounded-full border border-white/20"></div>
                     </Link>
 
-                    <div className="h-4 w-px bg-gray-700 mx-1"></div>
+                    <div className="h-4 w-px bg-outline-variant mx-1"></div>
 
                     <button
                         onClick={handleLogout}
-                        className="p-2 text-gray-400 hover:text-white transition-colors hover:bg-white/10 rounded-full"
+                        className="p-2 text-on-surface-variant hover:text-on-surface transition-colors hover:bg-surface-container-high rounded-full"
                         title="Logout"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
