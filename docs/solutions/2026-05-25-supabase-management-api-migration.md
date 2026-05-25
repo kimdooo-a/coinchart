@@ -52,7 +52,7 @@ curl -s -w "\nHTTP %{http_code}\n" -X POST \
 ## 교훈
 
 - **운영 DB 동기화는 명시적 게이트가 필요** — 마이그레이션 커밋 ≠ 적용. graceful degrade는 DB 부재를 은폐하므로 "운영자 별도"로 이월하면 영영 안 됨. 라운드 종료 시 운영 DB 객체 존재를 실제 쿼리로 확인할 것.
-- `SUPABASE_ACCESS_TOKEN`만 있으면 **DB password·link·config.toml 없이** Management API `database/query`로 DDL 적용 가능 (단 `schema_migrations` 히스토리는 미기록 — 차후 정식 db push 시 멱등 충돌 주의).
+- `SUPABASE_ACCESS_TOKEN`만 있으면 **DB password·link·config.toml 없이** Management API `database/query`로 DDL 적용 가능 (단 `schema_migrations` 히스토리는 미기록 — 차후 정식 db push 시 멱등 충돌 주의). → **R5-#4(세션 30)에서 정합**: 커뮤니티 5종의 `CREATE POLICY` 18개를 `DROP IF EXISTS` 선행으로 멱등화 완료(재실행 안전 확보) + 운영 DB `schema_migrations` 실측 진단(version=8자리 날짜라 같은 날짜 다수 파일이 충돌 → 단순 backfill 불가, 파일명 14자리 정규화가 선행돼야 정식 db push 가능). 상세 `docs/db/R4-db-apply-runbook.md` §9.
 - E2E 실패는 **앱 버그와 테스트 신뢰성 문제를 분리**해서 진단 — 직접 API 호출이 가장 빠른 귀속 판정.
 
 ## 관련 파일

@@ -261,18 +261,24 @@ CREATE TRIGGER trg_community_post_likes_count
 -- RLS 정책
 -- ==============================================
 
+-- ⚠️ CREATE POLICY는 비멱등 → 각 정책 DROP IF EXISTS 선행으로 재적용 안전 보장 (R5-#4 히스토리 정합)
+
 -- community_boards: 공개 SELECT, 쓰기는 service_role
 ALTER TABLE community_boards ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "community_boards_select" ON community_boards;
 CREATE POLICY "community_boards_select" ON community_boards
   FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "community_boards_insert" ON community_boards;
 CREATE POLICY "community_boards_insert" ON community_boards
   FOR INSERT WITH CHECK (auth.role() = 'service_role');
 
+DROP POLICY IF EXISTS "community_boards_update" ON community_boards;
 CREATE POLICY "community_boards_update" ON community_boards
   FOR UPDATE USING (auth.role() = 'service_role');
 
+DROP POLICY IF EXISTS "community_boards_delete" ON community_boards;
 CREATE POLICY "community_boards_delete" ON community_boards
   FOR DELETE USING (auth.role() = 'service_role');
 
@@ -280,42 +286,53 @@ CREATE POLICY "community_boards_delete" ON community_boards
 --                  UPDATE/DELETE는 본인 또는 service_role (익명은 서버 라우트에서 비번 검증 후 service_role)
 ALTER TABLE community_posts ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "community_posts_select" ON community_posts;
 CREATE POLICY "community_posts_select" ON community_posts
   FOR SELECT USING (is_deleted = false);
 
+DROP POLICY IF EXISTS "community_posts_insert" ON community_posts;
 CREATE POLICY "community_posts_insert" ON community_posts
   FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "community_posts_update" ON community_posts;
 CREATE POLICY "community_posts_update" ON community_posts
   FOR UPDATE USING (author_id IS NOT NULL AND author_id = auth.uid());
 
+DROP POLICY IF EXISTS "community_posts_delete" ON community_posts;
 CREATE POLICY "community_posts_delete" ON community_posts
   FOR DELETE USING (author_id IS NOT NULL AND author_id = auth.uid());
 
 -- community_comments: posts와 동일 패턴
 ALTER TABLE community_comments ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "community_comments_select" ON community_comments;
 CREATE POLICY "community_comments_select" ON community_comments
   FOR SELECT USING (is_deleted = false);
 
+DROP POLICY IF EXISTS "community_comments_insert" ON community_comments;
 CREATE POLICY "community_comments_insert" ON community_comments
   FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "community_comments_update" ON community_comments;
 CREATE POLICY "community_comments_update" ON community_comments
   FOR UPDATE USING (author_id IS NOT NULL AND author_id = auth.uid());
 
+DROP POLICY IF EXISTS "community_comments_delete" ON community_comments;
 CREATE POLICY "community_comments_delete" ON community_comments
   FOR DELETE USING (author_id IS NOT NULL AND author_id = auth.uid());
 
 -- community_post_likes: 공개 SELECT, INSERT 허용(서버 검증), DELETE는 본인만
 ALTER TABLE community_post_likes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "community_post_likes_select" ON community_post_likes;
 CREATE POLICY "community_post_likes_select" ON community_post_likes
   FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "community_post_likes_insert" ON community_post_likes;
 CREATE POLICY "community_post_likes_insert" ON community_post_likes
   FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "community_post_likes_delete" ON community_post_likes;
 CREATE POLICY "community_post_likes_delete" ON community_post_likes
   FOR DELETE USING (user_id IS NOT NULL AND user_id = auth.uid());
 

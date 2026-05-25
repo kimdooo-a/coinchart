@@ -90,11 +90,15 @@ CREATE TRIGGER trg_community_comment_likes_count
 -- ==============================================
 ALTER TABLE community_comment_likes ENABLE ROW LEVEL SECURITY;
 
+-- CREATE POLICY는 비멱등 → DROP IF EXISTS 선행으로 재적용 안전 보장 (R5-#4 히스토리 정합)
+DROP POLICY IF EXISTS "community_comment_likes_select" ON community_comment_likes;
 CREATE POLICY "community_comment_likes_select" ON community_comment_likes
   FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "community_comment_likes_insert" ON community_comment_likes;
 CREATE POLICY "community_comment_likes_insert" ON community_comment_likes
   FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "community_comment_likes_delete" ON community_comment_likes;
 CREATE POLICY "community_comment_likes_delete" ON community_comment_likes
   FOR DELETE USING (user_id IS NOT NULL AND user_id = auth.uid());

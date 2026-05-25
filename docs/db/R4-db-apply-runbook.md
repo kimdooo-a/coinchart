@@ -147,3 +147,58 @@ DROP TABLE IF EXISTS community_comment_likes;   -- ⚠️ 댓글 추천 데이�
 - **적용 순서**(전부 HTTP 201): `20260523_create_community_tables` → `20260523_alter_news_classify` → `20260523_create_hot_issues_rpc` → `20260524_comment_likes` → `20260524_post_likes_rpc`
 - **검증**: 테이블 5·RPC 4·보드시드 9·news분류컬럼 3 확인. 게시글 시드 156행. 스모크 PASS 2/SKIP 1(댓글 트리거)/FAIL 0.
 - ⚠️ **마이그레이션 히스토리 미기록**: Management API 직접 적용이라 `supabase_migrations.schema_migrations`에 없음. 차후 정식 `db push` 시 대부분 멱등(IF NOT EXISTS/OR REPLACE)이나 `CREATE POLICY` 3종(comment_likes)은 `DROP POLICY IF EXISTS` 선행 필요(§3-1 참조).
+
+---
+
+## 9. ✅ 히스토리 정합 (2026-05-25, 지휘자 세션 30 / R5-#4)
+
+세션 29의 §8 우려(차후 db push 시 CREATE POLICY 충돌)를 정합 처리함.
+
+### 9-1. 축 A — 마이그레이션 파일 완전 멱등화 (완료, 코드)
+커뮤니티 마이그레이션의 **모든 `CREATE POLICY`(18개)에 `DROP POLICY IF EXISTS ...` 선행 추가**:
+- `20260523_create_community_tables.sql` — 15개(boards 4·posts 4·comments 4·post_likes 3)
+- `20260524_comment_likes.sql` — 3개
+
+이제 5종 전부가 완전 멱등 → **정식 db push가 재실행해도 충돌 없음**(§3-1의 수동 DROP 선행 불요). 아직 어떤 환경의 `schema_migrations`에도 등록 전이라 파일 사후 수정의 부작용 없음(체크섬 충돌 환경 부재).
+
+### 9-2. 운영 DB `schema_migrations` 실측 진단 (읽기 조회)
+Management API로 `SELECT version, name FROM supabase_migrations.schema_migrations` 조회 결과:
+
+| 기록된 version | name | 비고 |
+|------|------|------|
+| 20241213 | auto_cleanup | 로컬엔 `20241213_*` **3개**(init_market_prices·update_cleanup_and_forex·auto_cleanup) → 날짜당 1행만 기록 |
+| 20241214 | add_news_language | 로컬엔 `20241214_*` **2개**(news_archive·add_news_language) → 1행만 |
+| 20251227 | create_stock_prices | |
+| 20260114 | create_secure_memos | |
+| 20260308 | create_blog_tables | |
+| 20260309 | blog_content_to_html | |
+
+**커뮤니티 5종(`20260523`×3·`20260524`×2)은 전부 미기록.**
+
+### 9-3. ⚠️ 단순 backfill 불가 — 같은 날짜 version 충돌
+- supabase의 `schema_migrations.version`은 **파일명 첫 숫자 토큰(8자리 날짜)**. 우리 파일명은 14자리 고유 timestamp가 아니라 날짜 8자리.
+- 따라서 **같은 날짜에 여러 마이그레이션이 있으면 version이 충돌**(20241213·20241214가 날짜당 1행만 기록된 게 그 증거). 커뮤니티도 `20260523`에 3개가 몰려 있어 단순 INSERT backfill이 PK 충돌로 실패.
+- **결론**: backfill 단독은 부적절. 멱등화(9-1)로 차후 db push 재실행 안전이 이미 확보됐으므로 운영 DB는 건드리지 않음.
+
+### 9-4. 정식 db push 환경 구축 가이드 (차후, 별도 작업)
+완전 정합(`migration list`가 5종을 적용됨으로 표시)을 원하면 아래 순서로 진행:
+
+1. **파일명 14자리 timestamp 정규화** — 같은 날짜 충돌 해소. 예:
+   - `20260523_create_community_tables.sql` → `20260523000001_create_community_tables.sql`
+   - `20260523_alter_news_classify.sql` → `20260523000002_alter_news_classify.sql`
+   - `20260523_create_hot_issues_rpc.sql` → `20260523000003_create_hot_issues_rpc.sql`
+   - `20260524_comment_likes.sql` → `20260524000001_comment_likes.sql`
+   - `20260524_post_likes_rpc.sql` → `20260524000002_post_likes_rpc.sql`
+   - (기존 `20241213_*`×3·`20241214_*`×2도 같은 충돌 보유 — 일괄 정규화 권장)
+2. **`supabase/config.toml` 생성** + `supabase link --project-ref enksnhshciyvllwfiwrm`
+3. **backfill SQL** (정규화된 version 기준, 이미 적용된 객체라 INSERT만):
+   ```sql
+   INSERT INTO supabase_migrations.schema_migrations (version, name) VALUES
+     ('20260523000001', 'create_community_tables'),
+     ('20260523000002', 'alter_news_classify'),
+     ('20260523000003', 'create_hot_issues_rpc'),
+     ('20260524000001', 'comment_likes'),
+     ('20260524000002', 'post_likes_rpc')
+   ON CONFLICT (version) DO NOTHING;
+   ```
+4. `supabase migration list`로 5종이 Remote 적용됨으로 표시되는지 확인. `db push --dry-run`에 대상 0건이면 정합 완료.
