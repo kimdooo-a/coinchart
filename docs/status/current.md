@@ -82,6 +82,7 @@
 | 26 | 2026-05-23 | R2/T02 일꾼 — 뉴스 실데이터 + 4차원 필터 (news-queries) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R2-T02-news-realdata.md) |
 | 27 | 2026-05-23 | **R1·R2 지휘자 — 디스패치 라운드 마감/cs** (회수·통합·아카이브) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-session27-dispatch-conductor.md) |
 | 28 | 2026-05-25 | **R3 지휘자 — community-finish 12/12 회수·통합·커밋/cs** (`30cdbd5`, SSR 전환·mock 삭제·dislike/댓글추천·라이트화) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-25-session28-r3-conductor.md) · [R3_SUMMARY](../handover/2026-05-24-R3-_SUMMARY.md) |
+| 29 | 2026-05-25 | **R4 지휘자 — community-wiring + 실 DB 적용 + E2E/cs** (`7683c41`·`b196df5`, UI 결선·dead code·마이그 5종 Management API 적용·E2E) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-25-session29-r4-conductor.md) · [R4_SUMMARY](../handover/2026-05-25-R4-_SUMMARY.md) |
 | 18 | 2026-05-23 | R1/T15 일꾼 — 메인페이지 실데이터 전환 (mock 제거 + SSR + `queries.ts`) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T15-mainpage-realdata.md) |
 | 19 | 2026-05-23 | R1/T11 일꾼 — 시그널·마켓·주식마켓 라이트화 (6파일 45/45 대칭, 18→19 정정) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T11-signal-market-lightify.md) |
 | 20 | 2026-05-23 | R1/T09 일꾼 — 블로그 라이트화 (app/blog 4 + components/Blog 11 + BlogEditor tone 3, 18파일) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T09-blog-lightify.md) |

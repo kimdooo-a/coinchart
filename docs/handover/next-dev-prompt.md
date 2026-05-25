@@ -120,7 +120,8 @@
 - TypeScript (`npx tsc --noEmit`): ✅ 에러 없음
 - ESLint: 신규 코드 0 에러, 기존 `scripts/` any/require 경고는 알려진 항목
 - Vitest: ✅ 동작 중 (커뮤니티 신규 모듈은 테스트 미작성 — R4 E2E 권장)
-- Git: R1 `60d4298` + R2 `81b9624` 푸시 완료. **R3 통합 `30cdbd5` + 부기 `c34f264` + cs 문서 `d789d07` → ✅ 2026-05-25 origin/main push 완료 (세션 29, `223c401..d789d07`)**
+- Git: R1 `60d4298` + R2 `81b9624` + R3(`30cdbd5`·`c34f264`·`d789d07`) origin push 완료. **R4 `7683c41`(통합) + `b196df5`(T04 회수 부기)는 로컬 main(ahead 2, push 보류 — 세션 29 종료 선택)**
+- 실 DB: **커뮤니티 마이그레이션 5종 운영 DB(`enksnhshciyvllwfiwrm`) 적용 완료** (Management API). 게시글 156행 시드. ⚠️ `schema_migrations` 히스토리 미기록(차후 db push 시 CREATE POLICY 3종 DROP 선행)
 - 디스패치: R1·R2·R3 마커 전부 `.dispatch/archive/`로 이동, active teams 비움
 
 ## v2.0 진행 상태
