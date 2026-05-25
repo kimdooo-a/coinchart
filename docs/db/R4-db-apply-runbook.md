@@ -180,25 +180,49 @@ Management API로 `SELECT version, name FROM supabase_migrations.schema_migratio
 - 따라서 **같은 날짜에 여러 마이그레이션이 있으면 version이 충돌**(20241213·20241214가 날짜당 1행만 기록된 게 그 증거). 커뮤니티도 `20260523`에 3개가 몰려 있어 단순 INSERT backfill이 PK 충돌로 실패.
 - **결론**: backfill 단독은 부적절. 멱등화(9-1)로 차후 db push 재실행 안전이 이미 확보됐으므로 운영 DB는 건드리지 않음.
 
-### 9-4. 정식 db push 환경 구축 가이드 (차후, 별도 작업)
-완전 정합(`migration list`가 5종을 적용됨으로 표시)을 원하면 아래 순서로 진행:
+### 9-4. 정식 db push 환경 구축 — ✅ 코드 작업 완료 (2026-05-25, R6-polish / T02)
 
-1. **파일명 14자리 timestamp 정규화** — 같은 날짜 충돌 해소. 예:
-   - `20260523_create_community_tables.sql` → `20260523000001_create_community_tables.sql`
-   - `20260523_alter_news_classify.sql` → `20260523000002_alter_news_classify.sql`
-   - `20260523_create_hot_issues_rpc.sql` → `20260523000003_create_hot_issues_rpc.sql`
-   - `20260524_comment_likes.sql` → `20260524000001_comment_likes.sql`
-   - `20260524_post_likes_rpc.sql` → `20260524000002_post_likes_rpc.sql`
-   - (기존 `20241213_*`×3·`20241214_*`×2도 같은 충돌 보유 — 일괄 정규화 권장)
-2. **`supabase/config.toml` 생성** + `supabase link --project-ref enksnhshciyvllwfiwrm`
-3. **backfill SQL** (정규화된 version 기준, 이미 적용된 객체라 INSERT만):
-   ```sql
-   INSERT INTO supabase_migrations.schema_migrations (version, name) VALUES
-     ('20260523000001', 'create_community_tables'),
-     ('20260523000002', 'alter_news_classify'),
-     ('20260523000003', 'create_hot_issues_rpc'),
-     ('20260524000001', 'comment_likes'),
-     ('20260524000002', 'post_likes_rpc')
-   ON CONFLICT (version) DO NOTHING;
-   ```
-4. `supabase migration list`로 5종이 Remote 적용됨으로 표시되는지 확인. `db push --dry-run`에 대상 0건이면 정합 완료.
+> **상태**: 아래 (1)·(2)·(3) **코드 작업 완료** — 파일명 14자리 정규화(git mv) + `supabase/config.toml` 생성 + `supabase/backfill_schema_migrations.sql` 작성.
+> **운영 DB 미적용** — `supabase link` / `db push` / backfill 실행은 자격증명 보유자(사용자)가 (4) 절차로 수행한다. (사용자 결정: 코드만, R5 "운영 DB 직접 변경 회피" 유지)
+
+#### (1) 파일명 14자리 timestamp 정규화 — ✅ 완료 (git mv, 파일 내용 변경 없음)
+14개 파일 전체를 `YYYYMMDD_name.sql` → `YYYYMMDDhhmmss_name.sql` 로 정규화(같은 날짜 version 충돌 해소). 같은 날짜 내 순서는 실제 적용 순서(논리 의존)를 `hhmmss`로 보존:
+
+| before (8자리) | after (14자리) |
+|------|------|
+| `20241213_init_market_prices.sql` | `20241213000001_init_market_prices.sql` |
+| `20241213_update_cleanup_and_forex.sql` | `20241213000002_update_cleanup_and_forex.sql` |
+| `20241213_auto_cleanup.sql` | `20241213000003_auto_cleanup.sql` |
+| `20241214_news_archive.sql` | `20241214000001_news_archive.sql` |
+| `20241214_add_news_language.sql` | `20241214000002_add_news_language.sql` |
+| `20251227_create_stock_prices.sql` | `20251227000001_create_stock_prices.sql` |
+| `20260114_create_secure_memos.sql` | `20260114000001_create_secure_memos.sql` |
+| `20260308_create_blog_tables.sql` | `20260308000001_create_blog_tables.sql` |
+| `20260309_blog_content_to_html.sql` | `20260309000001_blog_content_to_html.sql` |
+| `20260523_create_community_tables.sql` | `20260523000001_create_community_tables.sql` |
+| `20260523_alter_news_classify.sql` | `20260523000002_alter_news_classify.sql` |
+| `20260523_create_hot_issues_rpc.sql` | `20260523000003_create_hot_issues_rpc.sql` |
+| `20260524_comment_likes.sql` | `20260524000001_comment_likes.sql` |
+| `20260524_post_likes_rpc.sql` | `20260524000002_post_likes_rpc.sql` |
+
+- 순서 근거: `20241213` = init(테이블 생성) → update(제약·함수) → auto_cleanup(pg_cron); `20241214` = news_archive(테이블) → add_news_language(컬럼). mtime·논리 의존·운영 DB 마지막 기록(§9-2)과 모두 일치. 커뮤니티 5종은 본 §9-4 기존 매핑 + R4 적용 순서(§8) 유지.
+
+#### (2) `supabase/config.toml` 생성 — ✅ 완료 (파일만, link 미실행)
+`project_id = "enksnhshciyvllwfiwrm"` 포함. 실제 연결은 사용자가: `supabase link --project-ref enksnhshciyvllwfiwrm`
+
+#### (3) backfill SQL — ✅ 작성 완료 (적용 X)
+`supabase/backfill_schema_migrations.sql` — 정규화된 14자리 version 기준, `ON CONFLICT (version) DO NOTHING`.
+- **Part A**: 커뮤니티 5종(schema_migrations 미기록) INSERT — 정합 필수.
+- **Part B**: 비-커뮤니티 9종 — 정규화로 운영 DB의 기존 8자리 6행과 14자리 파일명이 mismatch되므로, 완전 정합 시 8자리 행 DELETE 후 14자리 재INSERT (선택).
+
+#### (4) 사용자 정합 완료 절차 (운영 DB 자격증명 필요 — 미실행)
+```bash
+supabase login
+supabase link --project-ref enksnhshciyvllwfiwrm
+supabase migration list            # 14종 version 상태 확인 (정규화로 기존 6행은 mismatch 표시될 수 있음)
+supabase db push --dry-run         # 적용 대상 미리보기 (객체는 이미 존재 — 0건이 이상적)
+# 이후 SQL Editor 또는 db push 정합 환경에서 backfill 실행:
+#   supabase/backfill_schema_migrations.sql (Part A 필수 / Part B 선택)
+supabase migration list            # 정합 완료 시 대상 마이그레이션이 Remote 적용됨으로 표시
+```
+> ⚠️ 운영 DB 객체(테이블/함수/트리거)는 세션 29(§8)에서 이미 적용 완료 — backfill은 `schema_migrations` **기록만** 보충한다.

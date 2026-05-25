@@ -5,8 +5,8 @@
  *
  * 운영자가 `supabase db push` 로 다음 2개를 적용한 뒤 1회 실행하여
  * 라운드트립으로 정상 적용 여부를 확인한다:
- *   - 20260524_post_likes_rpc.sql  → RPC community_toggle_post_like / community_post_like_counts
- *   - 20260524_comment_likes.sql   → 테이블 community_comment_likes + 트리거(like_count 동기화)
+ *   - 20260524000002_post_likes_rpc.sql  → RPC community_toggle_post_like / community_post_like_counts
+ *   - 20260524000001_comment_likes.sql   → 테이블 community_comment_likes + 트리거(like_count 동기화)
  *
  * 검증 항목:
  *   (1) RPC community_toggle_post_like 존재·호출 가능 — 익명(합성 ip_hash)으로 추천 ON→취소로

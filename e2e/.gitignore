@@ -2,3 +2,6 @@
 test-results/
 playwright-report/
 .cache/
+
+# R6/T01 — 관리자 인증 storageState(쿠키)·READY 마커 — 커밋 금지(.env 금지 정신)
+.auth/

@@ -4,11 +4,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createChart, IChartApi, ISeriesApi, Time, CandlestickSeries, LineSeries, HistogramSeries } from 'lightweight-charts';
 import { subscribeToKlines } from '@/lib/api/binance';
 import { calculateRSI, calculateBollingerBands, calculateMACD, calculateSMA } from '@/lib/indicators';
-import { getChartTheme, getCandleColors } from '@/lib/chart/theme';
+import { getChartTheme, getCandleColors, getDirectionColors, getVolumeColors } from '@/lib/chart/theme';
 
 // 라이트 테마 + 한국식(빨↑/파↓) 캔들 — lib/chart/theme.ts SSOT (R1/T08)
 const CHART_THEME = getChartTheme('light');
 const CANDLE_COLORS = getCandleColors('kr');
+// 히스토그램 방향색(한국식 빨↑/파↓): MACD 불투명, 볼륨 반투명
+const DIRECTION_COLORS = getDirectionColors('kr');
+const VOLUME_COLORS = getVolumeColors('kr');
 
 interface CandleData {
     time: number;
@@ -157,7 +160,7 @@ export const CryptoChart: React.FC<Props> = ({
                 height: macdContainerRef.current.clientHeight,
                 timeScale: { ...CHART_THEME.timeScale, timeVisible: true, secondsVisible: false },
             });
-            const histogramSeries = macdChart.addSeries(HistogramSeries, { color: '#26a69a' });
+            const histogramSeries = macdChart.addSeries(HistogramSeries, { color: DIRECTION_COLORS.up });
             const macdSeries = macdChart.addSeries(LineSeries, { color: '#2962FF', lineWidth: 2 });
             const signalSeries = macdChart.addSeries(LineSeries, { color: '#FF6D00', lineWidth: 2 });
 
@@ -177,7 +180,7 @@ export const CryptoChart: React.FC<Props> = ({
             if (showVolume) {
                 if (!volumeSeriesRef.current) {
                     volumeSeriesRef.current = chartRef.current.addSeries(HistogramSeries, {
-                        color: '#26a69a', priceFormat: { type: 'volume' }, priceScaleId: 'volume',
+                        color: VOLUME_COLORS.up, priceFormat: { type: 'volume' }, priceScaleId: 'volume',
                     });
                     chartRef.current.priceScale('volume').applyOptions({ scaleMargins: { top: 0.8, bottom: 0 }, visible: false });
                 }
@@ -261,7 +264,7 @@ export const CryptoChart: React.FC<Props> = ({
                         const volData = data.map((d: CandleData) => ({
                             time: d.time as Time,
                             value: d.volume,
-                            color: d.close >= d.open ? 'rgba(38, 166, 154, 0.5)' : 'rgba(239, 83, 80, 0.5)',
+                            color: d.close >= d.open ? VOLUME_COLORS.up : VOLUME_COLORS.down,
                         }));
                         volumeSeriesRef.current.setData(volData);
                     }
@@ -313,7 +316,7 @@ export const CryptoChart: React.FC<Props> = ({
                             const t = d.time as Time;
                             if (macdLine[i] !== null) m.push({ time: t, value: macdLine[i]! });
                             if (signalLine[i] !== null) s.push({ time: t, value: signalLine[i]! });
-                            if (histogram[i] !== null) h.push({ time: t, value: histogram[i]!, color: histogram[i]! >= 0 ? '#26a69a' : '#ef5350' });
+                            if (histogram[i] !== null) h.push({ time: t, value: histogram[i]!, color: histogram[i]! >= 0 ? DIRECTION_COLORS.up : DIRECTION_COLORS.down });
                         });
                         macdLineRef.current?.setData(m); signalLineRef.current?.setData(s); macdHistogramRef.current?.setData(h);
                     }

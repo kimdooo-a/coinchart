@@ -1,0 +1,17 @@
+# Supabase 프로젝트 설정 (R6-polish T02 생성, 2026-05-25)
+#
+# 목적: 마이그레이션 히스토리 정합(`supabase link` → `supabase db push`) 기반 마련.
+# ⚠️ 코드만: 이 파일 생성으로 끝. 실제 `supabase link`/`db push`/backfill 실행은
+#    자격증명 보유자(사용자)가 수행한다. (런북: docs/db/R4-db-apply-runbook.md §9-4)
+# CLI 기준 버전: v2.101.0 (supabase/.temp/cli-latest).
+
+# 원격 프로젝트 식별자.
+# Supabase 대시보드 > Project Settings > General 의 project-ref 값과 동일하게 둔다.
+# 연결 명령: `supabase link --project-ref enksnhshciyvllwfiwrm`
+project_id = "enksnhshciyvllwfiwrm"
+
+[db]
+# 로컬 개발 DB(supabase start) 포트 — 본 프로젝트는 원격(클라우드) 전용이나 표준값 명시.
+port = 54322
+# 원격 Postgres 메이저 버전 (Supabase 기본값 15).
+major_version = 15

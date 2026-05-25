@@ -55,6 +55,32 @@ export const US_CANDLE_COLORS = {
   wickDownColor: '#dc2626',
 };
 
+// 히스토그램 방향색(MACD 양/음 막대). 캔들 KR과 동일 hex 재사용으로 톤 일관성 확보.
+// 한국식: 상승/양(+) 빨강, 하락/음(-) 파랑
+export const KR_DIRECTION_COLORS = {
+  up: '#ba1a1a',
+  down: '#0050cb',
+};
+
+// 미국식: 상승/양(+) 초록, 하락/음(-) 빨강
+export const US_DIRECTION_COLORS = {
+  up: '#26a69a',
+  down: '#ef5350',
+};
+
+// 볼륨 히스토그램용 반투명(alpha 0.5) 방향색. 위 방향색과 동일 RGB의 0.5 투명도 변형.
+// 한국식: 빨 #ba1a1a → rgba(186,26,26) / 파 #0050cb → rgba(0,80,203)
+export const KR_VOLUME_COLORS = {
+  up: 'rgba(186, 26, 26, 0.5)',
+  down: 'rgba(0, 80, 203, 0.5)',
+};
+
+// 미국식: 녹 #26a69a → rgba(38,166,154) / 빨 #ef5350 → rgba(239,83,80)
+export const US_VOLUME_COLORS = {
+  up: 'rgba(38, 166, 154, 0.5)',
+  down: 'rgba(239, 83, 80, 0.5)',
+};
+
 export type ChartTone = 'light' | 'dark';
 export type CandleScheme = 'kr' | 'us';
 
@@ -64,4 +90,14 @@ export function getChartTheme(tone: ChartTone = 'light'): DeepPartial<ChartOptio
 
 export function getCandleColors(scheme: CandleScheme = 'kr') {
   return scheme === 'kr' ? KR_CANDLE_COLORS : US_CANDLE_COLORS;
+}
+
+// MACD 히스토그램·시리즈 기본색용 불투명 방향색
+export function getDirectionColors(scheme: CandleScheme = 'kr') {
+  return scheme === 'kr' ? KR_DIRECTION_COLORS : US_DIRECTION_COLORS;
+}
+
+// 볼륨 히스토그램 막대용 반투명 방향색
+export function getVolumeColors(scheme: CandleScheme = 'kr') {
+  return scheme === 'kr' ? KR_VOLUME_COLORS : US_VOLUME_COLORS;
 }

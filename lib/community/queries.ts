@@ -1,10 +1,14 @@
-// 메인페이지(app/page.tsx) SSR 데이터 쿼리 모음 (R1/T15, 2026-05-23)
+// 메인페이지(app/page.tsx) SSR 데이터 쿼리 모음 — 단일 진실 공급원(SSOT)
+// (R1/T15 2026-05-23 작성 → R6/T03 2026-05-25 anon 클라이언트 단일화)
 // 더미(mock-*) 대체 — community_posts / news / blog_posts + Binance ticker + FNG + 핫이슈 RPC
 //
-// 주의: Supabase 서버 클라이언트는 lib/supabase/server.ts의 실제 export인
-//       createClient()(async)를 사용한다. (명세서 표기 createServerClient 아님)
+// 렌더 모드: `/`를 정적 ISR(○)로 prerender하기 위해 쿠키 의존 server.ts createClient() 대신
+//            쿠키 비의존 anon 클라이언트(@supabase/supabase-js)를 사용한다. 메인페이지는 인증
+//            불필요한 공개 읽기뿐이므로 anon 키로 충분하며, global.fetch에 next.revalidate=300을
+//            주입해 Supabase 호출을 Next ISR 캐시(5분)에 편입시킨다.
+//            (이전엔 app/page.tsx가 자체 anon 로더를 내장했으나 R6/T03에서 본 SSOT로 환원)
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient as createAnonClient } from "@supabase/supabase-js";
 import { fetchCommunityTickers } from "@/lib/supabase/crypto";
 import { fetchFng } from "@/lib/community/fng";
 import type { CoinTicker } from "@/types/coins";
@@ -117,7 +121,19 @@ export const COIN_META: Record<string, CoinMeta> = {
 // ─────────────────────────────────────────────────────────────
 
 export async function fetchMainPageData(): Promise<MainPageData> {
-  const supabase = await createClient();
+  // 쿠키 비의존 anon 클라이언트 — `/` 정적 ISR(○) 유지의 핵심.
+  // global.fetch에 next.revalidate=300을 주입해 Supabase 호출을 Next ISR 캐시(5분)에 편입.
+  const supabase = createAnonClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: {
+        fetch: (input: RequestInfo | URL, init?: RequestInit) =>
+          fetch(input, { ...init, next: { revalidate: 300 } } as RequestInit),
+      },
+    }
+  );
 
   // 1. tickers (Binance) — 외부 API 실패 시 빈 배열 폴백
   const tickersP = fetchCommunityTickers().catch((e) => {
