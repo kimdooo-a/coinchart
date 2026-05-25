@@ -81,6 +81,21 @@ export const US_VOLUME_COLORS = {
   down: 'rgba(239, 83, 80, 0.5)',
 };
 
+// 보조지표 라인 식별색(SSOT). 방향(상승/하락)이 아니라 "지표를 서로 구분"하는 식별 목적이라
+// 캔들 KR 빨/파와 무관하게 고유색을 유지한다(MA7/25/99 세 선을 방향색으로 통일하면 구분 불가).
+// 라이트 배경(#ffffff) 가독성 기준으로 선정. CryptoChart·StockChart·DetailedChart에서 공통 참조.
+export const INDICATOR_COLORS = {
+  rsi: '#9c27b0',                   // RSI 단일선 (보라)
+  macd: '#2962FF',                  // MACD 라인 (파랑)
+  signal: '#FF6D00',                // MACD 시그널 (주황)
+  ma7: '#E91E63',                   // 단기 이동평균 (마젠타)
+  ma25: '#2196F3',                  // 중기 이동평균 (하늘)
+  ma99: '#c79100',                  // 장기 이동평균 — 노랑(#FFEA00)은 흰 배경 대비 부족 → 진앰버 교체
+  bbBand: 'rgba(0, 150, 136, 0.6)', // 볼린저 상·하단 (청록, alpha 0.5→0.6 가독 보강)
+  bbBasis: 'rgba(255, 179, 0, 1)',  // 볼린저 중앙선 (앰버)
+  avgPrice: '#0050cb',              // 평단가 참조선 — brand primary 정렬
+};
+
 export type ChartTone = 'light' | 'dark';
 export type CandleScheme = 'kr' | 'us';
 
@@ -100,4 +115,9 @@ export function getDirectionColors(scheme: CandleScheme = 'kr') {
 // 볼륨 히스토그램 막대용 반투명 방향색
 export function getVolumeColors(scheme: CandleScheme = 'kr') {
   return scheme === 'kr' ? KR_VOLUME_COLORS : US_VOLUME_COLORS;
+}
+
+// 보조지표 라인 식별색(RSI/MACD/MA/BB·평단가선)
+export function getIndicatorColors() {
+  return INDICATOR_COLORS;
 }

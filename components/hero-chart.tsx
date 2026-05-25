@@ -112,11 +112,11 @@ export const HeroChart = () => {
                 {/* Live Status Badge */}
                 <div className="flex items-center gap-2 pointer-events-none mb-2">
                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                    <span className="text-xs font-mono text-green-400">LIVE BINANCE DATA</span>
+                    <span className="text-xs font-mono text-green-600">LIVE BINANCE DATA</span>
                 </div>
 
                 {/* Coin Buttons */}
-                <div className="flex flex-wrap gap-2 p-1 bg-black/40 backdrop-blur-md rounded-xl border border-white/10 w-fit">
+                <div className="flex flex-wrap gap-2 p-1 bg-surface/80 backdrop-blur-md rounded-xl border border-outline-variant w-fit">
                     {coins.map((coin) => (
                         <button
                             key={coin.value}
@@ -124,7 +124,7 @@ export const HeroChart = () => {
                             className={`
                                 px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300
                                 ${symbol === coin.value
-                                    ? 'bg-primary text-primary-foreground shadow-[0_0_15px_rgba(255,87,51,0.5)] scale-105'
+                                    ? 'bg-primary text-primary-foreground shadow-[0_0_15px_rgba(0,80,203,0.45)] scale-105'
                                     : 'text-on-surface-variant hover:text-foreground hover:bg-muted/50'
                                 }
                             `}
@@ -136,7 +136,7 @@ export const HeroChart = () => {
 
                 {/* Active Symbol Display */}
                 <div className="pointer-events-none mt-2">
-                    <div className="text-3xl font-bold text-white tracking-tighter drop-shadow-lg">
+                    <div className="text-3xl font-bold text-on-surface tracking-tighter">
                         {symbol.replace('USDT', '')}/USDT
                     </div>
                 </div>

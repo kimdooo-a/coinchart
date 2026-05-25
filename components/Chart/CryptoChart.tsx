@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createChart, IChartApi, ISeriesApi, Time, CandlestickSeries, LineSeries, HistogramSeries } from 'lightweight-charts';
 import { subscribeToKlines } from '@/lib/api/binance';
 import { calculateRSI, calculateBollingerBands, calculateMACD, calculateSMA } from '@/lib/indicators';
-import { getChartTheme, getCandleColors, getDirectionColors, getVolumeColors } from '@/lib/chart/theme';
+import { getChartTheme, getCandleColors, getDirectionColors, getVolumeColors, getIndicatorColors } from '@/lib/chart/theme';
 
 // 라이트 테마 + 한국식(빨↑/파↓) 캔들 — lib/chart/theme.ts SSOT (R1/T08)
 const CHART_THEME = getChartTheme('light');
@@ -12,6 +12,8 @@ const CANDLE_COLORS = getCandleColors('kr');
 // 히스토그램 방향색(한국식 빨↑/파↓): MACD 불투명, 볼륨 반투명
 const DIRECTION_COLORS = getDirectionColors('kr');
 const VOLUME_COLORS = getVolumeColors('kr');
+// 보조지표 라인 식별색(SSOT) — RSI/MACD/MA/BB. 방향색 아님(R7-3)
+const IND = getIndicatorColors();
 
 interface CandleData {
     time: number;
@@ -144,7 +146,7 @@ export const CryptoChart: React.FC<Props> = ({
                 height: rsiContainerRef.current.clientHeight,
                 timeScale: { ...CHART_THEME.timeScale, timeVisible: true, secondsVisible: false },
             });
-            const rsiSeries = rsiChart.addSeries(LineSeries, { color: '#9c27b0', lineWidth: 2 });
+            const rsiSeries = rsiChart.addSeries(LineSeries, { color: IND.rsi, lineWidth: 2 });
             rsiChartRef.current = rsiChart; rsiSeriesRef.current = rsiSeries;
             syncCharts();
             return () => { rsiChartRef.current = null; rsiSeriesRef.current = null; rsiChart.remove(); };
@@ -161,8 +163,8 @@ export const CryptoChart: React.FC<Props> = ({
                 timeScale: { ...CHART_THEME.timeScale, timeVisible: true, secondsVisible: false },
             });
             const histogramSeries = macdChart.addSeries(HistogramSeries, { color: DIRECTION_COLORS.up });
-            const macdSeries = macdChart.addSeries(LineSeries, { color: '#2962FF', lineWidth: 2 });
-            const signalSeries = macdChart.addSeries(LineSeries, { color: '#FF6D00', lineWidth: 2 });
+            const macdSeries = macdChart.addSeries(LineSeries, { color: IND.macd, lineWidth: 2 });
+            const signalSeries = macdChart.addSeries(LineSeries, { color: IND.signal, lineWidth: 2 });
 
             macdChartRef.current = macdChart; macdHistogramRef.current = histogramSeries;
             macdLineRef.current = macdSeries; signalLineRef.current = signalSeries;
@@ -197,9 +199,9 @@ export const CryptoChart: React.FC<Props> = ({
         if (!chartRef.current) return;
         try {
             if (showMA) {
-                if (!ma7Ref.current) ma7Ref.current = chartRef.current.addSeries(LineSeries, { color: '#E91E63', lineWidth: 1, title: 'MA7' });
-                if (!ma25Ref.current) ma25Ref.current = chartRef.current.addSeries(LineSeries, { color: '#2196F3', lineWidth: 1, title: 'MA25' });
-                if (!ma99Ref.current) ma99Ref.current = chartRef.current.addSeries(LineSeries, { color: '#FFEA00', lineWidth: 2, title: 'MA99' });
+                if (!ma7Ref.current) ma7Ref.current = chartRef.current.addSeries(LineSeries, { color: IND.ma7, lineWidth: 1, title: 'MA7' });
+                if (!ma25Ref.current) ma25Ref.current = chartRef.current.addSeries(LineSeries, { color: IND.ma25, lineWidth: 1, title: 'MA25' });
+                if (!ma99Ref.current) ma99Ref.current = chartRef.current.addSeries(LineSeries, { color: IND.ma99, lineWidth: 2, title: 'MA99' });
             } else {
                 if (ma7Ref.current) { chartRef.current.removeSeries(ma7Ref.current); ma7Ref.current = null; }
                 if (ma25Ref.current) { chartRef.current.removeSeries(ma25Ref.current); ma25Ref.current = null; }
@@ -213,9 +215,9 @@ export const CryptoChart: React.FC<Props> = ({
         if (!chartRef.current) return;
         try {
             if (showBB) {
-                if (!bbUpperRef.current) bbUpperRef.current = chartRef.current.addSeries(LineSeries, { color: 'rgba(0, 150, 136, 0.5)', lineWidth: 1 });
-                if (!bbLowerRef.current) bbLowerRef.current = chartRef.current.addSeries(LineSeries, { color: 'rgba(0, 150, 136, 0.5)', lineWidth: 1 });
-                if (!bbMiddleRef.current) bbMiddleRef.current = chartRef.current.addSeries(LineSeries, { color: 'rgba(255, 179, 0, 1)', lineWidth: 1 });
+                if (!bbUpperRef.current) bbUpperRef.current = chartRef.current.addSeries(LineSeries, { color: IND.bbBand, lineWidth: 1 });
+                if (!bbLowerRef.current) bbLowerRef.current = chartRef.current.addSeries(LineSeries, { color: IND.bbBand, lineWidth: 1 });
+                if (!bbMiddleRef.current) bbMiddleRef.current = chartRef.current.addSeries(LineSeries, { color: IND.bbBasis, lineWidth: 1 });
             } else {
                 if (bbUpperRef.current) { chartRef.current.removeSeries(bbUpperRef.current); bbUpperRef.current = null; }
                 if (bbLowerRef.current) { chartRef.current.removeSeries(bbLowerRef.current); bbLowerRef.current = null; }
@@ -337,8 +339,8 @@ export const CryptoChart: React.FC<Props> = ({
     return (
         <div className="w-full flex flex-col gap-2 relative">
             {(isLoading || error) && (
-                <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-900 bg-opacity-80 rounded-lg backdrop-blur-sm">
-                    {error ? <div className="bg-red-900/50 p-4 rounded text-red-200">{error}</div> : <div className="text-blue-400">{lang === 'ko' ? '데이터 로딩중...' : 'Loading Data...'}</div>}
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-surface/70 rounded-lg backdrop-blur-sm">
+                    {error ? <div className="bg-error-container p-4 rounded text-on-error-container">{error}</div> : <div className="text-primary">{lang === 'ko' ? '데이터 로딩중...' : 'Loading Data...'}</div>}
                 </div>
             )}
             {/* Responsive Heights via CSS classes */}
