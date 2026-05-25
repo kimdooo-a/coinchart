@@ -215,11 +215,6 @@ export interface CoinBoardPost extends BoardPost {
   boardSlug: string; // coin-btc 등
 }
 
-export interface CoinPostsResult {
-  notices: CoinBoardPost[];
-  posts: CoinBoardPost[];
-}
-
 /** NewsRow가 소비하는 형태 (coinTag 포함) */
 export type CoinNewsItem = NewsHeadlineItem & { coinTag?: string };
 
