@@ -23,7 +23,7 @@ export default function WatchlistPage() {
                             {lang === 'ko' ? '관심종목' : 'Watchlist'}
                         </h1>
                     </div>
-                    <p className="text-muted-foreground text-lg">
+                    <p className="text-on-surface-variant text-lg">
                         {lang === 'ko' ? '관심 있는 코인과 주식을 모아서 관리합니다.' : 'Track your favorite coins and stocks.'}
                     </p>
                 </header>

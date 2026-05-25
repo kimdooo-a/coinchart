@@ -19,7 +19,7 @@ export default function PrivacyPage() {
                     <h1 className="text-3xl md:text-5xl font-black mb-6 bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 to-teal-500">
                         {lang === 'ko' ? '개인정보처리방침' : 'Privacy Policy'}
                     </h1>
-                    <p className="text-muted-foreground text-lg">
+                    <p className="text-on-surface-variant text-lg">
                         {lang === 'ko' ? 'ChartMaster의 개인정보 수집 및 이용에 관한 정책입니다.' : 'Our policy on collecting and using personal information.'}
                     </p>
                 </header>

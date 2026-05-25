@@ -51,7 +51,7 @@ const Gauge = ({ score, label, description }: GaugeProps) => {
     return (
         <div className="bg-card rounded-3xl p-8 border border-border shadow-md flex flex-col items-center relative overflow-hidden w-full">
             <div className="absolute top-0 w-full h-2 bg-gradient-to-r from-destructive via-yellow-500 to-green-500 opacity-60"></div>
-            <h3 className="text-muted-foreground mb-6 text-xl font-bold">{label}</h3>
+            <h3 className="text-on-surface-variant mb-6 text-xl font-bold">{label}</h3>
 
             <div className="relative w-64 h-32 overflow-hidden mb-4">
                 <div className="absolute top-0 left-0 w-full h-64 rounded-full border-[20px] border-muted box-border"></div>
@@ -79,7 +79,7 @@ const Gauge = ({ score, label, description }: GaugeProps) => {
                 </motion.div>
             </div>
 
-            <p className="text-muted-foreground mt-6 text-sm text-center">
+            <p className="text-on-surface-variant mt-6 text-sm text-center">
                 {description}
             </p>
         </div>
@@ -285,13 +285,13 @@ export default function StockMarketPage() {
                 <div className="bg-muted p-1 rounded-lg flex">
                     <button
                         onClick={() => setBasis('daily')}
-                        className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${basis === 'daily' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                        className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${basis === 'daily' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-on-surface-variant hover:text-foreground'}`}
                     >
                         {t.market?.dailyBasis || "Simple"}
                     </button>
                     <button
                         onClick={() => setBasis('realtime')}
-                        className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${basis === 'realtime' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                        className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${basis === 'realtime' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-on-surface-variant hover:text-foreground'}`}
                     >
                         {t.market?.realtimeBasis || "Detailed"}
                     </button>
@@ -320,7 +320,7 @@ export default function StockMarketPage() {
                     <div className="bg-card rounded-3xl p-8 border border-border">
                         <div className="flex items-center gap-3 mb-6">
                             <h3 className="text-xl font-bold text-foreground">🏢 {t.market?.detailStockTitle || t.market?.detailTitle || "Stock Details"}</h3>
-                            <span className="text-xs px-2 py-1 rounded bg-muted text-muted-foreground border border-border">
+                            <span className="text-xs px-2 py-1 rounded bg-muted text-on-surface-variant border border-border">
                                 Real Data (1D)
                             </span>
                         </div>
@@ -360,8 +360,8 @@ export default function StockMarketPage() {
                                         <p className="text-foreground font-medium">{insight.strategy}</p>
                                     </div>
                                     <div>
-                                        <span className="text-muted-foreground font-bold block mb-2 text-sm uppercase tracking-wide">Market Commentary</span>
-                                        <p className="text-muted-foreground leading-relaxed text-lg">
+                                        <span className="text-on-surface-variant font-bold block mb-2 text-sm uppercase tracking-wide">Market Commentary</span>
+                                        <p className="text-on-surface-variant leading-relaxed text-lg">
                                             {insight.story}
                                         </p>
                                     </div>

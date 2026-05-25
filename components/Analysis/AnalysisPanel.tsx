@@ -185,7 +185,7 @@ export const AnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
         if (g === 'A') return 'text-primary';
         if (g === 'B') return 'text-chart-2';
         if (g === 'C') return 'text-chart-3';
-        return 'text-muted-foreground';
+        return 'text-on-surface-variant';
     }
 
     return (
@@ -200,14 +200,14 @@ export const AnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
                     <div className="flex bg-surface-container rounded p-1 gap-1 self-start">
                         {ANALYSIS_INTERVALS.map(int => (
                             <button key={int} onClick={() => setInterval(int)}
-                                className={`px-3 py-1 rounded text-xs font-bold transition-all ${interval === int ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted'}`}>
+                                className={`px-3 py-1 rounded text-xs font-bold transition-all ${interval === int ? 'bg-primary text-primary-foreground' : 'text-on-surface-variant hover:bg-muted'}`}>
                                 {int.toUpperCase()}
                             </button>
                         ))}
                     </div>
 
                     {/* Data Source Disclaimer */}
-                    <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1.5">
+                    <div className="mt-2 text-xs text-on-surface-variant flex items-center gap-1.5">
                         <span>ℹ️</span>
                         <span>
                             {lang === 'ko'
@@ -228,7 +228,7 @@ export const AnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
                     </div>
                     <div className="h-10 w-px bg-border"></div>
                     <div className="text-center">
-                        <div className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{t.prob}</div>
+                        <div className="text-xs text-on-surface-variant uppercase tracking-wide mb-1">{t.prob}</div>
                         <div className="text-2xl font-bold text-foreground">
                             {probability.probability}%
                         </div>
@@ -276,7 +276,7 @@ export const AnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
                         {t.backtestTitle}
                         <button
                             onClick={() => setShowBacktestGuide(!showBacktestGuide)}
-                            className="text-xs font-normal text-muted-foreground bg-muted hover:bg-surface-container-low px-2 py-0.5 rounded transition-colors flex items-center gap-1"
+                            className="text-xs font-normal text-on-surface-variant bg-muted hover:bg-surface-container-low px-2 py-0.5 rounded transition-colors flex items-center gap-1"
                         >
                             <span className="text-indigo-400">?</span> {t.bt_guideBtn}
                         </button>
@@ -325,13 +325,13 @@ export const AnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="bg-muted p-3 rounded-lg">
-                        <div className="text-xs text-muted-foreground">{t.bt_winRate}</div>
+                        <div className="text-xs text-on-surface-variant">{t.bt_winRate}</div>
                         <div className="text-lg font-bold text-foreground">
                             {result.backtest.status === 'insufficient' ? t.na : `${result.backtest.winRate.toFixed(1)}%`}
                         </div>
                     </div>
                     <div className="bg-muted p-3 rounded-lg">
-                        <div className="text-xs text-muted-foreground">{t.bt_totalReturn}</div>
+                        <div className="text-xs text-on-surface-variant">{t.bt_totalReturn}</div>
                         <div className="text-lg font-bold text-foreground">
                             {result.backtest.status === 'insufficient' ? t.na : `${result.backtest.totalReturn.toFixed(1)}%`}
                         </div>

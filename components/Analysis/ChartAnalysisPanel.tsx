@@ -93,7 +93,7 @@ export const ChartAnalysisPanel: React.FC<Props> = ({ symbol, lang, apiEndpoint 
 
     // Render Logic
     if (isLoading) return <div className="bg-card rounded-xl p-6 border border-border animate-pulse h-96"></div>;
-    if (!analysis) return <div className="bg-card rounded-xl p-6 border border-border text-center text-muted-foreground">Insufficient Data</div>;
+    if (!analysis) return <div className="bg-card rounded-xl p-6 border border-border text-center text-on-surface-variant">Insufficient Data</div>;
 
     const { raw, sr } = analysis;
     const currentPrice = sr?.current || 0;
@@ -150,11 +150,11 @@ export const ChartAnalysisPanel: React.FC<Props> = ({ symbol, lang, apiEndpoint 
                             {t.title}
                         </h3>
                         <div className="flex items-center gap-2">
-                            <span className="text-xs text-muted-foreground">{t.basis}</span>
+                            <span className="text-xs text-on-surface-variant">{t.basis}</span>
                             <div className="flex bg-surface-container rounded p-1 gap-1">
                                 {ANALYSIS_INTERVALS.map(int => (
                                     <button key={int} onClick={() => setInterval(int)}
-                                        className={`px-3 py-1 rounded text-[10px] font-bold transition-all ${interval === int ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-surface-container-high'}`}>
+                                        className={`px-3 py-1 rounded text-[10px] font-bold transition-all ${interval === int ? 'bg-primary text-primary-foreground' : 'text-on-surface-variant hover:bg-surface-container-high'}`}>
                                         {int.toUpperCase()}
                                     </button>
                                 ))}

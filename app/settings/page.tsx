@@ -41,7 +41,7 @@ export default function SettingsPage() {
                             {lang === 'ko' ? '설정' : 'Settings'}
                         </h1>
                     </div>
-                    <p className="text-muted-foreground text-lg">
+                    <p className="text-on-surface-variant text-lg">
                         {lang === 'ko' ? '계정 및 서비스 설정을 관리합니다.' : 'Manage your account and service settings.'}
                     </p>
                 </header>
@@ -57,7 +57,7 @@ export default function SettingsPage() {
                                 <h2 className="text-2xl font-bold text-foreground">{group.title}</h2>
                             </div>
                             <p className="text-foreground leading-relaxed">{group.description}</p>
-                            <p className="mt-4 text-sm text-muted-foreground italic">
+                            <p className="mt-4 text-sm text-on-surface-variant italic">
                                 {lang === 'ko' ? '구현 예정입니다.' : 'Coming soon.'}
                             </p>
                         </section>

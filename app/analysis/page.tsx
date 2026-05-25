@@ -86,7 +86,7 @@ export default function AnalysisPage() {
                         <h1 className="text-2xl md:text-3xl font-bold text-primary flex items-center gap-2 drop-shadow-sm">
                             ❤️ 사랑하는 나의 마누라를 위해 ❤️
                         </h1>
-                        <div className="text-sm text-muted-foreground mt-1 font-medium">{t.subtitle}</div>
+                        <div className="text-sm text-on-surface-variant mt-1 font-medium">{t.subtitle}</div>
                     </div>
                 </header>
 

@@ -40,7 +40,7 @@ function DashboardCard({
             {content}
             <div className="flex flex-col px-6 gap-1.5" data-slot="card-header">
                 <div className="text-xl leading-tight font-semibold group-hover:text-primary transition-colors">{title}</div>
-                <p className="text-muted-foreground/70 text-sm group-hover:text-muted-foreground">{description}</p>
+                <p className="text-on-surface-variant/70 text-sm group-hover:text-on-surface-variant">{description}</p>
             </div>
         </div>
     );
@@ -256,7 +256,7 @@ export default function DashboardGrid({
                 <h2 className="relative mx-auto inline-flex max-w-3xl gap-x-2 text-center text-4xl font-bold leading-none tracking-normal md:text-5xl md:tracking-tight">
                     {t.dashboard.title}
                 </h2>
-                <p className="text-xs md:text-md mx-auto mt-2 max-w-4xl leading-tight text-muted-foreground/90 md:px-24">
+                <p className="text-xs md:text-md mx-auto mt-2 max-w-4xl leading-tight text-on-surface-variant/90 md:px-24">
                     {t.dashboard.subtitle}
                 </p>
             </div>
@@ -281,7 +281,7 @@ export default function DashboardGrid({
 
                 {/* Disclaimer */}
                 {t.dashboard.disclaimer && (
-                    <div className="mx-auto mt-4 flex max-w-md md:max-w-xl items-start justify-center gap-x-1 text-center text-xs text-muted-foreground/40 md:[&_p]:text-xxs [&_p]:text-[8px]">
+                    <div className="mx-auto mt-4 flex max-w-md md:max-w-xl items-start justify-center gap-x-1 text-center text-xs text-on-surface-variant/40 md:[&_p]:text-xxs [&_p]:text-[8px]">
                         <p>{t.dashboard.disclaimer}</p>
                     </div>
                 )}

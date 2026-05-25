@@ -102,7 +102,7 @@ export function MemoCreateModal({ isOpen, onClose, onSuccess, userId, t }: MemoC
                 >
                     <button
                         onClick={handleClose}
-                        className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
+                        className="absolute top-4 right-4 text-on-surface-variant hover:text-foreground transition-colors"
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -112,7 +112,7 @@ export function MemoCreateModal({ isOpen, onClose, onSuccess, userId, t }: MemoC
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {/* Title */}
                         <div>
-                            <label className="block text-xs text-muted-foreground mb-1">{t.memoTitle}</label>
+                            <label className="block text-xs text-on-surface-variant mb-1">{t.memoTitle}</label>
                             <input
                                 type="text"
                                 value={title}
@@ -125,7 +125,7 @@ export function MemoCreateModal({ isOpen, onClose, onSuccess, userId, t }: MemoC
 
                         {/* Content */}
                         <div>
-                            <label className="block text-xs text-muted-foreground mb-1">{t.memoContent}</label>
+                            <label className="block text-xs text-on-surface-variant mb-1">{t.memoContent}</label>
                             <textarea
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
@@ -137,7 +137,7 @@ export function MemoCreateModal({ isOpen, onClose, onSuccess, userId, t }: MemoC
 
                         {/* Password */}
                         <div>
-                            <label className="block text-xs text-muted-foreground mb-1">{t.password}</label>
+                            <label className="block text-xs text-on-surface-variant mb-1">{t.password}</label>
                             <input
                                 type="password"
                                 value={password}
@@ -149,7 +149,7 @@ export function MemoCreateModal({ isOpen, onClose, onSuccess, userId, t }: MemoC
 
                         {/* Confirm Password */}
                         <div>
-                            <label className="block text-xs text-muted-foreground mb-1">{t.confirmPassword}</label>
+                            <label className="block text-xs text-on-surface-variant mb-1">{t.confirmPassword}</label>
                             <input
                                 type="password"
                                 value={confirmPassword}

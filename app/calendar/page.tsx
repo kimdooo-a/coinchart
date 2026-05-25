@@ -158,7 +158,7 @@ export default function CalendarPage() {
                 </div>
 
                 <div className="grid grid-cols-7 gap-2 text-center mb-2">
-                    {weekDays.map(d => <div key={d} className="text-muted-foreground font-bold text-sm">{d}</div>)}
+                    {weekDays.map(d => <div key={d} className="text-on-surface-variant font-bold text-sm">{d}</div>)}
                 </div>
 
                 <div className="grid grid-cols-7 gap-2">
@@ -207,20 +207,20 @@ export default function CalendarPage() {
 
                 {/* Event List */}
                 <div className="space-y-6">
-                    <h3 className="text-2xl font-bold text-muted-foreground">
+                    <h3 className="text-2xl font-bold text-on-surface-variant">
                         {lang === 'ko'
                             ? `${currentDate.getMonth() + 1}월 주요 일정`
                             : `${new Date(currentDate).toLocaleString('en-US', { month: 'long' })}'s Major Events`
                         }
                     </h3>
                     {monthEvents.length === 0 ? (
-                        <p className="text-muted-foreground">{t.calendar.noEvents}</p>
+                        <p className="text-on-surface-variant">{t.calendar.noEvents}</p>
                     ) : (
                         monthEvents.map((event, idx) => (
                             <div key={idx} className="flex items-center gap-4 bg-card p-4 rounded-xl border border-border">
                                 <div className={`w-1 h-12 rounded-full ${event.impact === 'high' ? 'bg-destructive' : 'bg-yellow-500'}`}></div>
                                 <div>
-                                    <div className="text-xs text-muted-foreground mb-1">{event.date} • {event.country}</div>
+                                    <div className="text-xs text-on-surface-variant mb-1">{event.date} • {event.country}</div>
                                     <div className="text-lg font-bold text-foreground">
                                         {lang === 'ko' ? event.titleKo : event.titleEn}
                                     </div>
@@ -231,7 +231,7 @@ export default function CalendarPage() {
                 </div>
             </div>
 
-            <div className="mt-8 text-center text-xs text-muted-foreground">
+            <div className="mt-8 text-center text-xs text-on-surface-variant">
                 {t.calendar.footer}
             </div>
         </main>

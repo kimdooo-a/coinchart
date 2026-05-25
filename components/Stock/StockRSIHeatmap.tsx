@@ -102,7 +102,7 @@ export const StockRSIHeatmap: React.FC = () => {
                     ))}
                 </div>
             )}
-            <p className="text-muted-foreground text-xs mt-4 text-center">
+            <p className="text-on-surface-variant text-xs mt-4 text-center">
                 {lang === 'ko' ? 'RSI > 70: 과매수(매도 검토), RSI < 30: 과매도(매수 검토)' : 'RSI > 70: Overbought, RSI < 30: Oversold'}
             </p>
         </div>

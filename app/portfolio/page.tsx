@@ -199,7 +199,7 @@ export default function PortfolioPage() {
                         <h1 className="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">
                             {t.portfolio.title}
                         </h1>
-                        <p className="text-muted-foreground mt-1">{t.portfolio.subtitle}</p>
+                        <p className="text-on-surface-variant mt-1">{t.portfolio.subtitle}</p>
                     </div>
                     <button
                         onClick={() => setIsTradeModalOpen(true)}
@@ -212,25 +212,25 @@ export default function PortfolioPage() {
                 {/* Summary Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="bg-card/30 backdrop-blur-md border border-border p-6 rounded-2xl shadow-xl">
-                        <p className="text-muted-foreground text-sm font-medium mb-1">{t.portfolio.totalBalance}</p>
+                        <p className="text-on-surface-variant text-sm font-medium mb-1">{t.portfolio.totalBalance}</p>
                         <p className="text-3xl font-bold text-foreground">
                             ${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                     </div>
                     <div className="bg-card/30 backdrop-blur-md border border-border p-6 rounded-2xl shadow-xl">
-                        <p className="text-muted-foreground text-sm font-medium mb-1">{t.portfolio.totalInvested}</p>
+                        <p className="text-on-surface-variant text-sm font-medium mb-1">{t.portfolio.totalInvested}</p>
                         <p className="text-2xl font-bold text-foreground">
                             ${totalInvested.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                     </div>
                     <div className="bg-card/30 backdrop-blur-md border border-border p-6 rounded-2xl shadow-xl">
-                        <p className="text-muted-foreground text-sm font-medium mb-1">{t.portfolio.pl}</p>
+                        <p className="text-on-surface-variant text-sm font-medium mb-1">{t.portfolio.pl}</p>
                         <p className={`text-2xl font-bold ${totalPnL >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                             {totalPnL >= 0 ? '+' : ''}${totalPnL.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                     </div>
                     <div className="bg-card/30 backdrop-blur-md border border-border p-6 rounded-2xl shadow-xl">
-                        <p className="text-muted-foreground text-sm font-medium mb-1">{t.portfolio.return}</p>
+                        <p className="text-on-surface-variant text-sm font-medium mb-1">{t.portfolio.return}</p>
                         <p className={`text-2xl font-bold ${totalPnLPercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                             {totalPnLPercent >= 0 ? '+' : ''}{totalPnLPercent.toFixed(2)}%
                         </p>
@@ -243,7 +243,7 @@ export default function PortfolioPage() {
                         <h2 className="text-xl font-bold text-foreground">{t.portfolio.holdings}</h2>
                     </div>
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm text-muted-foreground">
+                        <table className="w-full text-left text-sm text-on-surface-variant">
                             <thead className="bg-muted text-foreground uppercase font-bold text-xs">
                                 <tr>
                                     <th className="px-6 py-4">{t.portfolio.asset}</th>
@@ -256,13 +256,13 @@ export default function PortfolioPage() {
                             <tbody className="divide-y divide-border bg-muted/30">
                                 {isLoading ? (
                                     <tr>
-                                        <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground animate-pulse">
+                                        <td colSpan={5} className="px-6 py-12 text-center text-on-surface-variant animate-pulse">
                                             {t.common.loading}
                                         </td>
                                     </tr>
                                 ) : holdings.length === 0 ? (
                                     <tr>
-                                        <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
+                                        <td colSpan={5} className="px-6 py-12 text-center text-on-surface-variant">
                                             {t.portfolio.noHoldings}
                                         </td>
                                     </tr>
@@ -276,7 +276,7 @@ export default function PortfolioPage() {
                                                     </div>
                                                     <div>
                                                         <div className="text-base">{h.symbol}</div>
-                                                        <div className="text-xs text-muted-foreground font-normal">{h.qty} {t.portfolio.shares}</div>
+                                                        <div className="text-xs text-on-surface-variant font-normal">{h.qty} {t.portfolio.shares}</div>
                                                     </div>
                                                 </div>
                                             </td>
@@ -285,7 +285,7 @@ export default function PortfolioPage() {
                                             </td>
                                             <td className="px-6 py-4 text-right font-mono">
                                                 <div className="text-foreground font-bold">${h.currentValue.toLocaleString()}</div>
-                                                <div className="text-xs text-muted-foreground">{t.portfolio.total}: ${h.totalCost.toLocaleString()}</div>
+                                                <div className="text-xs text-on-surface-variant">{t.portfolio.total}: ${h.totalCost.toLocaleString()}</div>
                                             </td>
                                             <td className="px-6 py-4 text-right text-foreground font-mono">
                                                 ${h.avgPrice.toLocaleString()}
@@ -310,7 +310,7 @@ export default function PortfolioPage() {
                         <h2 className="text-xl font-bold text-foreground">{t.portfolio.recentTrades}</h2>
                     </div>
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm text-muted-foreground">
+                        <table className="w-full text-left text-sm text-on-surface-variant">
                             <thead className="bg-muted text-foreground uppercase font-bold text-xs">
                                 <tr>
                                     <th className="px-6 py-4">{t.portfolio.date}</th>
@@ -323,20 +323,20 @@ export default function PortfolioPage() {
                             <tbody className="divide-y divide-border bg-muted/30">
                                 {isLoading ? (
                                     <tr>
-                                        <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground animate-pulse">
+                                        <td colSpan={5} className="px-6 py-12 text-center text-on-surface-variant animate-pulse">
                                             {t.common.loading}
                                         </td>
                                     </tr>
                                 ) : trades.length === 0 ? (
                                     <tr>
-                                        <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
+                                        <td colSpan={5} className="px-6 py-12 text-center text-on-surface-variant">
                                             {t.portfolio.noHistory}
                                         </td>
                                     </tr>
                                 ) : (
                                     trades.map((t) => (
                                         <tr key={t.id} className="hover:bg-muted/50 transition-colors">
-                                            <td className="px-6 py-4 text-muted-foreground">{new Date(t.executed_at).toLocaleDateString()}</td>
+                                            <td className="px-6 py-4 text-on-surface-variant">{new Date(t.executed_at).toLocaleDateString()}</td>
                                             <td className="px-6 py-4 font-bold text-foreground">{t.symbol}</td>
                                             <td className="px-6 py-4 text-center">
                                                 <span className={`px-2 py-1 rounded text-xs font-bold ${t.side === 'BUY' ? 'bg-green-900/40 text-green-400 border border-green-500/20' : 'bg-red-900/40 text-red-400 border border-red-500/20'}`}>

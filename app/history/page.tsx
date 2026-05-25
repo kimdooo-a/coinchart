@@ -55,7 +55,7 @@ export default function HistoryPage() {
                     animate={{ opacity: 1, y: 0 }}
                 >
                     <h2 className="text-4xl md:text-5xl font-black mb-2 text-foreground">{t.history.title}</h2>
-                    <p className="text-muted-foreground">{t.history.subtitle}</p>
+                    <p className="text-on-surface-variant">{t.history.subtitle}</p>
                 </motion.div>
             </header>
 
@@ -67,7 +67,7 @@ export default function HistoryPage() {
                         onClick={() => setSelectedCoin(sym)}
                         className={`px-6 py-3 rounded-2xl font-black text-xl transition-all border-2 ${selectedCoin === sym
                             ? 'bg-primary text-primary-foreground border-primary scale-110 shadow-xl'
-                            : 'bg-card text-muted-foreground border-border hover:border-primary/50'
+                            : 'bg-card text-on-surface-variant border-border hover:border-primary/50'
                             }`}
                     >
                         {sym}
@@ -86,7 +86,7 @@ export default function HistoryPage() {
                     <h3 className="text-2xl md:text-3xl font-black text-foreground mb-4">
                         {lang === 'ko' ? coinInfo.titleKo : coinInfo.titleEn}
                     </h3>
-                    <p className="text-muted-foreground leading-relaxed md:text-lg whitespace-pre-line">
+                    <p className="text-on-surface-variant leading-relaxed md:text-lg whitespace-pre-line">
                         {lang === 'ko' ? coinInfo.descKo : coinInfo.descEn}
                     </p>
                 </motion.div>
@@ -120,9 +120,9 @@ export default function HistoryPage() {
                                         {getBadgeLabel(event.type)}
                                     </div>
                                     <div className="text-3xl font-black text-foreground mb-2 group-hover:text-primary transition-colors">
-                                        {event.year} <span className="text-lg text-muted-foreground font-medium">.{event.month}</span>
+                                        {event.year} <span className="text-lg text-on-surface-variant font-medium">.{event.month}</span>
                                     </div>
-                                    <p className="text-muted-foreground font-medium leading-relaxed group-hover:text-foreground">
+                                    <p className="text-on-surface-variant font-medium leading-relaxed group-hover:text-foreground">
                                         {lang === 'ko' ? event.descKo : event.descEn}
                                     </p>
                                     <div className="mt-4 text-xs text-primary font-bold opacity-0 group-hover:opacity-100 transition-opacity">
@@ -137,7 +137,7 @@ export default function HistoryPage() {
                     ))
                 ) : (
                     <div className="text-center py-20 bg-muted/30 rounded-3xl border-dashed border-2 border-border">
-                        <p className="text-muted-foreground">{t.history.noHistory}</p>
+                        <p className="text-on-surface-variant">{t.history.noHistory}</p>
                     </div>
                 )}
 
@@ -162,7 +162,7 @@ export default function HistoryPage() {
                     >
                         <button
                             onClick={() => setSelectedEvent(null)}
-                            className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                            className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted text-on-surface-variant hover:text-foreground transition-colors"
                         >
                             ✕
                         </button>
@@ -176,7 +176,7 @@ export default function HistoryPage() {
                         </h3>
 
                         <div className="prose max-w-none mt-6">
-                            <p className="text-lg text-muted-foreground leading-relaxed whitespace-pre-line">
+                            <p className="text-lg text-on-surface-variant leading-relaxed whitespace-pre-line">
                                 {lang === 'ko' ? selectedEvent.detailsKo : selectedEvent.detailsEn}
                             </p>
                         </div>

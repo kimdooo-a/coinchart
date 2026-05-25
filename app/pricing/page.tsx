@@ -56,7 +56,7 @@ export default function PricingPage() {
                     <h1 className="text-3xl md:text-5xl font-black mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-indigo-500">
                         {lang === 'ko' ? '요금제' : 'Pricing'}
                     </h1>
-                    <p className="text-muted-foreground text-lg">
+                    <p className="text-on-surface-variant text-lg">
                         {lang === 'ko'
                             ? '더 강력한 분석 도구를 위한 프리미엄 플랜을 준비 중입니다.'
                             : 'Premium plans for more powerful analysis tools are coming soon.'}
@@ -77,7 +77,7 @@ export default function PricingPage() {
                             </div>
                             <div className="mb-6">
                                 <span className="text-3xl font-black text-foreground">{plan.price}</span>
-                                <span className="text-sm text-muted-foreground ml-2">/ {plan.period}</span>
+                                <span className="text-sm text-on-surface-variant ml-2">/ {plan.period}</span>
                             </div>
                             <ul className="space-y-3">
                                 {plan.features.map((feature) => (

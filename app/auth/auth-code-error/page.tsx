@@ -33,7 +33,7 @@ export default function AuthErrorPage() {
                     Authentication Error
                 </h1>
 
-                <p className="mb-8 text-muted-foreground">
+                <p className="mb-8 text-on-surface-variant">
                     There was a problem signing you in. Please try again or contact support if the problem persists.
                 </p>
 
@@ -46,7 +46,7 @@ export default function AuthErrorPage() {
                     </Link>
                     <Link
                         href="/"
-                        className="w-full rounded-lg px-6 py-3 font-medium text-muted-foreground hover:text-foreground transition-colors"
+                        className="w-full rounded-lg px-6 py-3 font-medium text-on-surface-variant hover:text-foreground transition-colors"
                     >
                         Go Home
                     </Link>

@@ -108,7 +108,7 @@ export default function SecureMemoPage() {
                             <h1 className="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">
                                 {t.secureMemo.title}
                             </h1>
-                            <p className="text-muted-foreground mt-1">{t.secureMemo.subtitle}</p>
+                            <p className="text-on-surface-variant mt-1">{t.secureMemo.subtitle}</p>
                         </div>
                     </div>
                     <button
@@ -133,7 +133,7 @@ export default function SecureMemoPage() {
                 {/* Memos Grid */}
                 {isLoading ? (
                     <div className="flex items-center justify-center py-20">
-                        <div className="animate-pulse text-muted-foreground">{t.common.loading}</div>
+                        <div className="animate-pulse text-on-surface-variant">{t.common.loading}</div>
                     </div>
                 ) : memos.length === 0 ? (
                     <motion.div
@@ -142,9 +142,9 @@ export default function SecureMemoPage() {
                         className="flex flex-col items-center justify-center py-20 text-center"
                     >
                         <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mb-4">
-                            <Lock className="w-10 h-10 text-muted-foreground" />
+                            <Lock className="w-10 h-10 text-on-surface-variant" />
                         </div>
-                        <p className="text-muted-foreground text-lg">{t.secureMemo.noMemos}</p>
+                        <p className="text-on-surface-variant text-lg">{t.secureMemo.noMemos}</p>
                         <button
                             onClick={() => setIsCreateModalOpen(true)}
                             className="mt-4 px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-full transition-all"

@@ -133,7 +133,7 @@ export default function AdminPage() {
                 </div>
                 <div className="relative z-10 flex flex-col items-center gap-4">
                     <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                    <p className="text-muted-foreground font-medium">{t.admin.checking}</p>
+                    <p className="text-on-surface-variant font-medium">{t.admin.checking}</p>
                 </div>
             </div>
         );
@@ -148,7 +148,7 @@ export default function AdminPage() {
                 </div>
                 <div className="relative z-10 bg-surface-container border border-outline-variant p-8 rounded-3xl shadow-xl text-center max-w-md w-full">
                     <h1 className="text-3xl font-black mb-4 text-red-500">{t.admin.accessDenied}</h1>
-                    <p className="text-muted-foreground mb-8">{t.admin.accessDeniedMsg}</p>
+                    <p className="text-on-surface-variant mb-8">{t.admin.accessDeniedMsg}</p>
                     <Link href="/" className="px-8 py-3 bg-surface-container-high hover:bg-surface-container-highest rounded-full font-bold transition-all text-on-surface inline-block">
                         {t.common.back}
                     </Link>
@@ -181,7 +181,7 @@ export default function AdminPage() {
                     <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-foreground">
                         {lang === 'ko' ? '블로그 관리' : 'Blog Management'}
                     </h2>
-                    <p className="text-muted-foreground mb-6 text-sm">
+                    <p className="text-on-surface-variant mb-6 text-sm">
                         {lang === 'ko' ? '블로그 글 작성, 수정, 삭제를 관리합니다.' : 'Manage blog posts: create, edit, and delete.'}
                     </p>
                     <div className="flex flex-wrap gap-4">
@@ -211,7 +211,7 @@ export default function AdminPage() {
                     <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-foreground">
                         📌 {lang === 'ko' ? '공지 게시판 관리' : 'Notice Management'}
                     </h2>
-                    <p className="text-muted-foreground mb-6 text-sm">
+                    <p className="text-on-surface-variant mb-6 text-sm">
                         {lang === 'ko' ? '게시판별 공지 작성 및 공지 등록/해제를 관리합니다.' : 'Create board notices and toggle notice status.'}
                     </p>
                     <div className="flex flex-wrap gap-4">
@@ -230,7 +230,7 @@ export default function AdminPage() {
                         📰 {t.admin.newsControl}
                         {loading && <span className="text-xs text-yellow-500 animate-pulse font-mono bg-yellow-500/10 px-2 py-1 rounded">({t.admin.processing})</span>}
                     </h2>
-                    <p className="text-muted-foreground mb-6 text-sm">
+                    <p className="text-on-surface-variant mb-6 text-sm">
                         {t.admin.newsDesc}
                     </p>
 
@@ -255,7 +255,7 @@ export default function AdminPage() {
                         📈 {t.admin.marketControl}
                         {loading && <span className="text-xs text-yellow-500 animate-pulse font-mono bg-yellow-500/10 px-2 py-1 rounded">({t.admin.processing})</span>}
                     </h2>
-                    <p className="text-muted-foreground mb-6 text-sm">
+                    <p className="text-on-surface-variant mb-6 text-sm">
                         {t.admin.marketDesc}
                     </p>
 
@@ -281,7 +281,7 @@ export default function AdminPage() {
                         🧹 {t.admin.dataCleanup}
                         {loading && <span className="text-xs text-yellow-500 animate-pulse font-mono bg-yellow-500/10 px-2 py-1 rounded">({t.admin.processing})</span>}
                     </h2>
-                    <p className="text-muted-foreground mb-6 text-sm">
+                    <p className="text-on-surface-variant mb-6 text-sm">
                         {t.admin.cleanupDesc}
                     </p>
 
@@ -325,14 +325,14 @@ export default function AdminPage() {
                             <tbody className="divide-y divide-outline-variant bg-surface-container-lowest">
                                 {users.length === 0 ? (
                                     <tr>
-                                        <td colSpan={4} className="p-8 text-center text-muted-foreground">{t.admin.table.noUsers}</td>
+                                        <td colSpan={4} className="p-8 text-center text-on-surface-variant">{t.admin.table.noUsers}</td>
                                     </tr>
                                 ) : (
                                     users.map((u) => (
                                         <tr key={u.id} className="hover:bg-surface-container transition-colors">
                                             <td className="p-4 text-on-surface font-medium">{u.email}</td>
-                                            <td className="p-4 text-muted-foreground">{new Date(u.created_at).toLocaleDateString()}</td>
-                                            <td className="p-4 text-muted-foreground">{u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleString() : '-'}</td>
+                                            <td className="p-4 text-on-surface-variant">{new Date(u.created_at).toLocaleDateString()}</td>
+                                            <td className="p-4 text-on-surface-variant">{u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleString() : '-'}</td>
                                             <td className="p-4 text-right">
                                                 <button
                                                     onClick={() => deleteUser(u.id)}

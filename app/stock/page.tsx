@@ -46,7 +46,7 @@ export default function StockAnalysisPage() {
                         <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2 drop-shadow-sm">
                             {t.title}
                         </h1>
-                        <div className="text-sm text-muted-foreground mt-1 font-medium">{t.subtitle}</div>
+                        <div className="text-sm text-on-surface-variant mt-1 font-medium">{t.subtitle}</div>
                     </div>
                 </header>
 
@@ -63,7 +63,7 @@ export default function StockAnalysisPage() {
                                     onClick={() => setSymbol(item.symbol)}
                                     className={`flex-none min-w-[60px] text-xs md:text-sm px-3 py-2 rounded-lg border whitespace-nowrap transition-all duration-300 font-bold tracking-wide relative overflow-hidden group ${symbol === item.symbol
                                         ? 'bg-primary border-primary text-primary-foreground shadow-[0_0_15px_rgba(255,87,51,0.4)] scale-105'
-                                        : 'bg-muted/50 border-input text-muted-foreground hover:border-primary/50 hover:bg-accent hover:text-accent-foreground'
+                                        : 'bg-muted/50 border-input text-on-surface-variant hover:border-primary/50 hover:bg-accent hover:text-accent-foreground'
                                         }`}
                                 >
                                     <span className="relative z-10">{item.symbol}</span>
@@ -88,7 +88,7 @@ export default function StockAnalysisPage() {
                     <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div className="flex flex-col gap-1">
                             <h2 className="text-xl md:text-2xl font-bold text-foreground">{symbol} {t.chartTitle}</h2>
-                            <p className="text-xs text-muted-foreground font-mono">
+                            <p className="text-xs text-on-surface-variant font-mono">
                                 Market Data by Twelve Data (Free: Delayed 15m)
                             </p>
                         </div>
@@ -102,7 +102,7 @@ export default function StockAnalysisPage() {
                                         onClick={() => setInterval(int)}
                                         className={`px-3 py-1 rounded text-xs md:text-sm font-medium transition-all whitespace-nowrap ${interval === int
                                             ? 'bg-primary text-primary-foreground shadow-sm'
-                                            : 'text-muted-foreground hover:text-foreground hover:bg-background'
+                                            : 'text-on-surface-variant hover:text-foreground hover:bg-background'
                                             }`}
                                     >
                                         {int}
@@ -112,11 +112,11 @@ export default function StockAnalysisPage() {
 
                             {/* Indicator Toggles */}
                             <div className="flex flex-wrap bg-muted rounded-lg p-1 gap-1">
-                                <button onClick={() => setShowVolume(!showVolume)} className={`px-2 md:px-3 py-1 rounded text-xs md:text-sm font-medium transition-all ${showVolume ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background'}`}>Vol</button>
-                                <button onClick={() => setShowMA(!showMA)} className={`px-2 md:px-3 py-1 rounded text-xs md:text-sm font-medium transition-all ${showMA ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background'}`}>MA</button>
-                                <button onClick={() => setShowBB(!showBB)} className={`px-2 md:px-3 py-1 rounded text-xs md:text-sm font-medium transition-all ${showBB ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background'}`}>BB</button>
-                                <button onClick={() => setShowRSI(!showRSI)} className={`px-2 md:px-3 py-1 rounded text-xs md:text-sm font-medium transition-all ${showRSI ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background'}`}>RSI</button>
-                                <button onClick={() => setShowMACD(!showMACD)} className={`px-2 md:px-3 py-1 rounded text-xs md:text-sm font-medium transition-all ${showMACD ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background'}`}>MACD</button>
+                                <button onClick={() => setShowVolume(!showVolume)} className={`px-2 md:px-3 py-1 rounded text-xs md:text-sm font-medium transition-all ${showVolume ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-on-surface-variant hover:text-foreground hover:bg-background'}`}>Vol</button>
+                                <button onClick={() => setShowMA(!showMA)} className={`px-2 md:px-3 py-1 rounded text-xs md:text-sm font-medium transition-all ${showMA ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-on-surface-variant hover:text-foreground hover:bg-background'}`}>MA</button>
+                                <button onClick={() => setShowBB(!showBB)} className={`px-2 md:px-3 py-1 rounded text-xs md:text-sm font-medium transition-all ${showBB ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-on-surface-variant hover:text-foreground hover:bg-background'}`}>BB</button>
+                                <button onClick={() => setShowRSI(!showRSI)} className={`px-2 md:px-3 py-1 rounded text-xs md:text-sm font-medium transition-all ${showRSI ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-on-surface-variant hover:text-foreground hover:bg-background'}`}>RSI</button>
+                                <button onClick={() => setShowMACD(!showMACD)} className={`px-2 md:px-3 py-1 rounded text-xs md:text-sm font-medium transition-all ${showMACD ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-on-surface-variant hover:text-foreground hover:bg-background'}`}>MACD</button>
                             </div>
                         </div>
                     </div>

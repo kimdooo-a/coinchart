@@ -79,7 +79,7 @@ export const NewsRotator = () => {
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 transition-all duration-1000 group-hover:bg-primary/10"></div>
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-secondary/5 rounded-full blur-2xl -ml-12 -mb-12 transition-all duration-1000 group-hover:bg-secondary/10"></div>
 
-            <h3 className="font-bold text-muted-foreground absolute top-3 left-4 mb-0 flex items-center gap-2 text-sm">
+            <h3 className="font-bold text-on-surface-variant absolute top-3 left-4 mb-0 flex items-center gap-2 text-sm">
                 <span>📰</span> {lang === 'ko' ? '최신 뉴스' : 'Latest News'}
             </h3>
 
@@ -96,7 +96,7 @@ export const NewsRotator = () => {
                         <p className="font-medium text-foreground leading-relaxed text-base md:text-lg group-hover:text-primary transition-colors">
                             "{currentNews.title}"
                         </p>
-                        <p className="text-muted-foreground font-bold tracking-wider uppercase text-xs md:text-sm mt-1">
+                        <p className="text-on-surface-variant font-bold tracking-wider uppercase text-xs md:text-sm mt-1">
                             - {currentNews.publisher} -
                         </p>
                     </motion.div>

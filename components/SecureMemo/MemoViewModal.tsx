@@ -132,7 +132,7 @@ export function MemoViewModal({ isOpen, memo, decryptedContent, onClose, onDelet
                 >
                     <button
                         onClick={handleClose}
-                        className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
+                        className="absolute top-4 right-4 text-on-surface-variant hover:text-foreground transition-colors"
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -145,14 +145,14 @@ export function MemoViewModal({ isOpen, memo, decryptedContent, onClose, onDelet
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => setIsEditing(true)}
-                                        className="p-2 text-muted-foreground hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-all"
+                                        className="p-2 text-on-surface-variant hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-all"
                                         title={t.edit}
                                     >
                                         <Edit2 className="w-4 h-4" />
                                     </button>
                                     <button
                                         onClick={handleDelete}
-                                        className="p-2 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                                        className="p-2 text-on-surface-variant hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
                                         title={t.delete}
                                     >
                                         <Trash2 className="w-4 h-4" />
@@ -180,7 +180,7 @@ export function MemoViewModal({ isOpen, memo, decryptedContent, onClose, onDelet
 
                             {/* Title */}
                             <div>
-                                <label className="block text-xs text-muted-foreground mb-1">{t.memoTitle}</label>
+                                <label className="block text-xs text-on-surface-variant mb-1">{t.memoTitle}</label>
                                 <input
                                     type="text"
                                     value={title}
@@ -192,7 +192,7 @@ export function MemoViewModal({ isOpen, memo, decryptedContent, onClose, onDelet
 
                             {/* Content */}
                             <div>
-                                <label className="block text-xs text-muted-foreground mb-1">{t.memoContent}</label>
+                                <label className="block text-xs text-on-surface-variant mb-1">{t.memoContent}</label>
                                 <textarea
                                     value={content}
                                     onChange={(e) => setContent(e.target.value)}
@@ -203,7 +203,7 @@ export function MemoViewModal({ isOpen, memo, decryptedContent, onClose, onDelet
 
                             {/* New Password */}
                             <div>
-                                <label className="block text-xs text-muted-foreground mb-1">{t.password}</label>
+                                <label className="block text-xs text-on-surface-variant mb-1">{t.password}</label>
                                 <input
                                     type="password"
                                     value={password}
@@ -215,7 +215,7 @@ export function MemoViewModal({ isOpen, memo, decryptedContent, onClose, onDelet
 
                             {/* Confirm Password */}
                             <div>
-                                <label className="block text-xs text-muted-foreground mb-1">{t.confirmPassword}</label>
+                                <label className="block text-xs text-on-surface-variant mb-1">{t.confirmPassword}</label>
                                 <input
                                     type="password"
                                     value={confirmPassword}

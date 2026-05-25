@@ -65,14 +65,14 @@ export function MemoCard({ memo, onClick, onDelete, t }: MemoCardProps) {
                         e.stopPropagation()
                         onDelete()
                     }}
-                    className="p-2 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                    className="p-2 text-on-surface-variant hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
                     title={t.delete}
                 >
                     <Trash2 className="w-4 h-4" />
                 </button>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-border flex justify-between text-xs text-muted-foreground">
+            <div className="mt-4 pt-3 border-t border-border flex justify-between text-xs text-on-surface-variant">
                 <span>{t.createdAt}: {formatDate(memo.created_at)}</span>
                 <span>{t.updatedAt}: {formatDate(memo.updated_at)}</span>
             </div>

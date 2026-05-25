@@ -28,7 +28,7 @@ export default function TermsPage() {
                     <h1 className="text-3xl md:text-5xl font-black mb-6 bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-orange-500">
                         {lang === 'ko' ? '이용약관' : 'Terms of Service'}
                     </h1>
-                    <p className="text-muted-foreground text-lg">
+                    <p className="text-on-surface-variant text-lg">
                         {lang === 'ko' ? 'ChartMaster 서비스 이용을 위한 약관입니다.' : 'Terms for using the service.'}
                     </p>
                 </header>

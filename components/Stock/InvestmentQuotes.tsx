@@ -39,7 +39,7 @@ export const InvestmentQuotes = ({ size = 'normal' }: Props) => {
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 transition-all duration-1000 group-hover:bg-primary/10"></div>
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-secondary/5 rounded-full blur-2xl -ml-12 -mb-12 transition-all duration-1000 group-hover:bg-secondary/10"></div>
 
-            <h3 className={`font-bold text-muted-foreground absolute top-6 left-6 flex items-center gap-2 ${isSmall ? 'text-sm top-3 left-4 mb-0' : 'text-xl mb-8'}`}>
+            <h3 className={`font-bold text-on-surface-variant absolute top-6 left-6 flex items-center gap-2 ${isSmall ? 'text-sm top-3 left-4 mb-0' : 'text-xl mb-8'}`}>
                 <span>💬</span> {lang === 'ko' ? '투자의 지혜' : 'Investment Wisdom'}
             </h3>
 
@@ -57,7 +57,7 @@ export const InvestmentQuotes = ({ size = 'normal' }: Props) => {
                             "{lang === 'ko' ? currentQuote.textKo : currentQuote.text}"
                         </p>
                         {!isSmall && <div className="w-12 h-1 bg-primary mx-auto rounded-full opacity-50 my-2"></div>}
-                        <p className={`text-muted-foreground font-bold tracking-wider uppercase ${isSmall ? 'text-xs md:text-sm mt-1' : 'text-sm md:text-base'}`}>
+                        <p className={`text-on-surface-variant font-bold tracking-wider uppercase ${isSmall ? 'text-xs md:text-sm mt-1' : 'text-sm md:text-base'}`}>
                             - {lang === 'ko' ? currentQuote.authorKo : currentQuote.author} -
                         </p>
                     </motion.div>

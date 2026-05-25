@@ -76,7 +76,7 @@ export const StockSectorPerformance: React.FC = () => {
     const getStatusColor = (rsi: number) => {
         if (rsi >= 70) return 'text-red-500';
         if (rsi <= 30) return 'text-green-500';
-        return 'text-muted-foreground';
+        return 'text-on-surface-variant';
     };
 
     const getRowColor = (change: number) => {
@@ -102,7 +102,7 @@ export const StockSectorPerformance: React.FC = () => {
             ) : (
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
-                        <thead className="text-xs text-muted-foreground uppercase bg-muted/50">
+                        <thead className="text-xs text-on-surface-variant uppercase bg-muted/50">
                             <tr>
                                 <th className="px-3 py-2 rounded-l-lg">Sector</th>
                                 <th className="px-3 py-2">Price</th>
@@ -118,7 +118,7 @@ export const StockSectorPerformance: React.FC = () => {
                                         <td className="px-3 py-3 font-medium text-foreground">
                                             <div className="flex flex-col">
                                                 <span>{lang === 'ko' ? sectorInfo?.nameKo : sectorInfo?.name}</span>
-                                                <span className="text-xs text-muted-foreground">{item.symbol}</span>
+                                                <span className="text-xs text-on-surface-variant">{item.symbol}</span>
                                             </div>
                                         </td>
                                         <td className="px-3 py-3 text-foreground">${item.price.toFixed(2)}</td>

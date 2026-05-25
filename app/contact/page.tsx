@@ -67,7 +67,7 @@ export default function ContactPage() {
                     <h1 className="text-4xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">
                         {lang === 'ko' ? '문의하기' : 'Contact Us'}
                     </h1>
-                    <p className="text-muted-foreground text-lg">
+                    <p className="text-on-surface-variant text-lg">
                         {lang === 'ko'
                             ? '궁금한 점이나 제안사항이 있으시면 언제든지 문의해주세요.'
                             : 'Have questions or suggestions? We\'d love to hear from you.'}
@@ -81,7 +81,7 @@ export default function ContactPage() {
                             <h3 className="text-3xl font-bold text-foreground mb-4">
                                 {lang === 'ko' ? '전송 완료!' : 'Message Sent!'}
                             </h3>
-                            <p className="text-muted-foreground mb-8 text-lg">
+                            <p className="text-on-surface-variant mb-8 text-lg">
                                 {lang === 'ko'
                                     ? '문의하신 내용이 성공적으로 접수되었습니다. 빠른 시일 내에 답변 드리겠습니다.'
                                     : 'Thank you for reaching out. We will get back to you shortly.'}
@@ -97,7 +97,7 @@ export default function ContactPage() {
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <label htmlFor="name" className="text-sm font-bold text-muted-foreground ml-1">
+                                    <label htmlFor="name" className="text-sm font-bold text-on-surface-variant ml-1">
                                         {lang === 'ko' ? '이름' : 'Name'}
                                     </label>
                                     <input
@@ -107,12 +107,12 @@ export default function ContactPage() {
                                         required
                                         value={formData.name}
                                         onChange={handleChange}
-                                        className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-muted-foreground/50"
+                                        className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-on-surface-variant/50"
                                         placeholder={lang === 'ko' ? '홍길동' : 'John Doe'}
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label htmlFor="email" className="text-sm font-bold text-muted-foreground ml-1">
+                                    <label htmlFor="email" className="text-sm font-bold text-on-surface-variant ml-1">
                                         {lang === 'ko' ? '이메일' : 'Email'}
                                     </label>
                                     <input
@@ -122,14 +122,14 @@ export default function ContactPage() {
                                         required
                                         value={formData.email}
                                         onChange={handleChange}
-                                        className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-muted-foreground/50"
+                                        className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-on-surface-variant/50"
                                         placeholder="name@example.com"
                                     />
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <label htmlFor="subject" className="text-sm font-bold text-muted-foreground ml-1">
+                                <label htmlFor="subject" className="text-sm font-bold text-on-surface-variant ml-1">
                                     {lang === 'ko' ? '제목' : 'Subject'}
                                 </label>
                                 <input
@@ -139,13 +139,13 @@ export default function ContactPage() {
                                     required
                                     value={formData.subject}
                                     onChange={handleChange}
-                                    className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-muted-foreground/50"
+                                    className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-on-surface-variant/50"
                                     placeholder={lang === 'ko' ? '문의 제목을 입력해주세요' : 'How can we help?'}
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label htmlFor="message" className="text-sm font-bold text-muted-foreground ml-1">
+                                <label htmlFor="message" className="text-sm font-bold text-on-surface-variant ml-1">
                                     {lang === 'ko' ? '내용' : 'Message'}
                                 </label>
                                 <textarea
@@ -155,7 +155,7 @@ export default function ContactPage() {
                                     rows={5}
                                     value={formData.message}
                                     onChange={handleChange}
-                                    className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-muted-foreground/50 resize-none"
+                                    className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-on-surface-variant/50 resize-none"
                                     placeholder={lang === 'ko' ? '자세한 내용을 적어주세요...' : 'Tell us more...'}
                                 ></textarea>
                             </div>

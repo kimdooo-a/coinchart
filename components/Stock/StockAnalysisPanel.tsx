@@ -155,8 +155,8 @@ export const StockAnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
     if (!result || result.uiState === 'insufficient') {
         return (
             <div className="bg-card rounded-xl p-10 border border-border text-center">
-                <div className="text-muted-foreground text-lg font-bold mb-2">⚠️ {t.insufficient}</div>
-                <p className="text-sm text-muted-foreground">Chart data is not available for this timeframe.</p>
+                <div className="text-on-surface-variant text-lg font-bold mb-2">⚠️ {t.insufficient}</div>
+                <p className="text-sm text-on-surface-variant">Chart data is not available for this timeframe.</p>
             </div>
         );
     }
@@ -167,7 +167,7 @@ export const StockAnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
         if (g === 'A') return 'text-primary';
         if (g === 'B') return 'text-chart-2'; // Assuming these colors exist or fallback
         if (g === 'C') return 'text-chart-3';
-        return 'text-muted-foreground';
+        return 'text-on-surface-variant';
     }
 
     return (
@@ -182,14 +182,14 @@ export const StockAnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
                     <div className="flex bg-muted rounded p-1 gap-1 self-start">
                         {ANALYSIS_INTERVALS.map(int => (
                             <button key={int} onClick={() => setInterval(int)}
-                                className={`px-3 py-1 rounded text-xs font-bold transition-all ${interval === int ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-background'}`}>
+                                className={`px-3 py-1 rounded text-xs font-bold transition-all ${interval === int ? 'bg-primary text-primary-foreground' : 'text-on-surface-variant hover:bg-background'}`}>
                                 {int.toUpperCase()}
                             </button>
                         ))}
                     </div>
 
                     {/* Data Source Disclaimer */}
-                    <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1.5">
+                    <div className="mt-2 text-xs text-on-surface-variant flex items-center gap-1.5">
                         <span>ℹ️</span>
                         <span>
                             {lang === 'ko'
@@ -203,14 +203,14 @@ export const StockAnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
                 {/* Probability Card (Summary) */}
                 <div className="bg-muted/50 p-4 rounded-xl border border-border flex items-center gap-6">
                     <div className="text-center">
-                        <div className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{t.grade}</div>
+                        <div className="text-xs text-on-surface-variant uppercase tracking-wide mb-1">{t.grade}</div>
                         <div className={`text-3xl font-black ${gradeColor(result.confidence.grade)}`}>
                             {result.confidence.grade}
                         </div>
                     </div>
                     <div className="h-10 w-px bg-border"></div>
                     <div className="text-center">
-                        <div className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{t.prob}</div>
+                        <div className="text-xs text-on-surface-variant uppercase tracking-wide mb-1">{t.prob}</div>
                         <div className="text-2xl font-bold text-foreground">
                             {probability.probability}%
                         </div>
@@ -225,7 +225,7 @@ export const StockAnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
                     <h4 className="text-primary font-bold text-sm mb-2 flex items-center gap-2">
                         🔍 {t.evidence}
                     </h4>
-                    <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                    <p className="text-sm text-on-surface-variant leading-relaxed whitespace-pre-wrap">
                         {explanation.sections.evidence}
                     </p>
                 </div>
@@ -235,7 +235,7 @@ export const StockAnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
                     <h4 className="text-destructive font-bold text-sm mb-2 flex items-center gap-2">
                         ⚠️ {t.risk}
                     </h4>
-                    <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                    <p className="text-sm text-on-surface-variant leading-relaxed whitespace-pre-wrap">
                         {explanation.sections.risk}
                     </p>
                 </div>
@@ -245,7 +245,7 @@ export const StockAnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
                     <h4 className="text-secondary-foreground font-bold text-sm mb-2 flex items-center gap-2">
                         👀 {t.watch}
                     </h4>
-                    <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                    <p className="text-sm text-on-surface-variant leading-relaxed whitespace-pre-wrap">
                         {explanation.sections.watch}
                     </p>
                 </div>
@@ -258,7 +258,7 @@ export const StockAnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
                         {t.backtestTitle}
                         <button
                             onClick={() => setShowBacktestGuide(!showBacktestGuide)}
-                            className="text-xs font-normal text-muted-foreground bg-muted hover:bg-background px-2 py-0.5 rounded transition-colors flex items-center gap-1"
+                            className="text-xs font-normal text-on-surface-variant bg-muted hover:bg-background px-2 py-0.5 rounded transition-colors flex items-center gap-1"
                         >
                             <span className="text-primary">?</span> {t.bt_guideBtn}
                         </button>
@@ -271,7 +271,7 @@ export const StockAnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <span className="font-bold text-foreground block mb-1">🎯 {t.bt_winRate} (Win Rate)</span>
-                                <p className="text-muted-foreground text-xs leading-relaxed">
+                                <p className="text-on-surface-variant text-xs leading-relaxed">
                                     {lang === 'ko'
                                         ? '전체 매매 신호 중 수익으로 마감된 거래의 비율입니다. 50% 이상이면 긍정적입니다.'
                                         : 'Percentage of trades that ended in profit. >50% is generally positive.'}
@@ -279,7 +279,7 @@ export const StockAnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
                             </div>
                             <div>
                                 <span className="font-bold text-foreground block mb-1">💰 {t.bt_totalReturn} (Total Return)</span>
-                                <p className="text-muted-foreground text-xs leading-relaxed">
+                                <p className="text-on-surface-variant text-xs leading-relaxed">
                                     {lang === 'ko'
                                         ? '시뮬레이션 기간 동안의 단순 누적 수익률입니다. (복리 미적용)'
                                         : 'Cumulative return over the simulation period (non-compounded).'}
@@ -287,7 +287,7 @@ export const StockAnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
                             </div>
                             <div>
                                 <span className="font-bold text-foreground block mb-1">📉 {t.bt_maxDD} (MDD)</span>
-                                <p className="text-muted-foreground text-xs leading-relaxed">
+                                <p className="text-on-surface-variant text-xs leading-relaxed">
                                     {lang === 'ko'
                                         ? '자산 고점 대비 최대 하락폭입니다. 수치가 낮을수록(0에 가까울수록) 안정적인 전략입니다.'
                                         : 'Maximum loss from a peak to a trough. Lower (closer to 0) implies better stability.'}
@@ -295,7 +295,7 @@ export const StockAnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
                             </div>
                             <div>
                                 <span className="font-bold text-foreground block mb-1">⚖️ {t.bt_profitFactor} (Profit Factor)</span>
-                                <p className="text-muted-foreground text-xs leading-relaxed">
+                                <p className="text-on-surface-variant text-xs leading-relaxed">
                                     {lang === 'ko'
                                         ? '총 이익 / 총 손실 비율입니다. 1.5 이상이면 훌륭한 전략, 1 미만이면 손실 전략입니다.'
                                         : 'Ratio of gross profit to gross loss. >1.5 is excellent, <1 implies a losing strategy.'}
@@ -307,26 +307,26 @@ export const StockAnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="bg-muted p-3 rounded-lg">
-                        <div className="text-xs text-muted-foreground">{t.bt_winRate}</div>
+                        <div className="text-xs text-on-surface-variant">{t.bt_winRate}</div>
                         <div className="text-lg font-bold text-foreground">
                             {result.backtest.status === 'insufficient' ? t.na : `${result.backtest.winRate.toFixed(1)}%`}
                         </div>
                     </div>
                     <div className="bg-muted p-3 rounded-lg">
-                        <div className="text-xs text-muted-foreground">{t.bt_totalReturn}</div>
+                        <div className="text-xs text-on-surface-variant">{t.bt_totalReturn}</div>
                         <div className="text-lg font-bold text-foreground">
                             {result.backtest.status === 'insufficient' ? t.na : `${result.backtest.totalReturn.toFixed(1)}%`}
                         </div>
                     </div>
                     {/* Max Drawdown - Unlocked */}
                     <div className="bg-card p-3 rounded-lg relative overflow-hidden group border border-border">
-                        <div className="text-xs text-muted-foreground">{t.bt_maxDD}</div>
+                        <div className="text-xs text-on-surface-variant">{t.bt_maxDD}</div>
                         <div className="text-lg font-bold text-destructive">-{result.backtest.maxDrawdownPercent.toFixed(1)}%</div>
                     </div>
 
                     {/* Profit Factor - Unlocked */}
                     <div className="bg-card p-3 rounded-lg relative overflow-hidden group border border-border">
-                        <div className="text-xs text-muted-foreground">{t.bt_profitFactor}</div>
+                        <div className="text-xs text-on-surface-variant">{t.bt_profitFactor}</div>
                         <div className="text-lg font-bold text-primary">
                             {result.backtest.profitFactor >= 999 ? 'Inf' : result.backtest.profitFactor.toFixed(2)}
                         </div>

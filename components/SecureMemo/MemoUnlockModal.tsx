@@ -82,7 +82,7 @@ export function MemoUnlockModal({ isOpen, memo, onClose, onUnlock, t }: MemoUnlo
                 >
                     <button
                         onClick={handleClose}
-                        className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
+                        className="absolute top-4 right-4 text-on-surface-variant hover:text-foreground transition-colors"
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -93,14 +93,14 @@ export function MemoUnlockModal({ isOpen, memo, onClose, onUnlock, t }: MemoUnlo
                         </div>
                         <div>
                             <h2 className="text-xl font-bold text-foreground">{memo.title}</h2>
-                            <p className="text-sm text-muted-foreground">{t.enterPassword}</p>
+                            <p className="text-sm text-on-surface-variant">{t.enterPassword}</p>
                         </div>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {/* Password */}
                         <div>
-                            <label className="block text-xs text-muted-foreground mb-1">{t.password}</label>
+                            <label className="block text-xs text-on-surface-variant mb-1">{t.password}</label>
                             <input
                                 type="password"
                                 value={password}

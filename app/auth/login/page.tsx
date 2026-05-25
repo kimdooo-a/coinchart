@@ -25,7 +25,7 @@ export default function LoginPage() {
                 <h1 className="mb-6 text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
                     Welcome Back
                 </h1>
-                <p className="mb-8 text-muted-foreground">
+                <p className="mb-8 text-on-surface-variant">
                     Sign in or create an account to access your portfolio.
                 </p>
 
