@@ -2,17 +2,18 @@
 
 | 항목 | 값 |
 |------|-----|
-| **마지막 세션** | 2026-05-25 (세션 29 — **R4 지휘자 community-wiring**. UI 결선·dead code·**실 DB 적용**·E2E 발사) |
-| **작업 내용** | 지휘자(CEO) 세션. (1) R3 미push 커밋 3종 origin push. (2) **R4(community-wiring, 4 일꾼)** 설계·발사·회수: T01 db적용준비·T02 UI wiring(게시글 비추 dislikeCount+댓글추천 PATCH 결선)·T03 dead code(news-queries 248→119줄)·T04 E2E(Wave2). **Wave1 3/3 PASS**, 통합 tsc 0·build green. (3) **실 DB 적용**(중대): 운영 DB(enksnhshciyvllwfiwrm)에 커뮤니티 마이그레이션 **5종 전부 미적용** 발견 → `.env.local` SUPABASE_ACCESS_TOKENS로 Management API `database/query`에 순차 적용(create_community_tables→alter_news_classify→hot_issues_rpc→comment_likes→post_likes_rpc, 전부 201). 게시글 시드 156행 + 스모크 PASS 2/SKIP 1/FAIL 0(토글 RPC like 0→1→0). **커뮤니티 백엔드 운영 첫 가동.** R5 후보: detail API 비추집계 노출·coin-queries dead code·T04 E2E 회수. |
+| **마지막 세션** | 2026-05-25 (세션 30 — **R5 지휘부**. 마이그레이션 정합·dead code·비추집계·E2E 풀검증 29 passed) |
+| **작업 내용** | 지휘부(CEO) 단독 세션. 세션 29 cs 인계받은 **R5 후보 4건을 사용자 지정 순서(#4→#3→#2→#1)로 순차 완결**. **#4** 마이그레이션 CREATE POLICY 18개 멱등화(DROP IF EXISTS 선행) + schema_migrations 실측 진단(version=파일명 8자리 날짜라 같은 날짜 다수 파일 충돌 → 단순 backfill 불가, 파일명 14자리 정규화 선행 필요, 런북 §9). **#3** coin-queries.ts 미사용 CoinPostsResult 제거(R4 우려 fetch 래퍼는 R3/T04에서 이미 제거 확인). **#2** detail 비추집계 노출(BoardPostDetail.dislikes + board-server community_post_like_counts RPC + PostVoteButtons initialDislikes; 클라 fetchBoardPost 사용처 0이라 SSR 경로만). **#1** T04 E2E 풀검증(kdye2e): L-B4 실패=시드 댓글 0 원인 확정 → 자체 댓글 생성으로 spec 개선, **E2E 29 passed/0 failed/1 skipped(AD1)**, 댓글 Management API 정리(잔여 0). tsc 0·build green. 보류분 3 + R5 4커밋 origin push. R6 후보: AD1 관리자 storageState·마이그 파일명 14자리 정규화. |
 | **브랜치** | main |
 | **빌드 상태** | ✅ `npx tsc --noEmit` 0 에러 / `npm run build` ✓ Compiled (54/54 static, `/board/[slug]`·`[postId]`·`write` ƒ SSR, `/coin/[symbol]` ● SSG+ISR 6종 프리렌더, `/news` ƒ SSR) |
-| **마지막 커밋** | `30cdbd5` (세션 28 R3 지휘자 통합 — 79파일 +5953/−2102) + `c34f264`(체크포인트 부기) + `d789d07`(R3 cs 문서 5종). **✅ 2026-05-25 origin/main push 완료**(`223c401..d789d07`, 세션 29). 디스패치 마커 R1·R2·R3 전부 `.dispatch/archive/`로 이동, active teams 비움 |
+| **마지막 커밋** | `77d3547`(R5-#1 E2E)·`a1f437c`(#2 비추집계)·`e12b6ee`(#3 dead code)·`e75a77c`(#4 마이그 멱등화). **✅ 2026-05-25 origin/main push 완료**(세션 30 R5 4커밋 `f3ce509..77d3547` + 보류분 3 `d789d07..f3ce509`). 워킹트리 clean |
 | **프로젝트 방향성** | **v2.0 커뮤니티 피벗** ([PROJECT_DIRECTION.md](../PROJECT_DIRECTION.md)) |
 
 ## 최근 작업 이력
 
 | 날짜 | 작업 | 결과 |
 |------|------|------|
+| 2026-05-25 | **R5 지휘부 — 마이그정합·deadcode·비추집계·E2E풀검증 (세션 30, CEO)** | R5 후보 4건 #4→#3→#2→#1 순차 완결. #4 CREATE POLICY 18개 멱등화 + schema_migrations 진단(같은 날짜 version 충돌→backfill 불가, 런북§9). #3 coin-queries CoinPostsResult 제거. #2 detail 비추집계(BoardPostDetail.dislikes + community_post_like_counts RPC + initialDislikes). #1 E2E 풀검증 **29 passed/0 fail/1 skip(AD1)** · L-B4 자체댓글생성 개선. tsc 0·build green. 보류분 3 + R5 4커밋 push. solution `2026-05-25-e2e-db-dependent-test-reliability.md` |
 | 2026-05-25 | **R4 지휘자 — community-wiring + 실 DB 적용 (세션 29, CEO)** | R3 미push 3종 push. R4 4일꾼 설계·발사·회수: T01 db준비·T02 UI결선(비추 dislikeCount·댓글추천 PATCH)·T03 dead code(news-queries 248→119)·T04 E2E(Wave2). Wave1 3/3 PASS, tsc 0·build green. **실 DB 적용**: 운영 DB에 커뮤니티 마이그 5종 전부 미적용 발견→Management API로 순차 적용(전부 201)+게시글 156행 시드+스모크 PASS 2/SKIP1/FAIL0. 커뮤니티 백엔드 운영 첫 가동. 보고서 `2026-05-25-R4-_SUMMARY.md`, 런북 `docs/db/R4-db-apply-runbook.md` |
 | 2026-05-25 | **R3 지휘자 — community-finish 라운드 마감 (세션 28, CEO)** | 12 일꾼 회수·통합. 1차(7/12)→2차(T03·T09)→T04 정정(stale 스냅샷 오판, 사용자 지적)→Wave3(T05)로 **12/12 verified**. 트랙 A(메타 SSOT→board/news/coin SSR→mock 3종 삭제)·B(공지 라우트·dislike RPC·댓글추천)·C(라이트화 4). 지휘자 SOT 갱신(_API like dislikeCount·comment PATCH / _SCHEMA comment_likes·RPC / meta 주석). 통합 커밋 `30cdbd5`(79파일) + 부기 `c34f264`. tsc 0·build ✓(54/54, board ƒ·coin ● 6종·news ƒ). 격리위반 2건(T06 additive 허용). R3 마커 12개 아카이브. 보고서 `2026-05-24-R3-_SUMMARY.md`, solution `2026-05-25-dispatch-recovery-stale-snapshot.md` |
 | 2026-05-23 | **R1·R2 지휘자 — 디스패치 라운드 마감 (세션 27, CEO)** | R1 재개 회수 시 12/15 확인→미완 3건(T09·T11·T15) 마커 리셋·부분 재발사로 15/15 마감, 통합 커밋 `60d4298`. R2(realdata-finish) 5개 설계·발사·회수·검증→5/5, 통합 커밋 `81b9624`. R1·R2 마커 전부 아카이브. write-guard 소프트 가드 확인(동시 발사 안전). R3 후보 5종(mock 정리·관리자 라우트·댓글 추천 RPC·dedup 정책·SSR 전환) 인계. 통합 보고서 `docs/handover/2026-05-23-R{1,2}-_SUMMARY.md` |
@@ -83,6 +84,7 @@
 | 27 | 2026-05-23 | **R1·R2 지휘자 — 디스패치 라운드 마감/cs** (회수·통합·아카이브) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-session27-dispatch-conductor.md) |
 | 28 | 2026-05-25 | **R3 지휘자 — community-finish 12/12 회수·통합·커밋/cs** (`30cdbd5`, SSR 전환·mock 삭제·dislike/댓글추천·라이트화) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-25-session28-r3-conductor.md) · [R3_SUMMARY](../handover/2026-05-24-R3-_SUMMARY.md) |
 | 29 | 2026-05-25 | **R4 지휘자 — community-wiring + 실 DB 적용 + E2E/cs** (`7683c41`·`b196df5`, UI 결선·dead code·마이그 5종 Management API 적용·E2E) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-25-session29-r4-conductor.md) · [R4_SUMMARY](../handover/2026-05-25-R4-_SUMMARY.md) |
+| 30 | 2026-05-25 | **R5 지휘부 — 마이그정합·deadcode·비추집계·E2E풀검증/cs** (`e75a77c`·`e12b6ee`·`a1f437c`·`77d3547`, #4 멱등화·#3 dead code·#2 비추집계·#1 E2E 29 passed) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-25-session30-r5.md) |
 | 18 | 2026-05-23 | R1/T15 일꾼 — 메인페이지 실데이터 전환 (mock 제거 + SSR + `queries.ts`) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T15-mainpage-realdata.md) |
 | 19 | 2026-05-23 | R1/T11 일꾼 — 시그널·마켓·주식마켓 라이트화 (6파일 45/45 대칭, 18→19 정정) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T11-signal-market-lightify.md) |
 | 20 | 2026-05-23 | R1/T09 일꾼 — 블로그 라이트화 (app/blog 4 + components/Blog 11 + BlogEditor tone 3, 18파일) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-23-R1-T09-blog-lightify.md) |
