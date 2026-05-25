@@ -7,7 +7,11 @@
 
 import { useState } from "react";
 import { ThumbsUp } from "lucide-react";
-import { createComment, type BoardCommentItem } from "@/lib/community/board-queries";
+import {
+  createComment,
+  toggleCommentLike,
+  type BoardCommentItem,
+} from "@/lib/community/board-queries";
 
 interface CommentSectionProps {
   postId: string;
@@ -21,6 +25,8 @@ export default function CommentSection({ postId, initialComments }: CommentSecti
   const [guestPwd, setGuestPwd] = useState("");
   const [commentSort, setCommentSort] = useState<"latest" | "popular">("latest");
   const [commentBusy, setCommentBusy] = useState(false);
+  // 추천 처리 중인 댓글 id 집합 — 진행 중 중복 클릭 가드 (PostVoteButtons의 likeBusy 패턴)
+  const [likeBusyIds, setLikeBusyIds] = useState<Set<string>>(new Set());
 
   const handleCommentSubmit = async () => {
     if (!commentInput.trim() || commentBusy) return;
@@ -40,6 +46,26 @@ export default function CommentSection({ postId, initialComments }: CommentSecti
       alert(e instanceof Error ? e.message : "댓글 등록에 실패했습니다.");
     } finally {
       setCommentBusy(false);
+    }
+  };
+
+  // 댓글 추천 토글 — PATCH /api/community/comment 응답 likeCount로 해당 댓글 likes 확정 갱신
+  const handleCommentLike = async (commentId: string) => {
+    if (likeBusyIds.has(commentId)) return; // 진행 중 중복 클릭 차단
+    setLikeBusyIds((prev) => new Set(prev).add(commentId));
+    try {
+      const { likeCount } = await toggleCommentLike(commentId, 1);
+      setComments((prev) =>
+        prev.map((c) => (c.id === commentId ? { ...c, likes: likeCount } : c))
+      );
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : "댓글 추천에 실패했습니다.");
+    } finally {
+      setLikeBusyIds((prev) => {
+        const next = new Set(prev);
+        next.delete(commentId);
+        return next;
+      });
     }
   };
 
@@ -132,7 +158,12 @@ export default function CommentSection({ postId, initialComments }: CommentSecti
               </div>
               <p className="text-body-sm text-on-surface mb-2">{c.content}</p>
               <div className="flex items-center gap-3 text-meta text-on-surface-variant">
-                <button className="hover:text-[var(--color-positive)] inline-flex items-center gap-0.5">
+                <button
+                  type="button"
+                  onClick={() => handleCommentLike(c.id)}
+                  disabled={likeBusyIds.has(c.id)}
+                  className="hover:text-[var(--color-positive)] inline-flex items-center gap-0.5 disabled:opacity-60"
+                >
                   <ThumbsUp className="w-3 h-3" />
                   {c.likes}
                 </button>
@@ -150,7 +181,12 @@ export default function CommentSection({ postId, initialComments }: CommentSecti
                   </div>
                   <p className="text-body-sm text-on-surface mb-1">{cc.content}</p>
                   <div className="flex gap-3 text-meta text-on-surface-variant">
-                    <button className="hover:text-[var(--color-positive)] inline-flex items-center gap-0.5">
+                    <button
+                      type="button"
+                      onClick={() => handleCommentLike(cc.id)}
+                      disabled={likeBusyIds.has(cc.id)}
+                      className="hover:text-[var(--color-positive)] inline-flex items-center gap-0.5 disabled:opacity-60"
+                    >
                       <ThumbsUp className="w-3 h-3" />
                       {cc.likes}
                     </button>

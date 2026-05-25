@@ -339,7 +339,7 @@ export async function createComment(input: CreateCommentInput): Promise<BoardCom
 export async function togglePostLike(
   postId: string,
   value: 1 | -1
-): Promise<{ liked: boolean; likeCount: number }> {
+): Promise<{ liked: boolean; likeCount: number; dislikeCount: number }> {
   const res = await fetch(`/api/community/like`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -348,9 +348,42 @@ export async function togglePostLike(
   const json = (await res.json().catch(() => ({}))) as {
     liked?: boolean;
     likeCount?: number;
+    dislikeCount?: number;
     error?: string;
   };
   if (!res.ok) throw new Error(json.error ?? `추천 실패 (${res.status})`);
+  // dislikeCount = 비추 수(분리 집계). 기존 호출부 호환 — 필드 추가만.
+  return {
+    liked: !!json.liked,
+    likeCount: Number(json.likeCount ?? 0),
+    dislikeCount: Number(json.dislikeCount ?? 0),
+  };
+}
+
+// ─────────────────────────────────────────────────────────────
+// 댓글 추천 토글 — PATCH /api/community/comment
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * 댓글 추천 토글 래퍼 (R4/T02, 2026-05-25).
+ * body: { commentId, value?: 1 | -1 } (value 미지정 시 1=추천).
+ * 익명 dedup 헤더(x-client-ip-hash)는 middleware가 자동 주입 — 클라는 명시하지 않는다.
+ */
+export async function toggleCommentLike(
+  commentId: string,
+  value: 1 | -1 = 1
+): Promise<{ liked: boolean; likeCount: number }> {
+  const res = await fetch(`/api/community/comment`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ commentId, value }),
+  });
+  const json = (await res.json().catch(() => ({}))) as {
+    liked?: boolean;
+    likeCount?: number;
+    error?: string;
+  };
+  if (!res.ok) throw new Error(json.error ?? `댓글 추천 실패 (${res.status})`);
   return { liked: !!json.liked, likeCount: Number(json.likeCount ?? 0) };
 }
 

@@ -1,0 +1,4 @@
+# Playwright 실행 산출물 (R4/T04) — 커밋 제외
+test-results/
+playwright-report/
+.cache/

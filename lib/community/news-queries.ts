@@ -1,20 +1,21 @@
-// /news 클라이언트 fetch 래퍼 + 매퍼 + category 라벨 사전 (R2/T02, 2026-05-23)
+// /news 순수 헬퍼 + 매퍼 + category 라벨 사전 + API 응답 타입 (R2/T02, 2026-05-23)
 //
-// 주의: 본 모듈은 클라이언트 컴포넌트(app/news/page.tsx, "use client")에서 import한다.
-//       따라서 server-only 의존(@/lib/supabase/server 등) 금지.
-//       메인페이지용 lib/community/queries.ts(SSR, server-only)와 의도적으로 분리한다.
+// R4/T03(2026-05-25): R3에서 /news가 SSR(news-server.ts)로 전환되며 호출처가 0이 된
+//   클라 fetch 래퍼 5종(fetchNews·fetchTickerItems·fetchHotIssueItems·fetchFngData·
+//   fetchOfficialPosts)과 그 전용 내부 상수/타입(COIN_DISPLAY·ApiTicker·ApiHotIssue·
+//   HOT_TREND_MAP·ApiBlogPost·NewsQueryParams)을 제거. 순수 헬퍼·타입·매퍼만 보존.
 //
-// 데이터 소스:
-//   - GET /api/news?query=&category=&page=   (R1/T06: 4차원 컬럼 포함)
-//   - GET /api/coins/ticker                   (R1/T03)
-//   - GET /api/coins/hot-issues               (R1/T13)
-//   - GET /api/fng                            (R1/T04)
-//   - GET /api/blog?limit=3                   (공식글)
+// 주의: 본 모듈은 server 모듈(news-server.ts·coin-server.ts)이 순수 헬퍼/타입을
+//       재사용한다(클라 컴포넌트도 import 가능). 따라서 server-only 의존
+//       (@/lib/supabase/server 등)은 여전히 금지 — 순수 모듈로 유지한다.
+//
+// 소비처:
+//   - lib/community/news-server.ts : categoryLabel, formatRelativeTime, NewsListItem
+//   - lib/community/coin-server.ts : categoryLabel
+//   - ApiNewsItem / mapApiNews / FngData : /api/news·/api/fng 응답 계약 타입·매퍼
+//     (현재 직접 호출처는 없으나 응답 계약·재사용 대비 보존)
 
 import type { NewsHeadlineItem, NewsSentiment } from "@/components/community/NewsHeadlineCard";
-import type { TickerItem } from "@/components/community/widgets/PriceTickerWidget";
-import type { HotIssue, HotIssueTrend } from "@/components/community/widgets/HotIssueWidget";
-import type { OfficialPost } from "@/components/community/widgets/OfficialPostsWidget";
 
 // ─────────────────────────────────────────────────────────────
 // 1. category 영문 enum → 한글 라벨 사전
@@ -41,25 +42,7 @@ export function categoryLabel(cat?: string | null): string | undefined {
 }
 
 // ─────────────────────────────────────────────────────────────
-// 2. 코인 심볼 → 한국어명·코인룸 링크 (사이드바 시세/핫이슈용 정적 사전)
-//    queries.ts의 COIN_META는 server-only 모듈이라 재사용 불가 → 클라용 별도 보유.
-// ─────────────────────────────────────────────────────────────
-
-const COIN_DISPLAY: Record<string, { nameKo: string; href: string }> = {
-  BTC: { nameKo: "비트코인", href: "/coin/btc" },
-  ETH: { nameKo: "이더리움", href: "/coin/eth" },
-  XRP: { nameKo: "리플", href: "/coin/xrp" },
-  SOL: { nameKo: "솔라나", href: "/coin/sol" },
-  DOGE: { nameKo: "도지코인", href: "/coin/altcoin" },
-  ADA: { nameKo: "카르다노", href: "/coin/altcoin" },
-  BNB: { nameKo: "바이낸스코인", href: "/coin/altcoin" },
-  TRX: { nameKo: "트론", href: "/coin/altcoin" },
-  LINK: { nameKo: "체인링크", href: "/coin/altcoin" },
-  AVAX: { nameKo: "아발란체", href: "/coin/altcoin" },
-};
-
-// ─────────────────────────────────────────────────────────────
-// 3. 상대 시간 ("방금 전" / "N분 전" / "N시간 전" / "N일 전")
+// 2. 상대 시간 ("방금 전" / "N분 전" / "N시간 전" / "N일 전")
 // ─────────────────────────────────────────────────────────────
 
 export function formatRelativeTime(iso: string | null | undefined): string {
@@ -77,7 +60,7 @@ export function formatRelativeTime(iso: string | null | undefined): string {
 }
 
 // ─────────────────────────────────────────────────────────────
-// 4. /api/news 응답 타입 (R1/T06 계약)
+// 3. /api/news 응답 타입 (R1/T06 계약)
 // ─────────────────────────────────────────────────────────────
 
 export interface ApiNewsItem {
@@ -100,7 +83,7 @@ export type NewsListItem = NewsHeadlineItem & {
 };
 
 // ─────────────────────────────────────────────────────────────
-// 5. 매퍼: ApiNewsItem → NewsListItem
+// 4. 매퍼: ApiNewsItem → NewsListItem
 //    - category 영문 → 한글 라벨
 //    - symbol === "ALL" → coinTag 없음
 //    - pubDate ISO → timeLabel
@@ -126,123 +109,10 @@ export function mapApiNews(item: ApiNewsItem, i: number): NewsListItem {
 }
 
 // ─────────────────────────────────────────────────────────────
-// 6. 뉴스 목록 fetch (코인·분류는 서버 위임, 감정·정렬은 호출측 클라 처리)
+// 5. /api/fng 응답 타입 (공포·탐욕 지수)
 // ─────────────────────────────────────────────────────────────
-
-export interface NewsQueryParams {
-  /** COIN_FILTERS key: ALL/BTC/ETH/XRP/SOL/ALT/STOCK */
-  coin?: string;
-  /** NEWS_CATEGORIES key(영문 enum): all/market/regulation/... */
-  category?: string;
-  page?: number;
-}
-
-export async function fetchNews(params: NewsQueryParams = {}): Promise<NewsListItem[]> {
-  const qs = new URLSearchParams();
-  if (params.coin && params.coin !== "ALL") qs.set("query", params.coin);
-  if (params.category && params.category !== "all") qs.set("category", params.category);
-  qs.set("page", String(params.page ?? 0));
-
-  const res = await fetch(`/api/news?${qs.toString()}`);
-  if (!res.ok) throw new Error(`[news] ${res.status}`);
-  const json = (await res.json()) as { items?: ApiNewsItem[] };
-  return (json.items ?? []).map(mapApiNews);
-}
-
-// ─────────────────────────────────────────────────────────────
-// 7. 사이드바 위젯 fetch (모두 실패 시 graceful: 빈 배열/null)
-// ─────────────────────────────────────────────────────────────
-
-interface ApiTicker {
-  symbol: string; // "BTCUSDT"
-  baseSymbol: string; // "BTC"
-  price: number;
-  changePct: number;
-}
-
-export async function fetchTickerItems(): Promise<TickerItem[]> {
-  try {
-    const res = await fetch("/api/coins/ticker");
-    if (!res.ok) return [];
-    const json = (await res.json()) as { tickers?: ApiTicker[] };
-    return (json.tickers ?? []).map((t) => ({
-      symbol: t.baseSymbol,
-      name: COIN_DISPLAY[t.baseSymbol]?.nameKo ?? t.baseSymbol,
-      price: t.price,
-      changePct: t.changePct,
-      href: COIN_DISPLAY[t.baseSymbol]?.href,
-    }));
-  } catch {
-    return [];
-  }
-}
-
-interface ApiHotIssue {
-  rank: number;
-  symbol: string;
-  count: number;
-  trend: string; // 'UP' | 'DOWN' | 'FLAT' | 'NEW'
-  score: number;
-}
-
-const HOT_TREND_MAP: Record<string, HotIssueTrend> = {
-  UP: "up",
-  DOWN: "down",
-  FLAT: "same",
-  NEW: "new",
-};
-
-export async function fetchHotIssueItems(): Promise<HotIssue[]> {
-  try {
-    const res = await fetch("/api/coins/hot-issues");
-    if (!res.ok) return [];
-    const json = (await res.json()) as { items?: ApiHotIssue[] };
-    return (json.items ?? []).map((h) => ({
-      rank: h.rank,
-      keyword: COIN_DISPLAY[h.symbol]?.nameKo ?? (h.symbol === "ALL" ? "전체" : h.symbol),
-      trend: HOT_TREND_MAP[h.trend] ?? "same",
-      href: COIN_DISPLAY[h.symbol]?.href,
-    }));
-  } catch {
-    return [];
-  }
-}
 
 export interface FngData {
   value: number;
   prevValue?: number;
-}
-
-export async function fetchFngData(): Promise<FngData | null> {
-  try {
-    const res = await fetch("/api/fng");
-    if (!res.ok) return null;
-    const fng = (await res.json()) as { value?: number; prevValue?: number };
-    if (typeof fng.value !== "number") return null;
-    return { value: fng.value, prevValue: fng.prevValue };
-  } catch {
-    return null;
-  }
-}
-
-interface ApiBlogPost {
-  slug: string;
-  title: string;
-  published_at: string | null;
-  created_at: string | null;
-}
-
-export async function fetchOfficialPosts(limit = 3): Promise<OfficialPost[]> {
-  try {
-    const res = await fetch(`/api/blog?limit=${limit}`);
-    if (!res.ok) return [];
-    const json = (await res.json()) as { posts?: ApiBlogPost[] };
-    return (json.posts ?? []).slice(0, limit).map((p) => ({
-      slug: p.slug,
-      title: p.title,
-      date: (p.published_at ?? p.created_at ?? "").slice(0, 10),
-    }));
-  } catch {
-    return [];
-  }
 }

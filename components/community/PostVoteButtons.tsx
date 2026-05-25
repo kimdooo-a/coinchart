@@ -10,21 +10,29 @@ import { togglePostLike } from "@/lib/community/board-queries";
 interface PostVoteButtonsProps {
   postId: string;
   initialLikes: number;
+  /** 초기 비추 수(분리 집계). 호출처(app/board/[slug]/[postId])가 넘기지 않으면 0 시작 — 후속 연결 예정. */
+  initialDislikes?: number;
 }
 
-export default function PostVoteButtons({ postId, initialLikes }: PostVoteButtonsProps) {
+export default function PostVoteButtons({
+  postId,
+  initialLikes,
+  initialDislikes = 0,
+}: PostVoteButtonsProps) {
   const [liked, setLiked] = useState(false);
   const [disliked, setDisliked] = useState(false);
   const [likes, setLikes] = useState(initialLikes);
+  const [dislikes, setDislikes] = useState(initialDislikes);
   const [likeBusy, setLikeBusy] = useState(false);
 
   const handleLike = async () => {
     if (likeBusy) return;
     setLikeBusy(true);
     try {
-      const { liked: nowLiked, likeCount } = await togglePostLike(postId, 1);
+      const { liked: nowLiked, likeCount, dislikeCount } = await togglePostLike(postId, 1);
       setLiked(nowLiked);
       setLikes(likeCount);
+      setDislikes(dislikeCount); // 응답의 분리 집계 비추 수 반영
       if (nowLiked) setDisliked(false);
     } catch (e: unknown) {
       alert(e instanceof Error ? e.message : "추천 처리에 실패했습니다.");
@@ -38,8 +46,9 @@ export default function PostVoteButtons({ postId, initialLikes }: PostVoteButton
     setLikeBusy(true);
     const wasDisliked = disliked;
     try {
-      const { likeCount } = await togglePostLike(postId, -1);
+      const { likeCount, dislikeCount } = await togglePostLike(postId, -1);
       setLikes(likeCount);
+      setDislikes(dislikeCount); // 응답의 분리 집계 비추 수 반영
       setDisliked(!wasDisliked);
       if (!wasDisliked) setLiked(false);
     } catch (e: unknown) {
@@ -75,7 +84,7 @@ export default function PostVoteButtons({ postId, initialLikes }: PostVoteButton
         }`}
       >
         <ThumbsDown className="w-4 h-4" />
-        <span className="font-bold">비추 {disliked ? 1 : 0}</span>
+        <span className="font-bold">비추 {dislikes}</span>
       </button>
       <button type="button" className="inline-flex items-center gap-1 px-3 py-2 rounded-md text-body-sm text-on-surface-variant hover:bg-surface-container">
         <Bookmark className="w-4 h-4" />스크랩
