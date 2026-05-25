@@ -149,19 +149,31 @@ export async function fetchBoardPostServer(
     console.error("[board-server] view_count 증가 실패:", e);
   }
 
-  // 댓글 첫 페이지 (created_at 오름차순 100) — API와 동일
+  // 댓글 첫 페이지(created_at 오름차순 100) + 추천/비추 분리 집계(community_post_like_counts) 병렬 조회
   const supabase = await createClient();
-  const { data: comments } = await supabase
-    .from("community_comments")
-    .select(COMMENT_FIELDS)
-    .eq("post_id", postId)
-    .eq("is_deleted", false)
-    .order("created_at", { ascending: true })
-    .limit(100);
+  const [commentsRes, countsRes] = await Promise.all([
+    supabase
+      .from("community_comments")
+      .select(COMMENT_FIELDS)
+      .eq("post_id", postId)
+      .eq("is_deleted", false)
+      .order("created_at", { ascending: true })
+      .limit(100),
+    supabase.rpc("community_post_like_counts", { p_post_id: postId }),
+  ]);
+
+  // RETURNS TABLE → 배열 첫 행. BIGINT는 supabase-js에서 number|string으로 올 수 있어 Number() 변환.
+  // RPC 실패/빈 결과 시 counts 미전달 → toBoardPostDetail이 like_count(순합산) 폴백, dislikes=0.
+  const countRow = (Array.isArray(countsRes.data) ? countsRes.data[0] : countsRes.data) as
+    | { like_count: number | string; dislike_count: number | string }
+    | undefined;
+  const counts = countRow
+    ? { likes: Number(countRow.like_count) || 0, dislikes: Number(countRow.dislike_count) || 0 }
+    : undefined;
 
   return {
-    post: toBoardPostDetail(post),
-    comments: ((comments ?? []) as CommentRow[]).map(toBoardComment),
+    post: toBoardPostDetail(post, counts),
+    comments: ((commentsRes.data ?? []) as CommentRow[]).map(toBoardComment),
   };
 }
 

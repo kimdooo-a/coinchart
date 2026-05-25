@@ -10,7 +10,7 @@ import { togglePostLike } from "@/lib/community/board-queries";
 interface PostVoteButtonsProps {
   postId: string;
   initialLikes: number;
-  /** 초기 비추 수(분리 집계). 호출처(app/board/[slug]/[postId])가 넘기지 않으면 0 시작 — 후속 연결 예정. */
+  /** 초기 비추 수(분리 집계). 상세 페이지가 community_post_like_counts 실값을 전달(R5/#2). 미전달 시 0. */
   initialDislikes?: number;
 }
 

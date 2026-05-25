@@ -81,7 +81,8 @@ export interface BoardPostDetail {
   tags: string[];
   coinSymbol?: string;
   views: number;
-  likes: number;
+  likes: number; // 추천 수 — 상세는 분리 집계(community_post_like_counts) 정확값, 미제공 시 like_count(순합산) 폴백
+  dislikes: number; // 비추 수 — 분리 집계. counts 미제공 시 0
   commentCount: number;
   isNotice: boolean;
   isHot: boolean;
@@ -144,7 +145,14 @@ export function toBoardListItem(row: PostListRow): BoardListItem {
   };
 }
 
-export function toBoardPostDetail(row: PostDetailRow): BoardPostDetail {
+/**
+ * 게시글 상세 매퍼. `counts`(community_post_like_counts 분리 집계)를 주면 추천/비추를 정확히 반영하고,
+ * 미제공 시(분리 집계 미조회 경로) likes는 like_count 순합산으로 폴백하고 dislikes는 0이다.
+ */
+export function toBoardPostDetail(
+  row: PostDetailRow,
+  counts?: { likes: number; dislikes: number }
+): BoardPostDetail {
   const isAnon = !row.author_id;
   return {
     id: row.id,
@@ -158,7 +166,8 @@ export function toBoardPostDetail(row: PostDetailRow): BoardPostDetail {
     tags: row.tags ?? [],
     coinSymbol: row.coin_symbol ?? undefined,
     views: row.view_count,
-    likes: row.like_count,
+    likes: counts ? counts.likes : row.like_count,
+    dislikes: counts ? counts.dislikes : 0,
     commentCount: row.comment_count,
     isNotice: row.is_notice,
     isHot: row.is_hot,

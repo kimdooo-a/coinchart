@@ -156,8 +156,12 @@ export default async function PostDetailPage({
             )}
           </article>
 
-          {/* 추천·공유 바 (클라 인터랙션) */}
-          <PostVoteButtons postId={post.id} initialLikes={post.likes} />
+          {/* 추천·공유 바 (클라 인터랙션) — 초기 추천/비추는 SSR 분리 집계값 */}
+          <PostVoteButtons
+            postId={post.id}
+            initialLikes={post.likes}
+            initialDislikes={post.dislikes}
+          />
 
           {/* 댓글 영역 (클라 인터랙션, 초기 댓글은 SSR) */}
           <CommentSection postId={post.id} initialComments={comments} />
