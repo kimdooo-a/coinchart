@@ -23,6 +23,9 @@ export default function BlogEditor({ content, onChange, tone = 'light' }: BlogEd
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const editor = useEditor({
+    // SSR 감지 시 TipTap이 throw하므로 명시적으로 비활성(하이드레이션 미스매치 방지).
+    // Next dynamic ssr:false 마운트(예: /admin/board)에서도 첫 렌더 throw를 막는다.
+    immediatelyRender: false,
     extensions: [
       ...getEditorExtensions(),
       Placeholder.configure({
