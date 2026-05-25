@@ -226,3 +226,31 @@ supabase db push --dry-run         # 적용 대상 미리보기 (객체는 이�
 supabase migration list            # 정합 완료 시 대상 마이그레이션이 Remote 적용됨으로 표시
 ```
 > ⚠️ 운영 DB 객체(테이블/함수/트리거)는 세션 29(§8)에서 이미 적용 완료 — backfill은 `schema_migrations` **기록만** 보충한다.
+
+---
+
+## 10. ✅ 운영 DB `schema_migrations` 정합 완료 (2026-05-25, 세션 32 / R7-1)
+
+§9-4의 (4) 절차를 자격증명 보유자(사용자) 승인 하에 실행하여 **운영 DB(`enksnhshciyvllwfiwrm`) 마이그레이션 히스토리를 완전 정합**했다.
+
+### 10-1. 적용 방식
+- **Management API `database/query`** (`.env.local`의 `SUPABASE_ACCESS_TOKENS`, DB password 불요) — 세션 29와 동일 검증 경로.
+- `supabase/backfill_schema_migrations.sql` **Part A + Part B 전체**를 명시적 `BEGIN; … COMMIT;` 트랜잭션으로 감싸 **원자적 1회 적용**(부분 실패 시 자동 롤백).
+- 사용자 결정: **Part A+B(완전 정합)** — 14자리 14종으로 통일.
+
+### 10-2. 적용 전 → 후 (`schema_migrations`)
+| | 적용 전 | 적용 후 |
+|---|---------|---------|
+| 행 수 | 6 | **14** |
+| version 형식 | 8자리(`20241213` 등) | **14자리**(`20241213000001` 등) |
+| 커뮤니티 5종 | 미기록 | **기록됨**(`20260523000001`~`20260524000002`) |
+| 비-커뮤니티 9종 | 6행만(날짜당 1행) | **9종 전체**(같은 날짜 다중 파일 분리) |
+
+### 10-3. 검증 (db push --dry-run 동등)
+- 적용 후 `schema_migrations` 재조회 14행 ↔ 로컬 `supabase/migrations/*.sql` 14개 파일명 version **1:1 완전 일치**(version·name 모두).
+- 이는 `supabase db push --dry-run` **적용 대상 0건**과 논리적으로 동등(로컬 모든 파일이 원격에 기록됨).
+- **CLI(`supabase link`/`db push --dry-run`) 직접 실행은 미수행**: (a) `.env.local`에 **UTF-8 BOM(`EF BB BF`)**이 있어 supabase CLI env 파서가 거부(`unexpected character '»'`), (b) `db push --dry-run`/`migration list --linked`는 DB password가 필요하나 본 프로젝트는 세션 29부터 Management API 전용으로 password 미보유. → Management API 읽기 조회 동등 검증으로 대체.
+
+### 10-4. 잔여 메모
+- `backfill_schema_migrations.sql`은 **적용 완료**. 재실행해도 `ON CONFLICT (version) DO NOTHING` + Part B의 DELETE 대상(8자리 6행) 부재로 **멱등**(안전).
+- **`.env.local` BOM**: Next.js는 무시하나 supabase CLI 등 일부 도구가 거부. 향후 CLI 작업이 필요하면 BOM 제거 권장(R7 잔여, 사용자 승인 후 — 커밋 금지 파일).

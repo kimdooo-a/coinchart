@@ -23,7 +23,11 @@ const READY_FILE = path.join(__dirname, ".auth", "admin.ready");
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const RUN_AD1 =
+// 활성 여부는 런타임(beforeAll/test)에 평가한다. READY_FILE 은 dependencies:['setup'] 의
+//   auth.setup 가 생성하는데, playwright 의 test collection 은 모든 프로젝트 실행보다 먼저
+//   1회 일어난다 → top-level 상수로 굳히면 setup 이 마커를 만들기 전에 평가되어 fresh 실행
+//   (CI 첫 회)에서 항상 skip 되는 함정이 있다. 함수로 만들어 setup 완료 후 시점에 평가한다.
+const runAd1 = () =>
   process.env.E2E_DB_READY === "1" &&
   fs.existsSync(READY_FILE) &&
   !!SUPABASE_URL &&
@@ -31,10 +35,9 @@ const RUN_AD1 =
 
 const SKIP_REASON =
   "AD1 비활성 — 활성 조건: E2E_DB_READY=1 + 관리자 인증(e2e/.auth/admin.ready, auth.setup) + " +
-  "service_role/URL 주입. 관리자 계정은 OAuth 전용이라 비밀번호 설정 후 자격 주입 필요(handover 참조)";
+  "service_role/URL 주입. 관리자 계정이 OAuth 전용이면 비밀번호 설정 또는 service_role generateLink fallback(R7-2)";
 
 test.describe("관리자 공지 토글 (인증+DB)", () => {
-  test.skip(!RUN_AD1, SKIP_REASON);
 
   // 자체 생성 대상 일반글 — 고유 제목으로 식별/정리
   const TITLE = `E2E 공지대상 ${Date.now()}`;
@@ -46,6 +49,7 @@ test.describe("관리자 공지 토글 (인증+DB)", () => {
     });
 
   test.beforeAll(async () => {
+    if (!runAd1()) return; // 비활성(skip 예정)이면 대상 데이터를 만들지 않는다
     // 익명(guest_*) 일반글로 적재 — author XOR guest CHECK 충족(guest 3요소).
     const hash = await bcrypt.hash("e2e-admin-ad1", 10); // guest_password_hash CHECK(≥60자)
     const { data, error } = await adminDb()
@@ -78,6 +82,8 @@ test.describe("관리자 공지 토글 (인증+DB)", () => {
   });
 
   test("AD1 관리자 is_notice 토글 → 공지 승격/해제 + 목록 상단 공지 노출", async ({ page }) => {
+    // 런타임 skip 판정(setup 의존 완료 후 — READY_FILE 존재 시점). collection 함정 회피.
+    test.skip(!runAd1(), SKIP_REASON);
     // free 보드가 기본 선택 — 마운트 시 verifyAdmin → loadBoard('free')
     await page.goto("/admin/board");
     // 관리자 게이트 통과(미들웨어 통과 + 클라 게이트 "접근 권한 없음" 아님)

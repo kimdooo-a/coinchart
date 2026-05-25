@@ -1,10 +1,10 @@
 -- supabase/backfill_schema_migrations.sql
 -- 생성: 2026-05-25 / R6-polish T02 (마이그레이션 히스토리 정합 — 코드만)
 --
--- ⚠️ 적용 금지(코드만): 이 파일은 작성만 되어 있고 운영 DB에 적용하지 않았습니다.
---    적용은 자격증명 보유자(사용자)가 정합 환경(config.toml + `supabase link` 완료)에서
---    `supabase db push` 후 SQL Editor 로, 또는 SQL Editor 에서 직접 수동 실행하십시오.
---    (런북: docs/db/R4-db-apply-runbook.md §9-4)
+-- ✅ 적용 완료 (2026-05-25, 세션 32 / R7-1): Management API database/query 로
+--    BEGIN;…COMMIT; 트랜잭션 1회 적용(Part A+B). 운영 DB schema_migrations = 14자리 14종 정합.
+--    (런북: docs/db/R4-db-apply-runbook.md §10)
+--    재실행 안전(멱등): Part A/b-2 는 ON CONFLICT DO NOTHING, Part B b-1 DELETE 는 8자리 행 부재로 0건.
 --
 -- 목적: 운영 DB(enksnhshciyvllwfiwrm)에 객체는 이미 적용됐으나
 --       supabase_migrations.schema_migrations 에 기록되지 않은 마이그레이션을,
