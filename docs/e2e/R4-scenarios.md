@@ -1,18 +1,25 @@
 # R4 E2E 시나리오 — 커뮤니티 (board/news/coin SSR + 추천·비추·댓글·관리자공지)
 
 > 작성: 2026-05-25 / R4 (community-wiring) / T04
-> 프레임워크: **@playwright/test** (본 라운드 신규 도입 — devDependency)
-> 최종 실행: 2026-05-25 — **24 passed / 6 skipped / 0 failed** (chromium, dev 서버)
+> 갱신: 2026-05-25 / R5-#1 (지휘자 세션 30) — DB 적용 후 풀 검증 + L-B3/L-B4 spec 신뢰성 개선
+> 프레임워크: **@playwright/test** (R4 신규 도입 — devDependency)
+> 최종 실행: 2026-05-25 (R5) — **29 passed / 1 skipped(AD1) / 0 failed** (chromium, dev 서버 + `E2E_DB_READY=1`)
+> 직전(R4): 24 passed / 6 skipped / 0 failed (DB 미적용 시점)
 
 ## 1. 개요
 
 R3에서 SSR 전환된 board(`ƒ`)·news(`ƒ`)·coin(`● SSG+ISR 6종`)과 R4/T02에서 결선된
 게시글 비추(dislikeCount 분리집계)·댓글 추천(PATCH) 흐름을 E2E로 고정한다.
 
-운영 DB 상태(2026-05-25): **R1 `community_*` 테이블 미적용**
-(`scripts/smoke/community-like-smoke.ts` FAIL — `community_posts`/`community_comments`/
-`community_comment_likes` 전부 PGRST205 부재). 따라서 SSR/내비/필터는 **graceful 빈 목록**으로
-검증하고, 추천·비추·댓글·관리자 토글은 **skip + "DB push 후 재실행"** 처리한다(hard-fail 금지).
+운영 DB 상태(2026-05-25 R5): **커뮤니티 마이그레이션 5종 적용 완료 + 게시글 156행 시드**
+(세션 29 Management API 적용, 런북 `docs/db/R4-db-apply-runbook.md` §8). 따라서 `E2E_DB_READY=1`로
+추천·비추·댓글 시나리오(L-B1~L-B4·N-B3)를 **실 DB 기반으로 풀 검증**한다.
+- **L-B3/L-B4 spec 개선(R5-#1)**: 시드는 게시글만 넣고 댓글은 없어 R4에서 L-B4가 추천 대상 부재로
+  실패(앱 버그 아님, spec 신뢰성 이슈). R5에서 **각 테스트가 추천 대상 댓글을 자체 생성**하고
+  POST 201·PATCH 응답을 `waitForResponse`로 확정하도록 수정 → L-B3/L-B4 독립·결정적 통과.
+  E2E가 생성한 댓글(content `E2E ` prefix)은 실행 후 정리(자동 정리 로직은 spec 외부 — 본 라운드는
+  Management API로 일괄 삭제, comment_likes는 CASCADE).
+- **AD1(관리자 토글)만 잔여 skip**: 관리자 인증 storageState(로그인 세션 캡처) 미구성 — R5 후속.
 
 ## 2. 실행 방법
 
@@ -57,19 +64,19 @@ npx playwright show-report e2e/playwright-report
 | S-B2 | 글쓰기 링크 → 작성 페이지(h1 "새 게시글") 진입 | ✅ 통과 | |
 | S-B3 | 잘못된 게시판 슬러그 → 404 | ✅ 통과 | |
 | E-B1 | 존재하지 않는 게시글 → "게시글을 찾을 수 없습니다" 소프트 안내 | ✅ 통과 | 하드 404 아님 |
-| N-B3 | 목록 글 클릭 → 상세 진입 | ⬜ 스킵 | 시드 없음(동적 skip) |
+| N-B3 | 목록 글 클릭 → 상세 진입 | ✅ 통과 | 시드 156행 적용 |
 
 ### B. 게시글 추천/비추 (DB 의존) — `e2e/community-board.spec.ts`
 | ID | 시나리오 | 상태 | 비고 |
 |----|---------|------|------|
-| L-B1 | 추천 클릭 → likeCount 증가 | ⬜ 스킵 | RPC 미적용 |
-| L-B2 | 비추 클릭 → dislikeCount **실값** 표시(T02 분리집계, 가짜 0/1 아님) | ⬜ 스킵 | RPC 미적용 |
+| L-B1 | 추천 클릭 → likeCount 증가 | ✅ 통과 | RPC `community_toggle_post_like` 적용 |
+| L-B2 | 비추 클릭 → dislikeCount **실값** 표시(T02 분리집계, 가짜 0/1 아님) | ✅ 통과 | 분리집계 응답 반영 |
 
 ### C. 댓글 (DB 의존) — `e2e/community-board.spec.ts`
 | ID | 시나리오 | 상태 | 비고 |
 |----|---------|------|------|
-| L-B3 | 댓글 작성(익명 닉/비번) → 목록 반영 | ⬜ 스킵 | 테이블 미적용 |
-| L-B4 | 댓글 ThumbsUp → likeCount 증가 + 추천순 정렬 | ⬜ 스킵 | comment_likes 미적용 |
+| L-B3 | 댓글 작성(익명 닉/비번) → 저장 확정(201) + 목록 반영 | ✅ 통과 | POST 201 `waitForResponse` 확정 |
+| L-B4 | 댓글 ThumbsUp → likeCount 증가 + 추천순 정렬 | ✅ 통과 | 추천 대상 댓글 자체 생성(R5-#1) |
 
 ### D. 뉴스 SSR + 4차원 필터 — `e2e/community-news.spec.ts`
 | ID | 시나리오 | 상태 | 비고 |
@@ -93,25 +100,28 @@ npx playwright show-report e2e/playwright-report
 | ID | 시나리오 | 상태 | 비고 |
 |----|---------|------|------|
 | S-AD1 | 비로그인 `/admin/board` → `/auth/login` 보호 리다이렉트 | ✅ 통과 | 미들웨어 protectedPaths |
-| AD1 | 관리자 is_notice 토글 → 목록 상단 공지 노출 | ⬜ 스킵 | 인증 storageState + DB 의존 |
+| AD1 | 관리자 is_notice 토글 → 목록 상단 공지 노출 | ⬜ 스킵 | 관리자 인증 storageState 미구성 (R5 후속) |
 
 ## 5. 커버리지
 
 | 카테고리 | 작성 | 통과 | 스킵 | 실패 |
 |---------|------|------|------|------|
-| 게시판 SSR/내비 (P0) | 9 | 8 | 1 | 0 |
-| 추천/비추 (P0, DB) | 2 | 0 | 2 | 0 |
-| 댓글 (P0, DB) | 2 | 0 | 2 | 0 |
+| 게시판 SSR/내비 (P0) | 9 | 9 | 0 | 0 |
+| 추천/비추 (P0, DB) | 2 | 2 | 0 | 0 |
+| 댓글 (P0, DB) | 2 | 2 | 0 | 0 |
 | 뉴스 SSR/필터 (P0) | 5 | 5 | 0 | 0 |
 | 코인룸 SSG/탭 (P0) | 10 | 10 | 0 | 0 |
 | 관리자 공지 (P1) | 2 | 1 | 1 | 0 |
-| **합계** | **30** | **24** | **6** | **0** |
+| **합계** | **30** | **29** | **1** | **0** |
 
-## 6. DB/인증 적용 후 활성화
+> R4(DB 미적용): 24 통과 / 6 스킵 → R5(DB 적용 + spec 개선): **29 통과 / 1 스킵(AD1)**.
 
-`docs/db/R4-db-apply-runbook.md` 의 `supabase db push`(마이그레이션 3종) +
-`npx tsx scripts/seed-community.ts`(게시글 시드) 적용 후 `E2E_DB_READY=1` 로 재실행하면
-6개 스킵 시나리오(N-B3·L-B1·L-B2·L-B3·L-B4·AD1)가 활성화된다.
+## 6. DB 적용 현황 + 잔여(AD1)
 
-- AD1(관리자 토글)은 추가로 **관리자 storageState**(로그인 세션 캡처)가 필요 → `e2e/auth.setup.ts`
-  + `playwright.config` projects 분리가 R5 후보(미구현).
+✅ **R5-#1 완료**: 마이그레이션 5종 + 게시글 156행 시드 적용 상태에서 `E2E_DB_READY=1` 풀 실행 →
+N-B3·L-B1·L-B2·L-B3·L-B4 **5건 활성·통과**. L-B3/L-B4는 추천 대상 댓글을 자체 생성하도록 개선해
+시드 댓글 부재와 무관하게 결정적으로 통과한다.
+
+⬜ **AD1만 잔여**: 관리자 `is_notice` 토글은 **관리자 storageState**(로그인 세션 캡처)가 필요하다.
+`e2e/auth.setup.ts` + `playwright.config` projects 분리 + 관리자 계정 자격 구성이 선행돼야 활성화
+가능 — **R5 후속**(자격증명 부재로 본 라운드 미구현).

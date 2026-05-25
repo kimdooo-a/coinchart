@@ -105,31 +105,57 @@ test.describe("게시글 추천/비추 (DB 의존)", () => {
   });
 });
 
+// 주의: 아래 두 테스트는 실 DB에 댓글을 생성한다(자동 정리하지 않음 — content가 "E2E " prefix).
+//   시드는 게시글만 적재하고 댓글은 넣지 않으므로, 추천 대상 댓글은 각 테스트가 자체 생성한다
+//   (R4 L-B4 실패 원인: 시드 댓글 0 → 추천 대상 부재. R5/#1에서 자체 생성으로 독립화).
 test.describe("댓글 (DB 의존)", () => {
   test.skip(SKIP_DB_DEPENDENT, DB_SKIP_REASON);
 
-  test("L-B3 댓글 작성(익명 닉/비번) → 목록 반영", async ({ page }) => {
+  test("L-B3 댓글 작성(익명 닉/비번) → 저장 확정(201) + 목록 반영", async ({ page }) => {
     await page.goto("/board/free");
     await firstPostRow(page, "free").click();
+    await page.waitForURL(/\/board\/free\/[0-9a-f-]{36}/);
+    const body = `E2E 자동 댓글 ${Date.now()}`;
     await page.getByPlaceholder("닉네임 (비회원)").fill("e2e_tester");
     await page.getByPlaceholder("비밀번호 (수정/삭제 시)").fill("1234");
-    await page.getByPlaceholder("댓글을 입력하세요...").fill("E2E 자동 댓글");
-    await page.getByRole("button", { name: "등록" }).click();
-    await expect(page.getByText("E2E 자동 댓글")).toBeVisible();
+    await page.getByPlaceholder("댓글을 입력하세요...").fill(body);
+    // 낙관적 UI(setComments) false positive 방지 — 등록 클릭과 함께 POST 201을 확정한다.
+    const [res] = await Promise.all([
+      page.waitForResponse(
+        (r) => r.url().includes("/api/community/comment") && r.request().method() === "POST"
+      ),
+      page.getByRole("button", { name: "등록" }).click(),
+    ]);
+    expect(res.status(), "댓글 작성 API 201").toBe(201);
+    await expect(page.getByText(body)).toBeVisible();
   });
 
   test("L-B4 댓글 추천 클릭 → likeCount 증가 + 추천순 정렬", async ({ page }) => {
     await page.goto("/board/free");
     await firstPostRow(page, "free").click();
-    // 댓글 영역의 첫 ThumbsUp 버튼(숫자만 포함)
-    const thumb = page
-      .locator("section")
-      .filter({ hasText: "댓글" })
-      .getByRole("button")
-      .filter({ hasText: /^\d+$/ })
-      .first();
-    const before = Number((await thumb.innerText()).replace(/\D/g, ""));
-    await thumb.click();
+    await page.waitForURL(/\/board\/free\/[0-9a-f-]{36}/);
+    // 추천 대상 댓글을 자체 생성(시드 댓글 0 의존 제거 · L-B3와 독립)
+    const body = `E2E 추천대상 ${Date.now()}`;
+    await page.getByPlaceholder("닉네임 (비회원)").fill("e2e_liker");
+    await page.getByPlaceholder("비밀번호 (수정/삭제 시)").fill("1234");
+    await page.getByPlaceholder("댓글을 입력하세요...").fill(body);
+    await Promise.all([
+      page.waitForResponse(
+        (r) => r.url().includes("/api/community/comment") && r.request().method() === "POST"
+      ),
+      page.getByRole("button", { name: "등록" }).click(),
+    ]);
+    // 방금 만든 댓글 항목(li)의 추천 버튼(ThumbsUp + likes) — li 안 첫 버튼
+    const commentLi = page.locator("li").filter({ hasText: body });
+    const thumb = commentLi.getByRole("button").first();
+    const before = Number((await thumb.innerText()).replace(/\D/g, "")) || 0;
+    // 추천 클릭 → PATCH(토글) 응답을 기다려 likeCount 갱신을 확정
+    await Promise.all([
+      page.waitForResponse(
+        (r) => r.url().includes("/api/community/comment") && r.request().method() === "PATCH"
+      ),
+      thumb.click(),
+    ]);
     await expect(thumb).not.toHaveText(String(before));
     // 추천순 정렬 토글
     await page.getByRole("button", { name: "추천순" }).click();
