@@ -1,20 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
 import { TRANSLATIONS } from '@/lib/translations';
 import WhaleAlert from '@/components/Signal/WhaleAlert';
-
-type Signal = {
-    symbol: string;
-    type: 'BUY' | 'SELL';
-    price: number;
-    timestamp: string;
-    reason: string;
-    strength: 'HIGH' | 'MEDIUM' | 'LOW';
-};
+import SignalCard, { Signal } from '@/components/Signal/SignalCard';
 
 export default function SignalPage() {
     const { lang } = useLanguage();
@@ -23,12 +14,42 @@ export default function SignalPage() {
     const [isScanning, setIsScanning] = useState(true);
 
     useEffect(() => {
-        // Mock scanning effect
-        const timer = setTimeout(() => {
-            setIsScanning(false);
-            setSignals([]); // Currently no signals found demo
-        }, 3000);
-        return () => clearTimeout(timer);
+        // /api/signals 엔드포인트에서 실제 시그널 데이터를 가져온다
+        let cancelled = false;
+
+        async function fetchSignals() {
+            setIsScanning(true);
+            try {
+                const res = await fetch('/api/signals');
+                if (!res.ok) {
+                    // HTTP 에러 응답 — 빈 상태로 유지
+                    console.error('[SignalPage] /api/signals 응답 오류:', res.status, res.statusText);
+                    if (!cancelled) {
+                        setSignals([]);
+                        setIsScanning(false);
+                    }
+                    return;
+                }
+                // API 응답 형식: { signals: Signal[] }
+                const data: { signals: Signal[] } = await res.json();
+                if (!cancelled) {
+                    setSignals(Array.isArray(data.signals) ? data.signals : []);
+                    setIsScanning(false);
+                }
+            } catch (err) {
+                // 네트워크 오류 등 — UI가 깨지지 않도록 빈 상태로 처리
+                console.error('[SignalPage] 시그널 fetch 실패:', err);
+                if (!cancelled) {
+                    setSignals([]);
+                    setIsScanning(false);
+                }
+            }
+        }
+
+        fetchSignals();
+
+        // 언마운트 시 상태 업데이트 방지
+        return () => { cancelled = true; };
     }, []);
 
     return (
@@ -69,7 +90,15 @@ export default function SignalPage() {
                     </div>
                 ) : signals.length > 0 ? (
                     <div className="w-full grid gap-4">
-                        {/* Signal Card List would go here */}
+                        {/* 신호 카드 리스트 — score 내림차순으로 정렬된 API 응답을 그대로 표시 */}
+                        {signals.map((signal, idx) => (
+                            <SignalCard
+                                key={`${signal.symbol}-${signal.type}-${signal.timestamp}-${idx}`}
+                                signal={signal}
+                                index={idx}
+                                lang={lang}
+                            />
+                        ))}
                     </div>
                 ) : (
                     <div className="text-center p-12 bg-card/50 rounded-3xl border border-border backdrop-blur-sm max-w-lg">
