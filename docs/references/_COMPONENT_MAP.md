@@ -15,7 +15,6 @@
 | `AnalysisPanel` | `app/analysis/page.tsx` | `lib/analysis/orchestrator`, `lib/analysis/signals`, `lib/analysis/aggregation`, `lib/backtest/engine` | 없음 |
 | `ChartAnalysisPanel` | `app/analysis/page.tsx`, `app/stock/page.tsx` | `lib/analysis/aggregation`, `lib/analysis/signals`, `lib/indicators` | 없음 |
 | `StockPanel` | `app/analysis/stock/[symbol]/page.tsx` | `lib/supabase/stock`, `lib/analysis/stock-signals`, `lib/analysis/stock` | `PremiumLock` |
-| `TradingStrategyGuide` | 현재 미사용 (주석 처리됨) | 없음 | 없음 |
 
 ### Chart
 
@@ -37,7 +36,6 @@
 
 | 컴포넌트 | 사용 페이지 | lib 의존성 | 컴포넌트 의존성 |
 |----------|-----------|------------|----------------|
-| `StockSectorPerformance` | 현재 미사용 (페이지에서 import 없음) | `context/LanguageContext`, `lib/indicators` | 없음 |
 | `StockRSIHeatmap` | `app/stock-market/page.tsx` | `context/LanguageContext`, `lib/indicators`, `lib/constants` | 없음 |
 | `StockAnalysisPanel` | `app/stock/page.tsx` | `lib/analysis/orchestrator`, `lib/analysis/signals`, `lib/analysis/aggregation`, `lib/backtest/engine` | 없음 |
 | `InvestmentQuotes` | `app/analysis/page.tsx`, `app/stock/page.tsx`, `app/stock-market/page.tsx` | `context/LanguageContext`, `lib/quotes` | 없음 |
@@ -47,6 +45,7 @@
 | 컴포넌트 | 사용 페이지 | lib 의존성 | 컴포넌트 의존성 |
 |----------|-----------|------------|----------------|
 | `WhaleAlert` | `app/signal/page.tsx` | `context/LanguageContext` | 없음 |
+| `SignalCard` | `app/signal/page.tsx` | 없음 | 없음 |
 
 ### SecureMemo
 
@@ -102,17 +101,11 @@
 
 | 컴포넌트 | 사용 위치 | lib 의존성 | 컴포넌트 의존성 |
 |----------|----------|------------|----------------|
-| `Badge` | `PremiumLock`, `InsufficientData`, `app/analysis/[symbol]/page.tsx` | `lib/utils` | 없음 |
-| `Button` | `PremiumLock`, `InsufficientData`, `app/analysis/[symbol]/page.tsx` | `lib/utils` | 없음 |
-| `Card` (Card, CardHeader, CardContent, CardFooter, CardTitle, CardDescription) | `PremiumLock`, `InsufficientData`, `app/analysis/[symbol]/page.tsx` | `lib/utils` | 없음 |
-| `Label` | `PremiumLock`, `InsufficientData`, `app/analysis/[symbol]/page.tsx` | `lib/utils` | 없음 |
+| `Badge` | `PremiumLock`, `app/analysis/[symbol]/page.tsx` | `lib/utils` | 없음 |
+| `Button` | `PremiumLock`, `app/analysis/[symbol]/page.tsx` | `lib/utils` | 없음 |
+| `Card` (Card, CardHeader, CardContent, CardFooter, CardTitle, CardDescription) | `PremiumLock`, `app/analysis/[symbol]/page.tsx` | `lib/utils` | 없음 |
+| `Label` | `PremiumLock`, `app/analysis/[symbol]/page.tsx` | `lib/utils` | 없음 |
 | `Separator` | `app/analysis/[symbol]/page.tsx` | `lib/utils` | 없음 |
-
-### Hooks
-
-| 훅 | 사용 위치 | lib 의존성 |
-|----|----------|------------|
-| `useSubscription` | 현재 미사용 (구현만 존재) | `lib/supabase/client` (TODO) |
 
 ### 루트 레벨 컴포넌트
 
@@ -120,8 +113,6 @@
 |----------|-----------|------------|----------------|
 | `AuthButton` | `global-header` (-> `app/layout.tsx`) | `lib/supabase/client` | 없음 |
 | `PremiumLock` | `Analysis/StockPanel` | `lib/utils` | `ui/card`, `ui/badge`, `ui/button`, `ui/label` |
-| `ErrorState` | 현재 미사용 (페이지에서 import 없음) | 없음 (lucide-react만 사용) | 없음 |
-| `InsufficientData` | 현재 미사용 (페이지에서 import 없음) | 없음 | `ui/card`, `ui/badge`, `ui/button`, `ui/label` |
 | `footer-section` | `app/page.tsx`, `board/[slug]`, `board/[slug]/write`, `board/[slug]/[postId]`, `coin/[symbol]`, `news` (6페이지 공용) | 없음 (lucide-react만 사용) | 없음 |
 | `global-header` | `app/layout.tsx` (전역) | `context/LanguageContext`, `lib/translations` | `AuthButton` |
 | `DetailedChart` | `app/analysis/page.tsx`, `app/analysis/[symbol]/page.tsx` | 없음 (lightweight-charts만 사용) | 없음 |
@@ -231,10 +222,6 @@ Analysis/StockPanel (app/analysis/stock/[symbol])
 | 컴포넌트 | 상태 |
 |----------|------|
 | `Chart/CryptoChart` | 주석 처리됨 (analysis 페이지에서 REMOVED for SSOT) |
-| `Analysis/TradingStrategyGuide` | 주석 처리됨 (AnalysisPanel에서 import 제거) |
-| `Stock/StockSectorPerformance` | 어떤 페이지에서도 import 되지 않음 |
-| `ErrorState` | 어떤 페이지에서도 import 되지 않음 |
-| `InsufficientData` | 어떤 페이지에서도 import 안 됨. 단 재사용 UI 프리미티브로 **보존**(세션 34 R8에서 라이트화) |
-| `hooks/useSubscription` | 어떤 컴포넌트에서도 import 되지 않음 |
 
 > 세션 34(R8): `about-section`·`dashboard-grid`·`LanguageSwitcher`는 dead code로 **삭제 완료**(더 이상 후보 아님).
+> 세션 36(R10): `Analysis/TradingStrategyGuide`·`Stock/StockSectorPerformance`·`ErrorState`·`InsufficientData`·`hooks/useSubscription` 5종 + `lib/economic_events.ts`는 dead code로 **삭제 완료**. 잔존 후보는 `Chart/CryptoChart`뿐(주석 처리 상태).

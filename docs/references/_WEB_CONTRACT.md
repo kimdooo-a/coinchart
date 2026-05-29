@@ -163,8 +163,6 @@
 | AuthButton | components/AuthButton.tsx | GlobalHeader |
 | DetailedChart | components/DetailedChart.tsx | /analysis, /analysis/[symbol] |
 | TradeModal | components/TradeModal.tsx | /portfolio |
-| ErrorState | components/ErrorState.tsx | 에러 표시 공통 |
-| InsufficientData | components/InsufficientData.tsx | 데이터 부족 표시 공통 |
 | PremiumLock | components/PremiumLock.tsx | 프리미엄 기능 잠금 |
 | Disclaimer | components/Common/Disclaimer.tsx | /analysis, /market |
 | InvestmentQuotes | components/Stock/InvestmentQuotes.tsx | /analysis, /stock, /stock-market |

@@ -4,6 +4,7 @@
 
 ## 최근 완료된 작업
 
+- **세션 36 (2026-05-29)**: **R10 단독 — 미완성 점검 + kdyswarm 3트랙 병렬 보완**. kdynext `--scan-only`(Explore 3병렬: 페이지/API/데드코드)로 진단 → audit 보고서. 핵심 발견: `/signal`은 백엔드(`/api/signals`+`signal_engine`) 완성인데 프론트가 `setSignals([])` mock(프론트만 미연결). **kdyswarm worktree 3트랙**(sonnet ×3): **T1** `/signal` mock 제거→실 fetch + `Signal` 타입 교정(price/reason/strength→type/title/description/score/timestamp/metrics) + `SignalCard` 신규. **T2** 데드코드 **6종 삭제**(`TradingStrategyGuide`·`ErrorState`·`InsufficientData`·`StockSectorPerformance`·`useSubscription`·`economic_events`, 995줄) + AnalysisPanel 죽은 주석. ⚠️ `gates.ts`는 Pre-Flight grep에서 `scripts/preflight.ts` import 확정→**삭제 제외**. **T3** ChartAnalysisPanel BB `prob:50`→`calculateBollingerBands` %B 실확률 + admin 주식 mock→`fetchStockPrices` `stock_prices` 실데이터(빈결과 시 mock fallback). 충돌 0·`--no-ff` 순차 머지·**tsc 0**. 레퍼런스 3종(`_COMPONENT_MAP`·`_TYPE_REFERENCE`·`_WEB_CONTRACT`) dead 6종 제거+SignalCard 등재. ⚠️ 런타임/build 미검증(tsc만). (handover `2026-05-29-session36-r10-dev-gap.md`, 보고서 `2026-05-29-R10-swarm-dev-gap-fix.md`, audit `2026-05-29-R9-T03-dev-gap-audit.md`)
 - **세션 35 (2026-05-29)**: **R9 지휘부 마감 — tree-reconcile: 홈 dead 트리 3종 삭제 + /history 메뉴 정합 + 레퍼런스 정합**. kdydispatch 평면 3터미널 분산·회수·통합. 발사 전 grep 사전 검증으로 stale 가정 보정(`footer-section`=6페이지 사용 삭제금지·`hero-section`만 dead·`/history` 라우트 실존=폐기 아닌 메뉴 정합·`.env.local` BOM 이미 해소). **T01** 홈 트리 9종 확정 + 닫힌 dead 트리 **3종 `git rm`**(`hero-section`·`hero-chart`·`news-rotator` — 서로만 참조, 외부 사용처 0 확정 −343줄)·보존 2종(`ErrorState`·`InsufficientData` 재사용 프리미티브). **T02** `/history`(`lib/history-data.ts` 실데이터 완성 페이지, 진입 경로만 누락)를 도구 드롭다운에 1줄 추가(7→8). **T03** `_COMPONENT_MAP`·`_WEB_CONTRACT` 정합 — dead 3종 제거·홈 트리 9종 갱신·`InvestmentQuotes` 홈 stale 제거·GNB v2.0 실구조(primary 5/coinRoom 6/tools 8) 재작성·계약 v3→v4. 지휘부 독립 검증: 격리 위반 0(매트릭스 정확 일치)·dead 잔존 0·tsc 0·build green(`○ /history`·54 라우트). 잔여 stale은 R10 플래그. (handover `2026-05-29-session35-r9-conductor.md`, 보고서 `2026-05-29-R9-_SUMMARY.md`)
 - **세션 34 (2026-05-25)**: **R8 마감 — 페이지 컴포넌트 다크 잔재 라이트화 + dead code 3종 삭제**. R8 후보 7종 사용처 전수 추적 → **4종 dead 발견**(`about-section`·`dashboard-grid`·`LanguageSwitcher`=구 다크 랜딩 잔재 / `InsufficientData`=미사용 재사용 프리미티브). 사용자 승인 하 **삭제+선별 라이트화**: 구 랜딩 3종 `git rm`(v2.0 피벗 후 미사용·홈은 커뮤니티 SSR 재구축·언어전환은 헤더 토글 중복). 살아있는 4종(`Chart/Ticker`@analysis·`Chart/StockTicker`@stock·`PremiumLock`@StockPanel·`AuthButton`@헤더) + `InsufficientData` 라이트화 — 다크 표면(`bg-gray-900`/`bg-black/40`/`border-gray-800`/회색 텍스트)을 `surface-container`/`on-surface(-variant)`/`outline-variant` 토큰으로 교체. **의미색 보존**(빨/파 시세·노랑 프리미엄·주황 경고, 등락 뱃지 `-400→-600` 가독), **의도 보존**(그라데이션 위 흰 글씨=아바타·로그인 CTA). 레퍼런스 동기화(`_COMPONENT_MAP`·`_WEB_CONTRACT` 삭제 3종 제거 + 홈 항목 stale 정정). tsc 0·build green(54/54)·다크 잔재 grep 0(그라데이션 흰글씨만). (handover `2026-05-25-session34-r8-page-lightify.md`)
 - **세션 33 (2026-05-25)**: **R7 마감 — 차트 라인/오버레이 색 KR 정렬(R7-3) + 토큰 bg-/border- 변형 점검(R7-4)**. **R7-3** 지표 라인(RSI/MACD/MA/BB)은 캔들과 달리 방향(상승/하락) 아닌 "지표 구분" **식별색**이라 의미 보존(사용자 확정 — MA7·25·99 빨/파 통일 시 구분 불가) + `lib/chart/theme.ts` `INDICATOR_COLORS`/`getIndicatorColors()` **SSOT 이관**(CryptoChart·StockChart 중복 하드코딩 9건씩 제거). 흰 배경 미가독 **MA99 `#FFEA00`→`#c79100`**(진앰버)·BB alpha 0.5→0.6·평단가선 brand primary 정렬. 차트 로딩 오버레이(`bg-gray-900/80`→`bg-surface/70`)·DetailedChart 라벨·**hero 심볼 `text-white`→`text-on-surface`**(흰 차트 배경서 안 보이던 핵심 버그) 라이트화(5파일). **R7-4** 토큰 `bg-`/`border-` 변형 점검 → shadcn 별칭(muted/card/border/background/popover/input)이 globals.css `@theme`에 라이트 토큰 전부 매핑 → `bg-muted`/`border-border` 172건 시각 정상·**전면 치환 불요**(R6 T05 별칭 보존 정책 유지), `text-muted-foreground` 잔여 0·비정상 변형 0. 실 깨짐은 차트 영역만 R7-3 흡수, 페이지 다크 잔재(about·AuthButton·Ticker·dashboard-grid 등 R1~R3 누락분)는 **R8 후보**. tsc 0·build green·시각 회귀 0. (handover `2026-05-25-R7-34-chart-lines-tokens.md`)
@@ -81,11 +82,20 @@
 2. ~~**`.env.local` UTF-8 BOM 제거**~~ → **✅ 이미 해소**(R9 진입 시 `BOM 없음` 확인). supabase CLI 직접 사용 가능.
 3. ~~**`/history` 메뉴 정리**~~ → **✅ T02 완료**. `/history`는 실데이터 완성 페이지(진입 경로만 누락) → 도구 드롭다운에 1줄 추가(방안 A). 보류: Giscus App 설치(수동) · 807줄 리팩토링.
 
-### ★ R10 후보 (다음 라운드 — T03 플래그)
+### R10 (세션 36, 2026-05-29 — 미완성 점검 + kdyswarm 보완) — 부분 완료
 
-1. **`_WEB_CONTRACT` 라우트 레지스트리 전수 정합** — v2.0 커뮤니티 라우트(`/board/[slug]`·`/board/[slug]/write`·`/board/[slug]/[postId]`·`/coin/[symbol]` 6종) 미등록(레지스트리 30행 ↔ 빌드 54 괴리). §8 연결성 카운트 stale("23/19개", 2026-02-20). 진입점 컬럼 과거 4그룹 기준(`/blog` 고아 가능성·`/contact`·`/terms`·`/settings`). Footer 레지스트리(§3-3) 실코드 미대조.
-2. **`app/analysis/[symbol]/page.tsx` 807줄 리팩토링** (대형 단일 작업 — 별도 라운드 권장).
-3. Giscus App 설치(수동) — https://github.com/apps/giscus → kimdooo-a/coinchart.
+- ~~**`/signal` 백엔드 연결**~~ → **✅ 완료** — `setSignals([])` mock 제거→`/api/signals` 실 fetch + `SignalCard` 신규. 백엔드 완성·프론트만 미연결이던 핵심 결함 해소. ⚠️ 실신호 표시는 `/api/signals` 실데이터 의존(런타임 미검증).
+- ~~**데드코드 정리**~~ → **✅ 완료** — 6종 삭제(995줄). `gates.ts`는 preflight 의존으로 제외. 잔존 후보 `Chart/CryptoChart`(주석처리)뿐.
+- ~~**데이터 정확도(BB·admin 주식)**~~ → **✅ 완료** — ChartAnalysisPanel BB %B 실확률 + admin 주식 `stock_prices` 실데이터(fallback). admin은 DB 적재 시 실값 반영.
+
+### ★ R11 후보 (다음 라운드)
+
+1. **`npm run build` 확정 + 배포** — 세션 36은 tsc만 확인, build 미실행. 배포 전 필수.
+2. **`_WEB_CONTRACT` 라우트 레지스트리 전수 정합** — v2.0 커뮤니티 라우트(`/board/[slug]`·`/board/[slug]/write`·`/board/[slug]/[postId]`·`/coin/[symbol]` 6종) 미등록(레지스트리 30행 ↔ 빌드 54 괴리). §8 연결성 카운트 stale("23/19개", 2026-02-20). 진입점 컬럼 과거 4그룹 기준. Footer 레지스트리(§3-3) 실코드 미대조.
+3. **`/watchlist`·`/settings` 신규 구현** — "준비 중" 플레이스홀더. brainstorming 선행 필요(저장/불러오기 CRUD·설정 로직).
+4. **`app/analysis/[symbol]/page.tsx` 807줄 리팩토링** (대형 단일 작업 — 별도 라운드 권장).
+5. `ChartAnalysisPanel` `calculateRSI` 미사용 import 정리(lint warning).
+6. Giscus App 설치(수동) — https://github.com/apps/giscus → kimdooo-a/coinchart.
 
 ### ✅ R3 완료 (세션 28, 2026-05-25 — community-finish 12/12)
 

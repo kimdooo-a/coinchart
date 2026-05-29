@@ -453,20 +453,6 @@
 
 ---
 
-## 훅 반환 타입 (components/hooks/)
-
-### SubscriptionTier
-- **위치**: `components/hooks/useSubscription.ts`
-- **값**: `'free' | 'pro' | 'enterprise'`
-
-### SubscriptionState (useSubscription 반환)
-- **위치**: `components/hooks/useSubscription.ts`
-- **필드**:
-  - `tier: SubscriptionTier`
-  - `isLoading: boolean`
-
----
-
 ## 설정 타입 (lib/config/)
 
 ### AppMode

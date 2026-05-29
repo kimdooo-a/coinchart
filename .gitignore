@@ -68,3 +68,6 @@ supabase/.temp/
 # kdydispatch — 프로젝트 한정 분산 상태
 .dispatch/
 !.dispatch/.gitkeep
+
+# kdyswarm — 워크트리 병렬 실행 임시 상태
+.kdyswarm/
