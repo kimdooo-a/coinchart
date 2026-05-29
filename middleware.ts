@@ -66,7 +66,9 @@ export async function middleware(request: NextRequest) {
     } = await supabase.auth.getUser()
 
     // 보호 대상 라우트 (인증 필요)
-    const protectedPaths = ['/portfolio', '/settings', '/watchlist', '/secure-memo', '/admin']
+    // R12: /settings·/watchlist 는 익명 우선 MVP(localStorage)로 전환 → 보호 해제.
+    //      회원 전용 기능(DB 동기화·계정관리)은 페이지 내부 auth 분기로 처리(라우트 게이팅 불요).
+    const protectedPaths = ['/portfolio', '/secure-memo', '/admin']
     const isProtected = protectedPaths.some((p) =>
         request.nextUrl.pathname.startsWith(p)
     )

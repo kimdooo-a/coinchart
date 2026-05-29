@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { DisplaySettingsProvider } from "@/lib/config/display-settings";
 import GlobalHeader from "@/components/global-header";
 import JsonLd from "@/components/seo/JsonLd";
 import { generateWebsiteJsonLd } from "@/lib/seo/json-ld";
@@ -44,10 +45,15 @@ export default function RootLayout({
       >
         <JsonLd data={generateWebsiteJsonLd()} />
         <LanguageProvider>
-          <GlobalHeader />
-          <div className="flex-1 w-full flex flex-col">
-            {children}
-          </div>
+          {/* 표시 환경설정(통화·등락색상) 전역 단일 마운트 (R12 / T-E / S2).
+              루트 마운트이므로 시세 표시 컴포넌트는 어디서든 useDisplaySettings() 구독 가능.
+              app/settings/page.tsx 의 로컬 래퍼는 이 마운트 후 제거 권장(중첩은 무해 — 같은 localStorage·이벤트). */}
+          <DisplaySettingsProvider>
+            <GlobalHeader />
+            <div className="flex-1 w-full flex flex-col">
+              {children}
+            </div>
+          </DisplaySettingsProvider>
         </LanguageProvider>
       </body>
     </html>

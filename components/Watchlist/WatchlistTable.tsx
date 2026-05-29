@@ -11,11 +11,11 @@ import type { WatchlistItem } from '@/components/hooks/useWatchlist';
 import type { WatchlistQuote } from '@/components/hooks/useWatchlistQuotes';
 import {
     baseSymbol,
-    formatPrice,
     formatPct,
     formatVolume,
     symbolSlug,
 } from './format';
+import { useDisplaySettings } from '@/lib/config/display-settings';
 
 export interface WatchlistRow {
     item: WatchlistItem;
@@ -35,6 +35,8 @@ const T = {
 
 export default function WatchlistTable({ rows, lang, onRemove }: WatchlistTableProps) {
     const t = T[lang];
+    // 표시 환경설정 구독 (R12 / T-E / S2) — 통화(USD↔KRW)·등락 색(한국식↔글로벌) 전역 전환.
+    const { formatPrice, changeColorClass } = useDisplaySettings();
 
     return (
         <div className="border border-outline-variant rounded-md overflow-hidden">
@@ -54,12 +56,9 @@ export default function WatchlistTable({ rows, lang, onRemove }: WatchlistTableP
                     const slug = symbolSlug(item.assetType, item.symbol);
                     const pct = quote?.changePct ?? null;
                     const isUp = pct != null && pct >= 0;
+                    // 등락 색: 표시 환경설정 구독(KR=빨↑파↓ / GLOBAL=녹↑빨↓). 값 없으면 중립.
                     const trendColor =
-                        pct == null
-                            ? 'text-on-surface-variant'
-                            : isUp
-                                ? 'text-[var(--color-kr-up)]'
-                                : 'text-[var(--color-kr-down)]';
+                        pct == null ? 'text-on-surface-variant' : changeColorClass(pct);
                     const chartHref =
                         item.assetType === 'CRYPTO'
                             ? `/analysis/${slug}`
@@ -86,9 +85,9 @@ export default function WatchlistTable({ rows, lang, onRemove }: WatchlistTableP
                                 </div>
                             </div>
 
-                            {/* 현재가 */}
+                            {/* 현재가 — USD 기준값을 표시 통화(USD/KRW)로 환산 */}
                             <div className="w-24 md:w-32 text-right tabular-nums text-body-base font-bold">
-                                {formatPrice(quote?.price ?? null)}
+                                {quote?.price != null ? formatPrice(quote.price) : '—'}
                             </div>
 
                             {/* 등락률 */}

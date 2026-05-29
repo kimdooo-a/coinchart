@@ -143,6 +143,7 @@
 **인덱스**: `idx_user_watchlist_user` (`user_id, sort_order`)
 **RLS**: 본인(`auth.uid() = user_id`)만 SELECT/INSERT/UPDATE/DELETE (4정책, secure_memos 패턴)
 **상한**: 회원 100 (API 가드 — 익명 30은 클라이언트 localStorage)
+**운영 DB 적용**: ✅ 2026-05-30 (R12 지휘자, Management API `database/query`). 테이블·인덱스·RLS 4정책 검증 + `schema_migrations` 정합(version `20260529000001`).
 
 ---
 

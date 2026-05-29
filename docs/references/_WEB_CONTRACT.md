@@ -47,8 +47,8 @@
 | R-017 | /contact | 문의하기 | form | app/contact/page.tsx | RootLayout | 아니오 | Footer(정보) | - | API(/api/contact) | ✅ 활성 |
 | R-018 | /terms | 이용약관 | static | app/terms/page.tsx | RootLayout | 아니오 | Footer(정보) | - | meta | ✅ 활성 |
 | R-019 | /admin | 관리자 | dashboard | app/admin/page.tsx | RootLayout | 예 (미들웨어) | 직접URL (관리자만) | /auth/login(비인증시) | API(/api/admin/*) | ✅ 활성 |
-| R-020 | /settings | 설정 | form | app/settings/page.tsx | RootLayout | 예 (미들웨어) | ⚠️ nav 진입점 없음 (v2.0 GNB 피벗으로 '서비스' 그룹 제거, 직접 URL/미들웨어만) | /portfolio | meta | 🚧 개발중 |
-| R-021 | /watchlist | 관심종목 | list | app/watchlist/page.tsx | RootLayout | 예 (미들웨어) | GNB(도구>관심종목) | /analysis | meta | 🚧 개발중 |
+| R-020 | /settings | 설정 | form | app/settings/page.tsx | RootLayout | 아니오 (R12 익명 우선) | GNB(도구▼>설정, 익명·회원 공통) + AuthButton ⚙️(회원) | /portfolio | meta | ✅ 활성 |
+| R-021 | /watchlist | 관심종목 | list | app/watchlist/page.tsx | RootLayout | 아니오 (R12 익명 우선) | GNB(도구>관심종목, 익명·회원 공통) | /analysis | meta | ✅ 활성 |
 | R-022 | /privacy | 개인정보처리방침 | static | app/privacy/page.tsx | RootLayout | 아니오 | Footer(정보) | /terms | meta | 🚧 개발중 |
 | R-023 | /pricing | 요금제 | static | app/pricing/page.tsx | RootLayout | 아니오 | PremiumLock, /analysis/[symbol] | / | meta | 🚧 개발중 |
 | R-024 | /blog | 블로그 목록 | list | app/blog/page.tsx | RootLayout | 아니오 | Footer(커뮤니티>공식글) — `footer-section.tsx:35` (고아 아님) | /blog/[slug] | API(/api/blog) | ✅ 활성 |
@@ -105,7 +105,7 @@
 | 5 | 알트코인 | /coin/altcoin | 드롭다운 | 항상 |
 | 6 | 김치프리미엄 | /coin/kimp | 드롭다운 | 항상 |
 
-**도구 드롭다운 (`tools`, 8개):**
+**도구 드롭다운 (`tools`, 9개):**
 
 | 순서 | 라벨 | 경로 | 유형 | 조건 |
 |------|------|------|------|------|
@@ -117,6 +117,9 @@
 | 6 | 코인 역사 | /history | 드롭다운 | 항상 (R9-T02 추가) |
 | 7 | 관심종목 | /watchlist | 드롭다운 | 항상 |
 | 8 | 보안 메모 | /secure-memo | 드롭다운 | 항상 |
+| 9 | 설정 | /settings | 드롭다운 | 항상 (R12-TD 추가, 익명·회원 공통) |
+
+> 회원은 위 도구▼ 외에 헤더 우측 **AuthButton ⚙️ 아이콘**으로도 /settings 진입 (R12-TD, taste #5 진입점 둘다).
 
 **고정 요소:**
 
@@ -184,7 +187,7 @@
 
 | 조건 | 소스 | 대상 | 방식 |
 |------|------|------|------|
-| 비인증 접근 | /portfolio, /settings, /watchlist, /secure-memo, /admin | /auth/login | 미들웨어 (middleware.ts) |
+| 비인증 접근 | /portfolio, /secure-memo, /admin | /auth/login | 미들웨어 (middleware.ts) — R12: /settings·/watchlist 보호 해제(익명 우선 MVP) |
 | Google OAuth 성공 | /auth/login | / | Supabase Auth 콜백 |
 | 인증 실패 | /auth/login | /auth/auth-code-error | Supabase Auth 콜백 |
 <!-- 새 리다이렉트는 이 줄 위에 추가 -->
@@ -225,12 +228,12 @@
 | 검증 범위 | 전체 (빌드 라우트 전수 추출 ↔ 레지스트리 1:1) |
 | 빌드 라우트 총계 | **71 엔트리** (Route(app) 표) = 페이지 35 + API 31 + auth/callback 1 + 메타 3(feed.xml·robots.txt·sitemap.xml) + _not-found 1. 정적 프리렌더 카운터 = 54/54 |
 | 등록 라우트(페이지) | **35개** (R-001~R-035) — 빌드 페이지 라우트와 1:1, 누락 0 |
-| 활성 라우트 | **31개** (개발중 4 제외) |
+| 활성 라우트 | **33개** (개발중 2 제외) |
 | 🔴 Critical | 0개 |
 | 🟡 Important | 0개 |
-| 🔵 Minor | 2개 — `/settings`·`/stock-market` nav 진입점 소실(v2.0 GNB 피벗, 직접 URL/미들웨어만 도달) |
+| 🔵 Minor | 1개 — `/stock-market` nav 진입점 소실(v2.0 GNB 피벗, 직접 URL만 도달) |
 | 판정 결과 | 빌드 페이지 라우트 35 ↔ 레지스트리 35 완전 일치 |
-| 상태 | ✅ 정상 (개발중 4: R-020 settings·R-021 watchlist·R-022 privacy·R-023 pricing / nav-less 2: R-011·R-020) |
+| 상태 | ✅ 정상 (개발중 2: R-022 privacy·R-023 pricing / nav-less 1: R-011 stock-market). R12: settings·watchlist 활성화 + nav 진입점 확보 + 미들웨어 보호 해제(익명 우선) |
 
 **API 라우트(31, 레지스트리 비등록 — 페이지 동반 파일 컬럼에서 추적):** `/api/admin/{board,cleanup-data,market-data,news-crawl,users}`, `/api/analysis/[symbol]`, `/api/analysis/stock/[symbol]`, `/api/blog`(+`[id]`·`categories`·`search`·`slug/[slug]`·`tags`·`upload`·`view/[id]`), `/api/board/[slug]`(+`[postId]`), `/api/coins/{hot-issues,ticker}`, `/api/community/{comment,like}`, `/api/contact`, `/api/fng`, `/api/kimchi`, `/api/klines`, `/api/news`, `/api/price`, `/api/signals`, `/api/stock/{history,quote,time-series}`
 
@@ -240,6 +243,8 @@
 
 | 날짜 | 이슈 | 심각도 | 조치 |
 |------|------|--------|------|
+| 2026-05-30 | 익명 우선 MVP인데 /settings·/watchlist가 미들웨어 인증 보호로 익명 도달 불가 (taste #3·T-A/B/D/F 설계 모순) | 🔴 Critical | middleware.ts protectedPaths에서 둘 제거(익명 우선), R-020·R-021 인증 '아니오'·상태 '활성'으로 갱신 — R12 지휘자 통합 |
+| 2026-05-30 | /settings nav 진입점 소실(R11 Minor) 해소 | 🔵 Minor→해소 | 도구▼>설정(익명·회원) + AuthButton ⚙️(회원) 2진입점 추가, GNB §3-1 9번째 등재 — R12-TD |
 | 2026-05-29 | v2.0 커뮤니티 라우트 미등록 (레지스트리 30 ↔ 빌드 페이지 35) | 🟡 Important | R-031~R-035 추가(/admin/board·/board/[slug]·/board/[slug]/write·/board/[slug]/[postId]·/coin/[symbol]) — R11-T01 |
 | 2026-05-29 | §8 카운트 stale (23/19 ↔ 실제 빌드 71엔트리) | 🟡 Important | 등록 35/활성 31로 갱신, 빌드 분류(페이지35·API31·특수4·_not-found1) 명시 — R11-T01 |
 | 2026-05-29 | /settings·/stock-market nav 진입점 소실 (v2.0 GNB 피벗으로 '서비스'·'주식' 그룹 제거) | 🔵 Minor | 진입점 컬럼에 ⚠️ 표기, §8 Minor 등재(직접 URL/미들웨어 도달 가능, 기능 정상) — R11-T01 |

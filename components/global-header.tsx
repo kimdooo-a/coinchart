@@ -72,6 +72,7 @@ export default function GlobalHeader() {
             { label: t.menu.history, href: "/history" },
             { label: t.menu.watchlist, href: "/watchlist" },
             { label: t.menu.secureMemo, href: "/secure-memo" },
+            { label: t.menu.settings, href: "/settings" },
         ],
     };
 

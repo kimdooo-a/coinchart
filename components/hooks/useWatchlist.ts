@@ -105,6 +105,112 @@ function writeAndEmit(items: WatchlistItem[]): void {
     listeners.forEach((l) => l());
 }
 
+/** 로컬 항목을 키로 제거(API 미호출 — 낙관적 업데이트 롤백/내부용) */
+function removeLocalByKey(key: string): void {
+    const cur = getSnapshot();
+    const next = cur.filter((it) => watchlistItemKey(it.assetType, it.symbol) !== key);
+    if (next.length !== cur.length) writeAndEmit(next);
+}
+
+/** 로컬에 항목 1건 복원(remove 롤백용 — 키 중복 시 무시) */
+function addLocalItem(item: WatchlistItem): void {
+    const cur = getSnapshot();
+    const k = watchlistItemKey(item.assetType, item.symbol);
+    if (cur.some((it) => watchlistItemKey(it.assetType, it.symbol) === k)) return;
+    writeAndEmit([...cur, item]);
+}
+
+// ---- 회원 DB 동기화 (D3 — T-C /api/watchlist* 합류) ----
+// 서버 응답 항목: createdAt이 ISO 문자열(로컬은 unix ms). 심볼 정규화는 서버·클라 동일(대문자·trim).
+interface ServerWatchlistItem {
+    assetType: WatchlistAssetType;
+    symbol: string;
+    sortOrder: number;
+    createdAt: string; // ISO
+}
+
+interface SyncResponse {
+    items: ServerWatchlistItem[];
+    added: number;
+    skipped: number;
+    limit: number;
+}
+
+/** 서버 항목(ISO createdAt) → 로컬 항목(unix ms) 매핑 */
+function serverToLocal(it: ServerWatchlistItem): WatchlistItem {
+    const t = Date.parse(it.createdAt);
+    return {
+        assetType: it.assetType,
+        symbol: normalizeSymbol(it.symbol),
+        sortOrder: it.sortOrder,
+        createdAt: Number.isFinite(t) ? t : Date.now(),
+    };
+}
+
+type AddApiResult = 'ok' | 'limit' | 'error';
+
+/** POST /api/watchlist — 추가(멱등). 409=상한, 그 외 실패=error. */
+async function apiAddItem(
+    assetType: WatchlistAssetType,
+    symbol: string,
+    sortOrder: number,
+): Promise<AddApiResult> {
+    try {
+        const res = await fetch('/api/watchlist', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ assetType, symbol, sortOrder }),
+        });
+        if (res.status === 409) return 'limit';
+        return res.ok ? 'ok' : 'error';
+    } catch {
+        return 'error';
+    }
+}
+
+/** DELETE /api/watchlist — 삭제(멱등). 성공 여부 반환. */
+async function apiRemoveItem(assetType: WatchlistAssetType, symbol: string): Promise<boolean> {
+    try {
+        const res = await fetch(
+            `/api/watchlist?assetType=${encodeURIComponent(assetType)}&symbol=${encodeURIComponent(symbol)}`,
+            { method: 'DELETE' },
+        );
+        return res.ok;
+    } catch {
+        return false;
+    }
+}
+
+/** POST /api/watchlist/sync — 로컬 우선 병합 업로드(로그인 직후 1회). 실패 시 null. */
+async function apiSync(local: WatchlistItem[]): Promise<SyncResponse | null> {
+    try {
+        const res = await fetch('/api/watchlist/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                items: local.map((i) => ({
+                    assetType: i.assetType,
+                    symbol: i.symbol,
+                    sortOrder: i.sortOrder,
+                })),
+            }),
+        });
+        if (!res.ok) return null;
+        return (await res.json()) as SyncResponse;
+    } catch {
+        return null;
+    }
+}
+
+// 로그인 세션당 sync 1회 가드(모듈 전역 — 훅 인스턴스가 여럿이어도 중복 sync 방지).
+// 로그아웃 시 false로 리셋 → 다음 로그인에 재동기화.
+let moduleSynced = false;
+
+/** 상한 초과·동기화 누락 등 사용자 안내용 신호(호출부가 선택 구독 — 미구독 시 무해) */
+export type WatchlistNotice =
+    | { type: 'limit'; limit: number }
+    | { type: 'sync-skipped'; count: number; limit: number };
+
 export interface UseWatchlist {
     /** sortOrder 오름차순 정렬된 목록 */
     items: WatchlistItem[];
@@ -123,6 +229,10 @@ export interface UseWatchlist {
     /** 표시 순서 변경 (sortOrder 재할당) */
     reorder: (from: number, to: number) => void;
     clear: () => void;
+    /** 회원 sync 시 상한 초과 누락·POST 409 등 안내 신호(없으면 null). 호출부 선택 구독. */
+    notice: WatchlistNotice | null;
+    /** 안내 신호 해제 */
+    dismissNotice: () => void;
 }
 
 export function useWatchlist(): UseWatchlist {
@@ -134,20 +244,50 @@ export function useWatchlist(): UseWatchlist {
         isMemberRef.current = isMember;
     }, [isMember]);
 
-    // 회원 판별 (상한만 결정 — 동기화는 D3 후속). setState는 async 콜백 내부.
+    const [notice, setNotice] = useState<WatchlistNotice | null>(null);
+    const dismissNotice = useCallback(() => setNotice(null), []);
+
+    // 회원 판별 + 로그인 직후 1회 sync(D3). 익명은 localStorage 그대로.
+    // setState는 async 콜백 내부. sync는 모듈 전역 가드(moduleSynced)로 인스턴스 다수여도 1회.
     useEffect(() => {
         const supabase = createClient();
         let active = true;
+
+        // 로그인 직후 1회: 로컬 목록을 sync로 업로드(로컬 우선 병합) → 응답 병합본으로 로컬 갱신.
+        const runSync = async () => {
+            if (moduleSynced) return;
+            moduleSynced = true; // await 전에 선점 — 인스턴스 경합 시 중복 sync 차단
+            const result = await apiSync(getSnapshot());
+            if (!result) {
+                moduleSynced = false; // 실패 → 다음 auth 이벤트에 재시도
+                return;
+            }
+            // 병합본(DB 진실)을 localStorage에 반영 → 회원 소스 전환(새 기기 로그인 시 목록 복원).
+            writeAndEmit(result.items.map(serverToLocal));
+            if (active && result.skipped > 0) {
+                setNotice({ type: 'sync-skipped', count: result.skipped, limit: result.limit });
+            }
+        };
+
         supabase.auth
             .getUser()
             .then(({ data }) => {
-                if (active) setIsMember(!!data.user);
+                if (!active) return;
+                const member = !!data.user;
+                setIsMember(member);
+                if (member) void runSync();
             })
             .catch(() => {
                 /* 비로그인/네트워크 오류 → 익명 취급 */
             });
         const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-            setIsMember(!!session?.user);
+            const member = !!session?.user;
+            setIsMember(member);
+            if (member) {
+                void runSync();
+            } else {
+                moduleSynced = false; // 로그아웃 → 다음 로그인에 재동기화
+            }
         });
         return () => {
             active = false;
@@ -168,21 +308,40 @@ export function useWatchlist(): UseWatchlist {
         const cur = getSnapshot();
         const k = watchlistItemKey(assetType, symbol);
         if (cur.some((it) => watchlistItemKey(it.assetType, it.symbol) === k)) return false; // 중복 무시
-        const curLimit = isMemberRef.current ? WATCHLIST_LIMIT_MEMBER : WATCHLIST_LIMIT_ANON;
+        const member = isMemberRef.current;
+        const curLimit = member ? WATCHLIST_LIMIT_MEMBER : WATCHLIST_LIMIT_ANON;
         if (cur.length >= curLimit) return false; // 상한 초과
         const maxOrder = cur.reduce((m, it) => Math.max(m, it.sortOrder), -1);
-        writeAndEmit([
-            ...cur,
-            { assetType, symbol, sortOrder: maxOrder + 1, createdAt: Date.now() },
-        ]);
+        const sortOrder = maxOrder + 1;
+        // 낙관적 로컬 추가(즉시 UI 반영) — 동기 boolean 계약 유지.
+        writeAndEmit([...cur, { assetType, symbol, sortOrder, createdAt: Date.now() }]);
+        // 회원이면 DB 반영. 409(서버 상한 100)·오류 시 로컬 롤백 + 안내.
+        if (member) {
+            void apiAddItem(assetType, symbol, sortOrder).then((res) => {
+                if (res === 'limit') {
+                    removeLocalByKey(k);
+                    setNotice({ type: 'limit', limit: WATCHLIST_LIMIT_MEMBER });
+                } else if (res === 'error') {
+                    removeLocalByKey(k);
+                }
+            });
+        }
         return true;
     }, []);
 
     const remove = useCallback((assetType: WatchlistAssetType, symbolRaw: string) => {
-        const k = watchlistItemKey(assetType, normalizeSymbol(symbolRaw));
+        const symbol = normalizeSymbol(symbolRaw);
+        const k = watchlistItemKey(assetType, symbol);
         const cur = getSnapshot();
+        const removed = cur.find((it) => watchlistItemKey(it.assetType, it.symbol) === k);
         const next = cur.filter((it) => watchlistItemKey(it.assetType, it.symbol) !== k);
-        if (next.length !== cur.length) writeAndEmit(next);
+        if (next.length === cur.length) return; // 변화 없음
+        writeAndEmit(next); // 낙관적 제거
+        if (isMemberRef.current && removed) {
+            void apiRemoveItem(assetType, symbol).then((ok) => {
+                if (!ok) addLocalItem(removed); // DB 실패 → 로컬 복원
+            });
+        }
     }, []);
 
     const toggle = useCallback(
@@ -205,7 +364,15 @@ export function useWatchlist(): UseWatchlist {
         writeAndEmit(cur.map((it, i) => ({ ...it, sortOrder: i })));
     }, []);
 
-    const clear = useCallback(() => writeAndEmit([]), []);
+    const clear = useCallback(() => {
+        const cur = getSnapshot();
+        writeAndEmit([]); // 낙관적 비우기
+        // 회원이면 DB도 비움(벌크 삭제 엔드포인트 없음 → 항목별 best-effort DELETE).
+        // 누락 시 다음 로그인 sync가 잔여 DB 행을 복원할 수 있으므로 전건 삭제 시도.
+        if (isMemberRef.current) {
+            for (const it of cur) void apiRemoveItem(it.assetType, it.symbol);
+        }
+    }, []);
 
     return {
         items,
@@ -219,5 +386,7 @@ export function useWatchlist(): UseWatchlist {
         toggle,
         reorder,
         clear,
+        notice,
+        dismissNotice,
     };
 }

@@ -13,13 +13,7 @@ export function symbolSlug(assetType: WatchlistAssetType, symbol: string): strin
     return baseSymbol(assetType, symbol).toLowerCase();
 }
 
-/** 가격 표기 ($ 접두, 자릿수 적응) */
-export function formatPrice(price: number | null): string {
-    if (price == null) return '—';
-    if (price >= 1000) return `$${price.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
-    if (price >= 1) return `$${price.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
-    return `$${price.toLocaleString(undefined, { maximumFractionDigits: 6 })}`;
-}
+// formatPrice 는 R12 Wave2 S2에서 표시설정 Context(useDisplaySettings)로 이관됨 — 로컬 dead export 제거.
 
 /** 등락률 (부호 + 화살표 없이 숫자만) */
 export function formatPct(pct: number | null): string {
