@@ -1,6 +1,6 @@
 # Component Map
 
-> 최종 업데이트: 2026-03-08
+> 최종 업데이트: 2026-05-29 (R9-T03 레퍼런스 정합)
 >
 > 각 컴포넌트의 사용 페이지, lib 의존성, 컴포넌트 간 의존 관계를 정리한 문서입니다.
 
@@ -40,7 +40,7 @@
 | `StockSectorPerformance` | 현재 미사용 (페이지에서 import 없음) | `context/LanguageContext`, `lib/indicators` | 없음 |
 | `StockRSIHeatmap` | `app/stock-market/page.tsx` | `context/LanguageContext`, `lib/indicators`, `lib/constants` | 없음 |
 | `StockAnalysisPanel` | `app/stock/page.tsx` | `lib/analysis/orchestrator`, `lib/analysis/signals`, `lib/analysis/aggregation`, `lib/backtest/engine` | 없음 |
-| `InvestmentQuotes` | `app/page.tsx`, `app/analysis/page.tsx`, `app/stock/page.tsx`, `app/stock-market/page.tsx` | `context/LanguageContext`, `lib/quotes` | 없음 |
+| `InvestmentQuotes` | `app/analysis/page.tsx`, `app/stock/page.tsx`, `app/stock-market/page.tsx` | `context/LanguageContext`, `lib/quotes` | 없음 |
 
 ### Signal
 
@@ -122,15 +122,14 @@
 | `PremiumLock` | `Analysis/StockPanel` | `lib/utils` | `ui/card`, `ui/badge`, `ui/button`, `ui/label` |
 | `ErrorState` | 현재 미사용 (페이지에서 import 없음) | 없음 (lucide-react만 사용) | 없음 |
 | `InsufficientData` | 현재 미사용 (페이지에서 import 없음) | 없음 | `ui/card`, `ui/badge`, `ui/button`, `ui/label` |
-| `hero-section` | `app/page.tsx` | `context/LanguageContext`, `lib/translations` | `hero-chart`, `news-rotator` |
-| `hero-chart` | `hero-section` | `lib/api/binance` | 없음 |
-| `footer-section` | `app/page.tsx` | 없음 (lucide-react만 사용) | 없음 |
+| `footer-section` | `app/page.tsx`, `board/[slug]`, `board/[slug]/write`, `board/[slug]/[postId]`, `coin/[symbol]`, `news` (6페이지 공용) | 없음 (lucide-react만 사용) | 없음 |
 | `global-header` | `app/layout.tsx` (전역) | `context/LanguageContext`, `lib/translations` | `AuthButton` |
-| `news-rotator` | `hero-section` | `context/LanguageContext` | 없음 |
 | `DetailedChart` | `app/analysis/page.tsx`, `app/analysis/[symbol]/page.tsx` | 없음 (lightweight-charts만 사용) | 없음 |
 | `TradeModal` | `app/portfolio/page.tsx` | `lib/supabase/client`, `lib/constants` | 없음 |
 
 > **세션 34(R8, 2026-05-25)**: `about-section`·`dashboard-grid`·`LanguageSwitcher` 3종 **삭제**(import 0건 dead code — v2.0 커뮤니티 피벗 후 구 다크 랜딩 잔재). 홈은 커뮤니티 SSR로 재구축되어 미사용, 언어 전환은 `global-header` 내장 토글로 대체됨.
+>
+> **R9-T01(2026-05-29)**: 구 다크 랜딩의 닫힌 dead 트리 `hero-section`·`hero-chart`·`news-rotator` 3종 **삭제**(`git rm`). `hero-section`이 `app/page.tsx`에서 미사용(import 0)이고 `hero-chart`·`news-rotator`는 `hero-section`에서만 쓰여 연쇄 dead. 위 레지스트리/요약/다이어그램에서 제거 완료. `app/page.tsx` 홈은 커뮤니티 SSR 9종 트리(아래 요약 참조).
 
 ---
 
@@ -138,7 +137,7 @@
 
 | 페이지 | 사용 컴포넌트 |
 |--------|-------------|
-| `app/page.tsx` (홈) | 커뮤니티 SSR로 재구축 (베스트30·뉴스·게시판·코인룸·사이드바). 구 `hero-section`/`footer-section` 등 잔재 일부 존재 여부는 재감사 필요 |
+| `app/page.tsx` (홈, SSR `revalidate=300`) | `BoardTableHeader`, `BoardRow`, `NewsRow`, `PriceTickerWidget`, `HotIssueWidget`, `FngGaugeWidget`, `OfficialPostsWidget`, `ToolsShortcutWidget`, `FooterSection` (+ `NewsHeadlineItem` 타입 전용 import). 시세 스트립·게시판 미리보기·코인룸 카드 섹션은 page.tsx 내부 `next/link` 직접 렌더. 데이터는 `lib/community/queries.ts`의 `fetchMainPageData` 공급 |
 | `app/layout.tsx` (전역 레이아웃) | `global-header` -> `AuthButton` |
 | `app/analysis/page.tsx` | `DetailedChart`, `Ticker`, `AnalysisPanel`, `ChartAnalysisPanel`, `InvestmentQuotes`, `Disclaimer` |
 | `app/analysis/[symbol]/page.tsx` | `DetailedChart`, `Card`, `Badge`, `Button`, `Separator`, `Label` |
@@ -167,12 +166,16 @@ app/layout.tsx
         └── AuthButton
               └── lib/supabase/client
 
-app/page.tsx (홈)
-  ├── hero-section
-  │     ├── hero-chart ─── lib/api/binance
-  │     └── news-rotator ── context/LanguageContext
-  ├── footer-section
-  └── InvestmentQuotes ── lib/quotes, context/LanguageContext
+app/page.tsx (홈, SSR revalidate=300) ── lib/community/queries (fetchMainPageData)
+  ├── BoardTableHeader · BoardRow ── community/BoardRow
+  ├── NewsRow ── community/NewsRow
+  ├── PriceTickerWidget ── community/widgets/PriceTickerWidget
+  ├── HotIssueWidget ── community/widgets/HotIssueWidget
+  ├── FngGaugeWidget ── community/widgets/FngGaugeWidget
+  ├── OfficialPostsWidget ── community/widgets/OfficialPostsWidget
+  ├── ToolsShortcutWidget ── community/widgets/ToolsShortcutWidget
+  └── footer-section
+  (시세 스트립·게시판 미리보기·코인룸 카드는 page.tsx 내 next/link 직접 렌더)
 
 app/analysis/page.tsx
   ├── Ticker ─── lib/api/binance

@@ -2,7 +2,7 @@
 
 > **이 파일은 kdyweb 스킬이 관리하는 단일 진실의 원천입니다.**
 > 수동 편집 시 계약 무결성이 깨질 수 있으므로 kdyweb을 통해 갱신하세요.
-> 생성일: 2026-02-20 | 최종 갱신: 2026-03-08 | 계약 버전: 3
+> 생성일: 2026-02-20 | 최종 갱신: 2026-05-29 (R9-T03 정합) | 계약 버전: 4
 
 ---
 
@@ -28,7 +28,7 @@
 
 | ID | 경로 | 페이지명 | 유형 | 파일 위치 | 레이아웃 | 인증 | 진입점 | 이동대상 | 동반 파일 | 상태 |
 |----|------|---------|------|----------|----------|------|--------|---------|----------|------|
-| R-001 | / | 랜딩 | static | app/page.tsx | RootLayout | 아니오 | 직접URL, GNB 로고 | /analysis, /market, /signal, /stock, /stock-market, /news, /calendar, /history, /portfolio, /secure-memo, /contact, /terms | meta | ✅ 활성 |
+| R-001 | / | 홈(커뮤니티) | static | app/page.tsx | RootLayout | 아니오 | 직접URL, GNB 로고 | /analysis, /market, /signal, /stock, /stock-market, /news, /calendar, /history, /portfolio, /secure-memo, /contact, /terms | meta | ✅ 활성 |
 | R-002 | /auth/login | 로그인 | auth | app/auth/login/page.tsx | RootLayout | 아니오 | AuthButton, 미들웨어 리다이렉트 | /(성공), /auth/auth-code-error(실패) | meta | ✅ 활성 |
 | R-003 | /auth/auth-code-error | 인증 에러 | error | app/auth/auth-code-error/page.tsx | RootLayout | 아니오 | 인증 실패 시 자동 | /auth/login | - | ✅ 활성 |
 | R-004 | /analysis | 코인 분석 | dashboard | app/analysis/page.tsx | RootLayout | 아니오 | GNB(코인>코인분석) | /analysis/[symbol] | meta | ✅ 활성 |
@@ -77,33 +77,51 @@
 
 ### 3-1. GNB (Global Navigation Bar)
 
-**드롭다운 메뉴 구조 (4그룹):**
+> v2.0 커뮤니티 피벗 후 GNB는 **1차 링크 5개 + 드롭다운 2그룹(코인룸·도구)** 구조다(`components/global-header.tsx`의 `primary`·`coinRoom`·`tools` 배열). 데스크탑/모바일이 `[coinRoom, tools].map(...)`로 동일 배열을 렌더 → 양쪽 자동 노출. 라벨은 `lib/translations.ts`의 ko 값.
 
-| 그룹 | 순서 | 라벨 | 경로 | 유형 | 조건 |
-|------|------|------|------|------|------|
-| 코인 | 1 | 코인 분석 | /analysis | 드롭다운 | 항상 |
-| 코인 | 2 | 시장 분위기 | /market | 드롭다운 | 항상 |
-| 코인 | 3 | AI 시그널 | /signal | 드롭다운 | 항상 |
-| 주식 | 1 | 주식 분석 | /stock | 드롭다운 | 항상 |
-| 주식 | 2 | 주식 시장 분위기 | /stock-market | 드롭다운 | 항상 |
-| 정보 | 1 | 뉴스 | /news | 드롭다운 | 항상 |
-| 정보 | 2 | 블로그 | /blog | 드롭다운 | 항상 |
-| 정보 | 3 | 캘린더 | /calendar | 드롭다운 | 항상 |
-| 정보 | 4 | 코인 히스토리 | /history | 드롭다운 | 항상 |
-| 서비스 | 1 | 포트폴리오 | /portfolio | 드롭다운 | 항상 |
-| 서비스 | 2 | 보안 메모 | /secure-memo | 드롭다운 | 항상 |
-| 서비스 | 3 | 관심종목 | /watchlist | 드롭다운 | 항상 |
-| 서비스 | 4 | 설정 | /settings | 드롭다운 | 항상 |
-| 서비스 | 5 | 문의하기 | /contact | 드롭다운 | 항상 |
-| 서비스 | 6 | 이용약관 | /terms | 드롭다운 | 항상 |
+**1차 상단 링크 (`primary`, 5개):**
+
+| 순서 | 라벨 | 경로 | 유형 | 조건 |
+|------|------|------|------|------|
+| 1 | 베스트 | / | 링크 | 항상 |
+| 2 | 자유게시판 | /board/free | 링크 | 항상 |
+| 3 | 시세토론 | /board/market | 링크 | 항상 |
+| 4 | 정보공유 | /board/info | 링크 | 항상 |
+| 5 | 뉴스 | /news | 링크 | 항상 |
+
+**코인룸 드롭다운 (`coinRoom`, 6개):**
+
+| 순서 | 라벨 | 경로 | 유형 | 조건 |
+|------|------|------|------|------|
+| 1 | BTC | /coin/btc | 드롭다운 | 항상 |
+| 2 | ETH | /coin/eth | 드롭다운 | 항상 |
+| 3 | XRP | /coin/xrp | 드롭다운 | 항상 |
+| 4 | SOL | /coin/sol | 드롭다운 | 항상 |
+| 5 | 알트코인 | /coin/altcoin | 드롭다운 | 항상 |
+| 6 | 김치프리미엄 | /coin/kimp | 드롭다운 | 항상 |
+
+**도구 드롭다운 (`tools`, 8개):**
+
+| 순서 | 라벨 | 경로 | 유형 | 조건 |
+|------|------|------|------|------|
+| 1 | 코인 분석 | /analysis | 드롭다운 | 항상 |
+| 2 | 주식 분석 | /stock | 드롭다운 | 항상 |
+| 3 | 시그널 | /signal | 드롭다운 | 항상 |
+| 4 | 시장 심리 | /market | 드롭다운 | 항상 |
+| 5 | 경제 일정 | /calendar | 드롭다운 | 항상 |
+| 6 | 코인 역사 | /history | 드롭다운 | 항상 (R9-T02 추가) |
+| 7 | 관심종목 | /watchlist | 드롭다운 | 항상 |
+| 8 | 보안 메모 | /secure-memo | 드롭다운 | 항상 |
 
 **고정 요소:**
 
 | 순서 | 라벨 | 경로/액션 | 유형 | 조건 |
 |------|------|----------|------|------|
 | 좌 | ChartMaster 로고 | / | 로고/링크 | 항상 |
+| 우 | 검색 | (UI 버튼, 미연결) | 버튼 | 데스크탑(md+) |
 | 우 | 언어 전환 | toggleLang() | 버튼 | 항상 |
 | 우 | 로그인/로그아웃 | AuthButton | 컴포넌트 | 항상 |
+| 우 | 글쓰기 | /board/free/write | 버튼 | 항상(sm+) |
 
 **GNB 파일:** `components/global-header.tsx`
 
@@ -141,16 +159,15 @@
 | 컴포넌트 | 파일 위치 | 사용처 |
 |----------|----------|--------|
 | GlobalHeader | components/global-header.tsx | RootLayout (전체) |
-| FooterSection | components/footer-section.tsx | 랜딩 페이지 (app/page.tsx) 직접 포함 |
+| FooterSection | components/footer-section.tsx | 6페이지 공용 (app/page.tsx, /board/[slug], /board/[slug]/write, /board/[slug]/[postId], /coin/[symbol], /news) 직접 포함 |
 | AuthButton | components/AuthButton.tsx | GlobalHeader |
-| HeroSection | components/hero-section.tsx | 랜딩 페이지 |
 | DetailedChart | components/DetailedChart.tsx | /analysis, /analysis/[symbol] |
 | TradeModal | components/TradeModal.tsx | /portfolio |
 | ErrorState | components/ErrorState.tsx | 에러 표시 공통 |
 | InsufficientData | components/InsufficientData.tsx | 데이터 부족 표시 공통 |
 | PremiumLock | components/PremiumLock.tsx | 프리미엄 기능 잠금 |
 | Disclaimer | components/Common/Disclaimer.tsx | /analysis, /market |
-| InvestmentQuotes | components/Stock/InvestmentQuotes.tsx | 랜딩, /stock, /stock-market |
+| InvestmentQuotes | components/Stock/InvestmentQuotes.tsx | /analysis, /stock, /stock-market |
 <!-- 새 공유 컴포넌트는 이 줄 위에 추가 -->
 
 ---
@@ -172,7 +189,7 @@
 
 | 페이지 ID | 주요 컴포넌트 | 공유 컴포넌트 | kdypick 출처 |
 |----------|-------------|-------------|-------------|
-| R-001 | HeroSection | GlobalHeader, FooterSection, InvestmentQuotes | - |
+| R-001 | BoardRow, NewsRow, PriceTickerWidget, HotIssueWidget, FngGaugeWidget, OfficialPostsWidget, ToolsShortcutWidget (커뮤니티 SSR) | GlobalHeader, FooterSection | - |
 | R-004 | DetailedChart, Ticker, AnalysisPanel, ChartAnalysisPanel | Disclaimer, InvestmentQuotes | - |
 | R-005 | DetailedChart, Card, Badge, Button, Separator, Label | Disclaimer | - |
 | R-006 | - (드롭다운 선택 UI) | - | - |
@@ -218,6 +235,7 @@
 
 | 버전 | 날짜 | 변경 내용 | 모드 |
 |------|------|----------|------|
+| 4 | 2026-05-29 | R9-T03 정합: HeroSection 레지스트리·R-001 매핑 제거(R9-T01 dead 삭제 반영), GNB를 v2.0 실구조(1차 5 + 코인룸 6 + 도구 8, /history 포함 — R9-T02)로 정합, InvestmentQuotes 홈 사용 표기 제거(코드 근거) | reconcile |
 | 2 | 2026-02-20 | 검증 이슈 수정: /pricing 생성, /settings·/watchlist GNB 연결, 총 23개 라우트 | verify |
 | 1 | 2026-02-20 | 초기 계약 생성 (기존 19개 페이지 + 신규 3개 스텁) | migrate |
 <!-- 변경 이력은 이 줄 위에 추가 -->

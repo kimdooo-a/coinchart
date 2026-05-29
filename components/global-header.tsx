@@ -69,6 +69,7 @@ export default function GlobalHeader() {
             { label: t.menu.aiSignal, href: "/signal" },
             { label: t.menu.marketMood, href: "/market" },
             { label: t.menu.calendar, href: "/calendar" },
+            { label: t.menu.history, href: "/history" },
             { label: t.menu.watchlist, href: "/watchlist" },
             { label: t.menu.secureMemo, href: "/secure-memo" },
         ],

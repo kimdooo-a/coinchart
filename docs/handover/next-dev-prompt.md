@@ -1,9 +1,10 @@
 # 다음 개발 프롬프트
 
-> 최종 갱신: 2026-05-25
+> 최종 갱신: 2026-05-29
 
 ## 최근 완료된 작업
 
+- **세션 35 (2026-05-29)**: **R9 지휘부 마감 — tree-reconcile: 홈 dead 트리 3종 삭제 + /history 메뉴 정합 + 레퍼런스 정합**. kdydispatch 평면 3터미널 분산·회수·통합. 발사 전 grep 사전 검증으로 stale 가정 보정(`footer-section`=6페이지 사용 삭제금지·`hero-section`만 dead·`/history` 라우트 실존=폐기 아닌 메뉴 정합·`.env.local` BOM 이미 해소). **T01** 홈 트리 9종 확정 + 닫힌 dead 트리 **3종 `git rm`**(`hero-section`·`hero-chart`·`news-rotator` — 서로만 참조, 외부 사용처 0 확정 −343줄)·보존 2종(`ErrorState`·`InsufficientData` 재사용 프리미티브). **T02** `/history`(`lib/history-data.ts` 실데이터 완성 페이지, 진입 경로만 누락)를 도구 드롭다운에 1줄 추가(7→8). **T03** `_COMPONENT_MAP`·`_WEB_CONTRACT` 정합 — dead 3종 제거·홈 트리 9종 갱신·`InvestmentQuotes` 홈 stale 제거·GNB v2.0 실구조(primary 5/coinRoom 6/tools 8) 재작성·계약 v3→v4. 지휘부 독립 검증: 격리 위반 0(매트릭스 정확 일치)·dead 잔존 0·tsc 0·build green(`○ /history`·54 라우트). 잔여 stale은 R10 플래그. (handover `2026-05-29-session35-r9-conductor.md`, 보고서 `2026-05-29-R9-_SUMMARY.md`)
 - **세션 34 (2026-05-25)**: **R8 마감 — 페이지 컴포넌트 다크 잔재 라이트화 + dead code 3종 삭제**. R8 후보 7종 사용처 전수 추적 → **4종 dead 발견**(`about-section`·`dashboard-grid`·`LanguageSwitcher`=구 다크 랜딩 잔재 / `InsufficientData`=미사용 재사용 프리미티브). 사용자 승인 하 **삭제+선별 라이트화**: 구 랜딩 3종 `git rm`(v2.0 피벗 후 미사용·홈은 커뮤니티 SSR 재구축·언어전환은 헤더 토글 중복). 살아있는 4종(`Chart/Ticker`@analysis·`Chart/StockTicker`@stock·`PremiumLock`@StockPanel·`AuthButton`@헤더) + `InsufficientData` 라이트화 — 다크 표면(`bg-gray-900`/`bg-black/40`/`border-gray-800`/회색 텍스트)을 `surface-container`/`on-surface(-variant)`/`outline-variant` 토큰으로 교체. **의미색 보존**(빨/파 시세·노랑 프리미엄·주황 경고, 등락 뱃지 `-400→-600` 가독), **의도 보존**(그라데이션 위 흰 글씨=아바타·로그인 CTA). 레퍼런스 동기화(`_COMPONENT_MAP`·`_WEB_CONTRACT` 삭제 3종 제거 + 홈 항목 stale 정정). tsc 0·build green(54/54)·다크 잔재 grep 0(그라데이션 흰글씨만). (handover `2026-05-25-session34-r8-page-lightify.md`)
 - **세션 33 (2026-05-25)**: **R7 마감 — 차트 라인/오버레이 색 KR 정렬(R7-3) + 토큰 bg-/border- 변형 점검(R7-4)**. **R7-3** 지표 라인(RSI/MACD/MA/BB)은 캔들과 달리 방향(상승/하락) 아닌 "지표 구분" **식별색**이라 의미 보존(사용자 확정 — MA7·25·99 빨/파 통일 시 구분 불가) + `lib/chart/theme.ts` `INDICATOR_COLORS`/`getIndicatorColors()` **SSOT 이관**(CryptoChart·StockChart 중복 하드코딩 9건씩 제거). 흰 배경 미가독 **MA99 `#FFEA00`→`#c79100`**(진앰버)·BB alpha 0.5→0.6·평단가선 brand primary 정렬. 차트 로딩 오버레이(`bg-gray-900/80`→`bg-surface/70`)·DetailedChart 라벨·**hero 심볼 `text-white`→`text-on-surface`**(흰 차트 배경서 안 보이던 핵심 버그) 라이트화(5파일). **R7-4** 토큰 `bg-`/`border-` 변형 점검 → shadcn 별칭(muted/card/border/background/popover/input)이 globals.css `@theme`에 라이트 토큰 전부 매핑 → `bg-muted`/`border-border` 172건 시각 정상·**전면 치환 불요**(R6 T05 별칭 보존 정책 유지), `text-muted-foreground` 잔여 0·비정상 변형 0. 실 깨짐은 차트 영역만 R7-3 흡수, 페이지 다크 잔재(about·AuthButton·Ticker·dashboard-grid 등 R1~R3 누락분)는 **R8 후보**. tsc 0·build green·시각 회귀 0. (handover `2026-05-25-R7-34-chart-lines-tokens.md`)
 - **세션 32 (2026-05-25)**: **R7 단독 — 운영 DB 마이그 정합(R7-1) + AD1 CI 통합 fallback(R7-2)**. **R7-1**: 운영 DB(`enksnhshciyvllwfiwrm`) `schema_migrations` 정합 — `backfill_schema_migrations.sql` Part A+B를 Management API `database/query` `BEGIN;COMMIT` 트랜잭션 1회 적용 → **6행(8자리)→14행(14자리)**, 로컬 14파일 1:1(객체/데이터 불변·히스토리만). 순서 함정(로컬14↔원격8 mismatch로 db push 선행 시 14개 재실행 위험) 식별 후 backfill 선행. CLI 검증은 `.env.local` **UTF-8 BOM**(supabase CLI env 파서 거부)+db password 부재로 미수행 → `schema_migrations` 직접조회(14종=로컬 14파일)가 db push --dry-run 0건과 동등함을 근거로 동등검증. 런북 §10 신설. **R7-2**: `auth.setup.ts`에 **비번 없는 service_role magiclink fallback 경로 B**(`admin.generateLink({type:'magiclink'})`→`verifyOtp({token_hash,type:'magiclink'})` 쿠키 캡처, signInWithPassword와 동일 포맷) 추가 + `community-admin-auth.spec.ts` **collection 타이밍 함정**(top-level `RUN_AD1`→CI fresh 첫회 항상 skip) 런타임 평가로 수정. 운영 DB 실측 후 fresh 실행 **2 passed**(비번 미주입, fallback 경로 B), graceful skip 회귀 보존, 잔여 0, 인증 산출물 gitignore 확인. tsc 0. solution 2종(`2026-05-25-playwright-auth-setup-collection-timing.md`·`2026-05-25-env-local-utf8-bom-breaks-cli.md`). (handover `session32-r7-migration-ad1.md`)
@@ -74,11 +75,17 @@
 
 1. ~~**페이지 컴포넌트 다크 잔재 라이트화**~~ → **✅ 완료**. 후보 7종 추적 결과 4종 dead. **삭제 3종**(`about-section`·`dashboard-grid`·`LanguageSwitcher` — 구 다크 랜딩 잔재, import 0건). **라이트화 5종**(`Chart/Ticker`·`StockTicker`·`PremiumLock`·`AuthButton` + 재사용 프리미티브 `InsufficientData`) — 다크 표면→라이트 토큰, 의미색(빨/파 시세·노랑 프리미엄·주황 경고)·그라데이션 흰글씨 보존. 레퍼런스 동기화. `hero-chart` 잔재는 R7 귀속(중복 아님).
 
-### ★ R9 후보 (다음 라운드)
+### ✅ R9 완료 (세션 35, 2026-05-29 — tree-reconcile)
 
-1. **`app/page.tsx` 홈 컴포넌트 트리 재감사** — R8에서 `_COMPONENT_MAP`/`_WEB_CONTRACT`의 홈 항목이 stale(과거 import 표기가 현 커뮤니티 SSR 구조와 불일치)임을 부분 정정. 홈이 실제 어떤 컴포넌트를 쓰는지 재감사하여 레퍼런스 정합 + 잔재 컴포넌트(`hero-section`·`footer-section` 등) dead 여부 확정.
-2. **`.env.local` UTF-8 BOM 제거** — supabase CLI 직접 사용 복구(현재 Management API 우회 중).
-3. Giscus App 설치(수동) · `/history` 메뉴 정리 · `app/analysis/[symbol]/page.tsx` 807줄 리팩토링.
+1. ~~**`app/page.tsx` 홈 컴포넌트 트리 재감사**~~ → **✅ T01+T03 완료**. 홈 트리 9종 확정 + 닫힌 dead 트리 3종 `git rm`(`hero-section`·`hero-chart`·`news-rotator`, 외부 사용처 0). `footer-section`은 6페이지 사용 중이라 **보존**(dead 가정 정정). `_COMPONENT_MAP`·`_WEB_CONTRACT`에서 dead 제거·홈 트리 9종 갱신·`InvestmentQuotes` 홈 stale 제거·GNB v2.0 실구조 재작성·계약 v3→v4.
+2. ~~**`.env.local` UTF-8 BOM 제거**~~ → **✅ 이미 해소**(R9 진입 시 `BOM 없음` 확인). supabase CLI 직접 사용 가능.
+3. ~~**`/history` 메뉴 정리**~~ → **✅ T02 완료**. `/history`는 실데이터 완성 페이지(진입 경로만 누락) → 도구 드롭다운에 1줄 추가(방안 A). 보류: Giscus App 설치(수동) · 807줄 리팩토링.
+
+### ★ R10 후보 (다음 라운드 — T03 플래그)
+
+1. **`_WEB_CONTRACT` 라우트 레지스트리 전수 정합** — v2.0 커뮤니티 라우트(`/board/[slug]`·`/board/[slug]/write`·`/board/[slug]/[postId]`·`/coin/[symbol]` 6종) 미등록(레지스트리 30행 ↔ 빌드 54 괴리). §8 연결성 카운트 stale("23/19개", 2026-02-20). 진입점 컬럼 과거 4그룹 기준(`/blog` 고아 가능성·`/contact`·`/terms`·`/settings`). Footer 레지스트리(§3-3) 실코드 미대조.
+2. **`app/analysis/[symbol]/page.tsx` 807줄 리팩토링** (대형 단일 작업 — 별도 라운드 권장).
+3. Giscus App 설치(수동) — https://github.com/apps/giscus → kimdooo-a/coinchart.
 
 ### ✅ R3 완료 (세션 28, 2026-05-25 — community-finish 12/12)
 
