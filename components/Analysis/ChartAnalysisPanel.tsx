@@ -3,7 +3,7 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { aggregateCandles } from '@/lib/analysis/aggregation';
 import { generateSignals } from '@/lib/analysis/signals';
-import { calculateRSI } from '@/lib/indicators';
+import { calculateRSI, calculateBollingerBands } from '@/lib/indicators';
 
 export type CandleData = {
     time: number;
@@ -130,13 +130,39 @@ export const ChartAnalysisPanel: React.FC<Props> = ({ symbol, lang, apiEndpoint 
         riskTol: lang === 'ko' ? '손절 감수 (Risk Tolerance)' : 'Risk Tolerance'
     };
 
+    // 볼린저밴드 %B 계산: 현재가가 밴드 내 어디에 위치하는지 0~1 비율로 산출
+    // %B = (현재가 - 하단밴드) / (상단밴드 - 하단밴드)
+    // %B < 0: 하단 이탈(강한 과매도), 0~0.2: 하단 근접(약한 과매도), 0.4~0.6: 중립
+    // 0.8~1.0: 상단 근접(약한 과매수), > 1: 상단 이탈(강한 과매수)
+    const bbBands = calculateBollingerBands(candles.map(c => c.close));
+    const lastBB = bbBands[bbBands.length - 1];
+    const bbBandWidth = (lastBB && !isNaN(lastBB.upper) && !isNaN(lastBB.lower))
+        ? lastBB.upper - lastBB.lower
+        : 0;
+    const bbPercentB = (bbBandWidth > 0 && !isNaN(lastBB.lower))
+        ? (currentPrice - lastBB.lower) / bbBandWidth
+        : 0.5; // 데이터 부족 시 중립 처리
+
+    // %B 기반 상태/레이블 산출
+    const getBBStatus = (pctB: number, l: 'ko' | 'en') => {
+        if (pctB >= 1) return { status: 'SELL', label: l === 'ko' ? '강한 과매수' : 'Strong Overbought', color: 'text-red-500' };
+        if (pctB >= 0.8) return { status: 'SELL', label: l === 'ko' ? '과매수' : 'Overbought', color: 'text-red-400' };
+        if (pctB <= 0) return { status: 'BUY', label: l === 'ko' ? '강한 과매도' : 'Strong Oversold', color: 'text-green-500' };
+        if (pctB <= 0.2) return { status: 'BUY', label: l === 'ko' ? '과매도' : 'Oversold', color: 'text-green-400' };
+        return { status: 'NEUTRAL', label: l === 'ko' ? '관망' : 'Neutral', color: 'text-on-surface-variant' };
+    };
+    const bbStatus = getBBStatus(bbPercentB, lang);
+
+    // %B → 상승 확률: 과매도(낮은 %B)일수록 상승 확률 높음, 과매수(높은 %B)일수록 낮음
+    const bbProb = Math.round(Math.min(99, Math.max(1, (1 - bbPercentB) * 60 + 20)));
+
     const indicators = [
         { name: 'RSI (14)', val: raw.RSI.toFixed(1), ...getIndicatorStatus(raw.RSI, 'RSI', lang), prob: getRiseProb(raw.RSI, 'RSI') },
         { name: 'Stoch (14,3)', val: `${raw.StochK.toFixed(0)}/${raw.StochD.toFixed(0)}`, ...getIndicatorStatus(raw.StochK, 'Stoch', lang), prob: getRiseProb(raw.StochK, 'Stoch') },
         { name: 'CCI (20)', val: raw.CCI.toFixed(0), ...getIndicatorStatus(raw.CCI, 'CCI', lang), prob: getRiseProb(raw.CCI, 'CCI') },
         { name: 'Will %R', val: raw.WillR.toFixed(1), ...getIndicatorStatus(raw.WillR, 'Will', lang), prob: getRiseProb(raw.WillR, 'Will') },
         { name: 'MACD', val: raw.MACD.toFixed(4), ...getIndicatorStatus(raw.MACD, 'MACD', lang), prob: getRiseProb(raw.MACD, 'MACD') }, // Logic simplified
-        { name: 'Bollinger', val: 'Band', ...getIndicatorStatus(0, 'RSI', lang), prob: 50 }, // Placeholder logic for band pos
+        { name: 'Bollinger', val: `%B ${bbPercentB.toFixed(2)}`, ...bbStatus, prob: bbProb },
         { name: 'ADX', val: raw.ADX.toFixed(1), ...getIndicatorStatus(raw.ADX, 'ADX', lang), prob: 50 },
     ];
 

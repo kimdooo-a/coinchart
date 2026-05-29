@@ -2,6 +2,7 @@
 import { createClient } from '@/lib/supabase/client';
 import { NextResponse } from 'next/server';
 import { SUPPORTED_COINS, TOP_US_STOCKS } from '@/lib/constants';
+import { fetchStockPrices } from '@/lib/supabase/stock';
 
 export async function GET() {
     const supabase = createClient();
@@ -46,27 +47,41 @@ export async function GET() {
         }
 
         // 2. Stock Update (All Supported Stocks)
-        // Using Mock generator as requested/established, but applying to ALL stock constants
+        // stock_prices 테이블(SSOT)에서 각 종목의 최신 종가를 조회하여 반환
+        // 조회 실패 또는 빈 결과이면 기존 mock 값으로 fallback하여 데이터 깨짐 방지
         const mockStock = (base: number) => {
             const variation = (Math.random() * 4 - 2) / 100; // +/- 2%
             return base * (1 + variation);
         };
 
-        // Base prices for simulation (optional, or just random around 100-1000)
-        // We can just use a hash of the symbol to get a "stable" random base if we wanted, 
-        // to make it look realistic, or just randomized ranges.
-        // Let's assume a generic base range for demo if specific bases aren't known, 
-        // OR better: use a simple mapping for realism if possible.
+        // fallback 기준 가격 (stock_prices 조회 실패 시 사용)
         const basePrices: Record<string, number> = {
             'AAPL': 170, 'MSFT': 420, 'NVDA': 900, 'GOOGL': 175, 'AMZN': 180,
             'META': 480, 'TSLA': 175, 'BRK-B': 410, 'LLY': 780, 'AVGO': 1300
         };
 
         for (const stock of TOP_US_STOCKS) {
-            const base = basePrices[stock.symbol] || 150; // Default 150 if new stock added
+            let stockPrice: number | null = null;
+
+            // stock_prices 테이블에서 최신 종가 조회 (SSOT: lib/supabase/stock.ts)
+            try {
+                const stockData = await fetchStockPrices(stock.symbol, 1);
+                if (stockData && stockData.length > 0) {
+                    stockPrice = stockData[stockData.length - 1].close;
+                }
+            } catch (e) {
+                console.error(`[market-data] stock_prices 조회 오류 (${stock.symbol}):`, e);
+            }
+
+            // 실제 데이터 없으면 mock fallback
+            if (stockPrice === null || stockPrice <= 0) {
+                const base = basePrices[stock.symbol] || 150;
+                stockPrice = mockStock(base);
+            }
+
             prices.push({
                 symbol: stock.symbol,
-                price: mockStock(base),
+                price: stockPrice,
                 asset_type: 'STOCK',
                 recorded_at: now
             });
