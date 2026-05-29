@@ -1,6 +1,6 @@
 # Schema Reference (Supabase)
 
-> 마지막 갱신: 2026-03-08
+> 마지막 갱신: 2026-05-30 (R12 user_watchlist 추가)
 > 소스: `supabase/migrations/` SQL 파일 기반
 
 ## 테이블 목록
@@ -11,6 +11,7 @@
 | `stock_prices` | 주식 SSOT (TwelveData OHLCV) | O | 20251227 |
 | `news` | 뉴스 아카이브 (15일) | O | 20241214 |
 | `secure_memos` | 암호화 메모 | O | 20260114 |
+| `user_watchlist` | 회원 즐겨찾기 동기화 | O | 20260529 |
 | `profiles` | 사용자 프로필 | - | trigger |
 | `blog_categories` | 블로그 카테고리 | O | 20260308 |
 | `blog_posts` | 블로그 포스트 | O | 20260308 |
@@ -121,6 +122,27 @@
 **인덱스**: `idx_secure_memos_user_id`, `idx_secure_memos_updated_at`
 **RLS**: 본인 메모만 CRUD 가능
 **트리거**: `update_secure_memos_updated_at` (UPDATE 시 자동 갱신)
+
+---
+
+## user_watchlist
+
+> 회원 즐겨찾기 동기화 SSOT (R12). 익명은 localStorage(`cca:watchlist`), 회원은 이 테이블(기기 간 동기화).
+> 개인 소유 데이터 — `secure_memos`와 동일 RLS 모델. 접근은 `lib/supabase/watchlist.ts` SSOT 경유.
+
+| 컬럼 | 타입 | 필수 | 기본값 | 설명 |
+|------|------|------|--------|------|
+| `id` | UUID | PK | gen_random_uuid() | |
+| `user_id` | UUID | O (FK → auth.users, ON DELETE CASCADE) | - | 소유자 |
+| `asset_type` | TEXT | O | - | CHECK IN ('CRYPTO','STOCK') |
+| `symbol` | TEXT | O | - | CRYPTO=`BTCUSDT` / STOCK=`AAPL` |
+| `sort_order` | INTEGER | - | 0 | 목록 정렬 순서 |
+| `created_at` | TIMESTAMPTZ | - | NOW() | |
+
+**제약**: `UNIQUE (user_id, asset_type, symbol)` — 중복 방지(머지 시 ON CONFLICT DO NOTHING)
+**인덱스**: `idx_user_watchlist_user` (`user_id, sort_order`)
+**RLS**: 본인(`auth.uid() = user_id`)만 SELECT/INSERT/UPDATE/DELETE (4정책, secure_memos 패턴)
+**상한**: 회원 100 (API 가드 — 익명 30은 클라이언트 localStorage)
 
 ---
 

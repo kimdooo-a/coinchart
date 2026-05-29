@@ -31,8 +31,8 @@ const eslintConfig = defineConfig([
           ],
           patterns: [
             {
-              group: ["@/lib/supabase/*", "!@/lib/supabase/crypto", "!@/lib/supabase/stock", "!@/lib/supabase/blog", "!@/lib/supabase/admin", "!@/lib/supabase/server", "!@/lib/supabase/client"],
-              message: "❌ Invalid supabase import. Use @/lib/supabase/crypto, @/lib/supabase/stock, or @/lib/supabase/blog only"
+              group: ["@/lib/supabase/*", "!@/lib/supabase/crypto", "!@/lib/supabase/stock", "!@/lib/supabase/blog", "!@/lib/supabase/watchlist", "!@/lib/supabase/admin", "!@/lib/supabase/server", "!@/lib/supabase/client"],
+              message: "❌ Invalid supabase import. Use @/lib/supabase/crypto, @/lib/supabase/stock, @/lib/supabase/blog, or @/lib/supabase/watchlist only"
             },
             {
               group: ["@/lib/analysis/*", "!@/lib/analysis/crypto", "!@/lib/analysis/stock"],

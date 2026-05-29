@@ -111,6 +111,7 @@
 | 35 | 2026-05-29 | **R9 지휘부 — tree-reconcile 3터미널 회수·통합·커밋/cs** (홈 dead 트리 3종 `git rm`(`hero-section`·`hero-chart`·`news-rotator`) + `/history` 도구 드롭다운 1줄 + `_COMPONENT_MAP`·`_WEB_CONTRACT` 정합·계약 v4, tsc 0·build green·격리 0) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-29-session35-r9-conductor.md) · [R9_SUMMARY](../handover/2026-05-29-R9-_SUMMARY.md) |
 | 36 | 2026-05-29 | **R10 단독 — 미완성 점검 + kdyswarm 3트랙 병렬 보완/cs** (signal 백엔드 연결+SignalCard / 데드코드 6종 삭제 995줄 / BB %B 실확률+admin 주식 실데이터, worktree 병렬·충돌 0·tsc 0·레퍼런스 3종 동기화) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-29-session36-r10-dev-gap.md) |
 | 37 | 2026-05-29 | **R11 지휘부 — reconcile-refactor 4터미널 회수·통합/cs** (라우트 레지스트리 35 1:1 정합·계약 v5 / lint 26→18 / analysis/[symbol] 807→78줄 리팩토링 `_components`8+`_lib`3 / watchlist·settings 기획, 통합 tsc 0·build green·격리 0) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-29-session37-r11-conductor.md) · [R11_SUMMARY](../handover/2026-05-29-R11-_SUMMARY.md) |
+| 38 | 2026-05-30 | **R12 지휘부 — watchlist/settings R12 CEO 인수·Wave1 회수통합·Wave2 발사준비/cs** (워커 터미널서 stale 마커 정리 후 R12 CEO 인수[기록 CEO PID 49144 DEAD] · taste 7확정 · Wave1 T-A/B/C 회수·교차검증 PASS · 통합 핫픽스 2[localStorage 키 `cca:watchlist` 통일·eslint SSOT watchlist 화이트리스트] · 레퍼런스 2종 갱신 · Wave2 T-D/E/F SOT+발사프롬프트, lint 0·tsc 0) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-30-session38-r12-conductor.md) |
 
 ## v2.0 피벗 핵심 (2026-05-10 결정)
 

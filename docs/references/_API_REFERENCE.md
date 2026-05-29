@@ -1,9 +1,9 @@
 # API Reference
 
 ## 개요
-총 29개 엔드포인트 (공개 9개 + 블로그 6개 + SEO 3개, 관리자 4개 + 블로그 5개, 주식 분석 2개 포함)
+총 33개 엔드포인트 (공개 9개 + 블로그 6개 + SEO 3개, 관리자 4개 + 블로그 5개, 주식 분석 2개, 사용자 데이터 4개 포함)
 
-최종 업데이트: 2026-03-08
+최종 업데이트: 2026-05-30 (R12 watchlist 4개 추가)
 
 ---
 
@@ -12,7 +12,8 @@
 2. [주식 관련](#주식-관련)
 3. [분석 관련](#분석-관련)
 4. [뉴스/기타](#뉴스기타)
-5. [관리자 전용](#관리자-전용)
+5. [사용자 데이터](#사용자-데이터)
+6. [관리자 전용](#관리자-전용)
 
 ---
 
@@ -340,6 +341,37 @@
   - `CONTACT_EMAIL_USER` (필수): Gmail 발신 계정
   - `CONTACT_EMAIL_PASS` (필수): Gmail 앱 비밀번호
   - `CONTACT_EMAIL_TO` (선택): 수신 이메일 (기본값: `smartkdy7@gmail.com`)
+
+---
+
+## 사용자 데이터
+
+> watchlist(즐겨찾기) 회원 동기화 (R12). 모든 라우트 **회원 전용** — 미회원 `401 {error:"로그인이 필요합니다."}`. 인증=`lib/supabase/server.ts` 쿠키 세션(`auth.getUser()`) + RLS 이중 가드. `dynamic = 'force-dynamic'`. 접근 SSOT=`lib/supabase/watchlist.ts`. 익명은 API 없이 localStorage(`cca:watchlist`).
+> `WatchlistItem = { assetType: 'CRYPTO'|'STOCK', symbol, sortOrder, createdAt }`
+
+### GET /api/watchlist
+- **파일**: `app/api/watchlist/route.ts`
+- **설명**: 본인 즐겨찾기 목록.
+- **응답 (200)**: `{ items: WatchlistItem[], limit: 100 }`
+
+### POST /api/watchlist
+- **파일**: `app/api/watchlist/route.ts`
+- **요청 바디**: `{ assetType, symbol, sortOrder? }` (symbol 서버 trim·대문자 정규화, 최대 32자)
+- **설명**: 추가(멱등). 이미 존재 시 기존 행 반환.
+- **응답**: `201 { item, alreadyExists:false }` (신규) / `200 { item, alreadyExists:true }` (기존)
+- **에러**: `400` 입력 오류 / `409 { error, limit:100 }` 상한 초과(회원 100)
+
+### DELETE /api/watchlist
+- **파일**: `app/api/watchlist/route.ts`
+- **요청**: 바디 `{ assetType, symbol }` 또는 쿼리 `?assetType=&symbol=`
+- **설명**: 삭제(멱등 — 없어도 ok).
+- **응답**: `200 { ok:true }` / `400` 입력 오류
+
+### POST /api/watchlist/sync
+- **파일**: `app/api/watchlist/sync/route.ts`
+- **요청 바디**: `{ items: [{assetType, symbol, sortOrder?}, ...] }` (단일 호출 입력 상한 500)
+- **설명**: **로컬 우선 병합** — 로컬+DB 합집합 업로드, 중복(UNIQUE) DB 기존 유지(로컬 손실 0). 합집합 100 초과 시 신규분 입력 순서로 잘라냄. 로그인 직후 1회(D3).
+- **응답 (200)**: `{ items: WatchlistItem[], added, skipped, limit:100 }`
 
 ---
 
