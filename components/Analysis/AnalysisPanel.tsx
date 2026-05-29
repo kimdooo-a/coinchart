@@ -2,11 +2,8 @@
 
 // CRYPTO ANALYSIS ONLY - DO NOT ADD STOCK IMPORTS
 import React, { useMemo, useEffect, useState } from 'react';
-// import { CandleData, getKlines } from '@/lib/api/binance'; // REMOVED for SSOT
-// import { analyzeMarket } from '@/lib/analysis'; // Legacy
 import { performAnalysis } from '@/lib/analysis/orchestrator';
 import { generateSignals } from '@/lib/analysis/signals';
-// import { PremiumLock } from '@/components/PremiumLock'; // Removed as Backtest is now free for all
 
 // Type definition for local use (or import if shared type exists)
 export type CandleData = {

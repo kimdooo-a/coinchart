@@ -229,7 +229,6 @@ export const CryptoChart: React.FC<Props> = ({
     // Data Fetching
     useEffect(() => {
         if (seriesRef.current) seriesRef.current.setData([]);
-        // ... (clear all refs logic) ...
         if (rsiSeriesRef.current) rsiSeriesRef.current.setData([]);
         if (bbUpperRef.current) bbUpperRef.current.setData([]);
         if (macdHistogramRef.current) macdHistogramRef.current.setData([]);

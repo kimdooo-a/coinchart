@@ -28,6 +28,7 @@
 | 03 | [03-post-detail-write.md](./03-post-detail-write.md) | 게시글 상세 + 작성 | `/board/{slug}/{id}` 등 | 1차 의뢰 (2개 시안) |
 | 04 | [04-news.md](./04-news.md) | 뉴스 강화 | `/news` | 1차 의뢰 (리디자인) |
 | 05 | [05-coin-room.md](./05-coin-room.md) | 코인룸 (BTC 예시) | `/coin/btc` | 1차 의뢰 (1개 시안 + 변형 가이드) |
+| 06 | [06-watchlist-settings.md](./06-watchlist-settings.md) | 관심종목 + 설정 (기획·스펙) | `/watchlist`, `/settings` | R11/T04 신규 기획 (구현 R12+) |
 
 ---
 

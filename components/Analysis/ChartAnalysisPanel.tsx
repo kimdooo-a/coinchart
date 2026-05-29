@@ -3,7 +3,7 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { aggregateCandles } from '@/lib/analysis/aggregation';
 import { generateSignals } from '@/lib/analysis/signals';
-import { calculateRSI, calculateBollingerBands } from '@/lib/indicators';
+import { calculateBollingerBands } from '@/lib/indicators';
 
 export type CandleData = {
     time: number;

@@ -2,7 +2,7 @@
 
 > **이 파일은 kdyweb 스킬이 관리하는 단일 진실의 원천입니다.**
 > 수동 편집 시 계약 무결성이 깨질 수 있으므로 kdyweb을 통해 갱신하세요.
-> 생성일: 2026-02-20 | 최종 갱신: 2026-05-29 (R9-T03 정합) | 계약 버전: 4
+> 생성일: 2026-02-20 | 최종 갱신: 2026-05-29 (R11-T01 라우트 레지스트리 전수 정합) | 계약 버전: 5
 
 ---
 
@@ -31,33 +31,38 @@
 | R-001 | / | 홈(커뮤니티) | static | app/page.tsx | RootLayout | 아니오 | 직접URL, GNB 로고 | /analysis, /market, /signal, /stock, /stock-market, /news, /calendar, /history, /portfolio, /secure-memo, /contact, /terms | meta | ✅ 활성 |
 | R-002 | /auth/login | 로그인 | auth | app/auth/login/page.tsx | RootLayout | 아니오 | AuthButton, 미들웨어 리다이렉트 | /(성공), /auth/auth-code-error(실패) | meta | ✅ 활성 |
 | R-003 | /auth/auth-code-error | 인증 에러 | error | app/auth/auth-code-error/page.tsx | RootLayout | 아니오 | 인증 실패 시 자동 | /auth/login | - | ✅ 활성 |
-| R-004 | /analysis | 코인 분석 | dashboard | app/analysis/page.tsx | RootLayout | 아니오 | GNB(코인>코인분석) | /analysis/[symbol] | meta | ✅ 활성 |
+| R-004 | /analysis | 코인 분석 | dashboard | app/analysis/page.tsx | RootLayout | 아니오 | GNB(도구>코인 분석) | /analysis/[symbol] | meta | ✅ 활성 |
 | R-005 | /analysis/[symbol] | 코인 상세 분석 | detail | app/analysis/[symbol]/page.tsx | RootLayout | 아니오 | /analysis에서 심볼 선택 | /analysis | API(/api/analysis/[symbol]) | ✅ 활성 |
 | R-006 | /analysis/stock | 주식 분석 선택 | list | app/analysis/stock/page.tsx | RootLayout | 아니오 | /stock에서 링크 | /analysis/stock/[symbol] | - | ✅ 활성 |
 | R-007 | /analysis/stock/[symbol] | 주식 상세 분석 | detail | app/analysis/stock/[symbol]/page.tsx | RootLayout | 아니오 | /analysis/stock에서 심볼 선택 | /analysis/stock | API(/api/analysis/stock/[symbol]) | ✅ 활성 |
-| R-008 | /market | 시장 분위기 | dashboard | app/market/page.tsx | RootLayout | 아니오 | GNB(코인>시장분위기), Footer(플랫폼) | /analysis | meta | ✅ 활성 |
-| R-009 | /signal | AI 시그널 | dashboard | app/signal/page.tsx | RootLayout | 아니오 | GNB(코인>AI시그널), Footer(플랫폼) | /analysis | API(/api/signals) | ✅ 활성 |
-| R-010 | /stock | 주식 분석 | dashboard | app/stock/page.tsx | RootLayout | 아니오 | GNB(주식>주식분석) | /analysis/stock, /analysis/stock/[symbol] | API(/api/stock/*) | ✅ 활성 |
-| R-011 | /stock-market | 주식 시장 분위기 | dashboard | app/stock-market/page.tsx | RootLayout | 아니오 | GNB(주식>주식시장분위기) | /stock | meta | ✅ 활성 |
-| R-012 | /news | 뉴스 | list | app/news/page.tsx | RootLayout | 아니오 | GNB(정보>뉴스) | 외부 뉴스 링크 | API(/api/news) | ✅ 활성 |
-| R-013 | /calendar | 경제 캘린더 | static | app/calendar/page.tsx | RootLayout | 아니오 | GNB(정보>캘린더) | - | meta | ✅ 활성 |
-| R-014 | /history | 코인 히스토리 | static | app/history/page.tsx | RootLayout | 아니오 | GNB(정보>코인히스토리), Footer(플랫폼) | - | meta | ✅ 활성 |
-| R-015 | /portfolio | 포트폴리오 | dashboard | app/portfolio/page.tsx | RootLayout | 예 (미들웨어) | GNB(서비스>포트폴리오), Footer(플랫폼) | /auth/login(비인증시) | meta | ✅ 활성 |
-| R-016 | /secure-memo | 보안 메모 | dashboard | app/secure-memo/page.tsx | RootLayout | 예 (미들웨어) | GNB(서비스>보안메모) | /auth/login(비인증시) | meta | ✅ 활성 |
-| R-017 | /contact | 문의하기 | form | app/contact/page.tsx | RootLayout | 아니오 | GNB(서비스>문의하기), Footer(정보) | - | API(/api/contact) | ✅ 활성 |
-| R-018 | /terms | 이용약관 | static | app/terms/page.tsx | RootLayout | 아니오 | GNB(서비스>이용약관), Footer(정보) | - | meta | ✅ 활성 |
+| R-008 | /market | 시장 분위기 | dashboard | app/market/page.tsx | RootLayout | 아니오 | GNB(도구>시장 심리) | /analysis | meta | ✅ 활성 |
+| R-009 | /signal | AI 시그널 | dashboard | app/signal/page.tsx | RootLayout | 아니오 | GNB(도구>시그널) | /analysis | API(/api/signals) | ✅ 활성 |
+| R-010 | /stock | 주식 분석 | dashboard | app/stock/page.tsx | RootLayout | 아니오 | GNB(도구>주식 분석) | /analysis/stock, /analysis/stock/[symbol] | API(/api/stock/*) | ✅ 활성 |
+| R-011 | /stock-market | 주식 시장 분위기 | dashboard | app/stock-market/page.tsx | RootLayout | 아니오 | ⚠️ nav 진입점 없음 (v2.0 GNB 피벗으로 '주식' 그룹 제거, 직접 URL만) | /stock | meta | ✅ 활성 |
+| R-012 | /news | 뉴스 | list | app/news/page.tsx | RootLayout | 아니오 | GNB(1차>뉴스), Footer(커뮤니티) | 외부 뉴스 링크 | API(/api/news) | ✅ 활성 |
+| R-013 | /calendar | 경제 캘린더 | static | app/calendar/page.tsx | RootLayout | 아니오 | GNB(도구>경제 일정) | - | meta | ✅ 활성 |
+| R-014 | /history | 코인 히스토리 | static | app/history/page.tsx | RootLayout | 아니오 | GNB(도구>코인 역사) | - | meta | ✅ 활성 |
+| R-015 | /portfolio | 포트폴리오 | dashboard | app/portfolio/page.tsx | RootLayout | 예 (미들웨어) | AuthButton(로그인 사용자 메뉴), 미들웨어 리다이렉트 | /auth/login(비인증시) | meta | ✅ 활성 |
+| R-016 | /secure-memo | 보안 메모 | dashboard | app/secure-memo/page.tsx | RootLayout | 예 (미들웨어) | GNB(도구>보안 메모) | /auth/login(비인증시) | meta | ✅ 활성 |
+| R-017 | /contact | 문의하기 | form | app/contact/page.tsx | RootLayout | 아니오 | Footer(정보) | - | API(/api/contact) | ✅ 활성 |
+| R-018 | /terms | 이용약관 | static | app/terms/page.tsx | RootLayout | 아니오 | Footer(정보) | - | meta | ✅ 활성 |
 | R-019 | /admin | 관리자 | dashboard | app/admin/page.tsx | RootLayout | 예 (미들웨어) | 직접URL (관리자만) | /auth/login(비인증시) | API(/api/admin/*) | ✅ 활성 |
-| R-020 | /settings | 설정 | form | app/settings/page.tsx | RootLayout | 예 (미들웨어) | GNB(서비스>설정) | /portfolio | meta | 🚧 개발중 |
-| R-021 | /watchlist | 관심종목 | list | app/watchlist/page.tsx | RootLayout | 예 (미들웨어) | GNB(서비스>관심종목) | /analysis | meta | 🚧 개발중 |
+| R-020 | /settings | 설정 | form | app/settings/page.tsx | RootLayout | 예 (미들웨어) | ⚠️ nav 진입점 없음 (v2.0 GNB 피벗으로 '서비스' 그룹 제거, 직접 URL/미들웨어만) | /portfolio | meta | 🚧 개발중 |
+| R-021 | /watchlist | 관심종목 | list | app/watchlist/page.tsx | RootLayout | 예 (미들웨어) | GNB(도구>관심종목) | /analysis | meta | 🚧 개발중 |
 | R-022 | /privacy | 개인정보처리방침 | static | app/privacy/page.tsx | RootLayout | 아니오 | Footer(정보) | /terms | meta | 🚧 개발중 |
 | R-023 | /pricing | 요금제 | static | app/pricing/page.tsx | RootLayout | 아니오 | PremiumLock, /analysis/[symbol] | / | meta | 🚧 개발중 |
-| R-024 | /blog | 블로그 목록 | list | app/blog/page.tsx | RootLayout | 아니오 | GNB(정보>블로그) | /blog/[slug] | API(/api/blog) | ✅ 활성 |
+| R-024 | /blog | 블로그 목록 | list | app/blog/page.tsx | RootLayout | 아니오 | Footer(커뮤니티>공식글) — `footer-section.tsx:35` (고아 아님) | /blog/[slug] | API(/api/blog) | ✅ 활성 |
 | R-025 | /blog/[slug] | 블로그 상세 | detail | app/blog/[slug]/page.tsx | RootLayout | 아니오 | /blog에서 포스트 선택 | /blog | API(/api/blog/slug/[slug]), meta(dynamic) | ✅ 활성 |
 | R-026 | /blog/category/[category] | 카테고리별 블로그 | list | app/blog/category/[category]/page.tsx | RootLayout | 아니오 | /blog 사이드바 카테고리 링크 | /blog | API(/api/blog) | ✅ 활성 |
 | R-027 | /blog/tag/[tag] | 태그별 블로그 | list | app/blog/tag/[tag]/page.tsx | RootLayout | 아니오 | /blog/[slug] 태그 뱃지 | /blog | API(/api/blog) | ✅ 활성 |
 | R-028 | /admin/blog | 블로그 관리 | dashboard | app/admin/blog/page.tsx | RootLayout | 예 (이메일) | /admin에서 링크 | /admin/blog/new, /admin/blog/edit/[id] | API(/api/blog) | ✅ 활성 |
 | R-029 | /admin/blog/new | 새 글 작성 | form | app/admin/blog/new/page.tsx | RootLayout | 예 (이메일) | /admin/blog에서 '새 글' 버튼 | /admin/blog | API(/api/blog, /api/blog/upload) | ✅ 활성 |
 | R-030 | /admin/blog/edit/[id] | 글 수정 | form | app/admin/blog/edit/[id]/page.tsx | RootLayout | 예 (이메일) | /admin/blog에서 수정 아이콘 | /admin/blog | API(/api/blog/[id]) | ✅ 활성 |
+| R-031 | /admin/board | 공지 게시판 관리 | dashboard | app/admin/board/page.tsx | RootLayout | 예 (미들웨어 /admin + 이메일 게이트) | /admin에서 링크('공지 게시판 관리') | /admin, / | API(/api/admin/board) | ✅ 활성 |
+| R-032 | /board/[slug] | 커뮤니티 게시판 목록 | list | app/board/[slug]/page.tsx | RootLayout | 아니오 (익명 열람) | GNB(1차>자유게시판·시세토론·정보공유), Footer(커뮤니티), 홈 BoardRow | /board/[slug]/write, /board/[slug]/[postId] | API(/api/board/[slug]), meta(dynamic) | ✅ 활성 |
+| R-033 | /board/[slug]/write | 게시글 작성 | form | app/board/[slug]/write/page.tsx | RootLayout | 아니오 (익명 작성: 게스트 닉/PW) | GNB(글쓰기 버튼 /board/free/write), /board/[slug] 글쓰기, /coin/[symbol] 히어로 | /board/[slug]/[postId](등록 성공), /board/[slug](취소) | API(/api/board/[slug]) | ✅ 활성 |
+| R-034 | /board/[slug]/[postId] | 게시글 상세 | detail | app/board/[slug]/[postId]/page.tsx | RootLayout | 아니오 | /board/[slug] BoardRow, 이전/다음, /coin/[symbol] | /board/[slug] | API(/api/board/[slug]/[postId], /api/community/comment, /api/community/like), meta(dynamic) | ✅ 활성 |
+| R-035 | /coin/[symbol] | 코인룸(코인별 토론·시세) | detail | app/coin/[symbol]/page.tsx | RootLayout | 아니오 | GNB(코인룸>BTC·ETH·XRP·SOL·알트코인·김치프리미엄) | /analysis/[symbol], /board/free/write | meta(SSG: generateStaticParams 6종, dynamicParams=false) | ✅ 활성 |
 <!-- 새 라우트는 이 줄 위에 추가 -->
 
 **유형 값:** `auth`, `dashboard`, `list`, `detail`, `form`, `static`, `error` (7종)
@@ -131,15 +136,20 @@
 
 ### 3-3. Footer
 
+> v2.0 커뮤니티 피벗 후 Footer는 **커뮤니티 그룹(5) + 정보 그룹(3)** + 브랜드/소셜 영역 구조다(`components/footer-section.tsx` 실코드 기준, R11-T01 정합). 기존 '플랫폼 그룹(/market·/portfolio·/signal·/history)'은 코드에서 제거됨.
+
 | 순서 | 라벨 | 경로 | 그룹 |
 |------|------|------|------|
-| 1 | 시장 개요 | /market | 플랫폼 |
-| 2 | 포트폴리오 | /portfolio | 플랫폼 |
-| 3 | AI 시그널 | /signal | 플랫폼 |
-| 4 | 코인 히스토리 | /history | 플랫폼 |
-| 5 | 이용약관 | /terms | 정보 |
-| 6 | 개인정보처리방침 | /privacy | 정보 |
-| 7 | 문의하기 | /contact | 정보 |
+| 1 | 자유게시판 | /board/free | 커뮤니티 |
+| 2 | 시세토론 | /board/market | 커뮤니티 |
+| 3 | 정보공유 | /board/info | 커뮤니티 |
+| 4 | 뉴스 | /news | 커뮤니티 |
+| 5 | 공식글 | /blog | 커뮤니티 |
+| 6 | 이용약관 | /terms | 정보 |
+| 7 | 개인정보처리방침 | /privacy | 정보 |
+| 8 | 문의하기 | /contact | 정보 |
+
+**고정 요소:** 브랜드 로고 → `/` · 소셜 아이콘(GitHub/Twitter/Mail) → `#`(미연결)
 
 **Footer 파일:** `components/footer-section.tsx`
 
@@ -198,6 +208,11 @@
 | R-011 | StockRSIHeatmap | InvestmentQuotes | - |
 | R-015 | TradeModal | - | - |
 | R-016 | MemoCard, MemoCreateModal, MemoUnlockModal, MemoViewModal | - | - |
+| R-031 | BlogEditor(동적), 보드 select | GlobalHeader | - |
+| R-032 | BoardRow, BoardTableHeader, Pagination, BoardSidebar, BoardListControls | GlobalHeader, FooterSection | - |
+| R-033 | BlogEditor(동적) | FooterSection | - |
+| R-034 | BoardRow, CommunityBadge, BoardSidebar, PostActions, PostVoteButtons, CommentSection | FooterSection | - |
+| R-035 | CoinHero, CoinRoomTabs, SidebarWidget, PriceTickerWidget, HotIssueWidget, FngGaugeWidget, OfficialPostsWidget | FooterSection | - |
 <!-- 새 컴포넌트 매핑은 이 줄 위에 추가 -->
 
 ---
@@ -206,20 +221,29 @@
 
 | 항목 | 결과 |
 |------|------|
-| 최종 검증일 | 2026-02-20 |
-| 검증 범위 | 전체 (migrate 후 자동) |
-| 등록 라우트 | 23개 |
-| 활성 라우트 | 19개 |
-| 🔴 Critical | 0개 (수정 완료: /pricing 깨진 링크 해결) |
-| 🟡 Important | 0개 (수정 완료: /settings, /watchlist GNB 연결) |
-| 🔵 Minor | 0개 |
-| 판정 결과 | - |
-| 상태 | ✅ 정상 (4개 개발중 페이지: R-020~R-023) |
+| 최종 검증일 | 2026-05-29 (R11-T01, `npm run build` green 출력 기준) |
+| 검증 범위 | 전체 (빌드 라우트 전수 추출 ↔ 레지스트리 1:1) |
+| 빌드 라우트 총계 | **71 엔트리** (Route(app) 표) = 페이지 35 + API 31 + auth/callback 1 + 메타 3(feed.xml·robots.txt·sitemap.xml) + _not-found 1. 정적 프리렌더 카운터 = 54/54 |
+| 등록 라우트(페이지) | **35개** (R-001~R-035) — 빌드 페이지 라우트와 1:1, 누락 0 |
+| 활성 라우트 | **31개** (개발중 4 제외) |
+| 🔴 Critical | 0개 |
+| 🟡 Important | 0개 |
+| 🔵 Minor | 2개 — `/settings`·`/stock-market` nav 진입점 소실(v2.0 GNB 피벗, 직접 URL/미들웨어만 도달) |
+| 판정 결과 | 빌드 페이지 라우트 35 ↔ 레지스트리 35 완전 일치 |
+| 상태 | ✅ 정상 (개발중 4: R-020 settings·R-021 watchlist·R-022 privacy·R-023 pricing / nav-less 2: R-011·R-020) |
+
+**API 라우트(31, 레지스트리 비등록 — 페이지 동반 파일 컬럼에서 추적):** `/api/admin/{board,cleanup-data,market-data,news-crawl,users}`, `/api/analysis/[symbol]`, `/api/analysis/stock/[symbol]`, `/api/blog`(+`[id]`·`categories`·`search`·`slug/[slug]`·`tags`·`upload`·`view/[id]`), `/api/board/[slug]`(+`[postId]`), `/api/coins/{hot-issues,ticker}`, `/api/community/{comment,like}`, `/api/contact`, `/api/fng`, `/api/kimchi`, `/api/klines`, `/api/news`, `/api/price`, `/api/signals`, `/api/stock/{history,quote,time-series}`
+
+**특수 라우트(4):** `/auth/callback`(OAuth 콜백 route handler), `/feed.xml`·`/robots.txt`·`/sitemap.xml`(메타데이터 route)
 
 ### 최근 이슈 이력
 
 | 날짜 | 이슈 | 심각도 | 조치 |
 |------|------|--------|------|
+| 2026-05-29 | v2.0 커뮤니티 라우트 미등록 (레지스트리 30 ↔ 빌드 페이지 35) | 🟡 Important | R-031~R-035 추가(/admin/board·/board/[slug]·/board/[slug]/write·/board/[slug]/[postId]·/coin/[symbol]) — R11-T01 |
+| 2026-05-29 | §8 카운트 stale (23/19 ↔ 실제 빌드 71엔트리) | 🟡 Important | 등록 35/활성 31로 갱신, 빌드 분류(페이지35·API31·특수4·_not-found1) 명시 — R11-T01 |
+| 2026-05-29 | /settings·/stock-market nav 진입점 소실 (v2.0 GNB 피벗으로 '서비스'·'주식' 그룹 제거) | 🔵 Minor | 진입점 컬럼에 ⚠️ 표기, §8 Minor 등재(직접 URL/미들웨어 도달 가능, 기능 정상) — R11-T01 |
+| 2026-05-29 | 레지스트리·§3-3 Footer 진입점 stale (구 GNB 그룹·플랫폼 그룹 라벨) | 🔵 Minor | 진입점 전수 정합(GNB §3-1·Footer 실코드), §3-3 커뮤니티/정보 그룹으로 갱신, /blog Footer 공식글 확정 — R11-T01 |
 | 2026-02-20 | /pricing 깨진 링크 (PremiumLock, analysis/[symbol]) | 🔴 Critical | /pricing 스텁 페이지 생성, 계약 R-023 등록 |
 | 2026-02-20 | /settings, /watchlist 고아 페이지 (GNB 진입점 없음) | 🟡 Important | GNB 서비스 메뉴에 추가, 번역 키 추가 |
 | 2026-02-20 | /settings, /watchlist 미들웨어에 등록되었으나 페이지 없음 | 🟡 Important | 스텁 페이지 생성 |
@@ -233,6 +257,7 @@
 
 | 버전 | 날짜 | 변경 내용 | 모드 |
 |------|------|----------|------|
+| 5 | 2026-05-29 | R11-T01 라우트 레지스트리 전수 정합: `npm run build`(green) 출력으로 빌드 71엔트리 추출 → 페이지 라우트 35 ↔ 레지스트리 1:1. 미등록 5건 추가(R-031 /admin/board·R-032 /board/[slug]·R-033 /board/[slug]/write·R-034 /board/[slug]/[postId]·R-035 /coin/[symbol]). 진입점 전수 정합(GNB §3-1·Footer 실코드 기준), §3-3 Footer를 커뮤니티/정보 그룹으로 갱신, /blog Footer 공식글 진입점 확정(고아 아님), §7 신규 5행, §8 카운트 35/31 + 빌드 분류 명시, /settings·/stock-market nav-less 등재 | reconcile |
 | 4 | 2026-05-29 | R9-T03 정합: HeroSection 레지스트리·R-001 매핑 제거(R9-T01 dead 삭제 반영), GNB를 v2.0 실구조(1차 5 + 코인룸 6 + 도구 8, /history 포함 — R9-T02)로 정합, InvestmentQuotes 홈 사용 표기 제거(코드 근거) | reconcile |
 | 2 | 2026-02-20 | 검증 이슈 수정: /pricing 생성, /settings·/watchlist GNB 연결, 총 23개 라우트 | verify |
 | 1 | 2026-02-20 | 초기 계약 생성 (기존 19개 페이지 + 신규 3개 스텁) | migrate |
