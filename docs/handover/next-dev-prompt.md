@@ -4,6 +4,7 @@
 
 ## 최근 완료된 작업
 
+- **세션 39 (2026-05-30)**: **R12 지휘부 마감 — watchlist/settings Wave2 회수·통합·운영DB·커밋**. 세션38 CEO(PID 119980) DEAD, 이 터미널을 SessionStart hook이 stale `R12-TF` 워커로 오바인딩 → 사용자 "지휘자" 선언 + 마커 전수 비활성 확인 → **CEO 마커 reclaim**(write-guard soft 검증). **Wave2 외부 3터미널 회수 PASS**: T-D(도구▼>설정+AuthButton⚙️ 2진입점)·T-E(DisplaySettingsProvider 루트 단일마운트+WatchlistTable 통화·등락색 구독)·T-F(useWatchlist 내부 D3 sync·회원 DB소스전환·409). **🔴 통합 검증에서만 포착된 교차영역 블로커 해소**: `middleware.ts`가 `/settings`·`/watchlist` 인증보호 → 익명 우선 MVP(taste #3)와 정면 모순(어느 일꾼도 middleware 미소유) → 사용자 승인 후 protectedPaths 제거. 지휘자 정리: settings 로컬 Provider 래퍼 제거·`format.ts` formatPrice dead export 제거·`AuthButton` lint 2건(`any`→`User|null`·deps `useMemo`+`[supabase]`). 레퍼런스 정합(`_WEB_CONTRACT` R-020/021 활성·GNB 9번째·비인증표·§8·이력 / `_SCHEMA` 적용기록). **user_watchlist 운영 DB 적용**(Management API `database/query`+`SUPABASE_ACCESS_TOKENS`: 테이블6·RLS4·schema_migrations `20260529000001` 정합). tsc 0·eslint error 0·파일중복0. 통합 커밋 `2d6593e`(15파일) push. R12 마커 archive. **watchlist/settings 익명 우선 MVP 완성.** (handover `2026-05-30-session39-r12-wave2.md`, 보고서 `2026-05-30-R12-_SUMMARY.md`, solution `2026-05-30-ps-convertto-json-string-as-object.md`)
 - **세션 38 (2026-05-30)**: **R12 지휘부 — watchlist/settings CEO 인수·Wave1 회수통합·Wave2 발사준비**. 워커 R11-T04 터미널 진입 → 사용자 "지휘관 터미널" 확인 → `tasklist`로 기록 CEO PID 49144·워커 47956 **둘 다 DEAD** 확정(마커 heartbeat만으론 점유 오판 — 1차 응답 정정) → stale R11 마커 archive + **R12 CEO 인수**(PID 119980). **taste 7확정**(클라이언트 병렬·로컬 우선 병합·익명30/회원100·한국식색상·진입점 둘 다·다크 v2.1 미룸·브랜드 그린). **Wave1 회수·교차검증**: T-A(useWatchlist+표UI+병렬폴링 9파일)·T-B(표시설정 Context+초기화+계정 11파일)·T-C(user_watchlist 마이그·RLS+API 4) 3/3 정적검증 PASS·격리 준수. **handover 신뢰 대신 실코드 교차검증으로 통합 결함 2건 차단**: ①localStorage 키 `cca:watchlist`(T-A)↔`cm.watchlist.v1`(T-B) 불일치→초기화·카운트 오작동 → `cca:watchlist` 통일(`lib/config/local-data.ts`), ②신규 SSOT `watchlist` eslint 화이트리스트 누락→API 2파일 error → `eslint.config.mjs`에 `!@/lib/supabase/watchlist`. 재검증 lint 0·tsc 0. 레퍼런스 갱신(`_SCHEMA` user_watchlist·`_API` watchlist 4종). **Wave2 발사준비**(외부 분산, disjoint): T-D nav(`components/Common/`)·T-E S2 전역적용(`app/layout.tsx`+`components/Watchlist/`)·T-F D3 회원동기화(`components/hooks/`) SOT+마커+발사프롬프트. **R12 미완**(Wave2 미발사·통합 커밋 전·마이그레이션 운영 적용 보류). (handover `2026-05-30-session38-r12-conductor.md`, solution `2026-05-30-dispatch-marker-stale-vs-process-alive.md`)
 - **세션 37 (2026-05-29)**: **R11 지휘부 — reconcile-refactor 4터미널 회수·통합**. kdydispatch 평면 4터미널 분산·회수·통합. 발사 전 사전 검증으로 stale 정정(build green·`/blog` 고아 아님=footer-section.tsx:35 진입점·watchlist/settings 의도적 스텁). **T01** 라우트 레지스트리 전수 정합 — `_WEB_CONTRACT` §2가 R-001~030(30행)으로 v2.0 커뮤니티 라우트 누락 → build Route표(71엔트리=페이지35+API31+특수4+notfound1, "54"는 정적 프리렌더 카운터였음 정정)로 **페이지 35 ↔ R-001~R-035 1:1**(미등록 5건 추가), §8 23/19→35/31, Footer §3-3 실코드 정합, 계약 v4→v5. **T02** lint/데드코드 — `ChartAnalysisPanel` `calculateRSI` 미사용 import + `AnalysisPanel` 죽은 주석 3줄 + `CryptoChart` placeholder 1줄 순수 제거(로직·export 불변, eslint 26→18). **T03** `app/analysis/[symbol]/page.tsx` **807→78줄(90%↓)** route-local 분해(`_components/`8 + `_lib/`3, `useAnalysisData` 322줄 훅 포함, 로직·ref가드·useEffect 의존성·시각 원본 복사, `components/` 미추출). **T04** `docs/design-brief/06-watchlist-settings.md` 신규 기획(watchlist=localStorage+회원DB 2단계·settings=익명 1급 재정의·R12 로드맵·미결정 7). 지휘부 독립 검증: 통합본 tsc 0·build green·`ƒ /analysis/[symbol]` 불변·격리 위반 0(4영역 disjoint). 부수발견: `/settings`·`/stock-market` nav 진입점 소실 2건(Minor). (handover `2026-05-29-session37-r11-conductor.md`, 보고서 `2026-05-29-R11-_SUMMARY.md`)
 - **세션 36 (2026-05-29)**: **R10 단독 — 미완성 점검 + kdyswarm 3트랙 병렬 보완**. kdynext `--scan-only`(Explore 3병렬: 페이지/API/데드코드)로 진단 → audit 보고서. 핵심 발견: `/signal`은 백엔드(`/api/signals`+`signal_engine`) 완성인데 프론트가 `setSignals([])` mock(프론트만 미연결). **kdyswarm worktree 3트랙**(sonnet ×3): **T1** `/signal` mock 제거→실 fetch + `Signal` 타입 교정(price/reason/strength→type/title/description/score/timestamp/metrics) + `SignalCard` 신규. **T2** 데드코드 **6종 삭제**(`TradingStrategyGuide`·`ErrorState`·`InsufficientData`·`StockSectorPerformance`·`useSubscription`·`economic_events`, 995줄) + AnalysisPanel 죽은 주석. ⚠️ `gates.ts`는 Pre-Flight grep에서 `scripts/preflight.ts` import 확정→**삭제 제외**. **T3** ChartAnalysisPanel BB `prob:50`→`calculateBollingerBands` %B 실확률 + admin 주식 mock→`fetchStockPrices` `stock_prices` 실데이터(빈결과 시 mock fallback). 충돌 0·`--no-ff` 순차 머지·**tsc 0**. 레퍼런스 3종(`_COMPONENT_MAP`·`_TYPE_REFERENCE`·`_WEB_CONTRACT`) dead 6종 제거+SignalCard 등재. ⚠️ 런타임/build 미검증(tsc만). (handover `2026-05-29-session36-r10-dev-gap.md`, 보고서 `2026-05-29-R10-swarm-dev-gap-fix.md`, audit `2026-05-29-R9-T03-dev-gap-audit.md`)
@@ -94,10 +95,27 @@
 
 1. **`npm run build` 확정 + 배포** — 세션 36은 tsc만 확인, build 미실행. 배포 전 필수.
 2. **`_WEB_CONTRACT` 라우트 레지스트리 전수 정합** — v2.0 커뮤니티 라우트(`/board/[slug]`·`/board/[slug]/write`·`/board/[slug]/[postId]`·`/coin/[symbol]` 6종) 미등록(레지스트리 30행 ↔ 빌드 54 괴리). §8 연결성 카운트 stale("23/19개", 2026-02-20). 진입점 컬럼 과거 4그룹 기준. Footer 레지스트리(§3-3) 실코드 미대조.
-3. **`/watchlist`·`/settings` 신규 구현** — "준비 중" 플레이스홀더. brainstorming 선행 필요(저장/불러오기 CRUD·설정 로직).
+3. ~~**`/watchlist`·`/settings` 신규 구현**~~ → **✅ R12 완료(세션 38·39)** — 익명 우선 MVP(localStorage)+회원 DB 동기화, 표시 환경설정 전역 적용. ↓ R12 완료 섹션 참조.
 4. **`app/analysis/[symbol]/page.tsx` 807줄 리팩토링** (대형 단일 작업 — 별도 라운드 권장).
 5. `ChartAnalysisPanel` `calculateRSI` 미사용 import 정리(lint warning).
 6. Giscus App 설치(수동) — https://github.com/apps/giscus → kimdooo-a/coinchart.
+
+### ✅ R12 완료 (세션 38·39, 2026-05-30 — watchlist/settings)
+
+- ~~**watchlist 구현**~~ → **✅ T-A**(useWatchlist+표UI+병렬폴링, 익명 localStorage 30) + **✅ T-F**(D3 회원 동기화: 로그인 sync·DB소스전환·409, 회원 100). 운영 DB user_watchlist 적용.
+- ~~**settings 구현**~~ → **✅ T-B**(표시설정 Context+초기화+계정) + **✅ T-E**(S2 전역적용: Provider 루트 단일마운트+WatchlistTable 통화·등락색 구독).
+- ~~**nav 진입점(`/settings`)**~~ → **✅ T-D**(도구▼>설정+AuthButton⚙️ 2진입점, taste #5).
+- ~~**middleware 익명 차단**~~ → **✅ 해소**(세션39 통합 발견 — `/settings`·`/watchlist` protectedPaths 제거, 익명 우선 MVP 정상화).
+- **검증**: tsc 0·eslint error 0·운영 DB RLS4·schema_migrations 정합. 커밋 `2d6593e`. ⚠️ 회원 sync 런타임 미검증(PENDING).
+
+### ★ R13 후보 (다음 라운드)
+
+1. **전역 시세 롤아웃(S2 확장)** — DisplaySettingsProvider는 루트에 있으나 구독은 watchlist 표만. 시세 스트립·코인룸·`/analysis` 등 나머지 시세 컴포넌트를 `useDisplaySettings()` 동일 패턴으로 확장.
+2. **watchlist 런타임 스모크** — 회원 sync→DB반영→새 기기 복원(dev서버+회원 로그인 필요). R12는 정적 검증만.
+3. **notice UX 표면화** — useWatchlist가 `notice`/`dismissNotice` 제공, WatchlistView 토스트 구독 미연결.
+4. **reorder DB 영속화·clear 벌크삭제 엔드포인트**(T-C 영역) — 현재 reorder 로컬 전용·clear 항목별 DELETE.
+5. **AuthButton 계정 드롭다운 UX** — 현재 아이콘 버튼 그룹.
+6. **배포**(Release 게이트 `published`, R10~R12 누적분).
 
 ### ✅ R3 완료 (세션 28, 2026-05-25 — community-finish 12/12)
 

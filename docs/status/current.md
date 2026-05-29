@@ -112,6 +112,7 @@
 | 36 | 2026-05-29 | **R10 단독 — 미완성 점검 + kdyswarm 3트랙 병렬 보완/cs** (signal 백엔드 연결+SignalCard / 데드코드 6종 삭제 995줄 / BB %B 실확률+admin 주식 실데이터, worktree 병렬·충돌 0·tsc 0·레퍼런스 3종 동기화) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-29-session36-r10-dev-gap.md) |
 | 37 | 2026-05-29 | **R11 지휘부 — reconcile-refactor 4터미널 회수·통합/cs** (라우트 레지스트리 35 1:1 정합·계약 v5 / lint 26→18 / analysis/[symbol] 807→78줄 리팩토링 `_components`8+`_lib`3 / watchlist·settings 기획, 통합 tsc 0·build green·격리 0) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-29-session37-r11-conductor.md) · [R11_SUMMARY](../handover/2026-05-29-R11-_SUMMARY.md) |
 | 38 | 2026-05-30 | **R12 지휘부 — watchlist/settings R12 CEO 인수·Wave1 회수통합·Wave2 발사준비/cs** (워커 터미널서 stale 마커 정리 후 R12 CEO 인수[기록 CEO PID 49144 DEAD] · taste 7확정 · Wave1 T-A/B/C 회수·교차검증 PASS · 통합 핫픽스 2[localStorage 키 `cca:watchlist` 통일·eslint SSOT watchlist 화이트리스트] · 레퍼런스 2종 갱신 · Wave2 T-D/E/F SOT+발사프롬프트, lint 0·tsc 0) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-30-session38-r12-conductor.md) |
+| 39 | 2026-05-30 | **R12 지휘부 마감 — watchlist/settings Wave2 회수·통합·운영DB·커밋/cs** (세션38 CEO DEAD→이 터미널 stale R12-TF 오바인딩→지휘자 reclaim · Wave2 T-D/E/F 외부 3터미널 회수 PASS · 🔴 신규 블로커 해소[middleware /settings·/watchlist 인증보호→익명 우선 MVP 모순→protectedPaths 제거] · settings 래퍼 제거·dead export·lint 2건 정리 · `_WEB_CONTRACT`/`_SCHEMA` 정합 · **user_watchlist 운영 DB 적용**[Management API·RLS4·schema_migrations] · tsc 0·eslint error 0 · 커밋 `2d6593e` push) | [로그](../logs/2026-05.md) | [handover](../handover/2026-05-30-session39-r12-wave2.md) · [R12_SUMMARY](../handover/2026-05-30-R12-_SUMMARY.md) |
 
 ## v2.0 피벗 핵심 (2026-05-10 결정)
 
@@ -144,8 +145,9 @@
 - ~~테스트 프레임워크 미도입~~ → 완료 (Vitest 20개 테스트, indicators + blog-utils)
 - ~~any 타입 78회 사용~~ → 핵심 코드 1개 (BlogPost.content 레거시 호환), scripts/ 45개 (낮은 우선순위)
 - ~~대형 파일 리팩토링 필요 (analysis/[symbol]/page.tsx 807줄)~~ → **R11(세션 37) 완료** (807→78줄, route-local `_components/`8+`_lib/`3 분해, 동작 보존). 후속: `useAnalysisData` 미사용 구조분해 변수 정리·`userTier` 실제 등급 연동
-- **nav 진입점 소실 2건** (R11-T01 발견): `/settings`·`/stock-market`이 현 GNB(도구 8)·Footer 어디에도 링크 없음 — 기능 정상(빌드 ○), 도달성만 소실. GNB/Footer 노출 여부 기획 판단 필요(R12 후보)
-- **watchlist/settings 미결정 7항목** (R11-T04 기획): 인증 병합·시세 배치·즐겨찾기 상한·등락 색상 기본값·settings 진입점·다크모드 시점·브랜드 컬러 — R12 구현 착수 전 사용자 taste 결정 필요
+- ~~**nav 진입점 소실 2건** (R11-T01): `/settings`·`/stock-market`~~ → `/settings` **R12(세션39) 해소**(도구▼>설정+AuthButton⚙️ 2진입점). `/stock-market`만 잔존(직접 URL 도달, 기능 정상)
+- ~~**watchlist/settings 미결정 7항목** (R11-T04 기획)~~ → **R12 taste 7확정·구현 완료**(세션38 Wave1+세션39 Wave2). watchlist/settings 익명 우선 MVP 완성, user_watchlist 운영 DB 적용
+- **R12 후속(R13 후보)**: 전역 시세 롤아웃(S2 확장—watchlist 표만 구독 중) · watchlist 런타임 스모크(회원 sync 미검증) · notice UX 표면화 · reorder DB 영속화·clear 벌크삭제 엔드포인트 · AuthButton 계정 드롭다운 UX
 - DB content 컬럼 이미 text 타입 (마이그레이션 불필요), 데이터도 HTML 형식 확인 완료
 - ~~kdy-addon/monet-registry-main (1.7GB) 정리 필요~~ → 완료 (2026-02-28)
 
