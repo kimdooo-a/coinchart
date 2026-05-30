@@ -1,5 +1,8 @@
+'use client';
+
 import SidebarWidget from "../SidebarWidget";
 import { cn } from "@/lib/utils";
+import { useDisplaySettings } from "@/lib/config/display-settings";
 
 interface FngGaugeWidgetProps {
   /** 0~100 */
@@ -19,6 +22,9 @@ const FNG_LEVELS = [
 ];
 
 export default function FngGaugeWidget({ value, label, prevValue }: FngGaugeWidgetProps) {
+  // 표시 환경설정 구독 (R14 / T01) — delta 텍스트 색만 등락색 체계(KR↔GLOBAL) 전환.
+  // ⚠️ 게이지 색(FNG_LEVELS)은 공포/탐욕 구간 의미색 → 구독 대상 아님.
+  const { changeColorClass } = useDisplaySettings();
   const v = Math.max(0, Math.min(100, value));
   const level = FNG_LEVELS.find((l) => v <= l.max) ?? FNG_LEVELS[FNG_LEVELS.length - 1];
   const angle = (v / 100) * 180; // 반원
@@ -64,10 +70,7 @@ export default function FngGaugeWidget({ value, label, prevValue }: FngGaugeWidg
 
         {delta !== null && (
           <div
-            className={cn(
-              "text-meta mt-1 tabular-nums",
-              delta > 0 ? "text-[var(--color-kr-up)]" : delta < 0 ? "text-[var(--color-kr-down)]" : "text-on-surface-variant"
-            )}
+            className={cn("text-meta mt-1 tabular-nums", changeColorClass(delta))}
           >
             어제 대비 {delta > 0 ? "+" : ""}
             {delta}

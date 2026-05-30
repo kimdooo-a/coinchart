@@ -4,6 +4,7 @@
 
 ## 최근 완료된 작업
 
+- **세션 41 (2026-05-30)**: **R14 지휘부 — loose-ends 마감**. kdydispatch 4 외부 터미널 평면 분산(R13 후속 4종). **T01** 시세 구독 잔여 — `FngGaugeWidget`·`HotIssueWidget` 2위젯 `'use client'`+`useDisplaySettings().changeColorClass` 구독 전환(FngGauge delta 색·HotIssue trend up/down만, 게이지 의미색·new/same 보존, 하드코딩 `text-[var(--color-kr-*)]` 0). KimchiPremium·StockTicker는 R13 T-A2 결론 확정으로 대상 외(전역 스윕으로 CoinHero=구독완료·WatchlistAddBar=알림색 재확인). **T02** `DEPLOYMENT_RUNBOOK.md` 전면 재작성 — "ChartMaster"/GitHub Release 게이트/KPI/`VERCEL_TOKEN` 유물 → `main` push→Vercel Git 자동배포·Vercel Dashboard·수동 Promote 롤백, Kill-Switch 보존, release-* "유물(Deprecated)" 섹션 분리. **T03** daily-cron 정상작동 확인 — **2026-05-25부터 5회 연속 실패=GitHub `kimdooo-a` 계정 결제 차단** 발견(job 3~4초 조기종료 "payments have failed", 워크플로/스크립트/secret 3종 정상·5-24까지 성공이 증명). **레포 Public이어도 계정 결제 hold면 Public Actions까지 차단** → R13 "Public=무료화" 전제 불완전(코드로 해결 불가·사용자 Billing 조치). `setup-node@v3→v4` 정비 1건. **T04** watchlist 회원 sync 스모크 — `docs/db/R14-watchlist-sync-smoke.md` 절차서 + `scripts/smoke/watchlist-sync-smoke.ts`(service_role DB 라운드트립, `--dry-run` PASS·`--write` PASS 잔여0, UNIQUE·RLS·reorder·DELETE 계약 정상), 실 로그인 sync는 절차서 위임(자격증명 필요). 지휘부 독립검증 tsc 0·eslint 0·build 0·격리 위반 0(4영역 disjoint). **🔴 PENDING(사용자)**: GitHub Billing 결제 해소·watchlist 실 로그인 스모크 실증. (handover `2026-05-30-session41-r14-loose-ends.md`, 보고서 `2026-05-30-R14-_SUMMARY.md`, solution `2026-05-30-public-repo-not-enough-account-billing-blocks-actions.md`)
 - **세션 40 (2026-05-30)**: **R13 지휘부 — display-rollout 마감 + 배포 경로 정상화**. kdydispatch 4 외부 터미널(T-A1 코인룸·사이드바 시세 `useDisplaySettings` 구독[CoinHero 서버→클라·PriceTickerWidget]·T-A2 티커 구독[Ticker·StockTicker]·T-B watchlist 후속[`WatchlistNotice` 배너·`PATCH` reorder DB영속화·`DELETE?all` 벌크clear·SSOT 확장]·T-C AuthButton 109→60줄+`AccountMenu` 드롭다운). 지휘자 독립검증 tsc/build/eslint 0·격리 disjoint(T-B `lib/supabase/watchlist.ts`=SOT "SSOT 경유" 지시 결과 정당). **🔧 dev500 블로커 규명**: T-B 오진(globals.css 아님)→실체는 R13 문서의 `text-[var(--color-kr-*)]` 문자열을 Tailwind v4 content 스캐너가 docs/까지 추출→dev CSS 파서 붕괴 → `app/globals.css`에 `@source not "../docs"` 핫픽스→dev `/`·`/watchlist`·`/coin/btc`·`/settings` 200. 통합 커밋 `a90a059`. 레퍼런스 갱신(`_API` reorder/clear·`_COMPONENT_MAP` AccountMenu·WatchlistNotice·시세구독). **배포 경로 정상화**: v1.0.0 Release publish→**billing 차단 발견**(private 레포 Actions 유료·release/태그 0개·release-* 파이프라인 VERCEL secret 미설정 중복)→**레포 Public 전환**(billing 해소)→실제 배포는 **Vercel Git 자동배포**(`coinchart.vercel.app` 200·R12 라우트 반영)임을 확인→중복 release-deploy/validate/observe 트리거 `workflow_dispatch` 비활성화(`*/15` schedule 제거) 커밋 `b9fd654`. solution 2종(tailwind-docs-content-pollution·private-actions-billing-vercel-git-deploy). (handover `2026-05-30-session40-r13-display.md`, 보고서 `2026-05-30-R13-_SUMMARY.md`)
 - **세션 39 (2026-05-30)**: **R12 지휘부 마감 — watchlist/settings Wave2 회수·통합·운영DB·커밋**. 세션38 CEO(PID 119980) DEAD, 이 터미널을 SessionStart hook이 stale `R12-TF` 워커로 오바인딩 → 사용자 "지휘자" 선언 + 마커 전수 비활성 확인 → **CEO 마커 reclaim**(write-guard soft 검증). **Wave2 외부 3터미널 회수 PASS**: T-D(도구▼>설정+AuthButton⚙️ 2진입점)·T-E(DisplaySettingsProvider 루트 단일마운트+WatchlistTable 통화·등락색 구독)·T-F(useWatchlist 내부 D3 sync·회원 DB소스전환·409). **🔴 통합 검증에서만 포착된 교차영역 블로커 해소**: `middleware.ts`가 `/settings`·`/watchlist` 인증보호 → 익명 우선 MVP(taste #3)와 정면 모순(어느 일꾼도 middleware 미소유) → 사용자 승인 후 protectedPaths 제거. 지휘자 정리: settings 로컬 Provider 래퍼 제거·`format.ts` formatPrice dead export 제거·`AuthButton` lint 2건(`any`→`User|null`·deps `useMemo`+`[supabase]`). 레퍼런스 정합(`_WEB_CONTRACT` R-020/021 활성·GNB 9번째·비인증표·§8·이력 / `_SCHEMA` 적용기록). **user_watchlist 운영 DB 적용**(Management API `database/query`+`SUPABASE_ACCESS_TOKENS`: 테이블6·RLS4·schema_migrations `20260529000001` 정합). tsc 0·eslint error 0·파일중복0. 통합 커밋 `2d6593e`(15파일) push. R12 마커 archive. **watchlist/settings 익명 우선 MVP 완성.** (handover `2026-05-30-session39-r12-wave2.md`, 보고서 `2026-05-30-R12-_SUMMARY.md`, solution `2026-05-30-ps-convertto-json-string-as-object.md`)
 - **세션 38 (2026-05-30)**: **R12 지휘부 — watchlist/settings CEO 인수·Wave1 회수통합·Wave2 발사준비**. 워커 R11-T04 터미널 진입 → 사용자 "지휘관 터미널" 확인 → `tasklist`로 기록 CEO PID 49144·워커 47956 **둘 다 DEAD** 확정(마커 heartbeat만으론 점유 오판 — 1차 응답 정정) → stale R11 마커 archive + **R12 CEO 인수**(PID 119980). **taste 7확정**(클라이언트 병렬·로컬 우선 병합·익명30/회원100·한국식색상·진입점 둘 다·다크 v2.1 미룸·브랜드 그린). **Wave1 회수·교차검증**: T-A(useWatchlist+표UI+병렬폴링 9파일)·T-B(표시설정 Context+초기화+계정 11파일)·T-C(user_watchlist 마이그·RLS+API 4) 3/3 정적검증 PASS·격리 준수. **handover 신뢰 대신 실코드 교차검증으로 통합 결함 2건 차단**: ①localStorage 키 `cca:watchlist`(T-A)↔`cm.watchlist.v1`(T-B) 불일치→초기화·카운트 오작동 → `cca:watchlist` 통일(`lib/config/local-data.ts`), ②신규 SSOT `watchlist` eslint 화이트리스트 누락→API 2파일 error → `eslint.config.mjs`에 `!@/lib/supabase/watchlist`. 재검증 lint 0·tsc 0. 레퍼런스 갱신(`_SCHEMA` user_watchlist·`_API` watchlist 4종). **Wave2 발사준비**(외부 분산, disjoint): T-D nav(`components/Common/`)·T-E S2 전역적용(`app/layout.tsx`+`components/Watchlist/`)·T-F D3 회원동기화(`components/hooks/`) SOT+마커+발사프롬프트. **R12 미완**(Wave2 미발사·통합 커밋 전·마이그레이션 운영 적용 보류). (handover `2026-05-30-session38-r12-conductor.md`, solution `2026-05-30-dispatch-marker-stale-vs-process-alive.md`)
@@ -109,14 +110,27 @@
 - ~~**middleware 익명 차단**~~ → **✅ 해소**(세션39 통합 발견 — `/settings`·`/watchlist` protectedPaths 제거, 익명 우선 MVP 정상화).
 - **검증**: tsc 0·eslint error 0·운영 DB RLS4·schema_migrations 정합. 커밋 `2d6593e`. ⚠️ 회원 sync 런타임 미검증(PENDING).
 
-### ★ R13 후보 (다음 라운드)
+### ✅ R13 완료 (세션 40, 2026-05-30 — display-rollout)
 
-1. **전역 시세 롤아웃(S2 확장)** — DisplaySettingsProvider는 루트에 있으나 구독은 watchlist 표만. 시세 스트립·코인룸·`/analysis` 등 나머지 시세 컴포넌트를 `useDisplaySettings()` 동일 패턴으로 확장.
-2. **watchlist 런타임 스모크** — 회원 sync→DB반영→새 기기 복원(dev서버+회원 로그인 필요). R12는 정적 검증만.
-3. **notice UX 표면화** — useWatchlist가 `notice`/`dismissNotice` 제공, WatchlistView 토스트 구독 미연결.
-4. **reorder DB 영속화·clear 벌크삭제 엔드포인트**(T-C 영역) — 현재 reorder 로컬 전용·clear 항목별 DELETE.
-5. **AuthButton 계정 드롭다운 UX** — 현재 아이콘 버튼 그룹.
-6. **배포**(Release 게이트 `published`, R10~R12 누적분).
+1. ~~전역 시세 롤아웃(S2 확장)~~ → **T-A1/T-A2 완료**(CoinHero·PriceTickerWidget·Ticker·StockTicker 구독). 잔여 FngGauge·HotIssue는 R14-T01 완료.
+2. ~~watchlist 런타임 스모크~~ → **R14-T04로 이월**(절차서+DB 스크립트 작성, 실 로그인은 사용자 PENDING).
+3. ~~notice UX 표면화~~ → **T-B 완료**(`WatchlistNotice` 배너).
+4. ~~reorder DB 영속화·clear 벌크삭제~~ → **T-B 완료**(`PATCH`/`DELETE?all`).
+5. ~~AuthButton 계정 드롭다운~~ → **T-C 완료**(`AccountMenu`).
+6. ~~배포~~ → **배포 경로 정상화**(Vercel Git 자동배포 확정·레포 Public). DEPLOYMENT_RUNBOOK 정정은 R14-T02 완료.
+
+### ✅ R14 완료 (세션 41, 2026-05-30 — loose-ends)
+
+1. ~~시세 구독 잔여~~ → **T01 완료**(FngGauge·HotIssue 등락색 구독, KimchiPremium·StockTicker 대상 외 확정).
+2. ~~DEPLOYMENT_RUNBOOK 정정~~ → **T02 완료**(Release게이트→Vercel Git 자동배포 전면 재작성).
+3. ~~daily-cron 확인~~ → **T03 완료/발견**: **2026-05-25부터 계정 결제 차단으로 전면 실패** — 코드 무결, 사용자 Billing 조치 필요.
+4. ~~watchlist sync 스모크~~ → **T04 완료**(절차서+DB 스크립트). DB 레이어 정상, 실 로그인은 PENDING.
+
+### ★ R15 후보 (사용자 조치 선행)
+
+1. **🔴 GitHub `kimdooo-a` 계정 Billing 결제 해소** — daily-cron 재가동 전제. Settings>Billing & plans → 결제 갱신/한도 상향 → `gh workflow run daily-cron.yml` 검증.
+2. **watchlist 실 로그인 sync 스모크 실증** — `docs/db/R14-watchlist-sync-smoke.md` §3·§5·§6. R12 런타임 PENDING 클로즈.
+3. (선택) `daily-cron.yml` node-version 18→20(EOL) · `/analysis/[symbol]` userTier 실등급 연동.
 
 ### ✅ R3 완료 (세션 28, 2026-05-25 — community-finish 12/12)
 
