@@ -1,9 +1,7 @@
 name: Release Validation Gate
 
+# [R13/세션40 비활성화] release 배포 파이프라인 중복(Vercel Git 자동배포 사용) → 태그 자동 트리거 제거(수동 전용).
 on:
-  push:
-    tags:
-      - 'v*.*.*'
   workflow_dispatch:
     inputs:
       tag:

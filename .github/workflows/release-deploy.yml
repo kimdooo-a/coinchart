@@ -1,8 +1,10 @@
 name: Auto Deploy Release to Production
 
+# [R13/세션40 비활성화] Vercel Git 자동배포(main push)가 실제 배포를 담당하므로 본 Actions 배포는 중복.
+# VERCEL_TOKEN/ORG_ID/PROJECT_ID secret 미설정이라 release publish 시 항상 실패 → 자동 트리거 제거(수동 전용).
+# Vercel CLI 배포를 정식 사용하려면 secret 등록 후 아래 트리거를 release:published로 복구.
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
 
 jobs:
   # ===========================

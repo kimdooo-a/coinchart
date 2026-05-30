@@ -1,17 +1,8 @@
 name: Observe Release & Monitor Health
 
+# [R13/세션40 비활성화] Vercel Git 자동배포 사용으로 release 배포·관측 파이프라인 중복.
+# 15분마다 schedule + deploy 후 workflow_run 트리거가 Vercel secret 부재로 항상 실패(사용량 낭비) → 자동 트리거 전부 제거(수동 전용).
 on:
-  # Trigger after the Deploy workflow completes
-  workflow_run:
-    workflows: ["Auto Deploy Release to Production"]
-    types:
-      - completed
-  
-  # Scheduled uptime check (every 15 minutes)
-  schedule:
-    - cron: '*/15 * * * *'
-
-  # Manual trigger for testing
   workflow_dispatch:
 
 jobs:
