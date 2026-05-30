@@ -1,5 +1,12 @@
+"use client";
+
+// CoinHero — 코인룸 상단 히어로 (R13 / T-A1 서버→클라 전환)
+// 시세(가격)·등락색·sparkline을 useDisplaySettings() 구독으로 전역 전환.
+// props는 전부 직렬화 가능 — 부모(코인룸 서버 페이지)가 데이터 fetch 후 전달.
+
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useDisplaySettings } from "@/lib/config/display-settings";
 
 export interface CoinHeroData {
   symbol: string; // BTC
@@ -32,11 +39,28 @@ export default function CoinHero({
   writeHref,
   className,
 }: CoinHeroProps) {
+  // 표시 환경설정 구독 (R13 / T-A1) — 통화(USD↔KRW)·등락 색(한국식↔글로벌) 전역 전환.
+  const { formatPrice, changeColorClass, changeColor } = useDisplaySettings();
   const isUp = data.changePct >= 0;
-  const trendColor = isUp ? "text-[var(--color-kr-up)]" : "text-[var(--color-kr-down)]";
-  const trendBg = isUp ? "bg-[var(--color-kr-up)]/10" : "bg-[var(--color-kr-down)]/10";
+  // 등락 색: KR=빨↑파↓ / GLOBAL=녹↑빨↓. flat(0)은 changeColorClass가 중립 처리.
+  const trendColor = changeColorClass(data.changePct);
+  // badge 배경 틴트 — trendColor와 정합. Tailwind JIT가 스캔하도록 리터럴 클래스로 분기.
+  const trendBg = isUp
+    ? changeColor === "GLOBAL"
+      ? "bg-[var(--color-new)]/10"
+      : "bg-[var(--color-kr-up)]/10"
+    : changeColor === "GLOBAL"
+      ? "bg-[var(--color-positive)]/10"
+      : "bg-[var(--color-kr-down)]/10";
   const sparkPath = data.sparkline ? buildSparklinePath(data.sparkline) : null;
-  const sparkColor = isUp ? "#BA1A1A" : "#0050CB";
+  // sparkline stroke — SVG 속성값이라 CSS 변수 직접 참조(런타임 해석). 등락 색과 정합.
+  const sparkColor = isUp
+    ? changeColor === "GLOBAL"
+      ? "var(--color-new)"
+      : "var(--color-kr-up)"
+    : changeColor === "GLOBAL"
+      ? "var(--color-positive)"
+      : "var(--color-kr-down)";
 
   return (
     <section
@@ -86,7 +110,7 @@ export default function CoinHero({
       {/* 우측: 가격 정보 */}
       <div className="flex flex-col items-start md:items-end flex-1 md:flex-none">
         <div className="flex items-baseline gap-2">
-          <span className={cn("text-h1", trendColor)}>${data.price.toLocaleString()}</span>
+          <span className={cn("text-h1", trendColor)}>{formatPrice(data.price)}</span>
           <span className={cn("text-body-base font-bold", trendColor)}>
             {isUp ? "▲" : "▼"} {data.changePct >= 0 ? "+" : ""}
             {data.changePct.toFixed(2)}%

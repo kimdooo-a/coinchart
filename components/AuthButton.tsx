@@ -6,6 +6,7 @@ import Link from 'next/link'
 import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { AccountMenu } from '@/components/account/AccountMenu'
 
 export const AuthButton = () => {
     const [user, setUser] = useState<User | null>(null)
@@ -38,61 +39,7 @@ export const AuthButton = () => {
     return (
         <div className="flex items-center gap-3">
             {user ? (
-                <div className="flex items-center gap-3 bg-surface-container backdrop-blur-md border border-outline-variant rounded-full pl-4 pr-2 py-1 shadow-lg">
-                    <div className="flex flex-col items-end hidden md:flex">
-                        <span className="text-[10px] text-on-surface-variant uppercase tracking-wide">Welcome</span>
-                        <span className="text-xs font-bold text-primary max-w-[100px] truncate">
-                            {user.user_metadata?.full_name || user.email?.split('@')[0]}
-                        </span>
-                    </div>
-
-                    {/* Admin Button (Only for smartkdy7@gmail.com) */}
-                    {user.email === 'smartkdy7@gmail.com' && (
-                        <Link
-                            href="/admin"
-                            className="p-2 text-red-500 hover:text-red-600 transition-colors hover:bg-surface-container-high rounded-full mr-1"
-                            title="Admin Dashboard"
-                        >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        </Link>
-                    )}
-
-                    {/* 설정 진입점 (회원 — taste #5: 계정 영역에서도 settings 진입) */}
-                    <Link
-                        href="/settings"
-                        className="p-2 text-on-surface-variant hover:text-primary transition-colors hover:bg-surface-container-high rounded-full mr-1"
-                        title="설정"
-                    >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                    </Link>
-
-                    <Link
-                        href="/portfolio"
-                        className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-xs ring-2 ring-transparent hover:ring-blue-400 transition-all shadow-md group relative"
-                        title="My Portfolio"
-                    >
-                        {user.email?.[0].toUpperCase()}
-                        <div className="absolute inset-0 rounded-full border border-white/20"></div>
-                    </Link>
-
-                    <div className="h-4 w-px bg-outline-variant mx-1"></div>
-
-                    <button
-                        onClick={handleLogout}
-                        className="p-2 text-on-surface-variant hover:text-on-surface transition-colors hover:bg-surface-container-high rounded-full"
-                        title="Logout"
-                    >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                    </button>
-                </div>
+                <AccountMenu user={user} onLogout={handleLogout} />
             ) : (
                 <Link
                     href="/auth/login"

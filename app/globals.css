@@ -1,6 +1,11 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* docs/ 문서(handover·orchestration SOT 등)에 적힌 코드 예시 클래스 문자열이
+   Tailwind v4 자동 content 감지에 후보로 오인 추출되어 불량 유틸
+   (예: text-[var(--color-kr-*)])을 생성 → dev Turbopack CSS 파서가 '*'에서 깨지는 것 방지 (R13) */
+@source not "../docs";
+
 /* ========================================
    v2.0 커뮤니티 디자인 토큰 (Stitch / Material 3 기반)
    - 한국식 금융: 빨강↑ 상승 / 파랑↓ 하락

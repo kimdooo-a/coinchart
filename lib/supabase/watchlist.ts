@@ -174,6 +174,66 @@ export async function removeFromWatchlist(
   }
 }
 
+/**
+ * 표시 순서 일괄 갱신(B-2 / R13). 회원이 reorder한 결과를 DB에 영속화.
+ * 각 (asset_type, symbol)의 sort_order를 UPDATE — 존재하지 않는 키는 조용히 무시(0행 영향).
+ * 신규 행 삽입 없음(reorder는 기존 항목 재배열 전용) → upsert 대신 update 사용.
+ * RLS가 본인 행만 노출하므로 user_id eq는 방어적 중복 필터.
+ * @returns 실제 UPDATE 시도한 항목 수(영향 행 수와 무관 — best-effort)
+ */
+export async function reorderWatchlist(
+  supabase: SupabaseClient,
+  userId: string,
+  order: WatchlistInput[]
+): Promise<number> {
+  // 입력 정규화·중복 제거(동일 키 마지막 sortOrder 우선)
+  const byKey = new Map<string, WatchlistInput>();
+  for (const input of order) {
+    byKey.set(itemKey(input.assetType, input.symbol), input);
+  }
+  const updates = [...byKey.values()];
+
+  // Supabase는 행별 상이한 값의 단일 일괄 UPDATE 원시명령이 없으므로 병렬 UPDATE.
+  // 최대 100건(상한)이라 round-trip 허용 범위. 하나라도 실패하면 throw.
+  await Promise.all(
+    updates.map(async (input) => {
+      const { error } = await supabase
+        .from('user_watchlist')
+        .update({ sort_order: input.sortOrder ?? 0 })
+        .eq('user_id', userId)
+        .eq('asset_type', input.assetType)
+        .eq('symbol', input.symbol);
+      if (error) {
+        console.error('[Watchlist SSOT] reorder error:', error);
+        throw new Error(error.message);
+      }
+    })
+  );
+  return updates.length;
+}
+
+/**
+ * 본인 즐겨찾기 전건 삭제(B-3 / R13). clear 벌크 삭제용 — 단일 쿼리.
+ * 항목별 루프(N회 DELETE)를 1회로 대체 → 다음 로그인 sync의 잔여행 복원 위험 제거.
+ * @returns 삭제된 행 수
+ */
+export async function clearUserWatchlist(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<number> {
+  const { data, error } = await supabase
+    .from('user_watchlist')
+    .delete()
+    .eq('user_id', userId)
+    .select('id');
+
+  if (error) {
+    console.error('[Watchlist SSOT] clear error:', error);
+    throw new Error(error.message);
+  }
+  return data?.length ?? 0;
+}
+
 export interface SyncResult {
   items: WatchlistItem[]; // 머지 후 최종 목록
   added: number; // 신규 삽입된 개수

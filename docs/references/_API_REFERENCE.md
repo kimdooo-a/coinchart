@@ -3,7 +3,7 @@
 ## 개요
 총 33개 엔드포인트 (공개 9개 + 블로그 6개 + SEO 3개, 관리자 4개 + 블로그 5개, 주식 분석 2개, 사용자 데이터 4개 포함)
 
-최종 업데이트: 2026-05-30 (R12 watchlist 4개 추가)
+최종 업데이트: 2026-05-30 (R13 watchlist reorder PATCH·벌크 clear DELETE?all 2개 추가)
 
 ---
 
@@ -363,9 +363,16 @@
 
 ### DELETE /api/watchlist
 - **파일**: `app/api/watchlist/route.ts`
-- **요청**: 바디 `{ assetType, symbol }` 또는 쿼리 `?assetType=&symbol=`
-- **설명**: 삭제(멱등 — 없어도 ok).
-- **응답**: `200 { ok:true }` / `400` 입력 오류
+- **요청(단건)**: 바디 `{ assetType, symbol }` 또는 쿼리 `?assetType=&symbol=`
+- **요청(벌크 clear, R13)**: 쿼리 `?all=true` (바디 없음) — 본인 전 행 단일 쿼리 삭제
+- **설명**: 삭제(멱등 — 없어도 ok). `all=true` 분기는 전건 비우기(clear).
+- **응답**: `200 { ok:true }`(단건) / `200 { ok:true, cleared:number }`(벌크) / `400` 입력 오류
+
+### PATCH /api/watchlist (R13)
+- **파일**: `app/api/watchlist/route.ts`
+- **요청 바디**: `{ order: [{ assetType:'CRYPTO'|'STOCK', symbol, sortOrder }, ...] }` (최대 500건)
+- **설명**: 표시 순서 일괄 영속화(reorder). 회원 RLS 하 `user_watchlist.sort_order` 일괄 UPDATE(미존재 키 무시·신규 삽입 없음). SSOT `reorderWatchlist()`.
+- **응답**: `200 { ok:true, updated:number }` / `400`(order 배열 아님·500 초과) / `401` / `500`
 
 ### POST /api/watchlist/sync
 - **파일**: `app/api/watchlist/sync/route.ts`

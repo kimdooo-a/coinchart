@@ -17,6 +17,7 @@ import {
 import { useWatchlistQuotes } from '@/components/hooks/useWatchlistQuotes';
 import WatchlistTable, { type WatchlistRow } from './WatchlistTable';
 import WatchlistAddBar from './WatchlistAddBar';
+import WatchlistNotice from './WatchlistNotice';
 import { baseSymbol } from './format';
 
 type TabFilter = 'ALL' | 'CRYPTO' | 'STOCK';
@@ -65,7 +66,8 @@ export default function WatchlistView() {
     const { lang } = useLanguage();
     const t = T[lang === 'en' ? 'en' : 'ko'];
 
-    const { items, limit, count, isFull, has, add, remove, clear } = useWatchlist();
+    const { items, limit, count, isFull, has, add, remove, clear, notice, dismissNotice } =
+        useWatchlist();
     const { quotes, loading, refresh } = useWatchlistQuotes(items);
 
     // 하이드레이션 완료 여부 (SSR 스냅샷=false → 빈 상태 깜빡임 방지). setState 없이 안전.
@@ -141,6 +143,13 @@ export default function WatchlistView() {
                         </button>
                     </div>
                 </header>
+
+                {/* 안내 배너 (상한·sync 누락) */}
+                <WatchlistNotice
+                    notice={notice}
+                    onDismiss={dismissNotice}
+                    lang={lang === 'en' ? 'en' : 'ko'}
+                />
 
                 {/* 추가 바 */}
                 <WatchlistAddBar

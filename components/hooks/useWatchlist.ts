@@ -181,6 +181,36 @@ async function apiRemoveItem(assetType: WatchlistAssetType, symbol: string): Pro
     }
 }
 
+/** PATCH /api/watchlist — 표시 순서 일괄 영속화(회원 reorder 후 best-effort). 성공 여부 반환. */
+async function apiReorder(order: WatchlistItem[]): Promise<boolean> {
+    try {
+        const res = await fetch('/api/watchlist', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                order: order.map((i) => ({
+                    assetType: i.assetType,
+                    symbol: i.symbol,
+                    sortOrder: i.sortOrder,
+                })),
+            }),
+        });
+        return res.ok;
+    } catch {
+        return false;
+    }
+}
+
+/** DELETE /api/watchlist?all=true — 본인 즐겨찾기 전건 삭제(벌크 clear). 성공 여부 반환. */
+async function apiClearAll(): Promise<boolean> {
+    try {
+        const res = await fetch('/api/watchlist?all=true', { method: 'DELETE' });
+        return res.ok;
+    } catch {
+        return false;
+    }
+}
+
 /** POST /api/watchlist/sync — 로컬 우선 병합 업로드(로그인 직후 1회). 실패 시 null. */
 async function apiSync(local: WatchlistItem[]): Promise<SyncResponse | null> {
     try {
@@ -361,16 +391,21 @@ export function useWatchlist(): UseWatchlist {
         if (from < 0 || from >= cur.length || to < 0 || to >= cur.length || from === to) return;
         const [moved] = cur.splice(from, 1);
         cur.splice(to, 0, moved);
-        writeAndEmit(cur.map((it, i) => ({ ...it, sortOrder: i })));
+        const next = cur.map((it, i) => ({ ...it, sortOrder: i }));
+        writeAndEmit(next); // 낙관적 로컬 재할당
+        // 회원이면 새 순서를 DB에 best-effort 영속화. 실패해도 로컬 유지(다음 sync에서 수렴).
+        if (isMemberRef.current) void apiReorder(next);
     }, []);
 
     const clear = useCallback(() => {
-        const cur = getSnapshot();
         writeAndEmit([]); // 낙관적 비우기
-        // 회원이면 DB도 비움(벌크 삭제 엔드포인트 없음 → 항목별 best-effort DELETE).
-        // 누락 시 다음 로그인 sync가 잔여 DB 행을 복원할 수 있으므로 전건 삭제 시도.
+        // 회원이면 DB도 비움 — 벌크 삭제 1회(전건). 항목별 루프 대비 잔여행 복원 위험 최소화.
+        // 실패 시 로컬은 이미 비워졌으므로, 다음 로그인 sync가 DB 잔여행을 복원할 수 있음
+        // → 1회 재시도로 성공률 제고(여전히 실패하면 로컬 우선 sync가 결국 수렴).
         if (isMemberRef.current) {
-            for (const it of cur) void apiRemoveItem(it.assetType, it.symbol);
+            void apiClearAll().then((ok) => {
+                if (!ok) void apiClearAll();
+            });
         }
     }, []);
 

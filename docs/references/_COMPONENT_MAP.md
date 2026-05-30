@@ -1,6 +1,6 @@
 # Component Map
 
-> 최종 업데이트: 2026-05-29 (R9-T03 레퍼런스 정합)
+> 최종 업데이트: 2026-05-30 (R13 — AccountMenu·WatchlistNotice 신규, 시세 컴포넌트 useDisplaySettings 구독)
 >
 > 각 컴포넌트의 사용 페이지, lib 의존성, 컴포넌트 간 의존 관계를 정리한 문서입니다.
 
@@ -111,7 +111,8 @@
 
 | 컴포넌트 | 사용 페이지 | lib 의존성 | 컴포넌트 의존성 |
 |----------|-----------|------------|----------------|
-| `AuthButton` | `global-header` (-> `app/layout.tsx`) | `lib/supabase/client` | 없음 |
+| `AuthButton` | `global-header` (-> `app/layout.tsx`) | `lib/supabase/client` | `account/AccountMenu` (R13) |
+| `account/AccountMenu` (R13 신규) | `AuthButton` | 없음 (`next/link`만) | 없음 |
 | `PremiumLock` | `Analysis/StockPanel` | `lib/utils` | `ui/card`, `ui/badge`, `ui/button`, `ui/label` |
 | `footer-section` | `app/page.tsx`, `board/[slug]`, `board/[slug]/write`, `board/[slug]/[postId]`, `coin/[symbol]`, `news` (6페이지 공용) | 없음 (lucide-react만 사용) | 없음 |
 | `global-header` | `app/layout.tsx` (전역) | `context/LanguageContext`, `lib/translations` | `AuthButton` |
@@ -121,6 +122,8 @@
 > **세션 34(R8, 2026-05-25)**: `about-section`·`dashboard-grid`·`LanguageSwitcher` 3종 **삭제**(import 0건 dead code — v2.0 커뮤니티 피벗 후 구 다크 랜딩 잔재). 홈은 커뮤니티 SSR로 재구축되어 미사용, 언어 전환은 `global-header` 내장 토글로 대체됨.
 >
 > **R9-T01(2026-05-29)**: 구 다크 랜딩의 닫힌 dead 트리 `hero-section`·`hero-chart`·`news-rotator` 3종 **삭제**(`git rm`). `hero-section`이 `app/page.tsx`에서 미사용(import 0)이고 `hero-chart`·`news-rotator`는 `hero-section`에서만 쓰여 연쇄 dead. 위 레지스트리/요약/다이어그램에서 제거 완료. `app/page.tsx` 홈은 커뮤니티 SSR 9종 트리(아래 요약 참조).
+>
+> **R13(2026-05-30, display-rollout)**: ① `account/AccountMenu` 신규 — `AuthButton`의 인라인 아이콘 4종(관리자·설정·아바타·로그아웃)을 아바타→드롭다운(포트폴리오·관심종목·설정·관리자조건부·로그아웃)으로 재구성(접근성 roving tabindex·aria·Esc). ② `Watchlist/WatchlistNotice` 신규 — `WatchlistView`가 `useWatchlist().notice`/`dismissNotice`를 구독하는 경량 배너(limit·sync-skipped 안내). ③ **시세 컴포넌트 `useDisplaySettings()` 구독 전역화**: `community/CoinHero`(서버→클라 전환)·`community/widgets/PriceTickerWidget`·`Chart/Ticker`·`Chart/StockTicker`가 통화(USD↔KRW)·등락색(KR↔GLOBAL)을 R12 표시설정 SSOT(`lib/config/display-settings.tsx`)에 구독. `Market/KimchiPremium`·`community/BoardSidebar`는 도메인 사유로 무변경(handover 근거). 레퍼런스 구현은 `Watchlist/WatchlistTable`. ④ **Tailwind 핫픽스**: `app/globals.css`에 `@source not "../docs"` — docs/ 문서의 코드 예시 클래스 문자열이 v4 content 스캐너에 오인 추출되어 dev CSS 파서를 깨던 것 차단.
 
 ---
 
