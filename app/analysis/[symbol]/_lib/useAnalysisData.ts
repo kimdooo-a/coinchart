@@ -44,7 +44,8 @@ export function useAnalysisData(symbol: string, router: Router): UseAnalysisData
 
     // performAnalysis 결과
     const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
-    const [userTier, setUserTier] = useState<'free' | 'pro'>('free')
+    // TODO(R15+): 실등급 연동 보류 — gates.ts isDisabledProGate + Supabase 세션 기반 tier 해석 필요. 현재 free 고정(pro-gate 제품결정 대기).
+    const userTier: 'free' | 'pro' = 'free'
     const [error, setError] = useState<string | null>(null)
 
     const supabase = createClient()
@@ -133,7 +134,7 @@ export function useAnalysisData(symbol: string, router: Router): UseAnalysisData
                     const cci = calculateCCI(highs, lows, closes)
                     const williams = calculateWilliamsR(highs, lows, closes)
                     const atr = calculateATR(highs, lows, closes)
-                    const { adx, plusDI: adxPlusDI, minusDI: adxMinusDI } = calculateADX(highs, lows, closes)
+                    const { adx } = calculateADX(highs, lows, closes)
 
                     const signals: IndicatorSignal[] = []
 

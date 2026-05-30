@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // .eslintignore에서 이관 (flat config에서 .eslintignore는 deprecated):
+    "kdy-addon/**",
   ]),
   // PHASE 5: Crypto/Stock SSOT Separation Rules
   {
