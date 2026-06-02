@@ -1,0 +1,14 @@
+{
+  "_comment": "다른 프로젝트의 .mcp.json 에 복사. YP_AGENT_KEY 는 운영자가 주입한 srv_agents_* 키. 절대 커밋 금지.",
+  "mcpServers": {
+    "ypserver-messenger": {
+      "command": "node",
+      "args": ["E:/00_develop/260523_luckystyle4u_server/clients/messenger/mcp-server.mjs"],
+      "env": {
+        "YP_AGENT_KEY": "srv_agents_REPLACE_ME",
+        "YP_MSG_TENANT": "agents",
+        "YP_MSG_BASE_URL": "https://stylelucky4u.com"
+      }
+    }
+  }
+}
