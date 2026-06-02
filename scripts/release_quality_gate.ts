@@ -23,9 +23,11 @@ const colors = {
 function runCommand(cmd: string): string {
     try {
         return execSync(cmd, { encoding: 'utf8' }).trim();
-    } catch (error: any) {
-        if (error.stderr) {
-            console.warn(`Command warning: ${error.stderr.toString().trim()}`);
+    } catch (error: unknown) {
+        // execSync 실패 시 error 객체에 stderr(Buffer|string)가 실릴 수 있음
+        const stderr = (error as { stderr?: Buffer | string }).stderr;
+        if (stderr) {
+            console.warn(`Command warning: ${stderr.toString().trim()}`);
         }
         throw error;
     }
@@ -90,10 +92,10 @@ async function main() {
                 process.exit(0); // Fail-open if weird error, or fail-close? Fail-open for now as adoption phase.
             }
 
-        } catch (e: any) {
+        } catch (e: unknown) {
             // If asset not found, it implies legacy release or KPI system failure.
             // We generally FAIL OPEN for legacy compatibility, but warn.
-            const msg = e.toString();
+            const msg = String(e);
             if (msg.includes('not found') || msg.includes('404')) {
                 console.log(`${colors.yellow}[SKIP] No KPI data found for previous release. Assuming legacy/legacy-stable.${colors.reset}`);
                 process.exit(0);

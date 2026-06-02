@@ -27,6 +27,11 @@ export interface AnalysisRecord {
     symbol: string;
     assetType: 'crypto' | 'stock';
     status: 'ok' | 'error';
+    // 분석 결과 shape는 performAnalysis | analyzeStock 반환 union이지만,
+    // 소비처인 report_generator.ts(T02 영역)가 result.signals 등 union에 없는
+    // 필드를 직접 접근하므로 구체화 시 교차 파일 tsc 에러가 발생한다.
+    // 동작 보존·격리 원칙상 구체화 보류 — T02의 소비처 정리와 함께 좁혀야 함.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     result?: any;
     error?: string;
     duration: number;  // ms
@@ -226,13 +231,14 @@ async function analyzeCryptoSymbol(
             duration: Date.now() - startTime,
             timestamp: new Date()
         };
-    } catch (error: any) {
-        logger.warn(`✗ ${symbol} analysis failed: ${error.message}`);
+    } catch (error: unknown) {
+        const err = error as { message?: string };
+        logger.warn(`✗ ${symbol} analysis failed: ${err.message}`);
         return {
             symbol,
             assetType: 'crypto',
             status: 'error',
-            error: error.message,
+            error: err.message,
             duration: Date.now() - startTime,
             timestamp: new Date()
         };
@@ -305,13 +311,14 @@ async function analyzeStockSymbol(
             duration: Date.now() - startTime,
             timestamp: new Date()
         };
-    } catch (error: any) {
-        logger.warn(`✗ ${symbol} stock analysis failed: ${error.message}`);
+    } catch (error: unknown) {
+        const err = error as { message?: string };
+        logger.warn(`✗ ${symbol} stock analysis failed: ${err.message}`);
         return {
             symbol,
             assetType: 'stock',
             status: 'error',
-            error: error.message,
+            error: err.message,
             duration: Date.now() - startTime,
             timestamp: new Date()
         };
@@ -444,11 +451,12 @@ export async function runBatchAnalysis(
             results,
             logs: []  // In production, load from log file
         };
-    } catch (error: any) {
-        logger.error(`[FATAL] Unexpected error: ${error.message}`);
-        logger.error(error.stack);
+    } catch (error: unknown) {
+        const err = error as { message?: string; stack?: string };
+        logger.error(`[FATAL] Unexpected error: ${err.message}`);
+        logger.error(err.stack);
 
-        await recordBatchFailed(batchId, error.message);
+        await recordBatchFailed(batchId, err.message ?? '');
 
         const duration = Date.now() - startTime;
         return {

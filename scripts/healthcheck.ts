@@ -104,7 +104,7 @@ async function checkEndpoint(endpoint: HealthCheckEndpoint): Promise<HealthCheck
             duration,
             timestamp: new Date(),
         };
-    } catch (error: any) {
+    } catch (error: unknown) {
         const duration = Date.now() - startTime;
 
         return {
@@ -112,7 +112,7 @@ async function checkEndpoint(endpoint: HealthCheckEndpoint): Promise<HealthCheck
             status: null,
             ok: false,
             duration,
-            error: error.message || 'Unknown error',
+            error: (error instanceof Error ? error.message : String(error)) || 'Unknown error',
             timestamp: new Date(),
         };
     }
@@ -198,10 +198,10 @@ async function runHealthChecks(): Promise<void> {
 
         logger.info('[END] Deployment verified');
         process.exit(0);
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('[FATAL] Unexpected error during health checks');
-        logger.error(`Message: ${error.message}`);
-        logger.error(`Stack: ${error.stack}`);
+        logger.error(`Message: ${error instanceof Error ? error.message : String(error)}`);
+        logger.error(`Stack: ${error instanceof Error ? error.stack : undefined}`);
         process.exit(1);
     }
 }

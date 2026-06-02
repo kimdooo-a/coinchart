@@ -22,8 +22,9 @@ export interface ReportOptions {
 export interface StateChange {
     symbol: string;
     metric: string;
-    from: any;
-    to: any;
+    // 지표 값(레짐 문자열 또는 수치)이므로 문자열·숫자 공용 타입
+    from: string | number;
+    to: string | number;
     percentage: number;
     severity: 'low' | 'medium' | 'high' | 'critical';
 }
@@ -72,8 +73,8 @@ export class ReportGenerator {
 
             // Default: Markdown
             return this.formatMarkdown(options, metrics);
-        } catch (error: any) {
-            this.logger.error(`Failed to generate report: ${error.message}`);
+        } catch (error: unknown) {
+            this.logger.error(`Failed to generate report: ${error instanceof Error ? error.message : String(error)}`);
             throw error;
         }
     }

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import type { AnalysisResult } from '@/lib/analysis/orchestrator'
 import type { FractalAnalysisResult } from '@/lib/fractal_engine'
-import type { Language, Translation } from '../_lib/types'
+import type { Language, Translation, Candle } from '../_lib/types'
 import { ProbabilityConfidenceCards } from './ProbabilityConfidenceCards'
 import { ExplanationCard } from './ExplanationCard'
 import { BacktestCard } from './BacktestCard'
@@ -27,7 +27,7 @@ interface AnalysisGridProps {
     t: Translation
     userTier: 'free' | 'pro'
     avgPrice: number | undefined
-    historyData: any[]
+    historyData: Candle[]
     fractalResult: FractalAnalysisResult | null
     router: Router
 }

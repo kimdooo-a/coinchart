@@ -20,6 +20,17 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
     }
 })
 
+// Yahoo Finance 일봉 정제 데이터 한 행의 형태 (OHLCV는 결측 시 null)
+interface YahooCandle {
+    timestamp: number
+    dateStr: string
+    open: number | null
+    high: number | null
+    low: number | null
+    close: number | null
+    volume: number | null
+}
+
 // Symbols to seed
 const CRYPTO_SYMBOLS = ['BTC-USD', 'ETH-USD', 'XRP-USD', 'SOL-USD', 'DOGE-USD', 'ADA-USD']
 const STOCK_SYMBOLS = ['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'AMZN', 'META', 'TSLA', 'SPY', 'QQQ']
@@ -50,7 +61,7 @@ async function fetchYahooData(symbol: string) {
             low: quote.low[i],
             close: quote.close[i],
             volume: quote.volume[i]
-        })).filter((d: any) => d.close !== null && d.close !== undefined)
+        })).filter((d: YahooCandle) => d.close !== null && d.close !== undefined)
 
         return cleanData
     } catch (e) {
@@ -71,7 +82,7 @@ async function seed() {
         // Symbol mapping (BTC-USD -> BTCUSDT for consistency with Binance/App usage)
         const appSymbol = yahooSymbol.replace('-USD', 'USDT')
 
-        const dbRows = rawData.map((d: any) => ({
+        const dbRows = rawData.map((d: YahooCandle) => ({
             symbol: appSymbol,
             date: d.dateStr, // market_prices uses 'date' column (YYYY-MM-DD)
             open: d.open,
@@ -95,7 +106,7 @@ async function seed() {
         const rawData = await fetchYahooData(symbol)
         if (!rawData) continue
 
-        const dbRows = rawData.map((d: any) => ({
+        const dbRows = rawData.map((d: YahooCandle) => ({
             symbol: symbol,
             time: d.timestamp, // stock_prices uses 'time' column (Unix seconds)
             open: d.open,

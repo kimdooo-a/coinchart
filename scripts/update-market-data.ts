@@ -21,6 +21,17 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
     }
 });
 
+// Yahoo Finance 일봉 정제 데이터 한 행의 형태 (OHLCV는 결측 시 null)
+interface YahooCandle {
+    timestamp: number;
+    dateStr: string;
+    open: number | null;
+    high: number | null;
+    low: number | null;
+    close: number | null;
+    volume: number | null;
+}
+
 // Helper to fetch from Yahoo Finance
 async function fetchYahooData(symbol: string) {
     console.log(`Fetching ${symbol} from Yahoo Finance...`);
@@ -47,7 +58,7 @@ async function fetchYahooData(symbol: string) {
             low: quote.low[i],
             close: quote.close[i],
             volume: quote.volume[i]
-        })).filter((d: any) => d.close !== null && d.close !== undefined);
+        })).filter((d: YahooCandle) => d.close !== null && d.close !== undefined);
 
         return cleanData;
     } catch (e) {
@@ -75,7 +86,7 @@ async function updateMarketData() {
         // The constants.ts says 'POPULAR_SYMBOLS = ... + "USDT"'. So likely "BTCUSDT".
         const appSymbol = `${coin.symbol}USDT`;
 
-        const dbRows = rawData.map((d: any) => ({
+        const dbRows = rawData.map((d: YahooCandle) => ({
             symbol: appSymbol,
             date: d.dateStr,
             open: d.open,
@@ -100,7 +111,7 @@ async function updateMarketData() {
 
         if (!rawData || rawData.length === 0) continue;
 
-        const dbRows = rawData.map((d: any) => ({
+        const dbRows = rawData.map((d: YahooCandle) => ({
             symbol: stock.symbol,
             time: d.timestamp,
             open: d.open,

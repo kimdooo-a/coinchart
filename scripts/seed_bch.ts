@@ -18,6 +18,9 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
     },
 });
 
+// Binance kline 한 행: 앞 6개(시각·OHLCV)만 사용하므로 그 형태만 명시, 나머지는 unknown
+type BinanceKline = [number, string, string, string, string, string, ...unknown[]];
+
 async function seedBCH() {
     console.log("🚀 Starting BCH Data Seeding...");
 
@@ -39,11 +42,12 @@ async function seedBCH() {
         console.log("Fetching BCHUSDT klines from Binance...");
         const url = 'https://api.binance.com/api/v3/klines?symbol=BCHUSDT&interval=1d&limit=1000';
         const response = await fetch(url);
-        const klines: any[] = await response.json();
+        // Binance klines: [openTime(number), open, high, low, close, volume(이상 string), closeTime(number), ...]
+        const klines: BinanceKline[] = await response.json();
         console.log(`Fetched ${klines.length} candles.`);
 
         // 2. Transform Data
-        const records = klines.map((k: any[]) => ({
+        const records = klines.map((k) => ({
             symbol: 'BCHUSDT',
             date: new Date(k[0]).toISOString(), // Timestamp
             open: parseFloat(k[1]),

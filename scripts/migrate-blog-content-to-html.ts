@@ -68,9 +68,8 @@ async function migrate() {
         continue;
       }
 
-      // TipTap JSON → HTML 변환
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const html = generateHTML(post.content as any, extensions);
+      // TipTap JSON → HTML 변환 (generateHTML 1번째 인자 타입으로 좁힘)
+      const html = generateHTML(post.content as Parameters<typeof generateHTML>[0], extensions);
 
       // DB 업데이트
       const { error: updateError } = await supabase

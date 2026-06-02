@@ -11,13 +11,25 @@ import { AnalysisRecord } from './batch_analysis';
 import { createLogger } from '../lib/logger';
 import { supabaseAdmin } from '../lib/supabaseAdmin';
 
+/**
+ * 알림 조건 평가에 사용되는 분석 스냅샷의 최소 형태.
+ * 실제 런타임에서 접근하는 필드만 선언한다(AnalysisRecord.result는
+ * AnalysisResult | StockAnalysisResult이며, 본 코드는 최상위 signals도
+ * 참조하므로 결과 타입을 직접 붙이지 않고 구조적 최소 타입으로 받는다).
+ */
+export interface AlertSnapshot {
+    probability: { probability: number };
+    confidence: { grade: string };
+    signals?: unknown[];
+}
+
 export interface Alert {
     id: string;
     name: string;
     symbol: string;
     type: 'state_change' | 'metric_threshold' | 'comparison';
-    condition: (current: any, previous?: any) => boolean;
-    message: (current: any, previous?: any) => string;
+    condition: (current: AlertSnapshot, previous?: AlertSnapshot | null) => boolean;
+    message: (current: AlertSnapshot, previous?: AlertSnapshot | null) => string;
     priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 }
 
@@ -60,7 +72,7 @@ const alertConditions: Alert[] = [
             return probChange > 30;  // > 30% change
         },
         message: (current, previous) => {
-            const from = previous.probability?.probability || '?';
+            const from = previous?.probability?.probability || '?';
             const to = current.probability?.probability || '?';
             return `📊 확률 급변: ${from}% → ${to}%`;
         },
@@ -81,7 +93,7 @@ const alertConditions: Alert[] = [
             return currGrade >= prevGrade + 2;
         },
         message: (current, previous) => {
-            return `⬆️ 신뢰도 상향: ${previous.confidence?.grade} → ${current.confidence?.grade}`;
+            return `⬆️ 신뢰도 상향: ${previous?.confidence?.grade} → ${current.confidence?.grade}`;
         },
         priority: 'CRITICAL'
     },
@@ -100,7 +112,7 @@ const alertConditions: Alert[] = [
             return currGrade < prevGrade && prevGrade >= 3;  // Only if was A or higher
         },
         message: (current, previous) => {
-            return `⬇️ 신뢰도 하향: ${previous.confidence?.grade} → ${current.confidence?.grade}`;
+            return `⬇️ 신뢰도 하향: ${previous?.confidence?.grade} → ${current.confidence?.grade}`;
         },
         priority: 'HIGH'
     },
@@ -118,7 +130,7 @@ const alertConditions: Alert[] = [
             return currSignals >= prevSignals * 2 && currSignals >= 3;
         },
         message: (current, previous) => {
-            return `📈 신호 급증: ${previous.signals?.length || 0} → ${current.signals?.length || 0}개`;
+            return `📈 신호 급증: ${previous?.signals?.length || 0} → ${current.signals?.length || 0}개`;
         },
         priority: 'HIGH'
     },
@@ -136,7 +148,7 @@ const alertConditions: Alert[] = [
             return prevSignals >= 2 && currSignals === 0;
         },
         message: (current, previous) => {
-            return `⚠️ 신호 소실: ${previous.signals?.length || 0}개 → 0개`;
+            return `⚠️ 신호 소실: ${previous?.signals?.length || 0}개 → 0개`;
         },
         priority: 'MEDIUM'
     },
@@ -154,7 +166,7 @@ const alertConditions: Alert[] = [
             return prevTrend !== currTrend;
         },
         message: (current, previous) => {
-            const from = previous.probability?.probability > 50 ? '상승' : '하락';
+            const from = (previous?.probability?.probability ?? 0) > 50 ? '상승' : '하락';
             const to = current.probability?.probability > 50 ? '상승' : '하락';
             return `🔄 추세 반전: ${from} → ${to}`;
         },
@@ -200,12 +212,13 @@ export class AlertEngine {
             }
 
             return { should: true };
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const err = error as { code?: string; message?: string };
             // If table doesn't exist, allow send
-            if (error.code === 'PGRST116') {
+            if (err.code === 'PGRST116') {
                 return { should: true };
             }
-            this.logger.warn(`Error checking alert history: ${error.message}`);
+            this.logger.warn(`Error checking alert history: ${err.message}`);
             return { should: true };  // Fail-open: send if unsure
         }
     }
@@ -235,8 +248,9 @@ export class AlertEngine {
                 status,
                 reason: reason || null
             });
-        } catch (error: any) {
-            this.logger.warn(`Failed to record alert: ${error.message}`);
+        } catch (error: unknown) {
+            const err = error as { message?: string };
+            this.logger.warn(`Failed to record alert: ${err.message}`);
         }
     }
 
@@ -259,8 +273,8 @@ export class AlertEngine {
      * Evaluate all conditions for a symbol
      */
     private evaluateConditions(
-        current: any,
-        previous: any,
+        current: AlertSnapshot,
+        previous: AlertSnapshot | null,
         symbol: string
     ): AlertResult[] {
         const results: AlertResult[] = [];
@@ -283,9 +297,10 @@ export class AlertEngine {
                         priority: condition.priority
                     });
                 }
-            } catch (error: any) {
+            } catch (error: unknown) {
+                const err = error as { message?: string };
                 this.logger.warn(
-                    `Error evaluating condition ${condition.id} for ${symbol}: ${error.message}`
+                    `Error evaluating condition ${condition.id} for ${symbol}: ${err.message}`
                 );
             }
         }
@@ -368,9 +383,10 @@ export class AlertEngine {
                         status: 'sent',
                         message: alert.message
                     });
-                } catch (error: any) {
+                } catch (error: unknown) {
+                    const err = error as { message?: string };
                     this.logger.error(
-                        `[FAIL] ${record.symbol} ${alert.alertId}: ${error.message}`
+                        `[FAIL] ${record.symbol} ${alert.alertId}: ${err.message}`
                     );
                     processResult.failed++;
                     await this.recordAlert(
@@ -380,14 +396,14 @@ export class AlertEngine {
                         alert.priority!,
                         alert.message!,
                         'failed',
-                        error.message
+                        err.message
                     );
 
                     processResult.results.push({
                         symbol: record.symbol,
                         alertId: alert.alertId,
                         status: 'failed',
-                        reason: error.message
+                        reason: err.message
                     });
                 }
             }

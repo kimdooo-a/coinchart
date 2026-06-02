@@ -114,8 +114,9 @@ async function checkDatabaseConnection(): Promise<boolean> {
 
         logger.info(`  ✅ Database connection OK`);
         return true;
-    } catch (error: any) {
-        logger.error(`  ❌ Database error: ${error.message}`);
+    } catch (error: unknown) {
+        const err = error as { message?: string };
+        logger.error(`  ❌ Database error: ${err.message}`);
         return false;
     }
 }
@@ -140,8 +141,9 @@ async function checkFeatureGates(): Promise<boolean> {
 
         logger.info(`  ✅ Feature gates configured`);
         return true;
-    } catch (error: any) {
-        logger.error(`  ❌ Feature gates error: ${error.message}`);
+    } catch (error: unknown) {
+        const err = error as { message?: string };
+        logger.error(`  ❌ Feature gates error: ${err.message}`);
         return false;
     }
 }
@@ -168,8 +170,9 @@ async function checkNodeEnvironment(): Promise<boolean> {
 
         logger.info(`  ✅ Node environment OK`);
         return true;
-    } catch (error: any) {
-        logger.warn(`  ⚠️  Could not check Node environment: ${error.message}`);
+    } catch (error: unknown) {
+        const err = error as { message?: string };
+        logger.warn(`  ⚠️  Could not check Node environment: ${err.message}`);
         return true; // Non-critical
     }
 }
@@ -218,10 +221,11 @@ async function runPreflightChecks(): Promise<void> {
             logger.error('[END] Fix the issues above before deploying');
             process.exit(1);
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const err = error as { message?: string; stack?: string };
         logger.error('[FATAL] Unexpected error during preflight checks');
-        logger.error(`Message: ${error.message}`);
-        logger.error(`Stack: ${error.stack}`);
+        logger.error(`Message: ${err.message}`);
+        logger.error(`Stack: ${err.stack}`);
         process.exit(1);
     }
 }

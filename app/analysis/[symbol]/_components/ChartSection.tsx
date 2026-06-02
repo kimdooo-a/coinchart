@@ -6,11 +6,11 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { DetailedChart } from '@/components/DetailedChart'
-import type { Translation } from '../_lib/types'
+import type { Translation, Candle } from '../_lib/types'
 
 interface ChartSectionProps {
     loading: boolean
-    historyData: any[]
+    historyData: Candle[]
     avgPrice: number | undefined
     symbol: string
     t: Translation

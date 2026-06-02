@@ -5,11 +5,11 @@
 
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import type { Translation } from '../_lib/types'
+import type { Translation, Candle } from '../_lib/types'
 
 interface PositionStatusCardProps {
     avgPrice: number | undefined
-    historyData: any[]
+    historyData: Candle[]
     t: Translation
 }
 

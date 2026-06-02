@@ -15,6 +15,18 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
+// Yahoo Finance 일봉 정제 데이터 한 행의 형태 (OHLCV는 결측 시 null)
+interface YahooPriceRow {
+    symbol: string
+    date: string
+    open: number | null
+    high: number | null
+    low: number | null
+    close: number | null
+    volume: number | null
+    type: 'CRYPTO' | 'STOCK' | 'FOREX'
+}
+
 const COINS = ['BTC-USD', 'ETH-USD', 'XRP-USD', 'SOL-USD', 'BCH-USD', 'DOGE-USD']
 const STOCKS = ['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'AMZN', 'META', 'TSLA', 'BRK-B', 'LLY', 'AVGO']
 const FOREX = ['KRW=X'] // USD to KRW
@@ -47,7 +59,7 @@ async function fetchYahooData(symbol: string, type: 'CRYPTO' | 'STOCK' | 'FOREX'
             close: quote.close[i],
             volume: quote.volume[i],
             type: type
-        })).filter((p: any) => p.close !== null)
+        })).filter((p: YahooPriceRow) => p.close !== null)
 
         return prices
     } catch (error) {

@@ -1,14 +1,14 @@
 import { generateExplanation } from '../lib/explanation/generator';
-import { ProbabilityResult, ConfidenceResult } from '../types/probability';
+import { ProbabilityResult, ConfidenceResult, MarketRegime, ConfidenceGrade } from '../types/probability';
 import { BacktestMetrics } from '../types/backtest';
 
-function mockProb(prob: number, regime: any): ProbabilityResult {
+function mockProb(prob: number, regime: MarketRegime): ProbabilityResult {
     return {
         direction: prob > 50 ? 'UP' : 'DOWN',
         probability: prob,
         confidence: {
             score: 90,
-            grade: 'A' as any,
+            grade: 'A',
             level: 'HIGH',
             factors: ['MA', 'RSI'],
             breakdown: { agreement: 30, trend: 25, volume: 20, history: 15, volatility: 0 },
@@ -19,7 +19,7 @@ function mockProb(prob: number, regime: any): ProbabilityResult {
     };
 }
 
-function mockConf(grade: any): ConfidenceResult {
+function mockConf(grade: ConfidenceGrade): ConfidenceResult {
     return {
         score: 90,
         grade: grade,

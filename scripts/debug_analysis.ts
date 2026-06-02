@@ -1,9 +1,10 @@
 
 import { analyzeMarket } from '../lib/analysis';
+import { CandleData } from '../lib/api/binance';
 
 console.log("Generating mock candles...");
 
-const candles: any[] = [];
+const candles: CandleData[] = [];
 let price = 10000;
 
 // 1. Generate 100 candles of uptrend

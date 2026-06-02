@@ -9,6 +9,7 @@ import { analyzeFractalPattern, FractalAnalysisResult } from '@/lib/fractal_engi
 import { performAnalysis, AnalysisResult } from '@/lib/analysis/orchestrator'
 import { IndicatorSignal } from '@/types/probability'
 import { Trade } from '@/types/backtest'
+import type { Candle } from './types'
 import {
     calculateRSI, analyzeRSI,
     calculateSMA, analyzeTrend,
@@ -24,7 +25,7 @@ import {
 type Router = ReturnType<typeof useRouter>
 
 export interface UseAnalysisData {
-    historyData: any[]
+    historyData: Candle[]
     avgPrice: number | undefined
     loading: boolean
     fractalResult: FractalAnalysisResult | null
@@ -36,7 +37,7 @@ export interface UseAnalysisData {
 }
 
 export function useAnalysisData(symbol: string, router: Router): UseAnalysisData {
-    const [historyData, setHistoryData] = useState<any[]>([])
+    const [historyData, setHistoryData] = useState<Candle[]>([])
     const [avgPrice, setAvgPrice] = useState<number | undefined>(undefined)
     const [loading, setLoading] = useState(true)
     const [fractalResult, setFractalResult] = useState<FractalAnalysisResult | null>(null)
