@@ -53,6 +53,7 @@
 - 모듈 소유권: `docs/MODULE_OWNERSHIP.md` 참조
 - SSOT 분리: `docs/SSOT_SEPARATION_RULES.md` 참조
 - 배포: `docs/DEPLOYMENT_RUNBOOK.md` 참조
+- Daily Cron 자체 서버 운영: `docs/DAILY_CRON_SELFHOST.md` 참조 (GitHub Actions billing 차단 대체)
 
 ## 프로젝트 방향성 (v2.0 — 2026-05-10 피벗)
 
