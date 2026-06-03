@@ -1,6 +1,6 @@
 # Schema Reference (Supabase)
 
-> 마지막 갱신: 2026-05-30 (R12 user_watchlist 추가)
+> 마지막 갱신: 2026-06-03 (PGRST205 해소 — batch_runs/batch_analysis_results/alert_history 추가)
 > 소스: `supabase/migrations/` SQL 파일 기반
 
 ## 테이블 목록
@@ -17,6 +17,9 @@
 | `blog_posts` | 블로그 포스트 | O | 20260308 |
 | `blog_tags` | 블로그 태그 | O | 20260308 |
 | `blog_post_tags` | 포스트-태그 다대다 | O | 20260308 |
+| `batch_runs` | daily-cron 배치 실행 메타 | O (service_role) | 20260603 |
+| `batch_analysis_results` | 배치 심볼별 분석 결과 | O (service_role) | 20260603 |
+| `alert_history` | 배치 알림 발송 이력 | O (service_role) | 20260603 |
 
 ---
 
@@ -409,4 +412,87 @@ OR (guest_nickname IS NOT NULL
 | `trg_community_comment_likes_count` | community_comment_likes | AFTER INSERT/UPDATE/DELETE | `community_sync_comment_like_count()` (value 부호 합산, R3/T08) |
 
 > `like_count` = `SUM(value)` 누적. 비추(-1)도 합산되므로 음수 가능 — 화면에서 추천만 노출하려면 별도 집계 또는 컬럼 분리 검토(차후).
+
+---
+
+## batch_* (PGRST205 해소 2026-06-03 추가)
+
+> daily-cron 배치 출력 3종. 운영 DB에 테이블이 없어 PostgREST가 PGRST205(스키마에 테이블 없음)를 반환하던 문제 해소.
+> 코드 insert 컬럼을 SSOT로 삼아 작성. 마이그레이션: `supabase/migrations/20260603000001_create_batch_tables.sql`
+> 운영 배치(service_role) 전용 쓰기/읽기 — anon/authenticated 기본 차단.
+> 코드 위치: `scripts/batch_analysis.ts`(batch_runs·batch_analysis_results), `scripts/alert_engine.ts`(alert_history).
+
+### batch_runs
+
+> 배치 실행 메타 (running → completed/failed, 실행당 1행). PK = `id` text.
+> `recordBatchStart`(INSERT) / `recordBatchComplete`·`recordBatchFailed`(UPDATE).
+
+| 컬럼 | 타입 | NULL | 기본값 | 설명 |
+|---|---|---|---|---|
+| `id` | TEXT | N (PK) | - | `batch_${YYYYMMDDHHMMSS}` (코드 생성) |
+| `type` | TEXT | N | - | `daily` / `weekly` |
+| `run_date` | DATE | N | - | 실행 일자 |
+| `started_at` | TIMESTAMPTZ | N | - | 시작 시각 |
+| `status` | TEXT | N | - | `running` / `completed` / `failed` |
+| `symbol_count` | INTEGER | N | - | 대상 심볼 수 |
+| `succeeded_count` | INTEGER | N | 0 | 성공 수 |
+| `failed_count` | INTEGER | N | 0 | 실패 수 |
+| `alerts_sent` | INTEGER | N | 0 | 발송 알림 수 |
+| `completed_at` | TIMESTAMPTZ | Y | - | 완료/실패 UPDATE 시 채움 |
+| `error_message` | TEXT | Y | - | 실패 사유 |
+
+### batch_analysis_results
+
+> 배치 심볼별 분석 결과 (batch_runs 1:N). PK = `id` uuid 자동.
+> 결과 저장 INSERT(id 미지정 → `gen_random_uuid()`).
+
+| 컬럼 | 타입 | NULL | 기본값 | 설명 |
+|---|---|---|---|---|
+| `id` | UUID | N (PK) | `gen_random_uuid()` | |
+| `batch_id` | TEXT | N (FK→batch_runs, ON DELETE CASCADE) | - | 소속 배치 |
+| `symbol` | TEXT | N | - | 종목 심볼 |
+| `asset_type` | TEXT | N | - | `crypto` / `stock` |
+| `result` | JSONB | N | - | 분석 결과 전체 |
+| `analyzed_at` | TIMESTAMPTZ | N | - | 분석 시각 |
+
+### alert_history
+
+> 배치 알림 발송 이력. PK = `id` text. 중복방지 24h 윈도우 조회 대상.
+> `recordAlert`(INSERT) / `shouldSendAlert`(SELECT: symbol+alert_id+triggered_at 범위 + status IN ('sent','pending')).
+> ⚠️ `status`에 CHECK 제약 없음 — `shouldSendAlert`가 'pending'을 필터로 사용(fail-open)하므로 스키마는 값을 제한하지 않는다.
+
+| 컬럼 | 타입 | NULL | 기본값 | 설명 |
+|---|---|---|---|---|
+| `id` | TEXT | N (PK) | - | `alert_${ts}_${rand}` (코드 생성) |
+| `batch_id` | TEXT | N (FK→batch_runs, ON DELETE CASCADE) | - | 소속 배치 |
+| `symbol` | TEXT | N | - | 종목 심볼 |
+| `alert_id` | TEXT | N | - | 알림 조건 ID |
+| `priority` | TEXT | N | - | `LOW` / `MEDIUM` / `HIGH` / `CRITICAL` |
+| `triggered_at` | TIMESTAMPTZ | N | - | 트리거 시각 |
+| `message` | TEXT | N | - | 알림 메시지 |
+| `sent_at` | TIMESTAMPTZ | Y | - | `status='sent'`일 때만 |
+| `status` | TEXT | N | - | `sent` / `failed` / `skipped` |
+| `reason` | TEXT | Y | - | 스킵/실패 사유 |
+
+### 인덱스 요약 (batch_*)
+
+| 인덱스 | 대상 | 용도 |
+|---|---|---|
+| `idx_batch_analysis_results_batch` | (batch_id) | FK 조인 |
+| `idx_batch_analysis_results_symbol_analyzed` | (symbol, analyzed_at DESC) | 심볼별 최신 조회 |
+| `idx_alert_history_batch` | (batch_id) | FK 조인 |
+| `idx_alert_history_symbol_alert_triggered` | (symbol, alert_id, triggered_at DESC) | shouldSendAlert 중복확인 |
+| `idx_batch_runs_run_date` | (run_date DESC) | 일자별 조회 |
+| `idx_batch_runs_type_run_date` | (type, run_date DESC) | 타입+일자별 조회 |
+
+### RLS 요약 (batch_*)
+
+| 테이블 | 정책 | 범위 |
+|---|---|---|
+| `batch_runs` | `batch_runs_service_role_all` | `FOR ALL TO service_role USING(true) WITH CHECK(true)` |
+| `batch_analysis_results` | `batch_analysis_results_service_role_all` | 동일 |
+| `alert_history` | `alert_history_service_role_all` | 동일 |
+
+> 3개 테이블 모두 `ENABLE ROW LEVEL SECURITY`. service_role은 RLS를 우회하므로 배치는 정책 없이도 동작하나, 의도 명시 목적으로 full-access 정책을 둠. anon/authenticated 정책 없음 → 기본 차단.
+> **운영 DB 적용**: ❌ 미수행 (마이그레이션 파일 작성까지만 — 운영 DB 작업은 별도). `schema_migrations` version `20260603000001`.
 
