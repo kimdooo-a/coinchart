@@ -94,7 +94,7 @@
   }
   ```
   - `premium`: 김치 프리미엄 비율 (%, 소수점 2자리)
-  - 지원 코인: BTC, ETH, SOL, XRP, BCH, DOGE
+  - 지원 코인: BTC, ETH, SOL, XRP, BCH, DOGE, ADA, AVAX, DOT (9종, `SUPPORTED_COINS` SSOT)
 - **에러 응답**:
   - `500`: `{ "error": "Failed to fetch data", "details": "..." }`
 - **인증**: 불필요

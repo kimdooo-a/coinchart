@@ -236,7 +236,8 @@ export class AlertEngine {
         reason?: string
     ): Promise<void> {
         try {
-            await supabaseAdmin.from('alert_history').insert({
+            // PostgREST 에러는 throw가 아니라 .error로 반환되므로 명시 검사한다(silent failure 차단).
+            const { error } = await supabaseAdmin.from('alert_history').insert({
                 id: `alert_${Date.now()}_${Math.random()}`,
                 batch_id: batchId,
                 symbol,
@@ -248,9 +249,12 @@ export class AlertEngine {
                 status,
                 reason: reason || null
             });
+            if (error) {
+                this.logger.error(`[alert_history] ${symbol} 기록 실패: ${error.code} ${error.message}`);
+            }
         } catch (error: unknown) {
             const err = error as { message?: string };
-            this.logger.warn(`Failed to record alert: ${err.message}`);
+            this.logger.error(`Failed to record alert: ${err.message}`);
         }
     }
 

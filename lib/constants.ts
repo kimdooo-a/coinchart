@@ -4,7 +4,10 @@ export const SUPPORTED_COINS = [
     { symbol: 'XRP', name: 'Ripple' },
     { symbol: 'SOL', name: 'Solana' },
     { symbol: 'BCH', name: 'Bitcoin Cash' },
-    { symbol: 'DOGE', name: 'Dogecoin' }
+    { symbol: 'DOGE', name: 'Dogecoin' },
+    { symbol: 'ADA', name: 'Cardano' },
+    { symbol: 'AVAX', name: 'Avalanche' },
+    { symbol: 'DOT', name: 'Polkadot' }
 ];
 
 export const TOP_US_STOCKS = [
