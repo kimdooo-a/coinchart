@@ -41,12 +41,23 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-      // auth.setup.ts(인증 셋업) + community-admin-auth.spec.ts(로그인 필요)는 비인증 프로젝트에서 제외
-      testIgnore: [/.*\.setup\.ts$/, /community-admin-auth\.spec\.ts$/],
+      // auth.setup.ts(인증 셋업) + 로그인 필요 스펙(AD1·watchlist sync)은 비인증 프로젝트에서 제외
+      testIgnore: [
+        /.*\.setup\.ts$/,
+        /community-admin-auth\.spec\.ts$/,
+        /watchlist-member\.spec\.ts$/,
+      ],
     },
     {
       name: "admin",
       testMatch: /community-admin-auth\.spec\.ts$/,
+      dependencies: ["setup"],
+      use: { ...devices["Desktop Chrome"], storageState: ADMIN_AUTH_FILE },
+    },
+    // 세션49 — watchlist 회원 sync 런타임 스모크(R17). admin.json(회원 세션) 재사용.
+    {
+      name: "watchlist-member",
+      testMatch: /watchlist-member\.spec\.ts$/,
       dependencies: ["setup"],
       use: { ...devices["Desktop Chrome"], storageState: ADMIN_AUTH_FILE },
     },
