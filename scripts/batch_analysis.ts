@@ -9,8 +9,8 @@
  */
 
 import { createLogger } from '../lib/logger';
-import { performAnalysis } from '../lib/analysis/orchestrator';
-import { analyzeStock } from '../lib/analysis/stock';
+import { performAnalysis, type AnalysisResult } from '../lib/analysis/orchestrator';
+import { analyzeStock, type StockAnalysisResult } from '../lib/analysis/stock';
 import { generateSignals } from '../lib/analysis/signals';
 import { fetchCryptoMarketPrices } from '../lib/supabase/crypto';
 import { fetchStockPrices } from '../lib/supabase/stock';
@@ -28,12 +28,9 @@ export interface AnalysisRecord {
     symbol: string;
     assetType: 'crypto' | 'stock';
     status: 'ok' | 'error';
-    // 분석 결과 shape는 performAnalysis | analyzeStock 반환 union이지만,
-    // 소비처인 report_generator.ts(T02 영역)가 result.signals 등 union에 없는
-    // 필드를 직접 접근하므로 구체화 시 교차 파일 tsc 에러가 발생한다.
-    // 동작 보존·격리 원칙상 구체화 보류 — T02의 소비처 정리와 함께 좁혀야 함.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    result?: any;
+    // 분석 결과 shape는 performAnalysis(AnalysisResult) | analyzeStock(StockAnalysisResult) 반환 union.
+    // (R17) 소비처 report_generator.ts가 result.probability.signals로 정정되어 union 좁히기 완료.
+    result?: AnalysisResult | StockAnalysisResult;
     error?: string;
     duration: number;  // ms
     timestamp: Date;
