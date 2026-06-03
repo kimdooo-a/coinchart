@@ -60,8 +60,8 @@ COMMENT ON COLUMN batch_analysis_results.result IS '분석 결과 JSON 전체';
 --   - scripts/alert_engine.ts recordAlert(INSERT) / shouldSendAlert(SELECT)
 --   - id = `alert_${ts}_${rand}`
 --   - batch_id FK → batch_runs(id) ON DELETE CASCADE
---   - status CHECK 미적용: shouldSendAlert가 'pending'을 필터로 사용(fail-open),
---     스키마는 status 값을 제한하지 않는다(쿼리 호환).
+--   - status는 'sent' | 'failed' | 'skipped'만 기록(recordAlert). 중복방지(shouldSendAlert)는
+--     'sent' 행만 24h 윈도우로 조회한다. status CHECK는 향후 확장 여지 보존 위해 미적용.
 -- ----------------------------------------------
 CREATE TABLE IF NOT EXISTS alert_history (
   id           TEXT PRIMARY KEY,                          -- alert_${ts}_${rand}

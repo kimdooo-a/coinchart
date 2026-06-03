@@ -458,8 +458,8 @@ OR (guest_nickname IS NOT NULL
 ### alert_history
 
 > 배치 알림 발송 이력. PK = `id` text. 중복방지 24h 윈도우 조회 대상.
-> `recordAlert`(INSERT) / `shouldSendAlert`(SELECT: symbol+alert_id+triggered_at 범위 + status IN ('sent','pending')).
-> ⚠️ `status`에 CHECK 제약 없음 — `shouldSendAlert`가 'pending'을 필터로 사용(fail-open)하므로 스키마는 값을 제한하지 않는다.
+> `recordAlert`(INSERT: status는 sent/failed/skipped만) / `shouldSendAlert`(SELECT: symbol+alert_id+triggered_at 범위 + `status = 'sent'` 최신 1건 `maybeSingle`).
+> ⚠️ `status`에 CHECK 제약 없음(향후 확장 여지 보존). 중복방지는 실제 발송된 'sent' 행만 조회한다(세션48 — 죽은 'pending' 필터 제거).
 
 | 컬럼 | 타입 | NULL | 기본값 | 설명 |
 |---|---|---|---|---|

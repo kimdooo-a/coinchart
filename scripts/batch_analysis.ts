@@ -188,7 +188,7 @@ async function analyzeCryptoSymbol(
         logger.debug(`Starting analysis for ${symbol}`);
 
         // 1. Fetch market prices from Supabase
-        const prices = await fetchCryptoMarketPrices(symbol, 288);  // Last 24 hours (5min * 288)
+        const prices = await fetchCryptoMarketPrices(symbol, 288);  // 최근 288 거래일(일봉, ~1년)
 
         if (!prices || prices.length < 50) {
             logger.warn(`Insufficient data for ${symbol}: ${prices?.length || 0} candles`);
@@ -268,7 +268,7 @@ async function analyzeStockSymbol(
         logger.debug(`Starting stock analysis for ${symbol}`);
 
         // 1. Fetch stock prices from Supabase
-        const prices = await fetchStockPrices(symbol, 288);
+        const prices = await fetchStockPrices(symbol, 288);  // 최근 288 거래일(일봉, ~1년)
 
         if (!prices || prices.length < 50) {
             logger.warn(`Insufficient stock data for ${symbol}: ${prices?.length || 0} candles`);

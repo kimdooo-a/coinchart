@@ -35,8 +35,9 @@ interface YahooCandle {
 // Helper to fetch from Yahoo Finance
 async function fetchYahooData(symbol: string) {
     console.log(`Fetching ${symbol} from Yahoo Finance...`);
-    // Fetch last 5 days just to be safe and ensure we get the latest closed candle
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=5d`;
+    // 일봉 1년치(~250 거래일)를 적재한다. 분석(generateSignals)이 최소 50봉 + 지표
+    // 워밍업(ADX/ATR 14, BB 20, S/R 50봉)을 요구하므로 range=5d로는 영구 Insufficient data.
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1y`;
     try {
         const res = await fetch(url);
         if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);

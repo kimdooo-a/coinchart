@@ -192,14 +192,20 @@ export class AlertEngine {
             // 최근 24시간 이내 발송된 동일 알림 확인
             const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
+            // 중복방지: 24h 윈도우 내 실제 '발송된(sent)' 동일 알림만 조회한다.
+            // recordAlert는 status를 sent/failed/skipped만 기록하므로 'pending'은 존재하지
+            // 않는 죽은 조건이었다. 또한 동일 알림이 24h 내 2건 이상이면 .single()이 에러를
+            // 던져 fail-open으로 중복 발송되던 잠재 버그가 있어, 최신 1건만 maybeSingle로 받는다.
             const result = await supabaseAdmin
                 .from('alert_history')
                 .select('*')
                 .eq('symbol', symbol)
                 .eq('alert_id', alertId)
                 .gte('triggered_at', twentyFourHoursAgo.toISOString())
-                .in('status', ['sent', 'pending'])
-                .single();
+                .eq('status', 'sent')
+                .order('triggered_at', { ascending: false })
+                .limit(1)
+                .maybeSingle();
 
             if (result.data) {
                 const minutesAgo = Math.floor(
