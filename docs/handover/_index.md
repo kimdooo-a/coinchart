@@ -7,6 +7,7 @@
 
 | # | 날짜 | 세션 | handover |
 |---|------|------|----------|
+| 49 | 2026-06-03 | 양평 통지 송신 + R17 잔여 마감 (watchlist sync E2E 스모크) | [→](./2026-06-03-session49-watchlist-sync-e2e.md) |
 | 48 | 2026-06-03 | alert 'pending' 정리 + 일봉 적재 깊이 확대 | [→](./2026-06-03-session48-alert-pending-daily-candle.md) |
 | 47 | 2026-06-03 | PGRST205 종료 + R17 교차결합 정리 (kdyswarm 2트랙) | [→](./2026-06-03-session47-batch-tables-r17.md) |
 | 46 | 2026-06-03 | 양평 조치 회신 — batch SSOT 정렬 + supabaseAdmin lazy + insert silent failure 차단 | [→](./2026-06-03-session46-batch-ssot-lazy-silentfailure.md) |
