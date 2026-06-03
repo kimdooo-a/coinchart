@@ -104,10 +104,12 @@ export class ReportGenerator {
             }
 
             // Count signals
-            if (result.signals) {
-                for (const signal of result.signals) {
-                    if (signal.type === 'buy') buySignals++;
-                    else if (signal.type === 'sell') sellSignals++;
+            // signals는 result 최상위가 아니라 ProbabilityResult 내부(result.probability.signals)에 위치.
+            // IndicatorSignal.signal 필드는 'BUY' | 'SELL' | 'NEUTRAL'(대문자) 열거값이다.
+            if (result.probability?.signals) {
+                for (const signal of result.probability.signals) {
+                    if (signal.signal === 'BUY') buySignals++;
+                    else if (signal.signal === 'SELL') sellSignals++;
                 }
             }
 
@@ -182,7 +184,7 @@ export class ReportGenerator {
             if (record.status === 'ok' && record.result) {
                 const r = record.result;
                 const probability = r.probability?.probability || 'N/A';
-                const signals = r.signals?.length || 0;
+                const signals = r.probability?.signals?.length || 0;
                 const grade = r.confidence?.grade || 'N/A';
 
                 md += `| ${record.symbol} | ✅ | ${probability}% | ${signals} | ${grade} |\n`;

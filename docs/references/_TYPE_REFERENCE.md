@@ -499,3 +499,15 @@
   - `ClassifyResult { coinTag; category; sentiment; importance; sentimentScore; matchedKeywords }`
 - 키워드 사전: COIN_KEYWORDS(8그룹), CATEGORY_KEYWORDS(8그룹), POSITIVE_KEYWORDS(23개), NEGATIVE_KEYWORDS(23개), SOURCE_WEIGHTS(9개)
 - 소비자: T06 (news-crawl 통합), T15 (메인페이지 최신 뉴스 표시)
+
+### 배치 분석 타입 (scripts/batch_analysis.ts, report_generator.ts) (R17 2026-06-03, T2)
+- `AnalysisRecord` — 배치 분석 단일 심볼 결과 레코드
+  - `symbol: string`
+  - `assetType: 'crypto' | 'stock'`
+  - `status: 'ok' | 'error'`
+  - **`result?: AnalysisResult | StockAnalysisResult`** — R17에서 `any` → union으로 확정.
+    - `AnalysisResult` = `lib/analysis/orchestrator.ts` (performAnalysis 반환)
+    - `StockAnalysisResult` = `lib/analysis/stock.ts` (analyzeStock 반환)
+    - signals는 최상위가 아니라 `result.probability.signals`(`ProbabilityResult.signals: IndicatorSignal[]`)에 위치
+  - `error?: string`, `duration: number`, `timestamp: Date`
+- 소비처 `report_generator.ts`: buy/sell 카운트는 `result.probability.signals`를 순회하며 `signal.signal === 'BUY' | 'SELL'`(대문자)로 집계 (R16의 `result.signals` + `signal.type` 오접근 정정)
