@@ -7,6 +7,7 @@
 
 | # | 날짜 | 세션 | handover |
 |---|------|------|----------|
+| 47 | 2026-06-03 | PGRST205 종료 + R17 교차결합 정리 (kdyswarm 2트랙) | [→](./2026-06-03-session47-batch-tables-r17.md) |
 | 46 | 2026-06-03 | 양평 조치 회신 — batch SSOT 정렬 + supabaseAdmin lazy + insert silent failure 차단 | [→](./2026-06-03-session46-batch-ssot-lazy-silentfailure.md) |
 | 45 | 2026-06-03 | 양평 cron 실행 요청 송신 + ypmsg_coinchart 전용 스킬 | [→](./2026-06-03-session45-ypmsg-coinchart.md) |
 | 44 | 2026-06-02 | daily-cron 자체호스팅 런북 + 메신저 온보딩 | [→](./2026-06-02-session44-daily-cron-selfhost-messenger.md) |

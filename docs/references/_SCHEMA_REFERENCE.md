@@ -494,5 +494,5 @@ OR (guest_nickname IS NOT NULL
 | `alert_history` | `alert_history_service_role_all` | 동일 |
 
 > 3개 테이블 모두 `ENABLE ROW LEVEL SECURITY`. service_role은 RLS를 우회하므로 배치는 정책 없이도 동작하나, 의도 명시 목적으로 full-access 정책을 둠. anon/authenticated 정책 없음 → 기본 차단.
-> **운영 DB 적용**: ❌ 미수행 (마이그레이션 파일 작성까지만 — 운영 DB 작업은 별도). `schema_migrations` version `20260603000001`.
+> **운영 DB 적용**: ✅ 완료 (2026-06-03, 세션 47 — Management API `database/query` 트랜잭션 적용). 검증: 3테이블 생성·컬럼(11/6/10)·인덱스·RLS 정책·FK(2) 확인 + `NOTIFY pgrst, 'reload schema'`로 PostgREST 캐시 리로드 → PGRST205 종료. `schema_migrations` version `20260603000001` backfill 완료.
 

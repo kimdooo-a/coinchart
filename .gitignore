@@ -71,3 +71,6 @@ supabase/.temp/
 
 # kdyswarm — 워크트리 병렬 실행 임시 상태
 .kdyswarm/
+
+# Claude Code Agent 워크트리 (isolation:worktree 임시 격리)
+.claude/worktrees/
