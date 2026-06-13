@@ -10,6 +10,7 @@ import { config } from 'dotenv';
 config({ path: '.env.local' });
 import { createClient } from '@supabase/supabase-js';
 import { generateHTML } from '@tiptap/html';
+import type { JSONContent } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
@@ -68,9 +69,8 @@ async function migrate() {
         continue;
       }
 
-      // TipTap JSON → HTML 변환
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const html = generateHTML(post.content as any, extensions);
+      // TipTap JSON → HTML 변환 (문자열 케이스는 위에서 skip되므로 JSON 콘텐츠로 단언)
+      const html = generateHTML(post.content as JSONContent, extensions);
 
       // DB 업데이트
       const { error: updateError } = await supabase

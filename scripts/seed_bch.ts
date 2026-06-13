@@ -2,6 +2,10 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 
+// Binance klines 응답 1행 형태: [openTime, open, high, low, close, volume, closeTime, ...]
+// 가격 필드는 문자열, 시간 필드는 숫자로 내려온다.
+type BinanceKline = [number, string, string, string, string, string, number, string, number, string, string, string];
+
 dotenv.config({ path: '.env.local' });
 dotenv.config(); // Fallback to .env
 
@@ -39,11 +43,11 @@ async function seedBCH() {
         console.log("Fetching BCHUSDT klines from Binance...");
         const url = 'https://api.binance.com/api/v3/klines?symbol=BCHUSDT&interval=1d&limit=1000';
         const response = await fetch(url);
-        const klines: any[] = await response.json();
+        const klines: BinanceKline[] = await response.json();
         console.log(`Fetched ${klines.length} candles.`);
 
         // 2. Transform Data
-        const records = klines.map((k: any[]) => ({
+        const records = klines.map((k) => ({
             symbol: 'BCHUSDT',
             date: new Date(k[0]).toISOString(), // Timestamp
             open: parseFloat(k[1]),

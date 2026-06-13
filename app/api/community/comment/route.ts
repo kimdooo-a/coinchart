@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { hashGuestPassword, verifyGuestPassword, validateGuestNickname } from "@/lib/community/auth";
+import type { ToggleLikeRow } from "@/types/community";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const isUuid = (s: string): boolean => UUID_REGEX.test(s);
@@ -137,11 +138,11 @@ export async function DELETE(req: NextRequest) {
   return NextResponse.json({ ok: true });
 }
 
-// PATCH — 댓글 추천 토글 (R3 / T08)
+// PATCH — 댓글 추천 토글 (R3 / T08 → R9 / T03 RPC 전환, 2026-06-13)
 //   body: { commentId, value?: 1 | -1 }  (value 미지정 시 1=추천)
-//   - 회원: user_id dedup / 익명: x-client-ip-hash dedup
-//   - 토글: 같은 value면 삭제(OFF), 다른 value면 전환(UPDATE)
-//   - 응답: { liked, likeCount }  (liked = value=1 추천이 활성인지)
+//   - 회원: user_id dedup (+ 본인 ip_hash 익명 추천 흡수/정리 = 회원전이 dedup) / 익명: x-client-ip-hash dedup
+//   - dedup→토글→집계를 단일 RPC(community_toggle_comment_like)로 원자 처리 (게시글 좋아요와 동일 패턴)
+//   - 응답: { liked, likeCount }  (liked = value=1 추천이 활성인지) — 기존 계약 유지
 interface CommentLikeBody {
   commentId?: unknown;
   value?: unknown;
@@ -175,62 +176,28 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "댓글 없음" }, { status: 404 });
   }
 
-  let existingQuery = admin
-    .from("community_comment_likes")
-    .select("id, value, user_id, ip_hash")
-    .eq("comment_id", commentId);
-
-  let ipHash: string | null = null;
-  if (user) {
-    existingQuery = existingQuery.eq("user_id", user.id);
-  } else {
-    ipHash = req.headers.get("x-client-ip-hash");
-    if (!ipHash) return NextResponse.json({ error: "추천 식별 헤더 없음" }, { status: 400 });
-    existingQuery = existingQuery.eq("ip_hash", ipHash);
+  // ip_hash: 회원/익명 공통으로 읽음
+  //   - 익명: dedup 식별자(필수)
+  //   - 회원: 본인 익명 추천 흡수(회원전이 dedup)용 (없어도 토글은 동작)
+  const ipHash = req.headers.get("x-client-ip-hash");
+  if (!user && !ipHash) {
+    return NextResponse.json({ error: "추천 식별 헤더 없음" }, { status: 400 });
   }
 
-  const { data: existing } = await existingQuery.maybeSingle();
+  // 원자적 토글 + 회원전이 dedup + 분리 집계 (RPC 단일 트랜잭션)
+  const { data: rows, error: rpcErr } = await admin.rpc("community_toggle_comment_like", {
+    p_comment_id: commentId,
+    p_user_id: user?.id ?? null,
+    p_ip_hash: ipHash,
+    p_value: value,
+  });
+  if (rpcErr) return NextResponse.json({ error: rpcErr.message }, { status: 500 });
 
-  let liked = false; // 최종 상태: 추천(value=1)이 활성인지 여부
+  const result = (Array.isArray(rows) ? rows[0] : rows) as ToggleLikeRow | undefined;
 
-  if (existing) {
-    if (existing.value === value) {
-      // 토글 OFF: 삭제
-      const { error: delErr } = await admin
-        .from("community_comment_likes")
-        .delete()
-        .eq("id", existing.id);
-      if (delErr) return NextResponse.json({ error: delErr.message }, { status: 500 });
-      liked = false;
-    } else {
-      // 추천 <-> 비추 전환
-      const { error: updErr } = await admin
-        .from("community_comment_likes")
-        .update({ value })
-        .eq("id", existing.id);
-      if (updErr) return NextResponse.json({ error: updErr.message }, { status: 500 });
-      liked = value === 1;
-    }
-  } else {
-    const insertRow: Record<string, unknown> = { comment_id: commentId, value };
-    if (user) insertRow.user_id = user.id;
-    else insertRow.ip_hash = ipHash;
-    const { error: insErr } = await admin
-      .from("community_comment_likes")
-      .insert(insertRow);
-    if (insErr) return NextResponse.json({ error: insErr.message }, { status: 500 });
-    liked = value === 1;
-  }
-
-  // 갱신된 like_count 재조회 (트리거가 반영)
-  const { data: refreshed } = await admin
-    .from("community_comments")
-    .select("like_count")
-    .eq("id", commentId)
-    .single();
-
+  // 응답은 기존 계약 { liked, likeCount } 유지 (dislike_count는 RPC가 반환하나 비노출)
   return NextResponse.json({
-    liked,
-    likeCount: refreshed?.like_count ?? 0,
+    liked: !!result?.liked,
+    likeCount: Number(result?.like_count ?? 0),
   });
 }

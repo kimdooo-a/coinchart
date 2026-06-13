@@ -7,7 +7,7 @@
  * - 중복 알림 방지 (24시간 윈도우)
  */
 
-import { AnalysisRecord } from './batch_analysis';
+import { AnalysisRecord, BatchAnalysisResult } from './batch_analysis';
 import { createLogger } from '../lib/logger';
 import { supabaseAdmin } from '../lib/supabaseAdmin';
 
@@ -16,8 +16,10 @@ export interface Alert {
     name: string;
     symbol: string;
     type: 'state_change' | 'metric_threshold' | 'comparison';
-    condition: (current: any, previous?: any) => boolean;
-    message: (current: any, previous?: any) => string;
+    // 조건 평가는 previous 부재(null) 시 항상 false를 반환하므로 previous를 nullable로 받는다.
+    condition: (current: BatchAnalysisResult, previous: BatchAnalysisResult | null) => boolean;
+    // message는 조건이 true일 때(=previous 존재)만 호출되므로 previous를 non-null로 받는다.
+    message: (current: BatchAnalysisResult, previous: BatchAnalysisResult) => string;
     priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 }
 
@@ -200,12 +202,13 @@ export class AlertEngine {
             }
 
             return { should: true };
-        } catch (error: any) {
+        } catch (error: unknown) {
             // If table doesn't exist, allow send
-            if (error.code === 'PGRST116') {
+            if (error && typeof error === 'object' && 'code' in error && error.code === 'PGRST116') {
                 return { should: true };
             }
-            this.logger.warn(`Error checking alert history: ${error.message}`);
+            const message = error instanceof Error ? error.message : String(error);
+            this.logger.warn(`Error checking alert history: ${message}`);
             return { should: true };  // Fail-open: send if unsure
         }
     }
@@ -235,8 +238,9 @@ export class AlertEngine {
                 status,
                 reason: reason || null
             });
-        } catch (error: any) {
-            this.logger.warn(`Failed to record alert: ${error.message}`);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            this.logger.warn(`Failed to record alert: ${message}`);
         }
     }
 
@@ -259,8 +263,8 @@ export class AlertEngine {
      * Evaluate all conditions for a symbol
      */
     private evaluateConditions(
-        current: any,
-        previous: any,
+        current: BatchAnalysisResult,
+        previous: BatchAnalysisResult | null,
         symbol: string
     ): AlertResult[] {
         const results: AlertResult[] = [];
@@ -274,7 +278,8 @@ export class AlertEngine {
             try {
                 const triggered = condition.condition(current, previous);
                 if (triggered) {
-                    const message = condition.message(current, previous);
+                    // 조건이 true면 condition 내부 가드(!previous→false)상 previous는 non-null이 보장된다.
+                    const message = condition.message(current, previous!);
                     results.push({
                         symbol,
                         alertId: condition.id,
@@ -283,9 +288,10 @@ export class AlertEngine {
                         priority: condition.priority
                     });
                 }
-            } catch (error: any) {
+            } catch (error: unknown) {
+                const message = error instanceof Error ? error.message : String(error);
                 this.logger.warn(
-                    `Error evaluating condition ${condition.id} for ${symbol}: ${error.message}`
+                    `Error evaluating condition ${condition.id} for ${symbol}: ${message}`
                 );
             }
         }
@@ -368,9 +374,10 @@ export class AlertEngine {
                         status: 'sent',
                         message: alert.message
                     });
-                } catch (error: any) {
+                } catch (error: unknown) {
+                    const message = error instanceof Error ? error.message : String(error);
                     this.logger.error(
-                        `[FAIL] ${record.symbol} ${alert.alertId}: ${error.message}`
+                        `[FAIL] ${record.symbol} ${alert.alertId}: ${message}`
                     );
                     processResult.failed++;
                     await this.recordAlert(
@@ -380,14 +387,14 @@ export class AlertEngine {
                         alert.priority!,
                         alert.message!,
                         'failed',
-                        error.message
+                        message
                     );
 
                     processResult.results.push({
                         symbol: record.symbol,
                         alertId: alert.alertId,
                         status: 'failed',
-                        reason: error.message
+                        reason: message
                     });
                 }
             }

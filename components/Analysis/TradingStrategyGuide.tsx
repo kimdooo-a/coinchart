@@ -1,6 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import type { TradingStyle, EntryStyle, TStrings } from './TradingStrategyGuide/types';
+import { AIAdviceSection } from './TradingStrategyGuide/AIAdviceSection';
+import { ConfigSection } from './TradingStrategyGuide/ConfigSection';
+import { EntryPlanSection } from './TradingStrategyGuide/EntryPlanSection';
 
 interface Props {
     currentPrice: number;
@@ -15,21 +19,17 @@ interface Props {
     };
 }
 
-type TradingStyle = 'trend' | 'reversal' | 'breakout';
-type EntryStyle = 'conservative' | 'aggressive';
-
 export const TradingStrategyGuide: React.FC<Props> = ({ currentPrice, lang, analysis }) => {
-    // User selections
+    // 사용자 선택 상태 (부모 보유)
     const [tradingStyle, setTradingStyle] = useState<TradingStyle>('trend');
     const [entryStyle, setEntryStyle] = useState<EntryStyle>('conservative');
     const [stopLossPercent, setStopLossPercent] = useState<number>(3.0);
 
-    // AI Advice Logic
+    // AI 조언 로직
     const getAIAdvice = () => {
         if (!analysis) return null;
 
-        // Use the robust pre-calculated win rate from AnalysisResult
-        // Fallback to 50 if undefined or 0 (though analyzeMarket handles this)
+        // AnalysisResult에서 미리 계산된 승률 사용. undefined/0이면 50으로 폴백.
         const avgWinRate = analysis.winRate ?? 50;
 
         const isStrongBuy = analysis.recommendation.includes('STRONG BUY') || analysis.recommendation.includes('강력 매수');
@@ -50,21 +50,21 @@ export const TradingStrategyGuide: React.FC<Props> = ({ currentPrice, lang, anal
                 recStyle = 'aggressive';
                 recTradingStyle = 'trend';
                 recStopLoss = 3.5;
-                color = 'text-green-400 border-green-500 bg-green-900/20';
+                color = 'bg-green-50 text-green-700 border-green-300';
             } else if (isBuy) {
                 title = `📈 매수 우위 (상승 확률 ${avgWinRate}%)`;
                 desc = `일반적인 상승 흐름입니다. '추세 추종' 스타일로 안전하게 눌림목을 노리세요. 손절 기준: -5.0%.`;
                 recStyle = 'conservative';
                 recTradingStyle = 'trend';
                 recStopLoss = 5.0;
-                color = 'text-green-300 border-green-500/50 bg-green-900/10';
+                color = 'bg-green-50 text-green-700 border-green-200';
             } else if (isSell) {
                 title = `📉 하락세 우세 (상승 확률 ${avgWinRate}%)`;
                 desc = `하락압력이 셉니다. '역추세' 관점으로 지지선 반등을 노리거나 관망하세요. 손절은 -4.0% 필수.`;
                 recStyle = 'conservative';
                 recTradingStyle = 'reversal';
                 recStopLoss = 4.0;
-                color = 'text-red-400 border-red-500 bg-red-900/20';
+                color = 'bg-red-50 text-red-700 border-red-300';
             } else {
                 title = `👀 변동성 축소/관망 (상승 확률 ${avgWinRate}%)`;
                 desc = `방향성이 없습니다. '돌파 매매'를 준비하거나 확실한 움직임을 기다리세요. 손절 -3.0%.`;
@@ -80,21 +80,21 @@ export const TradingStrategyGuide: React.FC<Props> = ({ currentPrice, lang, anal
                 recStyle = 'aggressive';
                 recTradingStyle = 'trend';
                 recStopLoss = 3.5;
-                color = 'text-green-400 border-green-500 bg-green-900/20';
+                color = 'bg-green-50 text-green-700 border-green-300';
             } else if (isBuy) {
                 title = `📈 Buy Signal (Win Rate ${avgWinRate}%)`;
                 desc = "Stable uptrend. Recommend 'Trend Following' (Conservative). Stop Loss -5.0%.";
                 recStyle = 'conservative';
                 recTradingStyle = 'trend';
                 recStopLoss = 5.0;
-                color = 'text-green-300 border-green-500/50 bg-green-900/10';
+                color = 'bg-green-50 text-green-700 border-green-200';
             } else if (isSell) {
                 title = `📉 Downside Risk (Win Rate ${avgWinRate}%)`;
                 desc = "Bearish pressure. Wait for 'Reversal' or stay out. Stop Loss -4.0%.";
                 recStyle = 'conservative';
                 recTradingStyle = 'reversal';
                 recStopLoss = 4.0;
-                color = 'text-red-400 border-red-500 bg-red-900/20';
+                color = 'bg-red-50 text-red-700 border-red-300';
             } else {
                 title = `👀 Wait & See (Win Rate ${avgWinRate}%)`;
                 desc = "No clear direction. Prepare for 'Breakout'. Stop Loss -3.0%.";
@@ -110,7 +110,7 @@ export const TradingStrategyGuide: React.FC<Props> = ({ currentPrice, lang, anal
 
     const aiAdvice = getAIAdvice();
 
-    // Auto-select recommended style on load if changed
+    // 로드 시 추천 스타일 자동 선택
     useEffect(() => {
         if (aiAdvice) {
             setEntryStyle(aiAdvice.recStyle);
@@ -120,7 +120,7 @@ export const TradingStrategyGuide: React.FC<Props> = ({ currentPrice, lang, anal
     }, [analysis]);
 
 
-    const t = {
+    const t: TStrings = {
         title: lang === 'ko' ? '🎓 AI 매매 전략 가이드' : '🎓 AI Trading Strategy',
         styles: {
             trend: lang === 'ko' ? '🌊 추세 추종 (Trend)' : '🌊 Trend Following',
@@ -153,10 +153,10 @@ export const TradingStrategyGuide: React.FC<Props> = ({ currentPrice, lang, anal
         }
     };
 
-    // Calculate Entry Levels based on Trading Style
+    // 매매 스타일 기반 진입 가격 계산
     const getEntryLevels = () => {
         let entryPrice = currentPrice;
-        let drops = [0, 0, 0]; // Percent drops/gaps for 1st, 2nd, 3rd entry
+        let drops = [0, 0, 0]; // 1·2·3차 진입의 하락 갭(%)
 
         if (analysis?.priceLevels) {
             const support = Array.isArray(analysis.priceLevels.support) ? analysis.priceLevels.support[0] : analysis.priceLevels.support;
@@ -164,31 +164,26 @@ export const TradingStrategyGuide: React.FC<Props> = ({ currentPrice, lang, anal
 
             switch (tradingStyle) {
                 case 'trend':
-                    // Trend: Market Entry
+                    // 추세: 시장가 진입
                     entryPrice = currentPrice;
                     drops = [0, 0.02, 0.05]; // 0%, -2%, -5%
                     break;
                 case 'reversal':
-                    // Reversal: Limit Entry at Support (or near it)
-                    // If Support is far below, we set 1st entry at Support.
-                    // If Support is very close, we use it directly.
+                    // 역추세: 지지선 근처 지정가 진입
                     entryPrice = support && support > currentPrice ? currentPrice : (support || currentPrice);
-                    // Entries: Support, Support-2%, Support-5%
                     drops = [0, 0.02, 0.05];
                     break;
                 case 'breakout':
-                    // Breakout: Stop Entry at Resistance
-                    // If Resistance is above current, we set entry there.
+                    // 돌파: 저항선 돌파 시 진입
                     entryPrice = resistance && resistance < currentPrice ? currentPrice : (resistance || currentPrice);
-                    // Entries: Breakout Level, Retest (-1% of breakout), Retest fail (-3%)
                     drops = [0, 0.01, 0.03];
                     break;
             }
         } else {
-            // Fallback if no analysis data
+            // 분석 데이터 없을 때 폴백
             switch (tradingStyle) {
                 case 'trend': drops = [0, 0.02, 0.05]; break;
-                case 'reversal': drops = [0.03, 0.05, 0.08]; break; // Naive fallback
+                case 'reversal': drops = [0.03, 0.05, 0.08]; break;
                 case 'breakout': drops = [0, 0.01, 0.025]; break;
             }
         }
@@ -197,8 +192,7 @@ export const TradingStrategyGuide: React.FC<Props> = ({ currentPrice, lang, anal
     };
 
     const entryLevels = getEntryLevels();
-    // Stop Loss should be relative to the 1st Entry Price (the primary entry), not current price.
-    // If we enter at Support (lower), Stop Loss is lower. If at Resistance (higher), Stop Loss is higher.
+    // 손절은 현재가가 아닌 1차 진입가 기준으로 계산.
     const stopLossPrice = entryLevels[0] * (1 - stopLossPercent / 100);
 
     const getSplitRatios = () => {
@@ -206,47 +200,11 @@ export const TradingStrategyGuide: React.FC<Props> = ({ currentPrice, lang, anal
     };
     const splits = getSplitRatios();
 
-    // Recommend entry comments logic
-    const getEntryComment = (index: number) => {
-        const isTrend = tradingStyle === 'trend';
-        const isReversal = tradingStyle === 'reversal';
-        const isBreakout = tradingStyle === 'breakout';
-
-        if (lang === 'en') {
-            if (index === 0) {
-                if (isTrend) return 'Market Buy\n(Current)';
-                if (isReversal) return 'Limit Buy\n(Support Lv)';
-                if (isBreakout) return 'Stop Buy\n(Resistance Lv)';
-            }
-            if (index === 1) return isBreakout ? 'Retest Level' : 'DCA Level 1';
-            if (index === 2) return isBreakout ? 'Last Defense' : 'Major Support';
-        } else {
-            if (index === 0) {
-                if (isTrend) return '시장가 진입\n(현재 추세)';
-                if (isReversal) return '지정가 매수\n(지지선 공략)';
-                if (isBreakout) return '돌파 매수(Stop)\n(저항선 돌파)';
-            }
-            if (index === 1) return isBreakout ? '리테스트 구간' : '1차 물타기/조정';
-            if (index === 2) return isBreakout ? '마지노선' : '2차 강력 지지';
-        }
-        return '';
-    };
-
-
     return (
         <div className="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden mt-6 shadow-lg">
 
-            {/* AI Summary Section */}
-            {aiAdvice && (
-                <div className={`p-5 border-b border-outline-variant ${aiAdvice.color}`}>
-                    <h3 className="text-lg md:text-xl font-bold mb-1 flex items-center gap-2">
-                        {aiAdvice.title}
-                    </h3>
-                    <p className="text-sm md:text-base opacity-90 leading-relaxed">
-                        {aiAdvice.desc}
-                    </p>
-                </div>
-            )}
+            {/* AI 요약 섹션 */}
+            {aiAdvice && <AIAdviceSection aiAdvice={aiAdvice} />}
 
             <div className="bg-surface-container p-4 border-b border-outline-variant">
                 <h3 className="text-lg font-bold text-on-surface flex items-center gap-2">
@@ -255,117 +213,29 @@ export const TradingStrategyGuide: React.FC<Props> = ({ currentPrice, lang, anal
             </div>
 
             <div className="p-5 space-y-6">
-                {/* 1. Configuration Section */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Trading Style Selector */}
-                    <div className="space-y-2">
-                        <label className="text-xs text-on-surface-variant font-bold uppercase tracking-wider">{t.labels.tradingStyle}</label>
-                        <div className="grid grid-cols-3 gap-2">
-                            {(['trend', 'reversal', 'breakout'] as const).map(style => (
-                                <button
-                                    key={style}
-                                    onClick={() => setTradingStyle(style)}
-                                    className={`p-2 rounded-lg text-xs md:text-sm font-bold border transition-all ${tradingStyle === style
-                                        ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/50'
-                                        : 'bg-surface-container border-outline-variant text-on-surface-variant hover:bg-surface-container-high'
-                                        }`}
-                                >
-                                    {t.styles[style].split(' (')[0]}
-                                </button>
-                            ))}
-                        </div>
-                        <p className="text-xs text-on-surface-variant mt-1 pl-1">
-                            {t.descriptions[tradingStyle]}
-                        </p>
-                    </div>
-
-                    {/* Entry Style & Risk */}
-                    <div className="space-y-4">
-                        <div className="space-y-2">
-                            <label className="text-xs text-on-surface-variant font-bold uppercase tracking-wider">{t.labels.entryStyle}</label>
-                            <div className="flex bg-surface-container rounded-lg p-1">
-                                {(['conservative', 'aggressive'] as const).map(style => (
-                                    <button
-                                        key={style}
-                                        onClick={() => setEntryStyle(style)}
-                                        className={`flex-1 py-1.5 rounded text-xs font-bold transition-all ${entryStyle === style
-                                            ? 'bg-surface-container-highest text-on-surface shadow'
-                                            : 'text-on-surface-variant hover:text-on-surface'
-                                            }`}
-                                    >
-                                        {t.entryStyles[style].split(' (')[0]}
-                                    </button>
-                                ))}
-                            </div>
-                            <p className="text-xs text-on-surface-variant pl-1">
-                                {entryStyle === 'conservative' ? t.descriptions.safe_split : t.descriptions.agg_split}
-                            </p>
-                        </div>
-
-                        <div className="space-y-2">
-                            <div className="flex justify-between items-end">
-                                <label className="text-xs text-on-surface-variant font-bold uppercase tracking-wider">{t.labels.stopLoss}</label>
-                                <span className="text-red-400 font-bold font-mono text-sm">-{stopLossPercent}%</span>
-                            </div>
-                            <input
-                                type="range" min="1" max="15" step="0.5"
-                                value={stopLossPercent}
-                                onChange={(e) => setStopLossPercent(Number(e.target.value))}
-                                className="w-full h-2 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-red-500"
-                            />
-                        </div>
-                    </div>
-                </div>
+                {/* 1. 설정 섹션 */}
+                <ConfigSection
+                    t={t}
+                    tradingStyle={tradingStyle}
+                    setTradingStyle={setTradingStyle}
+                    entryStyle={entryStyle}
+                    setEntryStyle={setEntryStyle}
+                    stopLossPercent={stopLossPercent}
+                    setStopLossPercent={setStopLossPercent}
+                />
 
                 <div className="h-px bg-outline-variant w-full" />
 
-                {/* 2. Results Section (Entry Plan) */}
-                <div>
-                    <h4 className="text-sm font-bold text-on-surface mb-3 flex items-center gap-2">
-                        {t.labels.entryPlan}
-                    </h4>
-
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                        {/* Entry 1, 2, 3 */}
-                        {[0, 1, 2].map((idx) => (
-                            <div key={idx} className={`relative p-3 rounded-xl border flex flex-col justify-between ${idx === 0 ? 'bg-blue-900/20 border-blue-500/50' : 'bg-surface-container/80 border-outline-variant border-dashed'
-                                }`}>
-                                <div className="mb-2">
-                                    <span className="text-xs font-bold text-on-surface-variant block mb-1">
-                                        {idx + 1}차 진입 ({splits[idx]}%)
-                                    </span>
-                                    <span className="text-xs text-on-surface-variant whitespace-pre-line leading-relaxed">
-                                        {getEntryComment(idx)}
-                                    </span>
-                                </div>
-                                <div className="text-lg md:text-xl font-black text-on-surface font-mono tracking-tight">
-                                    ${entryLevels[idx].toLocaleString(undefined, { maximumFractionDigits: 4 })}
-                                </div>
-                                {idx > 0 && (
-                                    <span className="absolute top-2 right-2 text-[10px] bg-surface-container-high text-on-surface px-1.5 py-0.5 rounded">
-                                        -{((1 - entryLevels[idx] / currentPrice) * 100).toFixed(1)}%
-                                    </span>
-                                )}
-                            </div>
-                        ))}
-
-                        {/* Stop Loss Card */}
-                        <div className="p-3 rounded-xl border bg-red-900/10 border-red-500/50 flex flex-col justify-between relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-8 h-8 bg-red-500/10 rounded-bl-xl"></div>
-                            <div className="mb-2">
-                                <span className="text-xs font-bold text-red-400 block mb-1">
-                                    STOP LOSS
-                                </span>
-                                <span className="text-xs text-red-300/70">
-                                    자동 매도 (손절)
-                                </span>
-                            </div>
-                            <div className="text-lg md:text-xl font-black text-red-400 font-mono tracking-tight">
-                                ${stopLossPrice.toLocaleString(undefined, { maximumFractionDigits: 4 })}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                {/* 2. 결과 섹션 (진입 계획표) */}
+                <EntryPlanSection
+                    t={t}
+                    entryLevels={entryLevels}
+                    splits={splits}
+                    stopLossPrice={stopLossPrice}
+                    currentPrice={currentPrice}
+                    tradingStyle={tradingStyle}
+                    lang={lang}
+                />
             </div>
         </div>
     );

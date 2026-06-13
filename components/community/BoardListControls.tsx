@@ -81,6 +81,7 @@ export default function BoardListControls({
           <select
             value={sort}
             onChange={(e) => router.push(buildUrl({ sort: e.target.value as BoardSortKey }))}
+            aria-label="정렬 기준"
             className="appearance-none bg-surface-container-lowest border border-outline-variant rounded-md text-body-sm px-3 py-1.5 pr-8 cursor-pointer"
           >
             <option value="latest">최신순</option>
@@ -96,6 +97,7 @@ export default function BoardListControls({
           <input
             type="text"
             placeholder="제목 검색"
+            aria-label="제목 검색"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             onKeyDown={(e) => {

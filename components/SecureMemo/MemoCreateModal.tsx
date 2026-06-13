@@ -102,6 +102,7 @@ export function MemoCreateModal({ isOpen, onClose, onSuccess, userId, t }: MemoC
                 >
                     <button
                         onClick={handleClose}
+                        aria-label="닫기"
                         className="absolute top-4 right-4 text-on-surface-variant hover:text-foreground transition-colors"
                     >
                         <X className="w-5 h-5" />
@@ -112,8 +113,9 @@ export function MemoCreateModal({ isOpen, onClose, onSuccess, userId, t }: MemoC
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {/* Title */}
                         <div>
-                            <label className="block text-xs text-on-surface-variant mb-1">{t.memoTitle}</label>
+                            <label htmlFor="memo-create-title" className="block text-xs text-on-surface-variant mb-1">{t.memoTitle}</label>
                             <input
+                                id="memo-create-title"
                                 type="text"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
@@ -125,8 +127,9 @@ export function MemoCreateModal({ isOpen, onClose, onSuccess, userId, t }: MemoC
 
                         {/* Content */}
                         <div>
-                            <label className="block text-xs text-on-surface-variant mb-1">{t.memoContent}</label>
+                            <label htmlFor="memo-create-content" className="block text-xs text-on-surface-variant mb-1">{t.memoContent}</label>
                             <textarea
+                                id="memo-create-content"
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
                                 className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:border-indigo-500 min-h-[150px] resize-none"
@@ -137,8 +140,9 @@ export function MemoCreateModal({ isOpen, onClose, onSuccess, userId, t }: MemoC
 
                         {/* Password */}
                         <div>
-                            <label className="block text-xs text-on-surface-variant mb-1">{t.password}</label>
+                            <label htmlFor="memo-create-password" className="block text-xs text-on-surface-variant mb-1">{t.password}</label>
                             <input
+                                id="memo-create-password"
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -149,8 +153,9 @@ export function MemoCreateModal({ isOpen, onClose, onSuccess, userId, t }: MemoC
 
                         {/* Confirm Password */}
                         <div>
-                            <label className="block text-xs text-on-surface-variant mb-1">{t.confirmPassword}</label>
+                            <label htmlFor="memo-create-confirm-password" className="block text-xs text-on-surface-variant mb-1">{t.confirmPassword}</label>
                             <input
+                                id="memo-create-confirm-password"
                                 type="password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}

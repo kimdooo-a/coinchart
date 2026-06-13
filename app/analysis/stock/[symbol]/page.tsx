@@ -31,7 +31,7 @@ export default function StockAnalysisDetailPage({ params }: StockAnalysisPagePro
             <div className="max-w-7xl mx-auto space-y-6 md:space-y-8">
                 {/* Header */}
                 <header className="border-b border-outline-variant pb-6">
-                    <h1 className="text-3xl font-bold text-green-400">
+                    <h1 className="text-3xl font-bold text-green-600">
                         📈 {symbol} - Stock Analysis
                     </h1>
                     <p className="text-on-surface-variant mt-2">

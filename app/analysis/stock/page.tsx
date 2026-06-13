@@ -26,7 +26,7 @@ export default function StockAnalysisPage() {
             <div className="max-w-7xl mx-auto space-y-6 md:space-y-8">
                 {/* Header */}
                 <header className="border-b border-outline-variant pb-6">
-                    <h1 className="text-3xl font-bold text-green-400">{t.title}</h1>
+                    <h1 className="text-3xl font-bold text-green-600">{t.title}</h1>
                     <p className="text-on-surface-variant mt-2">{t.subtitle}</p>
                 </header>
 

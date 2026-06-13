@@ -15,6 +15,19 @@ import { generateSignals } from '../lib/analysis/signals';
 import { fetchCryptoMarketPrices } from '../lib/supabase/crypto';
 import { fetchStockPrices } from '../lib/supabase/stock';
 import { supabaseAdmin } from '../lib/supabaseAdmin';
+import type { ProbabilityResult, ConfidenceResult } from '../types/probability';
+
+/**
+ * 배치 분석 결과 중 소비처(report_generator·alert_engine)가 실제로 읽는 필드만
+ * 모은 구조적 타입. 확률/신뢰도 내부 형태는 기존 분석 반환 타입(ProbabilityResult·
+ * ConfidenceResult)을 Pick으로 재사용한다. signals는 소비처가 선택적으로 탐색하는
+ * 신호 요약 필드(실제 분석 결과엔 없을 수 있어 optional)이다.
+ */
+export interface BatchAnalysisResult {
+    probability: Pick<ProbabilityResult, 'probability'>;
+    confidence: Pick<ConfidenceResult, 'grade'>;
+    signals?: Array<{ type?: string }>;
+}
 
 export interface BatchOptions {
     type: 'daily' | 'weekly';
@@ -27,7 +40,7 @@ export interface AnalysisRecord {
     symbol: string;
     assetType: 'crypto' | 'stock';
     status: 'ok' | 'error';
-    result?: any;
+    result?: BatchAnalysisResult;
     error?: string;
     duration: number;  // ms
     timestamp: Date;
@@ -226,13 +239,14 @@ async function analyzeCryptoSymbol(
             duration: Date.now() - startTime,
             timestamp: new Date()
         };
-    } catch (error: any) {
-        logger.warn(`✗ ${symbol} analysis failed: ${error.message}`);
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        logger.warn(`✗ ${symbol} analysis failed: ${message}`);
         return {
             symbol,
             assetType: 'crypto',
             status: 'error',
-            error: error.message,
+            error: message,
             duration: Date.now() - startTime,
             timestamp: new Date()
         };
@@ -305,13 +319,14 @@ async function analyzeStockSymbol(
             duration: Date.now() - startTime,
             timestamp: new Date()
         };
-    } catch (error: any) {
-        logger.warn(`✗ ${symbol} stock analysis failed: ${error.message}`);
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        logger.warn(`✗ ${symbol} stock analysis failed: ${message}`);
         return {
             symbol,
             assetType: 'stock',
             status: 'error',
-            error: error.message,
+            error: message,
             duration: Date.now() - startTime,
             timestamp: new Date()
         };
@@ -444,11 +459,13 @@ export async function runBatchAnalysis(
             results,
             logs: []  // In production, load from log file
         };
-    } catch (error: any) {
-        logger.error(`[FATAL] Unexpected error: ${error.message}`);
-        logger.error(error.stack);
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        const stack = error instanceof Error ? error.stack : undefined;
+        logger.error(`[FATAL] Unexpected error: ${message}`);
+        logger.error(stack);
 
-        await recordBatchFailed(batchId, error.message);
+        await recordBatchFailed(batchId, message);
 
         const duration = Date.now() - startTime;
         return {

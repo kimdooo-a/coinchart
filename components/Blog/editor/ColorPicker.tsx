@@ -38,7 +38,7 @@ export default function ColorPicker({ currentColor, onColorChange, children, tit
         className={`p-2 rounded-lg transition-colors ${
           currentColor && currentColor !== '#000000'
             ? 'bg-white/10 text-white'
-            : 'text-gray-400 hover:text-white hover:bg-white/10'
+            : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high'
         }`}
       >
         <div className="relative">

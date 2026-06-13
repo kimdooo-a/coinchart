@@ -75,6 +75,9 @@ export async function GET(req: Request) {
 
     } catch (error) {
         console.error('DB News Fetch Error:', error);
-        return NextResponse.json({ items: [] });
+        // R9/T04: DB 오류를 200으로 은폐하지 않고 503(서비스 일시 불가)로 명시.
+        // items: [] 필드는 유지해 프론트가 배열을 안전하게 읽되, 상태코드로 "오류"를 구분.
+        const message = error instanceof Error ? error.message : 'unknown error';
+        return NextResponse.json({ items: [], error: message }, { status: 503 });
     }
 }

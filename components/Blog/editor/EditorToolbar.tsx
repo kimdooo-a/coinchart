@@ -57,7 +57,7 @@ function ToolButton({
           ? 'bg-primary text-white'
           : disabled
             ? 'text-gray-600 cursor-not-allowed'
-            : 'text-gray-400 hover:text-white hover:bg-white/10'
+            : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high'
       }`}
     >
       {children}
@@ -342,7 +342,7 @@ export default function EditorToolbar({
             className={`px-3 py-1.5 text-xs font-medium transition-colors ${
               viewMode === mode
                 ? 'bg-primary text-white'
-                : 'text-gray-400 hover:text-white'
+                : 'text-on-surface-variant hover:text-on-surface'
             }`}
           >
             {mode === 'wysiwyg' ? '편집' : mode === 'html' ? 'HTML' : '미리보기'}

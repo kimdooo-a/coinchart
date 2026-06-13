@@ -15,6 +15,22 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
+// Yahoo Finance chart API 응답 중 본 스크립트가 사용하는 필드만 정의
+interface YahooQuote {
+    open: (number | null)[]
+    high: (number | null)[]
+    low: (number | null)[]
+    close: (number | null)[]
+    volume: (number | null)[]
+}
+interface YahooChartResult {
+    timestamp?: number[]
+    indicators: { quote: YahooQuote[] }
+}
+interface YahooChartResponse {
+    chart?: { result?: YahooChartResult[] }
+}
+
 const COINS = ['BTC-USD', 'ETH-USD', 'XRP-USD', 'SOL-USD', 'BCH-USD', 'DOGE-USD']
 const STOCKS = ['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'AMZN', 'META', 'TSLA', 'BRK-B', 'LLY', 'AVGO']
 const FOREX = ['KRW=X'] // USD to KRW
@@ -25,7 +41,7 @@ async function fetchYahooData(symbol: string, type: 'CRYPTO' | 'STOCK' | 'FOREX'
         // Fetch 3 years of 1-day interval data
         const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=3y`
         const res = await fetch(url)
-        const data = await res.json()
+        const data: YahooChartResponse = await res.json()
 
         if (!data.chart || !data.chart.result || data.chart.result.length === 0) {
             console.error(`No data found for ${symbol}`)
@@ -47,7 +63,7 @@ async function fetchYahooData(symbol: string, type: 'CRYPTO' | 'STOCK' | 'FOREX'
             close: quote.close[i],
             volume: quote.volume[i],
             type: type
-        })).filter((p: any) => p.close !== null)
+        })).filter((p) => p.close !== null)
 
         return prices
     } catch (error) {

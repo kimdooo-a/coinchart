@@ -21,6 +21,17 @@ function isUuid(s: string): boolean {
   return UUID_REGEX.test(s);
 }
 
+// R9/T04: 최종 update 단계의 Supabase 오류를 상태코드로 분기.
+// PostgREST RLS 거부(PGRST301) 또는 Postgres 권한 부족(42501)은 403 + 한국어 친화 메시지,
+// 그 외 실제 DB 오류만 500 유지. RLS(권한) 거부와 서버 오류가 뒤섞이지 않도록 한다.
+function mapUpdateError(error: { code?: string; message: string }): NextResponse {
+  const code = error.code ?? "";
+  if (code === "PGRST301" || code === "42501") {
+    return NextResponse.json({ error: "권한이 없습니다" }, { status: 403 });
+  }
+  return NextResponse.json({ error: error.message }, { status: 500 });
+}
+
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ slug: string; postId: string }> }
@@ -164,7 +175,7 @@ export async function PATCH(
     .update(updates)
     .eq("id", postId);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return mapUpdateError(error);
   return NextResponse.json({ ok: true });
 }
 
@@ -201,6 +212,6 @@ export async function DELETE(
     .update({ is_deleted: true })
     .eq("id", postId);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return mapUpdateError(error);
   return NextResponse.json({ ok: true });
 }

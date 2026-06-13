@@ -22,8 +22,8 @@ export interface ReportOptions {
 export interface StateChange {
     symbol: string;
     metric: string;
-    from: any;
-    to: any;
+    from: unknown;
+    to: unknown;
     percentage: number;
     severity: 'low' | 'medium' | 'high' | 'critical';
 }
@@ -72,8 +72,9 @@ export class ReportGenerator {
 
             // Default: Markdown
             return this.formatMarkdown(options, metrics);
-        } catch (error: any) {
-            this.logger.error(`Failed to generate report: ${error.message}`);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            this.logger.error(`Failed to generate report: ${message}`);
             throw error;
         }
     }

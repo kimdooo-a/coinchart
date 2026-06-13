@@ -1,6 +1,6 @@
 # Component Map
 
-> 최종 업데이트: 2026-03-08
+> 최종 업데이트: 2026-06-13 (R9 gap-verify / T09 — `components/community/*` 섹션 신규 등재, R8 삭제 3종 부재 재확인)
 >
 > 각 컴포넌트의 사용 페이지, lib 의존성, 컴포넌트 간 의존 관계를 정리한 문서입니다.
 
@@ -12,10 +12,63 @@
 
 | 컴포넌트 | 사용 페이지 | lib 의존성 | 컴포넌트 의존성 |
 |----------|-----------|------------|----------------|
-| `AnalysisPanel` | `app/analysis/page.tsx` | `lib/analysis/orchestrator`, `lib/analysis/signals`, `lib/analysis/aggregation`, `lib/backtest/engine` | 없음 |
+| `AnalysisPanel` | `app/analysis/page.tsx` | `lib/analysis/orchestrator`, `lib/analysis/signals`, `lib/analysis/aggregation`, `lib/backtest/engine` (훅 경유) | `useAnalysisCandles`, `useAnalysisResult` |
 | `ChartAnalysisPanel` | `app/analysis/page.tsx`, `app/stock/page.tsx` | `lib/analysis/aggregation`, `lib/analysis/signals`, `lib/indicators` | 없음 |
 | `StockPanel` | `app/analysis/stock/[symbol]/page.tsx` | `lib/supabase/stock`, `lib/analysis/stock-signals`, `lib/analysis/stock` | `PremiumLock` |
-| `TradingStrategyGuide` | 현재 미사용 (주석 처리됨) | 없음 | 없음 |
+| `TradingStrategyGuide` | 현재 미사용 (주석 처리됨) | 없음 | `AIAdviceSection`, `ConfigSection`, `EntryPlanSection` (R9 분할) |
+| `TradingStrategyGuide/AIAdviceSection` | `TradingStrategyGuide` | 없음 | 없음 |
+| `TradingStrategyGuide/ConfigSection` | `TradingStrategyGuide` | 없음 | 없음 |
+| `TradingStrategyGuide/EntryPlanSection` | `TradingStrategyGuide` | 없음 | 없음 |
+
+#### Analysis 커스텀 훅 (R9 신설 — `components/hooks/`)
+
+| 훅 | 시그니처 | 사용 컴포넌트 | lib 의존성 |
+|----|----------|---------------|------------|
+| `useAnalysisCandles` | `(symbol, interval) → { candles, isLoading, error }` | `AnalysisPanel` | `lib/analysis/aggregation` |
+| `useAnalysisResult` | `(candles, symbol, interval, userTier) → AnalysisResult \| null` | `AnalysisPanel` | `lib/analysis/orchestrator`, `lib/analysis/signals`, `lib/backtest/engine` |
+
+#### `app/analysis/[symbol]` 라우트 분할 컴포넌트 (R9 신설 — `_components/`)
+
+| 컴포넌트 | 사용 페이지 | props 핵심 |
+|----------|-----------|------------|
+| `AnalysisHeader` | `app/analysis/[symbol]/page.tsx` | symbol, lang, setLang, avgPrice, currentPrice, t, onBack |
+| `ChartSection` | `app/analysis/[symbol]/page.tsx` | loading, historyData, avgPrice, symbol, t |
+| `ProbabilityConfidenceCards` | `app/analysis/[symbol]/page.tsx` | analysisResult, lang |
+| `ExplanationCard` | `app/analysis/[symbol]/page.tsx` | analysisResult, lang |
+| `BacktestCard` | `app/analysis/[symbol]/page.tsx` | analysisResult, userTier, lang |
+| `PositionFractalCards` | `app/analysis/[symbol]/page.tsx` | avgPrice, historyData, fractalResult, t, lang |
+
+### Community (v2.0 커뮤니티 피벗 — `components/community/`)
+
+> R1~R8에 걸쳐 신설된 커뮤니티(게시판·뉴스·코인룸·메인) 공통 컴포넌트. 실제 디렉터리 스냅샷(2026-06-13) 기준 15개 + `widgets/` 5개. lib 의존은 `lib/community/*`(board-meta/board-queries/coin-queries/news-meta/news-server) + `lib/utils`(cn).
+
+| 컴포넌트 | 사용 페이지·컴포넌트 | lib 의존성 | 컴포넌트 의존성 |
+|----------|---------------------|------------|----------------|
+| `Badge` | `app/board/[slug]/[postId]/page.tsx` | `lib/utils` | 없음 |
+| `BoardListControls` | `app/board/[slug]/page.tsx` | `lib/community/board-meta`, `lib/community/board-queries` | `CommunityTabs` |
+| `BoardRow` | `app/board/[slug]/page.tsx`, `app/board/[slug]/[postId]/page.tsx`, `app/page.tsx`, `CoinRoomTabs` | `lib/utils` | 없음 |
+| `BoardSidebar` | `app/board/[slug]/page.tsx`, `app/board/[slug]/[postId]/page.tsx` | `lib/community/board-queries` | `widgets/FngGaugeWidget`, `widgets/HotIssueWidget`, `widgets/OfficialPostsWidget`, `widgets/PriceTickerWidget`, `widgets/ToolsShortcutWidget` |
+| `CoinHero` | `app/coin/[symbol]/page.tsx` | `lib/utils` | 없음 |
+| `CoinRoomTabs` | `app/coin/[symbol]/page.tsx` | `lib/community/coin-queries` | `BoardRow`, `NewsRow`, `CommunityTabs` |
+| `CommentSection` | `app/board/[slug]/[postId]/page.tsx` | `lib/community/board-queries` | 없음 |
+| `CommunityTabs` | `BoardListControls`, `CoinRoomTabs` | `lib/utils` | 없음 |
+| `NewsFilters` | `app/news/page.tsx` | `lib/community/news-meta`, `lib/community/news-server`, `lib/utils` | `NewsHeadlineCard` |
+| `NewsHeadlineCard` | `app/news/page.tsx`, `app/page.tsx`, `NewsFilters` | `lib/utils` | 없음 |
+| `NewsRow` | `app/news/page.tsx`, `app/page.tsx`, `CoinRoomTabs` | `lib/utils` | 없음 |
+| `Pagination` | `app/board/[slug]/page.tsx` | `lib/utils` | 없음 |
+| `PostActions` | `app/board/[slug]/[postId]/page.tsx` | `lib/community/board-meta`, `lib/community/board-queries` | 없음 |
+| `PostVoteButtons` | `app/board/[slug]/[postId]/page.tsx` | `lib/community/board-queries` | 없음 |
+| `SidebarWidget` | `app/coin/[symbol]/page.tsx`, `app/news/page.tsx` | `lib/utils` | 없음 |
+
+#### Community 사이드바 위젯 (`components/community/widgets/`)
+
+| 위젯 | 사용 컴포넌트 | lib 의존성 |
+|------|---------------|------------|
+| `FngGaugeWidget` | `BoardSidebar` | `lib/utils` (데이터: `/api/fng`) |
+| `HotIssueWidget` | `BoardSidebar` | `lib/utils` (데이터: `/api/coins/hot-issues`) |
+| `OfficialPostsWidget` | `BoardSidebar` | 없음 |
+| `PriceTickerWidget` | `BoardSidebar` | `lib/utils` (데이터: `/api/coins/ticker`) |
+| `ToolsShortcutWidget` | `BoardSidebar` | 없음 |
 
 ### Chart
 

@@ -125,7 +125,7 @@ export const StockPanel: React.FC<Props> = ({ symbol, lang }) => {
     return (
         <div className="bg-surface-container-lowest rounded-xl p-6 md:p-8 border border-outline-variant shadow-lg space-y-6">
             {/* Title */}
-            <h2 className="text-xl md:text-2xl font-bold text-green-400">{t.title}</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-green-600">{t.title}</h2>
 
             {/* Analysis Basis */}
             <div className="bg-surface-container rounded-lg p-4 text-sm text-on-surface border-l-4 border-green-500">
@@ -137,7 +137,7 @@ export const StockPanel: React.FC<Props> = ({ symbol, lang }) => {
                 {/* Rise Probability */}
                 <div className="bg-surface-container rounded-lg p-4 text-center">
                     <p className="text-on-surface-variant text-sm mb-2">{t.prob}</p>
-                    <p className="text-2xl font-bold text-green-400">
+                    <p className="text-2xl font-bold text-green-600">
                         {probability?.probability || t.na}%
                     </p>
                 </div>
@@ -145,9 +145,9 @@ export const StockPanel: React.FC<Props> = ({ symbol, lang }) => {
                 {/* Grade */}
                 <div className="bg-surface-container rounded-lg p-4 text-center">
                     <p className="text-on-surface-variant text-sm mb-2">{t.grade}</p>
-                    <p className={`text-2xl font-bold ${['A', 'B'].includes(result.confidence?.grade) ? 'text-green-400' :
-                            ['C'].includes(result.confidence?.grade) ? 'text-yellow-400' :
-                                'text-red-400'
+                    <p className={`text-2xl font-bold ${['A', 'B'].includes(result.confidence?.grade) ? 'text-green-600' :
+                            ['C'].includes(result.confidence?.grade) ? 'text-yellow-600' :
+                                'text-red-600'
                         }`}>
                         {result.confidence?.grade || t.na}
                     </p>
@@ -156,7 +156,7 @@ export const StockPanel: React.FC<Props> = ({ symbol, lang }) => {
                 {/* Regime */}
                 <div className="bg-surface-container rounded-lg p-4 text-center">
                     <p className="text-on-surface-variant text-sm mb-2">Regime</p>
-                    <p className="text-sm font-semibold text-blue-400">
+                    <p className="text-sm font-semibold text-blue-600">
                         {probability?.regime || t.na}
                     </p>
                 </div>
@@ -164,7 +164,7 @@ export const StockPanel: React.FC<Props> = ({ symbol, lang }) => {
                 {/* Data Points */}
                 <div className="bg-surface-container rounded-lg p-4 text-center">
                     <p className="text-on-surface-variant text-sm mb-2">Data Points</p>
-                    <p className="text-2xl font-bold text-blue-400">{candles.length}</p>
+                    <p className="text-2xl font-bold text-blue-600">{candles.length}</p>
                 </div>
             </div>
 
@@ -179,7 +179,7 @@ export const StockPanel: React.FC<Props> = ({ symbol, lang }) => {
                 <div className={`space-y-4 ${isLocked ? 'blur-sm opacity-50 pointer-events-none select-none grayscale' : ''}`}>
                     {/* Evidence */}
                     <div className="bg-surface-container rounded-lg p-4">
-                        <h3 className="font-bold text-green-400 mb-2">📋 {t.evidence}</h3>
+                        <h3 className="font-bold text-green-600 mb-2">📋 {t.evidence}</h3>
                         <p className="text-on-surface text-sm leading-relaxed">
                             {explanation?.sections?.evidence || t.na}
                         </p>
@@ -187,7 +187,7 @@ export const StockPanel: React.FC<Props> = ({ symbol, lang }) => {
 
                     {/* Risk */}
                     <div className="bg-surface-container rounded-lg p-4">
-                        <h3 className="font-bold text-red-400 mb-2">⚠️ {t.risk}</h3>
+                        <h3 className="font-bold text-red-600 mb-2">⚠️ {t.risk}</h3>
                         <p className="text-on-surface text-sm leading-relaxed">
                             {explanation?.sections?.risk || t.na}
                         </p>
@@ -195,7 +195,7 @@ export const StockPanel: React.FC<Props> = ({ symbol, lang }) => {
 
                     {/* Watch Points */}
                     <div className="bg-surface-container rounded-lg p-4">
-                        <h3 className="font-bold text-blue-400 mb-2">👀 {t.watch}</h3>
+                        <h3 className="font-bold text-blue-600 mb-2">👀 {t.watch}</h3>
                         <p className="text-on-surface text-sm leading-relaxed">
                             {explanation?.sections?.watch || t.na}
                         </p>

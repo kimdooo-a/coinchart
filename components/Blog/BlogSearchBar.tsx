@@ -38,6 +38,7 @@ export default function BlogSearchBar({ onSearch, initialQuery = '' }: BlogSearc
       {query && (
         <button
           onClick={() => setQuery('')}
+          aria-label={lang === 'ko' ? '검색어 지우기' : 'Clear search'}
           className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface"
         >
           <X className="w-4 h-4" />

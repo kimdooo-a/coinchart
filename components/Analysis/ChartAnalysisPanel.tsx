@@ -208,11 +208,11 @@ export const ChartAnalysisPanel: React.FC<Props> = ({ symbol, lang, apiEndpoint 
                 </div>
 
                 {/* Observation Box */}
-                <div className="bg-blue-900/20 border border-blue-500/30 p-4 rounded-xl flex items-start gap-3">
+                <div className="bg-blue-50 border border-blue-300 p-4 rounded-xl flex items-start gap-3">
                     <span className="text-2xl">👀</span>
                     <div>
-                        <h4 className="text-blue-400 font-bold text-sm mb-1">{lang === 'ko' ? '변동성 축소/관망 (상승 확률 50%)' : 'Volatility Reduction (Rise Prob 50%)'}</h4>
-                        <p className="text-xs text-blue-200/80 leading-relaxed">
+                        <h4 className="text-blue-700 font-bold text-sm mb-1">{lang === 'ko' ? '변동성 축소/관망 (상승 확률 50%)' : 'Volatility Reduction (Rise Prob 50%)'}</h4>
+                        <p className="text-xs text-blue-600 leading-relaxed">
                             {lang === 'ko' ? "방향성이 없습니다. '돌파 매매'를 준비하거나 확실한 움직임을 기다리세요. 손절 -3.0%." : "No clear direction. Prepare for breakout or wait. Stop loss -3.0%."}
                         </p>
                     </div>
@@ -236,9 +236,9 @@ export const ChartAnalysisPanel: React.FC<Props> = ({ symbol, lang, apiEndpoint 
                                     <div className="bg-surface-container p-3 rounded-lg text-on-surface-variant text-sm flex items-center gap-2 opacity-50">
                                         {t.counter}
                                     </div>
-                                    <div className="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 border border-blue-500/50 p-3 rounded-lg text-blue-400 text-sm flex flex-col gap-1">
+                                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-300 p-3 rounded-lg text-blue-700 text-sm flex flex-col gap-1">
                                         <div className="font-bold flex items-center gap-2">{t.breakout} ✅</div>
-                                        <div className="text-[10px] text-blue-300/70">{t.breakoutDesc}</div>
+                                        <div className="text-[10px] text-blue-600">{t.breakoutDesc}</div>
                                     </div>
                                 </div>
                             </div>
@@ -257,7 +257,7 @@ export const ChartAnalysisPanel: React.FC<Props> = ({ symbol, lang, apiEndpoint 
                                 <div className="bg-surface-container/80 p-3 rounded-lg flex justify-between items-center border border-outline-variant relative overflow-hidden">
                                     <div className="absolute left-0 top-0 h-full w-1 bg-blue-500"></div>
                                     <div>
-                                        <div className="text-xs text-blue-400 font-bold mb-0.5">{t.entry1}</div>
+                                        <div className="text-xs text-blue-700 font-bold mb-0.5">{t.entry1}</div>
                                         <div className="text-xs text-on-surface-variant">{t.breakBuy}</div>
                                     </div>
                                     <div className="text-right">
@@ -270,7 +270,7 @@ export const ChartAnalysisPanel: React.FC<Props> = ({ symbol, lang, apiEndpoint 
                                 <div className="bg-surface-container/80 p-3 rounded-lg flex justify-between items-center border border-outline-variant relative overflow-hidden">
                                     <div className="absolute left-0 top-0 h-full w-1 bg-indigo-500"></div>
                                     <div>
-                                        <div className="text-xs text-indigo-400 font-bold mb-0.5">{t.entry2}</div>
+                                        <div className="text-xs text-indigo-700 font-bold mb-0.5">{t.entry2}</div>
                                         <div className="text-xs text-on-surface-variant">{t.retest}</div>
                                     </div>
                                     <div className="text-right">
@@ -283,7 +283,7 @@ export const ChartAnalysisPanel: React.FC<Props> = ({ symbol, lang, apiEndpoint 
                                 <div className="bg-surface-container/80 p-3 rounded-lg flex justify-between items-center border border-outline-variant relative overflow-hidden">
                                     <div className="absolute left-0 top-0 h-full w-1 bg-purple-500"></div>
                                     <div>
-                                        <div className="text-xs text-purple-400 font-bold mb-0.5">{t.entry3}</div>
+                                        <div className="text-xs text-purple-700 font-bold mb-0.5">{t.entry3}</div>
                                         <div className="text-xs text-on-surface-variant">{t.maginot}</div>
                                     </div>
                                     <div className="text-right">
@@ -293,14 +293,14 @@ export const ChartAnalysisPanel: React.FC<Props> = ({ symbol, lang, apiEndpoint 
                                 </div>
 
                                 {/* Stop Loss */}
-                                <div className="bg-red-900/20 p-3 rounded-lg flex justify-between items-center border border-red-500/30 relative overflow-hidden mt-2">
+                                <div className="bg-red-50 p-3 rounded-lg flex justify-between items-center border border-red-300 relative overflow-hidden mt-2">
                                     <div className="absolute left-0 top-0 h-full w-1 bg-red-600"></div>
                                     <div>
-                                        <div className="text-xs text-red-500 font-bold mb-0.5">{t.stop}</div>
-                                        <div className="text-xs text-red-400/70">{t.autoSell}</div>
+                                        <div className="text-xs text-red-600 font-bold mb-0.5">{t.stop}</div>
+                                        <div className="text-xs text-red-500">{t.autoSell}</div>
                                     </div>
                                     <div className="text-right">
-                                        <div className="text-red-400 font-bold font-mono">${stopLoss.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
+                                        <div className="text-red-700 font-bold font-mono">${stopLoss.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
                                         <div className="text-[10px] text-red-500">-3.0%</div>
                                     </div>
                                 </div>

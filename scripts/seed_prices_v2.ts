@@ -20,6 +20,22 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
     }
 })
 
+// Yahoo Finance chart API 응답 중 본 스크립트가 사용하는 필드만 정의
+interface YahooQuote {
+    open: (number | null)[]
+    high: (number | null)[]
+    low: (number | null)[]
+    close: (number | null)[]
+    volume: (number | null)[]
+}
+interface YahooChartResult {
+    timestamp?: number[]
+    indicators: { quote: YahooQuote[] }
+}
+interface YahooChartResponse {
+    chart?: { result?: YahooChartResult[] }
+}
+
 // Symbols to seed
 const CRYPTO_SYMBOLS = ['BTC-USD', 'ETH-USD', 'XRP-USD', 'SOL-USD', 'DOGE-USD', 'ADA-USD']
 const STOCK_SYMBOLS = ['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'AMZN', 'META', 'TSLA', 'SPY', 'QQQ']
@@ -32,7 +48,7 @@ async function fetchYahooData(symbol: string) {
     try {
         const res = await fetch(url)
         if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`)
-        const data = await res.json()
+        const data: YahooChartResponse = await res.json()
 
         const result = data.chart?.result?.[0]
         if (!result) return null
@@ -50,7 +66,7 @@ async function fetchYahooData(symbol: string) {
             low: quote.low[i],
             close: quote.close[i],
             volume: quote.volume[i]
-        })).filter((d: any) => d.close !== null && d.close !== undefined)
+        })).filter((d) => d.close !== null && d.close !== undefined)
 
         return cleanData
     } catch (e) {
@@ -71,7 +87,7 @@ async function seed() {
         // Symbol mapping (BTC-USD -> BTCUSDT for consistency with Binance/App usage)
         const appSymbol = yahooSymbol.replace('-USD', 'USDT')
 
-        const dbRows = rawData.map((d: any) => ({
+        const dbRows = rawData.map((d) => ({
             symbol: appSymbol,
             date: d.dateStr, // market_prices uses 'date' column (YYYY-MM-DD)
             open: d.open,
@@ -95,7 +111,7 @@ async function seed() {
         const rawData = await fetchYahooData(symbol)
         if (!rawData) continue
 
-        const dbRows = rawData.map((d: any) => ({
+        const dbRows = rawData.map((d) => ({
             symbol: symbol,
             time: d.timestamp, // stock_prices uses 'time' column (Unix seconds)
             open: d.open,

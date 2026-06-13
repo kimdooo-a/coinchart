@@ -1,9 +1,11 @@
 # API Reference
 
 ## 개요
-총 29개 엔드포인트 (공개 9개 + 블로그 6개 + SEO 3개, 관리자 4개 + 블로그 5개, 주식 분석 2개 포함)
+총 31개 route.ts 엔드포인트 (`app/api/**/route.ts` 기준) + SEO 라우트 3종(`feed.xml`/`sitemap.xml`/`robots.txt`).
 
-최종 업데이트: 2026-03-08
+분류: 암호화폐 6 (`klines`/`price`/`kimchi`/`signals`/`coins/ticker`/`coins/hot-issues`) · 주식 3 (`stock/quote`/`stock/time-series`/`stock/history`) · 분석 2 (`analysis/[symbol]`/`analysis/stock/[symbol]`) · 뉴스·기타 3 (`news`/`contact`/`fng`) · 커뮤니티 5 (`board/[slug]`/`board/[slug]/[postId]`/`community/comment`/`community/like` + 관리자 `admin/board`) · 관리자 5 (`admin/users`/`admin/market-data`/`admin/news-crawl`/`admin/cleanup-data`/`admin/board`) · 블로그 10.
+
+최종 업데이트: 2026-06-13 (R9 gap-verify / T09 — 실제 route.ts 31개 정합, T04 에러 핸들링 상태코드 반영)
 
 ---
 
@@ -140,9 +142,11 @@
     ...
   }
   ```
-- **에러 응답**:
-  - `400`: `{ "error": "Symbol is required" }` 또는 Twelve Data 에러 패스스루
-  - `500`: `{ "error": "Server configuration error" }` (API 키 미설정) / `{ "error": "Failed to fetch data" }`
+- **에러 응답** (R9/T04 갱신 — "심볼 없음" vs "API 다운"을 상태코드로 구분):
+  - `400`: `{ "error": "Symbol is required" }` (symbol 누락) / 그 외 잘못된 요청 시 TwelveData 원본 패스스루(`data.status==='error'`이고 심볼·5xx 케이스 아님)
+  - `404`: 심볼 없음/잘못된 심볼 — TwelveData 원본 패스스루. 판별: `data.code === 404` 또는 `data.message`가 `/not found|symbol|no data/i` 매칭. (이전엔 400)
+  - `500`: `{ "error": "Server configuration error" }` (`TWELVEDATA_API_KEY` 미설정)
+  - `503`: API 다운/업스트림 5xx. 업스트림 HTTP 5xx(`res.status>=500`) → `{ "error": "Stock data service unavailable" }`; TwelveData 에러코드 5xx(`data.code>=500`) → 원본 패스스루; 네트워크 예외·타임아웃·JSON 파싱 실패(catch) → `{ "error": "Failed to fetch data" }`. (catch는 이전 500에서 503으로 변경)
 - **캐시**: Next.js fetch 캐시 60초 (`revalidate: 60`)
 - **인증**: 불필요
 - **환경변수**: `TWELVEDATA_API_KEY` (필수)
@@ -309,7 +313,9 @@
     ]
   }
   ```
-- **에러 응답**: 에러 시에도 `{ "items": [] }` 반환 (200)
+- **에러 응답** (R9/T04 갱신):
+  - 정상(결과 0건 포함): `200` `{ "items": [] }`
+  - DB 오류: `503` `{ "items": [], "error": "<사유>" }` — `items`는 빈 배열로 유지(프론트가 `data.items` 안전 소비), `error`는 오류 시에만 추가되는 선택 필드(정상 200 응답에는 없음). 이전엔 DB 오류도 200으로 은폐했으나 R9/T04에서 503으로 명시.
 - **인증**: 불필요
 - **데이터 소스**: Supabase `news` 테이블
 
@@ -672,7 +678,7 @@ R1 (2026-05-23) 추가. Alternative.me Fear & Greed Index 프록시.
   - `prevValue`: 어제 값 (없을 수도 있음)
   - `timestamp`: unix ms
 - **에러 응답**:
-  - `502`: `{ "error": "..." }` (외부 API 실패 / 빈 응답)
+  - `502`: `{ "error": "..." }` (외부 API 실패 / 빈 응답 / JSON 파싱 실패). R9/T04에서 `lib/community/fng.ts`가 JSON 파싱 실패 시 `throw new Error("[fng] invalid json")`로 명시 보강 → 이 catch로 흡수되어 502 반환(상태코드 불변).
 - **캐시**: 1시간 (Next `revalidate = 3600` + 모듈 메모리)
 - **인증**: 불필요
 - **사용처**: 메인페이지 사이드바 `FngGaugeWidget` (T15)
@@ -780,6 +786,7 @@ v2.0 커뮤니티 피벗(자유/시세/정보 + 코인룸 6종)을 위한 게시
 - **권한**: 회원=`auth.uid() === post.author_id` / 익명=`bcrypt.compare(guestPassword, guest_password_hash)`
 - **응답 (200)**: `{ ok: true }`
 - **에러**: `401`(비번 누락) / `403`(권한/비번 불일치) / `404`(없음) / `410`(이미 삭제)
+- **에러 (R9/T04 갱신 — 최종 update 단계)**: RLS 거부(`error.code === 'PGRST301'`) 또는 Postgres 권한 부족(`error.code === '42501'`) → `403` `{ "error": "권한이 없습니다" }`. 그 외 DB 오류 → `500` `{ "error": "<message>" }`. (RLS/권한 케이스는 이전 500에서 403으로 변경. `verifyEditPermission`이 반환하는 위 401/403/404/410 흐름은 불변.)
 
 ---
 
@@ -790,6 +797,7 @@ v2.0 커뮤니티 피벗(자유/시세/정보 + 코인룸 6종)을 위한 게시
 - **권한**: PATCH와 동일
 - **`guestPassword` 전달**: query `?guestPassword=` 또는 body JSON (DELETE에 body 허용)
 - **응답 (200)**: `{ ok: true }`
+- **에러 (R9/T04 갱신 — 최종 update 단계)**: PATCH와 동일 정책(공통 helper `mapUpdateError()`). RLS 거부(`PGRST301`)·Postgres 권한 부족(`42501`) → `403` `{ "error": "권한이 없습니다" }`, 그 외 DB 오류 → `500`.
 
 ---
 

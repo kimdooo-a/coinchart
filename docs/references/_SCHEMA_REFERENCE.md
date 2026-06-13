@@ -352,7 +352,15 @@ OR (guest_nickname IS NOT NULL
 
 **추가 인덱스**: `idx_community_comment_likes_comment (comment_id)` — 집계 조회 가속
 **CHECK**: `user_id IS NOT NULL OR ip_hash IS NOT NULL`
-**카운터**: `community_comments.like_count`를 트리거 `community_sync_comment_like_count()`(value 부호 합산)가 동기화. 집계 RPC 없이 트리거 카운터 방식(post_likes와 동일).
+**카운터**: `community_comments.like_count`를 트리거 `community_sync_comment_like_count()`(value 부호 합산)가 동기화. 함수는 이 컬럼을 직접 손대지 않고 트리거에 위임(post_likes와 동일).
+
+**토글 RPC (R9 2026-06-13, T03)** — 마이그레이션: `supabase/migrations/20260613000001_create_comment_likes_rpc.sql`
+- `community_toggle_comment_like(p_comment_id UUID, p_user_id UUID, p_ip_hash TEXT, p_value SMALLINT) RETURNS TABLE(liked BOOLEAN, like_count BIGINT, dislike_count BIGINT)` — 회원전이 dedup + 원자적 토글 + 분리집계를 단일 트랜잭션 처리. 게시글 정본 `community_toggle_post_like`(`20260524000002`)를 `post_id→comment_id`·`community_post_likes→community_comment_likes`로 1:1 차용.
+  - **파라미터**: `p_user_id`=회원이면 `auth.users.id`, 익명이면 `NULL` · `p_ip_hash`=익명 dedup 키 / 회원전이 흡수 키(회원도 전달 권장) · `p_value`=`1`(추천)|`-1`(비추). `p_value ∉ {-1,1}` 또는 `p_user_id·p_ip_hash` 둘 다 NULL이면 `RAISE EXCEPTION`.
+  - **동작**: (A) 회원전이 dedup(회원행 부재 시 익명행 `user_id` 승계+`ip_hash=NULL`, 회원행 존재 시 익명 중복행 삭제) → (B) 기존 표 조회 → (C) 토글(없음=INSERT / 같은 value=DELETE 취소 / 다른 value=UPDATE 전환) → (D) 분리 집계 반환.
+  - **의존(선행)**: `supabase/migrations/20260524000001_comment_likes.sql` — 테이블 `community_comment_likes`, 유니크 부분 인덱스 `uniq_community_comment_likes_user`/`uniq_community_comment_likes_iphash`, 트리거 `trg_community_comment_likes_count`→`community_sync_comment_like_count()`(SUM(value)). `community_comments.like_count`는 트리거가 자동 갱신(함수 불간섭).
+  - **멱등**: 반환 타입 변경 충돌 대비 선행 `DROP FUNCTION IF EXISTS community_toggle_comment_like(UUID, UUID, TEXT, SMALLINT)` + `CREATE OR REPLACE` + 한국어 `COMMENT ON FUNCTION`.
+  - **소비처**: `app/api/community/comment/route.ts` PATCH 핸들러가 `admin.rpc("community_toggle_comment_like", {...})` 1콜로 호출(이전 직접 CUD 대체). API 응답은 `{ liked, likeCount }`만 노출(`dislike_count`는 RPC가 반환하나 댓글 UI 미소비로 비노출). 반환 타입은 `types/community.ts#ToggleLikeRow`(게시글/댓글 공통).
 
 ### 인덱스 요약
 

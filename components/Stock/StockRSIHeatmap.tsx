@@ -95,7 +95,7 @@ export const StockRSIHeatmap: React.FC = () => {
                                     {getRSIText(item.rsi)}
                                 </span>
                             </div>
-                            <span className={`text-[10px] ${item.change >= 0 ? 'text-green-300' : 'text-red-300'}`}>
+                            <span className={`text-[10px] ${item.change >= 0 ? 'text-green-700' : 'text-red-700'}`}>
                                 {item.change > 0 ? '+' : ''}{item.change.toFixed(2)}%
                             </span>
                         </div>

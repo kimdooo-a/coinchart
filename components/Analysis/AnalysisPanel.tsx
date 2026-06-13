@@ -1,149 +1,46 @@
 'use client';
 
 // CRYPTO ANALYSIS ONLY - DO NOT ADD STOCK IMPORTS
-import React, { useMemo, useEffect, useState } from 'react';
-// import { CandleData, getKlines } from '@/lib/api/binance'; // REMOVED for SSOT
-// import { analyzeMarket } from '@/lib/analysis'; // Legacy
-import { performAnalysis } from '@/lib/analysis/orchestrator';
-import { generateSignals } from '@/lib/analysis/signals';
-// import { TradingStrategyGuide } from './TradingStrategyGuide'; // Hiding legacy strategy guide 
+import React, { useState } from 'react';
+// import { TradingStrategyGuide } from './TradingStrategyGuide'; // Hiding legacy strategy guide
 // import { PremiumLock } from '@/components/PremiumLock'; // Removed as Backtest is now free for all
+import { useAnalysisCandles } from '@/components/hooks/useAnalysisCandles';
+import { useAnalysisResult } from '@/components/hooks/useAnalysisResult';
 
-// Type definition for local use (or import if shared type exists)
-export type CandleData = {
-    time: number;
-    open: number;
-    high: number;
-    low: number;
-    close: number;
-    volume: number;
-};
+// CandleData 타입은 useAnalysisCandles로 이전됨. 기존 외부 import 경로 호환을 위해 재노출.
+export type { CandleData } from '@/components/hooks/useAnalysisCandles';
 
 interface Props {
     symbol: string;
     lang: 'en' | 'ko';
 }
 
-// SSOT Limitation: Only Daily data exists in Supabase.
-// restricting to '1d' to ensure analysis validity.
-import { aggregateCandles } from '@/lib/analysis/aggregation';
-import { generateHistoricalTrades } from '@/lib/backtest/engine';
-
-// SSOT: Daily data aggregated for higher timeframes
+// SSOT: Daily 데이터를 상위 타임프레임으로 집계
 const ANALYSIS_INTERVALS = ['1d', '1w'];
 
 export const AnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
-    const [candles, setCandles] = useState<CandleData[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [interval, setInterval] = useState('1d');
-    const [isGuideOpen, setIsGuideOpen] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-    const [showBacktestGuide, setShowBacktestGuide] = useState(false); // Valid state for toggle
+    const [showBacktestGuide, setShowBacktestGuide] = useState(false); // 토글용 상태
 
-    // Free vs PRO Gate - UNLOCKED FOR ALL
-    const isPro = true; // Always true now
-    const userTier = 'pro';
+    // Free vs PRO Gate - 전체 해제됨
+    const userTier = 'pro' as const;
 
-    // Fetch Binance Data via API Route (same as /market page)
-    useEffect(() => {
-        const fetchAnalysisData = async () => {
-            setIsLoading(true);
-            setError(null);
-            setCandles([]);
+    // 캔들 데이터 fetch + 집계 (커스텀 훅)
+    const { candles, isLoading } = useAnalysisCandles(symbol, interval);
 
-            try {
-                // Use API Route to fetch from Binance (Proxied to Supabase)
-                // SSOT: Always fetch '1d' data. If user selected '1w'/'1M', we aggregate client-side.
-                // We ask for '1d' explicitly to API.
-                const res = await fetch(`/api/klines?symbol=${symbol.toUpperCase()}&interval=1d&limit=990`);
-                if (!res.ok) throw new Error('Failed to fetch klines');
-                const data = await res.json();
+    // 시그널 + 과거 거래 + 종합 분석 결과 (커스텀 훅)
+    const result = useAnalysisResult(candles, symbol, interval, userTier);
 
-                if (!data || data.length === 0) {
-                    setIsLoading(false);
-                    return;
-                }
-
-                // Map to CandleData (API returns time in seconds)
-                const formatted: CandleData[] = data.map((d: { time: number; open: number; high: number; low: number; close: number; volume: number }) => ({
-                    time: d.time, // Already in seconds from API
-                    open: Number(d.open),
-                    high: Number(d.high),
-                    low: Number(d.low),
-                    close: Number(d.close),
-                    volume: Number(d.volume)
-                }));
-
-                // Sort ASC by time for aggregation
-                formatted.sort((a, b) => a.time - b.time);
-
-                // Aggregate if needed
-                const finalData = aggregateCandles(formatted, interval);
-
-                setCandles(finalData);
-                setIsLoading(false);
-            } catch (err) {
-                console.error('Klines Fetch Error:', err);
-                setError('Failed to fetch market data.');
-                setIsLoading(false);
-            }
-        };
-        fetchAnalysisData();
-    }, [symbol, interval]);
-
-    const result = useMemo(() => {
-        if (!candles || candles.length === 0) return null;
-
-        // 1. Generate Signals
-        const { signals, adxValue, plusDI, minusDI, atrValue, avgAtrValue, bbWidth, volumeRatio, rawIndicators } = generateSignals(candles);
-
-        // 2. Generate Historical Trades (Simulated)
-        const trades = generateHistoricalTrades(candles);
-
-        // 3. Perform Analysis (Orchestrator)
-        // Calculate data age from last candle
-        const lastCandle = candles[candles.length - 1];
-        let dataAgeSeconds = lastCandle ? Math.floor(Date.now() / 1000) - lastCandle.time : 0;
-
-        // For Daily/Weekly frames, ignore "seconds" staleness check (standard is >60s penalty)
-        if (interval === '1d' || interval === '1w' || interval === '1M') {
-            dataAgeSeconds = 0;
-        }
-
-        return performAnalysis({
-            symbol,
-            timeframe: interval,
-            signals,
-            adxValue,
-            plusDI,
-            minusDI,
-            atrValue,
-            avgAtrValue,
-            bbWidth,
-            volumeRatio,
-            userTier,
-            trades: trades,
-            sampleSize: candles.length,
-            dataAgeSeconds,
-            dataSource: 'supabase'
-        });
-    }, [candles, symbol, interval, userTier]);
-
-    // UI Translation
+    // UI Translation (사용 중인 키만 유지 — 미사용 키는 정리)
     const t = {
         title: lang === 'ko' ? '⚡ 통계적 패턴 정밀 분석' : '⚡ Statistical Pattern Analysis',
-        basis: lang === 'ko' ? '분석 기준:' : 'Analysis Basis:',
-        loading: lang === 'ko' ? '데이터 분석 중...' : 'Analyzing Data...',
         insufficient: lang === 'ko' ? '데이터 부족 (최근 50개 캔들 필요)' : 'Insufficient Data (>50 candles required)',
-        proLock: lang === 'ko' ? 'PRO 버전에서 상세 분석 제공' : 'Detailed Analysis in PRO Version',
         evidence: lang === 'ko' ? '분석 근거' : 'Evidence',
         risk: lang === 'ko' ? '리스크 요인' : 'Risk Factors',
         watch: lang === 'ko' ? '주요 관전 포인트' : 'Key Watch Levels',
         grade: lang === 'ko' ? '신뢰도 등급' : 'Confidence Grade',
         prob: lang === 'ko' ? '상승 확률' : 'Rise Probability',
         na: 'N/A',
-        guideTitle: lang === 'ko' ? '📊 지표 설명서' : '📊 Indicator Guide',
         // New Backtest Strings
         backtestTitle: lang === 'ko' ? '시스템 백테스트 (과거 시뮬레이션)' : 'System Backtest',
         bt_winRate: lang === 'ko' ? '승률' : 'Win Rate',
@@ -176,11 +73,8 @@ export const AnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
         );
     }
 
-    // 3. OK / Pro-Locked State
-    const { probability, explanation, uiState } = result;
-    const isLocked = uiState === 'pro-locked'; // Orchestrator might return this if strict
-    // But we handle masking here based on userTier too.
-
+    // 3. OK / Pro-Locked State (마스킹은 userTier 기준으로 처리)
+    const { probability, explanation } = result;
     const gradeColor = (g: string) => {
         if (g === 'A') return 'text-primary';
         if (g === 'B') return 'text-chart-2';
@@ -190,7 +84,6 @@ export const AnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
 
     return (
         <div className="bg-card rounded-xl p-4 md:p-6 border border-border shadow-xl space-y-6">
-
             {/* Header / Controls */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
@@ -278,7 +171,7 @@ export const AnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
                             onClick={() => setShowBacktestGuide(!showBacktestGuide)}
                             className="text-xs font-normal text-on-surface-variant bg-muted hover:bg-surface-container-low px-2 py-0.5 rounded transition-colors flex items-center gap-1"
                         >
-                            <span className="text-indigo-400">?</span> {t.bt_guideBtn}
+                            <span className="text-indigo-600">?</span> {t.bt_guideBtn}
                         </button>
                     </h4>
                 </div>
@@ -322,7 +215,6 @@ export const AnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
                         </div>
                     </div>
                 )}
-
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="bg-muted p-3 rounded-lg">
                         <div className="text-xs text-on-surface-variant">{t.bt_winRate}</div>
@@ -340,20 +232,18 @@ export const AnalysisPanel: React.FC<Props> = ({ symbol, lang }) => {
                     {/* Max Drawdown - Unlocked */}
                     <div className="bg-surface-container p-3 rounded-lg relative overflow-hidden group">
                         <div className="text-xs text-on-surface-variant">{t.bt_maxDD}</div>
-                        <div className="text-lg font-bold text-red-400">-{result.backtest.maxDrawdownPercent.toFixed(1)}%</div>
+                        <div className="text-lg font-bold text-red-600">-{result.backtest.maxDrawdownPercent.toFixed(1)}%</div>
                     </div>
 
                     {/* Profit Factor - Unlocked */}
                     <div className="bg-surface-container p-3 rounded-lg relative overflow-hidden group">
                         <div className="text-xs text-on-surface-variant">{t.bt_profitFactor}</div>
-                        <div className="text-lg font-bold text-blue-400">
+                        <div className="text-lg font-bold text-blue-600">
                             {result.backtest.profitFactor >= 999 ? 'Inf' : result.backtest.profitFactor.toFixed(2)}
                         </div>
                     </div>
                 </div>
             </div>
-
-            {/* Premium Modal Overlay - Removed */}
         </div>
     );
 };

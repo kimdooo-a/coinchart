@@ -132,6 +132,7 @@ export function MemoViewModal({ isOpen, memo, decryptedContent, onClose, onDelet
                 >
                     <button
                         onClick={handleClose}
+                        aria-label={t.close}
                         className="absolute top-4 right-4 text-on-surface-variant hover:text-foreground transition-colors"
                     >
                         <X className="w-5 h-5" />
@@ -180,8 +181,9 @@ export function MemoViewModal({ isOpen, memo, decryptedContent, onClose, onDelet
 
                             {/* Title */}
                             <div>
-                                <label className="block text-xs text-on-surface-variant mb-1">{t.memoTitle}</label>
+                                <label htmlFor="memo-edit-title" className="block text-xs text-on-surface-variant mb-1">{t.memoTitle}</label>
                                 <input
+                                    id="memo-edit-title"
                                     type="text"
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
@@ -192,8 +194,9 @@ export function MemoViewModal({ isOpen, memo, decryptedContent, onClose, onDelet
 
                             {/* Content */}
                             <div>
-                                <label className="block text-xs text-on-surface-variant mb-1">{t.memoContent}</label>
+                                <label htmlFor="memo-edit-content" className="block text-xs text-on-surface-variant mb-1">{t.memoContent}</label>
                                 <textarea
+                                    id="memo-edit-content"
                                     value={content}
                                     onChange={(e) => setContent(e.target.value)}
                                     className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:border-indigo-500 min-h-[150px] resize-none"
@@ -203,8 +206,9 @@ export function MemoViewModal({ isOpen, memo, decryptedContent, onClose, onDelet
 
                             {/* New Password */}
                             <div>
-                                <label className="block text-xs text-on-surface-variant mb-1">{t.password}</label>
+                                <label htmlFor="memo-edit-password" className="block text-xs text-on-surface-variant mb-1">{t.password}</label>
                                 <input
+                                    id="memo-edit-password"
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
@@ -215,8 +219,9 @@ export function MemoViewModal({ isOpen, memo, decryptedContent, onClose, onDelet
 
                             {/* Confirm Password */}
                             <div>
-                                <label className="block text-xs text-on-surface-variant mb-1">{t.confirmPassword}</label>
+                                <label htmlFor="memo-edit-confirm-password" className="block text-xs text-on-surface-variant mb-1">{t.confirmPassword}</label>
                                 <input
+                                    id="memo-edit-confirm-password"
                                     type="password"
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}

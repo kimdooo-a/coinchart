@@ -66,8 +66,9 @@ export async function runDailyBatchWorkflow(
                 format: 'markdown'
             });
             orchestratorLogger.info('[STEP 2] Report generated successfully');
-        } catch (error: any) {
-            orchestratorLogger.error(`[STEP 2] Report generation failed: ${error.message}`);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            orchestratorLogger.error(`[STEP 2] Report generation failed: ${message}`);
             // Continue anyway (non-blocking)
         }
 
@@ -79,8 +80,9 @@ export async function runDailyBatchWorkflow(
             orchestratorLogger.info(
                 `[STEP 3] Alerts processed: sent=${alertResult.sent}, skipped=${alertResult.skipped}, failed=${alertResult.failed}`
             );
-        } catch (error: any) {
-            orchestratorLogger.error(`[STEP 3] Alert processing failed: ${error.message}`);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            orchestratorLogger.error(`[STEP 3] Alert processing failed: ${message}`);
             // Continue anyway (non-blocking)
         }
 
@@ -93,9 +95,11 @@ export async function runDailyBatchWorkflow(
             totalDuration: Date.now() - startTime,
             status: 'completed'
         };
-    } catch (error: any) {
-        orchestratorLogger.error(`[FATAL] Workflow error: ${error.message}`);
-        orchestratorLogger.error(error.stack);
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        const stack = error instanceof Error ? error.stack : undefined;
+        orchestratorLogger.error(`[FATAL] Workflow error: ${message}`);
+        orchestratorLogger.error(stack);
 
         return {
             batchResult: {
@@ -153,8 +157,9 @@ export async function runWeeklyBatchWorkflow(
                 format: 'markdown'
             });
             orchestratorLogger.info('[STEP 2] Weekly report generated successfully');
-        } catch (error: any) {
-            orchestratorLogger.error(`[STEP 2] Report generation failed: ${error.message}`);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            orchestratorLogger.error(`[STEP 2] Report generation failed: ${message}`);
         }
 
         // Step 3: Process alerts
@@ -165,8 +170,9 @@ export async function runWeeklyBatchWorkflow(
             orchestratorLogger.info(
                 `[STEP 3] Alerts processed: sent=${alertResult.sent}, skipped=${alertResult.skipped}`
             );
-        } catch (error: any) {
-            orchestratorLogger.error(`[STEP 3] Alert processing failed: ${error.message}`);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            orchestratorLogger.error(`[STEP 3] Alert processing failed: ${message}`);
         }
 
         orchestratorLogger.info('[COMPLETE] Weekly batch workflow finished successfully');
@@ -178,8 +184,9 @@ export async function runWeeklyBatchWorkflow(
             totalDuration: Date.now() - startTime,
             status: 'completed'
         };
-    } catch (error: any) {
-        orchestratorLogger.error(`[FATAL] Workflow error: ${error.message}`);
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        orchestratorLogger.error(`[FATAL] Workflow error: ${message}`);
 
         return {
             batchResult: {

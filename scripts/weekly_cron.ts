@@ -59,10 +59,12 @@ async function main() {
 
         // Exit with success
         process.exit(result.status === 'completed' ? 0 : 1);
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        const stack = error instanceof Error ? error.stack : undefined;
         logger.error(`[FAILED] Weekly batch workflow error`);
-        logger.error(`Message: ${error.message}`);
-        logger.error(`Stack: ${error.stack}`);
+        logger.error(`Message: ${message}`);
+        logger.error(`Stack: ${stack}`);
 
         // Exit with failure
         process.exit(1);

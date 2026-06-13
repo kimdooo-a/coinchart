@@ -114,8 +114,9 @@ async function checkDatabaseConnection(): Promise<boolean> {
 
         logger.info(`  ✅ Database connection OK`);
         return true;
-    } catch (error: any) {
-        logger.error(`  ❌ Database error: ${error.message}`);
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        logger.error(`  ❌ Database error: ${message}`);
         return false;
     }
 }
@@ -140,8 +141,9 @@ async function checkFeatureGates(): Promise<boolean> {
 
         logger.info(`  ✅ Feature gates configured`);
         return true;
-    } catch (error: any) {
-        logger.error(`  ❌ Feature gates error: ${error.message}`);
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        logger.error(`  ❌ Feature gates error: ${message}`);
         return false;
     }
 }
@@ -168,8 +170,9 @@ async function checkNodeEnvironment(): Promise<boolean> {
 
         logger.info(`  ✅ Node environment OK`);
         return true;
-    } catch (error: any) {
-        logger.warn(`  ⚠️  Could not check Node environment: ${error.message}`);
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        logger.warn(`  ⚠️  Could not check Node environment: ${message}`);
         return true; // Non-critical
     }
 }
@@ -218,10 +221,12 @@ async function runPreflightChecks(): Promise<void> {
             logger.error('[END] Fix the issues above before deploying');
             process.exit(1);
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        const stack = error instanceof Error ? error.stack : undefined;
         logger.error('[FATAL] Unexpected error during preflight checks');
-        logger.error(`Message: ${error.message}`);
-        logger.error(`Stack: ${error.stack}`);
+        logger.error(`Message: ${message}`);
+        logger.error(`Stack: ${stack}`);
         process.exit(1);
     }
 }
