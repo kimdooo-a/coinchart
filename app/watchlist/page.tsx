@@ -11,15 +11,15 @@ export default function WatchlistPage() {
     return (
         <main className="min-h-screen bg-background text-foreground relative overflow-hidden flex flex-col items-center pt-[120px] md:pt-[140px]">
             <div className="fixed inset-0 z-0 pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-yellow-500/10 rounded-full blur-[120px]" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-amber-500/10 rounded-full blur-[120px]" />
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]" />
             </div>
 
             <div className="relative z-10 w-full max-w-4xl px-4 py-8">
                 <header className="mb-12 text-center border-b border-border pb-8">
                     <div className="flex items-center justify-center gap-3 mb-6">
                         <Star className="w-10 h-10 text-yellow-400" />
-                        <h1 className="text-3xl md:text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 to-amber-500">
+                        <h1 className="text-3xl md:text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
                             {lang === 'ko' ? '관심종목' : 'Watchlist'}
                         </h1>
                     </div>
@@ -31,13 +31,13 @@ export default function WatchlistPage() {
                 <div className="space-y-6">
                     <section className="bg-card/30 backdrop-blur-md border border-border p-8 rounded-3xl shadow-xl text-center">
                         <div className="flex justify-center gap-6 mb-8">
-                            <div className="p-4 bg-yellow-500/10 rounded-2xl border border-yellow-500/20">
+                            <div className="p-4 bg-primary/5 rounded-2xl border border-primary/20">
                                 <Star className="w-8 h-8 text-yellow-400" />
                             </div>
-                            <div className="p-4 bg-green-500/10 rounded-2xl border border-green-500/20">
+                            <div className="p-4 bg-primary/5 rounded-2xl border border-primary/20">
                                 <TrendingUp className="w-8 h-8 text-green-400" />
                             </div>
-                            <div className="p-4 bg-blue-500/10 rounded-2xl border border-blue-500/20">
+                            <div className="p-4 bg-primary/5 rounded-2xl border border-primary/20">
                                 <Bell className="w-8 h-8 text-blue-400" />
                             </div>
                         </div>

@@ -93,19 +93,19 @@ export default function SecureMemoPage() {
         <div className="min-h-screen bg-background text-foreground relative overflow-hidden pt-[120px] md:pt-[140px]">
             {/* Background Effects */}
             <div className="fixed inset-0 z-0 pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/20 rounded-full blur-[120px]" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/20 rounded-full blur-[120px]" />
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]" />
             </div>
 
             <div className="relative z-10 max-w-4xl mx-auto px-4 py-8 space-y-8">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white shadow-xl shadow-primary/20">
                             <ShieldCheck className="w-7 h-7" />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">
+                            <h1 className="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
                                 {t.secureMemo.title}
                             </h1>
                             <p className="text-on-surface-variant mt-1">{t.secureMemo.subtitle}</p>
@@ -113,7 +113,7 @@ export default function SecureMemoPage() {
                     </div>
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
-                        className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold rounded-full transition-all shadow-lg shadow-indigo-500/20 flex items-center gap-2"
+                        className="px-6 py-2.5 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold rounded-full transition-all shadow-lg shadow-primary/20 flex items-center gap-2"
                     >
                         <Plus className="w-5 h-5" />
                         {t.secureMemo.newMemo}
@@ -147,7 +147,7 @@ export default function SecureMemoPage() {
                         <p className="text-on-surface-variant text-lg">{t.secureMemo.noMemos}</p>
                         <button
                             onClick={() => setIsCreateModalOpen(true)}
-                            className="mt-4 px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-full transition-all"
+                            className="mt-4 px-6 py-2 bg-primary hover:bg-primary/90 text-white font-medium rounded-full transition-all"
                         >
                             {t.secureMemo.newMemo}
                         </button>

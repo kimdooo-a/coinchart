@@ -29,15 +29,15 @@ export default function SettingsPage() {
     return (
         <main className="min-h-screen bg-background text-foreground relative overflow-hidden flex flex-col items-center pt-[120px] md:pt-[140px]">
             <div className="fixed inset-0 z-0 pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[120px]" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-cyan-500/10 rounded-full blur-[120px]" />
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]" />
             </div>
 
             <div className="relative z-10 w-full max-w-4xl px-4 py-8">
                 <header className="mb-12 text-center border-b border-border pb-8">
                     <div className="flex items-center justify-center gap-3 mb-6">
                         <Settings className="w-10 h-10 text-blue-400" />
-                        <h1 className="text-3xl md:text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-cyan-500">
+                        <h1 className="text-3xl md:text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
                             {lang === 'ko' ? '설정' : 'Settings'}
                         </h1>
                     </div>

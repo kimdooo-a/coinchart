@@ -25,8 +25,8 @@ export default function PricingPage() {
             price: lang === 'ko' ? '준비 중' : 'Coming Soon',
             period: lang === 'ko' ? '출시 예정' : 'TBD',
             icon: Zap,
-            color: 'from-blue-500 to-cyan-500',
-            borderColor: 'border-blue-500/30',
+            color: 'from-primary to-secondary',
+            borderColor: 'border-primary/30',
             features: lang === 'ko'
                 ? ['프랙탈 패턴 고급 분석', '실시간 알림', '무제한 관심종목', 'AI 포지션 진단']
                 : ['Advanced fractal analysis', 'Real-time alerts', 'Unlimited watchlist', 'AI position diagnosis'],
@@ -47,13 +47,13 @@ export default function PricingPage() {
     return (
         <main className="min-h-screen bg-background text-foreground relative overflow-hidden flex flex-col items-center pt-[120px] md:pt-[140px]">
             <div className="fixed inset-0 z-0 pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-500/10 rounded-full blur-[120px]" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/10 rounded-full blur-[120px]" />
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]" />
             </div>
 
             <div className="relative z-10 w-full max-w-5xl px-4 py-8">
                 <header className="mb-12 text-center border-b border-border pb-8">
-                    <h1 className="text-3xl md:text-5xl font-black mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-indigo-500">
+                    <h1 className="text-3xl md:text-5xl font-black mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
                         {lang === 'ko' ? '요금제' : 'Pricing'}
                     </h1>
                     <p className="text-on-surface-variant text-lg">
@@ -82,7 +82,7 @@ export default function PricingPage() {
                             <ul className="space-y-3">
                                 {plan.features.map((feature) => (
                                     <li key={feature} className="flex items-center gap-2 text-foreground">
-                                        <Check className="w-4 h-4 text-green-400 shrink-0" />
+                                        <Check className="w-4 h-4 text-secondary shrink-0" />
                                         <span className="text-sm">{feature}</span>
                                     </li>
                                 ))}

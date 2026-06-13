@@ -52,8 +52,8 @@ export default function ContactPage() {
         <main className="min-h-screen bg-background text-foreground relative overflow-hidden flex flex-col items-center">
             {/* Background Effects */}
             <div className="fixed inset-0 z-0 pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/20 rounded-full blur-[120px]" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/20 rounded-full blur-[120px]" />
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]" />
             </div>
 
             {/* Spacer for GlobalHeader */}
@@ -64,7 +64,7 @@ export default function ContactPage() {
                     <div className="inline-flex items-center justify-center p-4 bg-primary/10 rounded-full mb-6 border border-primary/20 shadow-lg shadow-primary/5">
                         <Mail className="w-8 h-8 text-primary" />
                     </div>
-                    <h1 className="text-4xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">
+                    <h1 className="text-4xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
                         {lang === 'ko' ? '문의하기' : 'Contact Us'}
                     </h1>
                     <p className="text-on-surface-variant text-lg">
