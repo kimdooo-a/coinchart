@@ -1,10 +1,13 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { classify } from '@/lib/news/classifier';
+import { requireAdmin } from '@/lib/supabase/admin-guard';
 import { NextResponse } from 'next/server';
 
 export async function GET(req: Request) {
-    // Basic auth check
-    // In real app, verify user.ID or role
+    // 관리자 권한 검증 (공통 SSOT)
+    const gate = await requireAdmin();
+    if (!gate.ok) return gate.res;
+
     const { searchParams } = new URL(req.url);
     const lang = searchParams.get('lang') || 'ko';
 

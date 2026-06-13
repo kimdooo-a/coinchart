@@ -1,16 +1,21 @@
-
-import { createClient } from '@/lib/supabase/client';
 import { NextResponse } from 'next/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { requireAdmin } from '@/lib/supabase/admin-guard';
 import { SUPPORTED_COINS, TOP_US_STOCKS } from '@/lib/constants';
 import { fetchStockPrices } from '@/lib/supabase/stock';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
-    const supabase = createClient();
+    // 관리자 권한 검증 (공통 SSOT)
+    const gate = await requireAdmin();
+    if (!gate.ok) return gate.res;
+
+    // service_role 클라이언트로 DB 작업 (RLS 우회). 기존 브라우저 anon 클라(@/lib/supabase/client)는
+    // API 라우트에서 쿠키 세션을 못 읽어 인증·DB write 모두 실패하던 잠재 버그였음 — 정상화.
+    const supabase = createAdminClient();
 
     try {
-        const { data: { user } } = await supabase.auth.getUser();
-        // Auth check logic omitted for demo as per previous implementation
-
         const prices = [];
         const now = new Date().toISOString();
 

@@ -1,10 +1,13 @@
-
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { requireAdmin } from '@/lib/supabase/admin-guard';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+    const gate = await requireAdmin();
+    if (!gate.ok) return gate.res;
+
     const supabase = createAdminClient();
     try {
         const { data: { users }, error } = await supabase.auth.admin.listUsers();
@@ -16,6 +19,9 @@ export async function GET() {
 }
 
 export async function DELETE(req: Request) {
+    const gate = await requireAdmin();
+    if (!gate.ok) return gate.res;
+
     const supabase = createAdminClient();
     try {
         const { userId } = await req.json();

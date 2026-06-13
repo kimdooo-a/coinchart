@@ -1,17 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { requireAdmin } from '@/lib/supabase/admin-guard';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
-    const supabaseAuth = await createClient();
-
-    // Check authentication
-    const { data: { user } } = await supabaseAuth.auth.getUser();
-    if (!user || user.email !== 'smartkdy7@gmail.com') {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // 관리자 권한 검증 (공통 SSOT — 기존 하드코딩 이메일 비교를 헬퍼로 통일)
+    const gate = await requireAdmin();
+    if (!gate.ok) return gate.res;
 
     // Use Admin Client for database operations (bypass RLS)
     const supabase = createAdminClient();

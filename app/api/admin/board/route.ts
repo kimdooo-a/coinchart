@@ -10,9 +10,8 @@
 //   community_posts RLS는 update를 author 본인으로 제한하므로, 쓰기는 service_role
 //   admin 클라이언트로 수행한다(공개 board POST의 createAdminClient 패턴과 동일).
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isAdminEmail } from "@/lib/supabase/blog";
+import { requireAdmin } from "@/lib/supabase/admin-guard";
 
 // board API(app/api/board/[slug]/route.ts)의 VALID_SLUGS와 동일하게 유지
 const VALID_SLUGS = new Set([
@@ -23,27 +22,6 @@ const VALID_SLUGS = new Set([
 // board API와 동일한 select 필드 — 응답 행 구조를 공개 API와 일치시켜 UI 재사용 용이
 const POST_SELECT_FIELDS =
   "id, board_slug, title, author_id, guest_nickname, guest_ip_masked, category, tags, coin_symbol, view_count, like_count, comment_count, is_notice, is_hot, created_at, updated_at";
-
-/**
- * 관리자 권한 게이트. 서버 측 role 검증을 단일 지점으로 강제한다.
- * - 미인증: 401 / 인증되었으나 비관리자: 403 (안티패턴: 클라만 신뢰 금지)
- */
-async function requireAdmin(): Promise<
-  { ok: true; userId: string } | { ok: false; res: NextResponse }
-> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { ok: false, res: NextResponse.json({ error: "로그인이 필요합니다" }, { status: 401 }) };
-  }
-  if (!isAdminEmail(user.email)) {
-    return { ok: false, res: NextResponse.json({ error: "관리자 권한이 필요합니다" }, { status: 403 }) };
-  }
-  return { ok: true, userId: user.id };
-}
 
 // GET — 보드별 공지 목록 + 최근 일반글(공지 승격 후보)
 export async function GET(req: NextRequest) {
