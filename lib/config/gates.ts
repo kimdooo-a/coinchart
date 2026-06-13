@@ -72,10 +72,3 @@ export function getFeatureGatesCached(): FeatureGates {
     }
     return cachedGates;
 }
-
-/**
- * Reset cache (for testing)
- */
-export function resetFeatureGatesCache(): void {
-    cachedGates = null;
-}
