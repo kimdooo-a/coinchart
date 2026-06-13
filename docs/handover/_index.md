@@ -7,6 +7,7 @@
 
 | # | 날짜 | 세션 | handover |
 |---|------|------|----------|
+| 51 | 2026-06-14 | 기능 완성도 점검 연구 + R-A 보안 핫픽스 + R-B 설계/계획 | [→](./2026-06-14-session51-completeness-ra-rb.md) |
 | 50 | 2026-06-13 | git main 통합 — r9-gap-verify 스테일 브랜치 선별 회수 | [→](./2026-06-13-session50-git-main-integration.md) |
 | 49 | 2026-06-03 | 양평 통지 송신 + R17 잔여 마감 (watchlist sync E2E 스모크) | [→](./2026-06-03-session49-watchlist-sync-e2e.md) |
 | 48 | 2026-06-03 | alert 'pending' 정리 + 일봉 적재 깊이 확대 | [→](./2026-06-03-session48-alert-pending-daily-candle.md) |
