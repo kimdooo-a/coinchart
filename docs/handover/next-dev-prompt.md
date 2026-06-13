@@ -1,9 +1,10 @@
 # 다음 개발 프롬프트
 
-> 최종 갱신: 2026-05-25
+> 최종 갱신: 2026-06-13
 
 ## 최근 완료된 작업
 
+- **세션 35 (2026-06-13)**: **R9 지휘부 — gap-verify 부족분 포괄 검증 (10-터미널 분산 10/10)**. R1~R8 마감 후 사용자 요구("부족한 모든 내용 검증 + 일꾼 적극 + kdyswarm 내부 병렬")에 따라 지휘자가 7차원 read-only 갭 스캔(Agent 병렬, 충돌 0)으로 10작업 도출 → 9 외부 일꾼 + **T09 지휘자 직접**(write-guard가 비-CEO의 `docs/references/` 하드 차단 → 공통 SOT는 지휘자 전담, solution `2026-06-13-dispatch-references-conductor-only.md`). **T01** 엔진 5종 단위테스트 27(Workflow mode5 5sub, 커버리지 0%→확보)·**T02** 커뮤니티 쿼리 테스트 63+E2E 4·**T03** 댓글 좋아요 RPC(`community_toggle_comment_like` 멱등·회원전이 dedup)+`types/community.ts`+PATCH RPC 1콜·**T04** API 에러핸들링 4영역(news 503·fng JSON throw·stock 404/503·board RLS 403)·**T05** dead code 3함수 삭제(logger는 import 8건 증거로 보존)·**T06** 8페이지 gradient 토큰화·**T07** Analysis 모듈화(`[symbol]/page.tsx` **807→441**·`TradingStrategyGuide` 372→242·`AnalysisPanel` 359→249 + 신규 12파일)·**T08** a11y 7파일·**T09** 레퍼런스 3종·**T10** scripts `any` 43(실측)→0. 통합 tsc 0·build green·**vitest 117 passed**·격리위반 0. 통합커밋 `aa22a26`(+T05 `3abea66`·T06 `e737daa`). 미적용: 마이그 `20260613` 운영DB 적용·E2E 풀런(R10). (handover `session35-r9-conductor.md`, 보고서 `R9-_SUMMARY.md`)
 - **세션 34 (2026-05-25)**: **R8 마감 — 페이지 컴포넌트 다크 잔재 라이트화 + dead code 3종 삭제**. R8 후보 7종 사용처 전수 추적 → **4종 dead 발견**(`about-section`·`dashboard-grid`·`LanguageSwitcher`=구 다크 랜딩 잔재 / `InsufficientData`=미사용 재사용 프리미티브). 사용자 승인 하 **삭제+선별 라이트화**: 구 랜딩 3종 `git rm`(v2.0 피벗 후 미사용·홈은 커뮤니티 SSR 재구축·언어전환은 헤더 토글 중복). 살아있는 4종(`Chart/Ticker`@analysis·`Chart/StockTicker`@stock·`PremiumLock`@StockPanel·`AuthButton`@헤더) + `InsufficientData` 라이트화 — 다크 표면(`bg-gray-900`/`bg-black/40`/`border-gray-800`/회색 텍스트)을 `surface-container`/`on-surface(-variant)`/`outline-variant` 토큰으로 교체. **의미색 보존**(빨/파 시세·노랑 프리미엄·주황 경고, 등락 뱃지 `-400→-600` 가독), **의도 보존**(그라데이션 위 흰 글씨=아바타·로그인 CTA). 레퍼런스 동기화(`_COMPONENT_MAP`·`_WEB_CONTRACT` 삭제 3종 제거 + 홈 항목 stale 정정). tsc 0·build green(54/54)·다크 잔재 grep 0(그라데이션 흰글씨만). (handover `2026-05-25-session34-r8-page-lightify.md`)
 - **세션 33 (2026-05-25)**: **R7 마감 — 차트 라인/오버레이 색 KR 정렬(R7-3) + 토큰 bg-/border- 변형 점검(R7-4)**. **R7-3** 지표 라인(RSI/MACD/MA/BB)은 캔들과 달리 방향(상승/하락) 아닌 "지표 구분" **식별색**이라 의미 보존(사용자 확정 — MA7·25·99 빨/파 통일 시 구분 불가) + `lib/chart/theme.ts` `INDICATOR_COLORS`/`getIndicatorColors()` **SSOT 이관**(CryptoChart·StockChart 중복 하드코딩 9건씩 제거). 흰 배경 미가독 **MA99 `#FFEA00`→`#c79100`**(진앰버)·BB alpha 0.5→0.6·평단가선 brand primary 정렬. 차트 로딩 오버레이(`bg-gray-900/80`→`bg-surface/70`)·DetailedChart 라벨·**hero 심볼 `text-white`→`text-on-surface`**(흰 차트 배경서 안 보이던 핵심 버그) 라이트화(5파일). **R7-4** 토큰 `bg-`/`border-` 변형 점검 → shadcn 별칭(muted/card/border/background/popover/input)이 globals.css `@theme`에 라이트 토큰 전부 매핑 → `bg-muted`/`border-border` 172건 시각 정상·**전면 치환 불요**(R6 T05 별칭 보존 정책 유지), `text-muted-foreground` 잔여 0·비정상 변형 0. 실 깨짐은 차트 영역만 R7-3 흡수, 페이지 다크 잔재(about·AuthButton·Ticker·dashboard-grid 등 R1~R3 누락분)는 **R8 후보**. tsc 0·build green·시각 회귀 0. (handover `2026-05-25-R7-34-chart-lines-tokens.md`)
 - **세션 32 (2026-05-25)**: **R7 단독 — 운영 DB 마이그 정합(R7-1) + AD1 CI 통합 fallback(R7-2)**. **R7-1**: 운영 DB(`enksnhshciyvllwfiwrm`) `schema_migrations` 정합 — `backfill_schema_migrations.sql` Part A+B를 Management API `database/query` `BEGIN;COMMIT` 트랜잭션 1회 적용 → **6행(8자리)→14행(14자리)**, 로컬 14파일 1:1(객체/데이터 불변·히스토리만). 순서 함정(로컬14↔원격8 mismatch로 db push 선행 시 14개 재실행 위험) 식별 후 backfill 선행. CLI 검증은 `.env.local` **UTF-8 BOM**(supabase CLI env 파서 거부)+db password 부재로 미수행 → `schema_migrations` 직접조회(14종=로컬 14파일)가 db push --dry-run 0건과 동등함을 근거로 동등검증. 런북 §10 신설. **R7-2**: `auth.setup.ts`에 **비번 없는 service_role magiclink fallback 경로 B**(`admin.generateLink({type:'magiclink'})`→`verifyOtp({token_hash,type:'magiclink'})` 쿠키 캡처, signInWithPassword와 동일 포맷) 추가 + `community-admin-auth.spec.ts` **collection 타이밍 함정**(top-level `RUN_AD1`→CI fresh 첫회 항상 skip) 런타임 평가로 수정. 운영 DB 실측 후 fresh 실행 **2 passed**(비번 미주입, fallback 경로 B), graceful skip 회귀 보존, 잔여 0, 인증 산출물 gitignore 확인. tsc 0. solution 2종(`2026-05-25-playwright-auth-setup-collection-timing.md`·`2026-05-25-env-local-utf8-bom-breaks-cli.md`). (handover `session32-r7-migration-ad1.md`)
@@ -74,11 +75,18 @@
 
 1. ~~**페이지 컴포넌트 다크 잔재 라이트화**~~ → **✅ 완료**. 후보 7종 추적 결과 4종 dead. **삭제 3종**(`about-section`·`dashboard-grid`·`LanguageSwitcher` — 구 다크 랜딩 잔재, import 0건). **라이트화 5종**(`Chart/Ticker`·`StockTicker`·`PremiumLock`·`AuthButton` + 재사용 프리미티브 `InsufficientData`) — 다크 표면→라이트 토큰, 의미색(빨/파 시세·노랑 프리미엄·주황 경고)·그라데이션 흰글씨 보존. 레퍼런스 동기화. `hero-chart` 잔재는 R7 귀속(중복 아님).
 
-### ★ R9 후보 (다음 라운드)
+### ✅ R9 완료 (세션 35, 2026-06-13 — gap-verify)
 
-1. **`app/page.tsx` 홈 컴포넌트 트리 재감사** — R8에서 `_COMPONENT_MAP`/`_WEB_CONTRACT`의 홈 항목이 stale(과거 import 표기가 현 커뮤니티 SSR 구조와 불일치)임을 부분 정정. 홈이 실제 어떤 컴포넌트를 쓰는지 재감사하여 레퍼런스 정합 + 잔재 컴포넌트(`hero-section`·`footer-section` 등) dead 여부 확정.
-2. **`.env.local` UTF-8 BOM 제거** — supabase CLI 직접 사용 복구(현재 Management API 우회 중).
-3. Giscus App 설치(수동) · `/history` 메뉴 정리 · `app/analysis/[symbol]/page.tsx` 807줄 리팩토링.
+7차원 갭 스캔 후 10-터미널 분산(9 일꾼 + T09 지휘자 직접). T01 엔진 테스트 27·T02 커뮤니티 테스트 63+E2E 4·T03 댓글 좋아요 RPC+`types/community`·T04 API 에러핸들링·T05 dead code·T06 8페이지 gradient·**T07 `analysis/[symbol]/page.tsx` 807→441 모듈화(12 신규)**·T08 a11y·T09 레퍼런스 3종·T10 scripts any 43→0. tsc 0·build green·vitest 117 passed·격리위반 0. (handover `session35-r9-conductor.md`, 보고서 `R9-_SUMMARY.md`)
+
+### ★ R10 후보 (다음 라운드)
+
+1. **마이그 `20260613` 운영DB 적용 + E2E 풀런** — `community_toggle_comment_like` RPC를 Management API로 적용(선행 `20260524000001` 확인) 후 dev 서버 + `E2E_DB_READY=1`로 N-D1~N-D3 + DB 의존 spec 실검증.
+2. **엔진 보정 8건(T01 발견)** — `signal_engine` `Number.isFinite` 가드, `probability/engine` clamp 스펙 정정, `backtest/engine` dead 표현식(L57)·미청산 포지션, `analysis` riskRewardRatio 비유한 가드.
+3. **polish 묶음** — 타입 일괄치환(T03: `board-queries` 인라인→`types/community` 재노출, 댓글 dislikeCount 노출) · 에디터 다크 데코 잔재(T08: EditorToolbar Divider·ColorPicker 드롭다운·BlogEditor `tone='dark'` 미사용 분기, CommentSection aria-label) · economic_events/calendar 중복(T05) · 광원 토큰 `--glow`(T06).
+4. **홈 컴포넌트 트리 재감사**(R9 미착수) — `_COMPONENT_MAP`/`_WEB_CONTRACT` 홈 항목 stale 정정 + 잔재 컴포넌트 dead 여부 확정.
+5. **`.env.local` UTF-8 BOM 제거** — supabase CLI 직접 사용 복구(현재 Management API 우회 중).
+6. Giscus App 설치(수동) · `/history` 메뉴 정리.
 
 ### ✅ R3 완료 (세션 28, 2026-05-25 — community-finish 12/12)
 
@@ -135,9 +143,9 @@
 - ~~블로그 SEO 미성숙~~ → 80%로 개선
 - ~~Giscus 미설정~~ → 코드 설정 완료, **App 설치만 필요**
 - ~~테스트 프레임워크 미도입~~ → Vitest 20개 동작
-- ~~any 타입 78회~~ → 핵심 코드 1개, scripts/ 45개
+- ~~any 타입 78회~~ → ~~핵심 코드 1개, scripts/ 45개~~ → **R9/T10에서 `scripts/` any 43건(실측)→0 완전 제거**(`unknown`+가드, `as any` 2건도 제거). 잔여는 핵심 코드 1개(`BlogPost.content` 레거시 union)
 - ~~에디터 기능 부족~~ → 28개 버튼, HTML 저장, 자동저장 완비
-- `app/analysis/[symbol]/page.tsx` 807줄 (리팩토링 필요)
+- ~~`app/analysis/[symbol]/page.tsx` 807줄 (리팩토링 필요)~~ → **R9/T07 완료** (807→441줄, `_components/` 6개 + `TradingStrategyGuide/` 3분할 + `components/hooks/useAnalysis*.ts` 2개로 모듈화)
 - `BlogPost.content` 타입이 union — 레거시 호환 제거 가능
 - ~~Supabase 마이그레이션 히스토리 동일 날짜 중복 파일 — 리네이밍 권장~~ → **R6/T02 완료**(14자리 정규화). 운영 DB backfill만 사용자 대기(런북 §9-4)
 - ~~`BlogEditor` TipTap이 SSR/`dynamic(ssr:false)` 환경에서 `immediatelyRender` 누락 시 클라 크래시~~ → **R6 핫픽스 완료**(`a1983a3`, `immediatelyRender:false`). solution `2026-05-25-tiptap-immediatelyrender-ssr-crash.md`
