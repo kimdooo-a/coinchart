@@ -75,6 +75,7 @@ export interface BoardPostDetail {
   title: string;
   contentHtml: string;
   author: string;
+  authorId?: string | null; // DB author_id — null/없으면 익명 글 (수정 페이지 익명 판정 SSOT)
   authorIp?: string;
   isAdmin: boolean;
   category?: string;
@@ -160,6 +161,7 @@ export function toBoardPostDetail(
     title: row.title,
     contentHtml: row.content_html ?? "",
     author: isAnon ? row.guest_nickname ?? "익명" : "회원",
+    authorId: row.author_id ?? null,
     authorIp: isAnon ? maskedIpToShort(row.guest_ip_masked) : undefined,
     isAdmin: false, // T12 API는 운영자 플래그를 노출하지 않음 (후속 라운드)
     category: row.category && row.category !== "전체" ? row.category : undefined,
@@ -460,8 +462,12 @@ export async function deleteBoardPost(
   postId: string,
   guestPassword?: string
 ): Promise<void> {
-  const qs = guestPassword ? `?guestPassword=${encodeURIComponent(guestPassword)}` : "";
-  const res = await fetch(`/api/board/${slug}/${postId}${qs}`, { method: "DELETE" });
+  // 비번은 query string이 아니라 request body(JSON)로만 전송 — 평문 로깅 방지(H-2)
+  const res = await fetch(`/api/board/${slug}/${postId}`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ guestPassword: guestPassword ?? "" }),
+  });
   const json = (await res.json().catch(() => ({}))) as { error?: string };
   if (!res.ok) throw new Error(json.error ?? `삭제 실패 (${res.status})`);
 }

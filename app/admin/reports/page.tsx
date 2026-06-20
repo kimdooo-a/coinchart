@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { REPORT_REASON_LABELS, type ReportReason } from '@/lib/community/report-client';
+import { formatDateTime } from '@/lib/community/format-utils';
 
 // 클라 표시 게이트용 관리자 이메일(서버는 requireAdmin으로 별도 검증) — 기존 admin 페이지 관례 따름
 const ADMIN_EMAIL = 'smartkdy7@gmail.com';
@@ -45,16 +46,6 @@ const STATUS_LABEL: Record<ReportStatus, string> = {
 
 function shortenUuid(uuid: string): string {
   return uuid.slice(0, 8) + '…';
-}
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString('ko-KR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
 }
 
 export default function AdminReportsPage() {
@@ -276,7 +267,7 @@ export default function AdminReportsPage() {
                     {/* 하단 행: 신고 시각 + 액션 버튼 */}
                     <div className="flex items-center justify-between gap-3 mt-3 flex-wrap">
                       <span className="text-meta text-on-surface-variant">
-                        신고 시각: {formatDate(r.created_at)}
+                        신고 시각: {formatDateTime(r.created_at)}
                       </span>
 
                       {/* 상태변경 버튼 */}

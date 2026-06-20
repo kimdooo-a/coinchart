@@ -3,6 +3,7 @@
 // DO NOT import stock functions from here
 
 import { createClient } from '@/lib/supabase/client';
+import { createClient as createAnonClient } from '@supabase/supabase-js';
 import type { CoinTicker } from '@/types/coins';
 
 export interface CryptoPriceData {
@@ -61,6 +62,73 @@ export async function fetchCryptoMarketPrices(
             .sort((a, b) => a.time - b.time);
     } catch (err) {
         console.error('[Crypto SSOT] Exception:', err);
+        return null;
+    }
+}
+
+/**
+ * Fetch Crypto market prices — SERVER-SAFE 변종 (H-1, 2026-06-20)
+ *
+ * fetchCryptoMarketPrices와 동일한 쿼리·반환 형태(CryptoPriceData[] ascending)이나,
+ * createBrowserClient 대신 쿠키 비의존 anon 클라이언트 + Next ISR(revalidate) fetch 래퍼를
+ * 사용한다. 서버 SSR 로더(coin-server.ts fetchCoinRoomData)에서 호출 시 매 렌더마다
+ * 비캐시 Supabase 왕복이 발생하던 문제를 해소하고, 같은 페이지의 다른 anon 쿼리들과
+ * 동일한 ISR 재검증 캐시(5분)에 편입시킨다.
+ *
+ * 클라 분석 페이지는 기존 fetchCryptoMarketPrices를 그대로 사용한다(변경 없음).
+ *
+ * @param symbol - Crypto symbol (e.g., 'BTCUSDT', 'ETHUSDT')
+ * @param limit - Number of records to fetch (default: 990)
+ * @returns Array of CryptoPriceData or null if error
+ */
+export async function fetchCryptoMarketPricesServer(
+    symbol: string,
+    limit: number = 990
+): Promise<CryptoPriceData[] | null> {
+    try {
+        const supabase = createAnonClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            {
+                auth: { persistSession: false, autoRefreshToken: false },
+                global: {
+                    fetch: (input: RequestInfo | URL, init?: RequestInit) =>
+                        fetch(input, { ...init, next: { revalidate: 300 } } as RequestInit),
+                },
+            }
+        );
+
+        const { data, error } = await supabase
+            .from('market_prices')
+            .select('date, open, high, low, close, volume, symbol')
+            .eq('symbol', symbol.toUpperCase())
+            .order('date', { ascending: false })
+            .limit(limit);
+
+        if (error) {
+            console.error('[Crypto SSOT/Server] Fetch Error:', error);
+            return null;
+        }
+
+        if (!data || data.length === 0) {
+            console.warn(`[Crypto SSOT/Server] No data found for symbol: ${symbol}`);
+            return null;
+        }
+
+        // Map and sort ascending for analysis
+        return data
+            .map(d => ({
+                time: new Date(d.date).getTime() / 1000, // Convert date string to Unix timestamp (seconds)
+                open: Number(d.open),
+                high: Number(d.high),
+                low: Number(d.low),
+                close: Number(d.close),
+                volume: Number(d.volume),
+                symbol: d.symbol
+            }))
+            .sort((a, b) => a.time - b.time);
+    } catch (err) {
+        console.error('[Crypto SSOT/Server] Exception:', err);
         return null;
     }
 }

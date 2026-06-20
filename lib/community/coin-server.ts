@@ -15,7 +15,7 @@
 //   시세(Binance)·FNG는 외부 API 모듈을 직접 호출하고 .catch로 격리한다(전체 페이지 500 방지).
 
 import { createClient as createAnonClient } from "@supabase/supabase-js";
-import { fetchCommunityTickers, fetchCryptoMarketPrices } from "@/lib/supabase/crypto";
+import { fetchCommunityTickers, fetchCryptoMarketPricesServer } from "@/lib/supabase/crypto";
 import { analyzeMarket } from "@/lib/analysis/crypto";
 import { fetchFng } from "@/lib/community/fng";
 import { categoryLabel } from "@/lib/community/news-queries";
@@ -198,9 +198,9 @@ export async function fetchCoinRoomData(meta: CoinRoomMeta): Promise<CoinRoomDat
   // 2-1. AI 시그널 — 단일 코인(isAggregate=false)만 분석, altcoin/kimp는 null
   type SignalResult = { signal: '매수' | '매도' | '중립'; confidence: number; marketState: string } | null;
   const analysisSignalP: Promise<SignalResult> = (!meta.isAggregate && meta.binanceSymbol)
-    ? fetchCryptoMarketPrices(meta.binanceSymbol, 300).then((prices) => {
+    ? fetchCryptoMarketPricesServer(meta.binanceSymbol, 300).then((prices) => {
         if (!prices || prices.length < 60) return null;
-        // fetchCryptoMarketPrices가 이미 ascending 정렬로 반환 → analyzeMarket 바로 사용 가능
+        // fetchCryptoMarketPricesServer가 이미 ascending 정렬로 반환 → analyzeMarket 바로 사용 가능
         const candles = prices.map((p) => ({
           time: p.time,
           open: p.open,

@@ -4,7 +4,7 @@
 // props: open, targetType, targetId, onClose
 // 접근성: role="dialog", aria-modal, ESC 닫기, 라디오 그룹
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import {
   REPORT_REASON_LABELS,
@@ -34,14 +34,14 @@ export default function ReportModal({
   // 언마운트 시 타이머 cleanup
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
 
-  // 상태 초기화는 닫기 핸들러에서 처리
-  const handleClose = () => {
+  // 상태 초기화는 닫기 핸들러에서 처리 (setter는 안정적이므로 deps는 onClose만)
+  const handleClose = useCallback(() => {
     setReason("spam");
     setDetail("");
     setBusy(false);
     setMessage(null);
     onClose();
-  };
+  }, [onClose]);
 
   // ESC 닫기 (상태 리셋을 위해 handleClose 경유)
   useEffect(() => {
@@ -51,8 +51,7 @@ export default function ReportModal({
     };
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, onClose]);
+  }, [open, handleClose]);
 
   if (!open) return null;
 

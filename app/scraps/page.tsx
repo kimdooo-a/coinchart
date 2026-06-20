@@ -7,9 +7,9 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Bookmark, Eye, MessageSquare, ThumbsUp, LogIn } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 import CommunityBadge from '@/components/community/Badge';
 import { BOARD_META, type BoardSlug } from '@/lib/community/board-meta';
+import { formatRelativeTime } from '@/lib/community/format-utils';
 
 // ─── 타입 ─────────────────────────────────────────────────────
 
@@ -25,20 +25,7 @@ interface ScrapPost {
 }
 
 // ─── 날짜 포맷 ────────────────────────────────────────────────
-
-function formatDate(iso: string): string {
-  const d = new Date(iso);
-  const now = new Date();
-  const diffMs = now.getTime() - d.getTime();
-  const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 1) return '방금 전';
-  if (diffMin < 60) return `${diffMin}분 전`;
-  const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr}시간 전`;
-  const diffDay = Math.floor(diffHr / 24);
-  if (diffDay < 7) return `${diffDay}일 전`;
-  return d.toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' });
-}
+// 상대 시간 포맷은 lib/community/format-utils 의 formatRelativeTime 사용
 
 function formatCount(n: number): string {
   if (n >= 10000) return `${(n / 10000).toFixed(1)}만`;
@@ -78,7 +65,7 @@ function ScrapCard({ post }: { post: ScrapPost }) {
         </p>
         {/* 메타 */}
         <div className="flex items-center gap-3 mt-1 text-meta text-on-surface-variant">
-          <span>{formatDate(post.created_at)}</span>
+          <span>{formatRelativeTime(post.created_at)}</span>
           <span className="flex items-center gap-0.5">
             <Eye className="w-3 h-3" />
             {formatCount(post.view_count)}
@@ -109,19 +96,10 @@ export default function ScrapsPage() {
   const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
-    const supabase = createClient();
     let cancelled = false;
 
     async function init() {
-      // 세션 확인
-      const { data: { user } } = await supabase.auth.getUser();
-      if (cancelled) return;
-
-      if (!user) {
-        setViewState('unauthenticated');
-        return;
-      }
-
+      // 미로그인 여부는 별도 getUser() 없이 API의 401 응답으로 판정 (아래 res.status === 401 처리)
       // 스크랩 목록 fetch
       try {
         const res = await fetch('/api/community/scrap', { cache: 'no-store' });

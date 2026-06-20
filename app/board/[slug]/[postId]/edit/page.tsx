@@ -72,7 +72,7 @@ export default function PostEditPage({
                 setTags(post.tags ?? []);
                 setCoinSymbol(post.coinSymbol ?? "");
 
-                const anon = !!post.authorIp; // guest_ip_masked 존재 → 익명 글
+                const anon = !post.authorId; // author_id 없음 → 익명 글 (마스킹 IP는 legacy 글에서 null일 수 있어 신뢰 불가)
                 setIsAnonymous(anon);
 
                 if (anon) {
@@ -291,6 +291,7 @@ export default function PostEditPage({
                     {/* 본문 (TipTap 에디터) */}
                     <label className="text-label-bold text-on-surface-variant block mb-1">본문</label>
                     <div className="mb-4">
+                        {/* key forces BlogEditor remount when switching posts so prefill applies */}
                         <BlogEditor key={postId} content={content} onChange={setContent} tone="light" />
                     </div>
 

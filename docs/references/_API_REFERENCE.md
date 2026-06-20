@@ -834,7 +834,7 @@ v2.0 커뮤니티 피벗(자유/시세/정보 + 코인룸 6종)을 위한 게시
 게시글 soft delete (`is_deleted=true`).
 
 - **권한**: PATCH와 동일
-- **`guestPassword` 전달**: query `?guestPassword=` 또는 body JSON (DELETE에 body 허용)
+- **`guestPassword` 전달**: **body JSON 전용** (`{ guestPassword?: string }`) — query string은 평문 로깅 위험으로 제거(H-2 2026-06-20). 클라 `deleteBoardPost`는 `DELETE` + `Content-Type: application/json` + body 전송
 - **응답 (200)**: `{ ok: true }`
 
 ---

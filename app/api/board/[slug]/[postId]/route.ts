@@ -159,18 +159,13 @@ export async function DELETE(
   if (!VALID_SLUGS.has(slug)) return NextResponse.json({ error: "Unknown board" }, { status: 404 });
   if (!isUuid(postId)) return NextResponse.json({ error: "Invalid post id" }, { status: 400 });
 
-  // 비번은 query string 또는 body 어디서든 받음 (DELETE 메서드라 body 처리 분기)
+  // 비번은 오직 request body(JSON)에서만 읽는다 — query string은 평문 로깅 위험(H-2)
   let guestPassword = "";
-  const url = new URL(req.url);
-  const qPwd = url.searchParams.get("guestPassword");
-  if (qPwd) guestPassword = qPwd;
-  else {
-    try {
-      const body = (await req.json()) as { guestPassword?: unknown };
-      if (typeof body.guestPassword === "string") guestPassword = body.guestPassword;
-    } catch {
-      // body 없으면 무시
-    }
+  try {
+    const body = (await req.json()) as { guestPassword?: unknown };
+    if (typeof body.guestPassword === "string") guestPassword = body.guestPassword;
+  } catch {
+    // body 없으면 무시
   }
 
   const auth = await verifyEditPermission(postId, guestPassword);

@@ -74,9 +74,8 @@ export default function PostVoteButtons({
       if ("status" in result) {
         // 에러 응답
         if (result.status === 401) {
-          if (confirm("스크랩하려면 로그인이 필요합니다. 로그인 페이지로 이동할까요?")) {
-            window.location.href = "/auth/login";
-          }
+          // 비로그인 사용자: 차단형 confirm 대신 로그인 페이지로 즉시 이동 (앱 공통 패턴)
+          window.location.href = "/auth/login";
         } else {
           alert(result.error || "스크랩 처리에 실패했습니다.");
         }
