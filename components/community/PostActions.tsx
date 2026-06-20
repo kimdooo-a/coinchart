@@ -36,7 +36,11 @@ export default function PostActions({ slug, postId, requiresPassword }: PostActi
 
   return (
     <div className="flex items-center gap-2">
-      <button className="hover:text-primary inline-flex items-center gap-1" type="button">
+      <button
+        className="hover:text-primary inline-flex items-center gap-1"
+        type="button"
+        onClick={() => router.push(`/board/${slug}/${postId}/edit`)}
+      >
         <Edit className="w-3 h-3" />수정
       </button>
       <button onClick={handleDelete} className="hover:text-error inline-flex items-center gap-1" type="button">

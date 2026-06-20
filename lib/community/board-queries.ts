@@ -397,6 +397,36 @@ export async function toggleCommentLike(
 }
 
 // ─────────────────────────────────────────────────────────────
+// 수정 — PATCH /api/board/{slug}/{postId}
+// ─────────────────────────────────────────────────────────────
+
+export interface UpdatePostInput {
+  title?: string;
+  contentHtml?: string;
+  category?: string;
+  tags?: string[];
+  coinSymbol?: string;
+  guestPassword?: string;
+}
+
+/** 게시글 수정. 익명 글은 guestPassword 필수. 성공 시 void. */
+export async function updateBoardPost(
+  slug: BoardSlug,
+  postId: string,
+  input: UpdatePostInput
+): Promise<void> {
+  const res = await fetch(`/api/board/${slug}/${postId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  const json = (await res.json().catch(() => ({}))) as { error?: string };
+  if (!res.ok) {
+    throw new Error(json.error ?? `수정 실패 (${res.status})`);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
 // 삭제 — DELETE /api/board/{slug}/{postId}
 // ─────────────────────────────────────────────────────────────
 
