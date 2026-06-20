@@ -5,8 +5,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { verifyGuestPassword } from "@/lib/community/auth";
 import { sanitizeHtml } from "@/lib/blog-sanitize";
+import { verifyEditPermission } from "@/lib/community/post-edit-auth";
 
 const VALID_SLUGS = new Set([
   "free", "market", "info",
@@ -94,44 +94,6 @@ interface UpdateBody {
   tags?: unknown;
   coinSymbol?: unknown;
   guestPassword?: unknown;
-}
-
-async function verifyEditPermission(
-  postId: string,
-  guestPassword: string
-): Promise<{ ok: boolean; reason?: string; status?: number; row?: { author_id: string | null; guest_password_hash: string | null } }> {
-  const supabaseUser = await createClient();
-  const { data: { user } } = await supabaseUser.auth.getUser();
-
-  const admin = createAdminClient();
-  const { data: row, error } = await admin
-    .from("community_posts")
-    .select("author_id, guest_password_hash, is_deleted")
-    .eq("id", postId)
-    .single();
-
-  if (error || !row) return { ok: false, reason: "Not found", status: 404 };
-  if (row.is_deleted) return { ok: false, reason: "Deleted", status: 410 };
-
-  // 회원 작성: author_id 일치
-  if (row.author_id) {
-    if (!user || user.id !== row.author_id) {
-      return { ok: false, reason: "Forbidden", status: 403, row };
-    }
-    return { ok: true, row };
-  }
-
-  // 익명 작성: 비번 검증
-  if (!row.guest_password_hash) {
-    return { ok: false, reason: "권한 없음", status: 403, row };
-  }
-  if (!guestPassword) {
-    return { ok: false, reason: "비밀번호 필요", status: 401, row };
-  }
-  const ok = await verifyGuestPassword(guestPassword, row.guest_password_hash);
-  if (!ok) return { ok: false, reason: "비밀번호 불일치", status: 403, row };
-
-  return { ok: true, row };
 }
 
 export async function PATCH(

@@ -427,6 +427,31 @@ export async function updateBoardPost(
 }
 
 // ─────────────────────────────────────────────────────────────
+// 수정 권한 사전 검증 — POST /api/board/{slug}/{postId}/verify-edit
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * 수정 페이지의 익명 비밀번호 게이트가 편집기 진입 전 호출 (HIGH-1, 2026-06-20).
+ * 서버가 PATCH와 동일한 비번 검증을 수행 → 틀리면 throw(게이트 유지), 맞으면 통과.
+ * 회원 글은 guestPassword 없이도 세션으로 통과한다.
+ */
+export async function verifyPostEditAccess(
+  slug: BoardSlug,
+  postId: string,
+  guestPassword?: string
+): Promise<void> {
+  const res = await fetch(`/api/board/${slug}/${postId}/verify-edit`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ guestPassword: guestPassword ?? "" }),
+  });
+  const json = (await res.json().catch(() => ({}))) as { error?: string };
+  if (!res.ok) {
+    throw new Error(json.error ?? `비밀번호 확인 실패 (${res.status})`);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
 // 삭제 — DELETE /api/board/{slug}/{postId}
 // ─────────────────────────────────────────────────────────────
 

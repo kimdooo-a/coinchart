@@ -18,9 +18,14 @@ export async function middleware(request: NextRequest) {
     const requestHeaders = new Headers(request.headers)
     if (IP_INJECT_PATHS.some((p) => path.startsWith(p))) {
         const ip = extractClientIp({ headers: request.headers })
-        requestHeaders.set('x-client-ip', ip)
-        requestHeaders.set('x-client-ip-masked', maskIp(ip))
-        requestHeaders.set('x-client-ip-hash', hashIp(ip))
+        // IP 미상(빈 문자열) 시 해시 헤더를 주입하지 않는다.
+        // 고정 센티넬 해시를 주입하면 IP 미상 익명 사용자 전원이 dedup을 전역 공유하게 되므로,
+        // 헤더를 비워 라우트의 "식별 헤더 없음" 400 가드가 작동하게 한다(fail-closed).
+        if (ip) {
+            requestHeaders.set('x-client-ip', ip)
+            requestHeaders.set('x-client-ip-masked', maskIp(ip))
+            requestHeaders.set('x-client-ip-hash', hashIp(ip))
+        }
     }
 
     let response = NextResponse.next({

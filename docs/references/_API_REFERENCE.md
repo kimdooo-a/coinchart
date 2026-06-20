@@ -839,6 +839,19 @@ v2.0 커뮤니티 피벗(자유/시세/정보 + 코인룸 6종)을 위한 게시
 
 ---
 
+### POST /api/board/[slug]/[postId]/verify-edit (HIGH-1 2026-06-20)
+
+게시글 수정 권한 **사전 검증**. 수정 페이지의 익명 비밀번호 게이트가 편집기 진입 전 호출해 비번을 서버에서 확인한다(게이트가 진실해짐 — 검증 없이 통과하던 정합성 결함 해소).
+
+- **파일**: `app/api/board/[slug]/[postId]/verify-edit/route.ts`
+- **Body**: `{ guestPassword?: string }`
+- **권한·검증 로직**: PATCH/DELETE와 동일한 `verifyEditPermission()`(`lib/community/post-edit-auth.ts` SSOT) — 회원=세션 author_id 일치 / 익명=bcrypt 비번 일치
+- **응답 (200)**: `{ ok: true }`
+- **에러**: `401`(비번 누락) / `403`(권한/비번 불일치) / `404`(없음) / `410`(이미 삭제)
+- **클라**: `verifyPostEditAccess(slug, postId, guestPassword?)` (`lib/community/board-queries.ts`)
+
+---
+
 ### POST /api/community/comment
 
 댓글/대댓글 작성.

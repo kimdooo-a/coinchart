@@ -11,7 +11,7 @@ import dynamic from "next/dynamic";
 import { Info } from "lucide-react";
 import FooterSection from "@/components/footer-section";
 import { BOARD_META, type BoardSlug } from "@/lib/community/board-meta";
-import { fetchBoardPost, updateBoardPost } from "@/lib/community/board-queries";
+import { fetchBoardPost, updateBoardPost, verifyPostEditAccess } from "@/lib/community/board-queries";
 
 const BlogEditor = dynamic(() => import("@/components/Blog/editor/BlogEditor"), {
     ssr: false,
@@ -54,6 +54,8 @@ export default function PostEditPage({
     const [isAnonymous, setIsAnonymous] = useState(false);
     const [guestPwd, setGuestPwd] = useState("");
     const [guestPwdInput, setGuestPwdInput] = useState(""); // 게이트 입력값
+    const [gateChecking, setGateChecking] = useState(false); // 게이트 서버 검증 중
+    const [gateError, setGateError] = useState(""); // 게이트 검증 실패 메시지
 
     // 페이지 상태
     const [loadState, setLoadState] = useState<LoadState>({ status: "loading" });
@@ -96,14 +98,28 @@ export default function PostEditPage({
         setTagInput("");
     };
 
-    // 비밀번호 게이트 통과
-    const handleGateConfirm = () => {
+    // 비밀번호 게이트 통과 — 서버에서 PATCH와 동일한 비번 검증을 먼저 수행(HIGH-1)
+    const handleGateConfirm = async () => {
         if (!guestPwdInput.trim()) {
-            alert("비밀번호를 입력해주세요.");
+            setGateError("비밀번호를 입력해주세요.");
             return;
         }
-        setGuestPwd(guestPwdInput);
-        setLoadState({ status: "ready" });
+        setGateChecking(true);
+        setGateError("");
+        try {
+            await verifyPostEditAccess(boardSlug, postId, guestPwdInput);
+            setGuestPwd(guestPwdInput);
+            setLoadState({ status: "ready" });
+        } catch (e: unknown) {
+            const msg = e instanceof Error ? e.message : "비밀번호 확인에 실패했습니다.";
+            setGateError(
+                msg.includes("불일치") || msg.includes("403")
+                    ? "비밀번호가 일치하지 않습니다."
+                    : msg
+            );
+        } finally {
+            setGateChecking(false);
+        }
     };
 
     // 수정 제출
@@ -186,14 +202,21 @@ export default function PostEditPage({
                             type="password"
                             placeholder="비밀번호 (4자 이상)"
                             value={guestPwdInput}
-                            onChange={(e) => setGuestPwdInput(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter") handleGateConfirm();
+                            onChange={(e) => {
+                                setGuestPwdInput(e.target.value);
+                                if (gateError) setGateError("");
                             }}
-                            className="w-full border border-outline-variant rounded text-body-sm px-3 py-2 focus:outline-none focus:border-primary mb-4"
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" && !gateChecking) handleGateConfirm();
+                            }}
+                            disabled={gateChecking}
+                            className="w-full border border-outline-variant rounded text-body-sm px-3 py-2 focus:outline-none focus:border-primary mb-2 disabled:opacity-60"
                             autoFocus
                         />
-                        <div className="flex gap-2 justify-end">
+                        {gateError && (
+                            <p className="text-body-sm text-error mb-2" role="alert">{gateError}</p>
+                        )}
+                        <div className="flex gap-2 justify-end mt-2">
                             <Link
                                 href={`/board/${boardSlug}/${postId}`}
                                 className="px-4 py-2 rounded-md border border-outline-variant text-body-sm text-on-surface hover:bg-surface-container-low"
@@ -203,9 +226,10 @@ export default function PostEditPage({
                             <button
                                 type="button"
                                 onClick={handleGateConfirm}
-                                className="bg-primary text-on-primary text-label-bold px-6 py-2 rounded-md hover:bg-primary-container"
+                                disabled={gateChecking}
+                                className="bg-primary text-on-primary text-label-bold px-6 py-2 rounded-md hover:bg-primary-container disabled:opacity-60"
                             >
-                                확인
+                                {gateChecking ? "확인 중..." : "확인"}
                             </button>
                         </div>
                     </div>

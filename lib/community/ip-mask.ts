@@ -8,7 +8,10 @@ export function extractClientIp(req: { headers: Headers } | Request): string {
   const headers = "headers" in req ? req.headers : new Headers();
   const xff = headers.get("x-forwarded-for") ?? "";
   const real = headers.get("x-real-ip") ?? "";
-  const ip = (xff.split(",")[0] ?? "").trim() || real || "0.0.0.0";
+  // IP 미상 시 "0.0.0.0" 같은 고정 센티넬을 쓰면 hashIp가 모든 IP 미상 익명 사용자에게
+  // 동일 해시를 만들어 신고/추천 dedup이 전역 공유된다(한 명 신고 시 나머지 전원 차단).
+  // → 빈 문자열을 반환해 미들웨어가 해시 헤더를 주입하지 않게 하고, 라우트의 400 거부 가드가 작동하게 한다.
+  const ip = (xff.split(",")[0] ?? "").trim() || real.trim() || "";
   return ip;
 }
 

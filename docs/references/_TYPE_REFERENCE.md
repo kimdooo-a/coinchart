@@ -480,14 +480,19 @@
   - `verifyGuestPassword(plain: string, hash: string): Promise<boolean>`
   - `validateGuestNickname(nickname: string): { ok: boolean; reason?: string }` — 2~12자
 - `lib/community/ip-mask.ts`
-  - `extractClientIp(req: { headers: Headers } | Request): string`
-  - `maskIp(ip: string): string` — `211.34.123.45` → `211.34.*.*`
+  - `extractClientIp(req: { headers: Headers } | Request): string` — **IP 미상 시 `""` 반환**(HIGH-2 2026-06-20, 이전엔 `"0.0.0.0"`). 고정 센티넬은 `hashIp`가 IP 미상 익명 사용자 전원에게 동일 해시를 만들어 신고/추천 dedup이 전역 공유되는 결함이 있어 빈 문자열로 변경.
+  - `maskIp(ip: string): string` — `211.34.123.45` → `211.34.*.*` (형식 불일치/빈 문자열 → `0.0.*.*`)
   - `hashIp(ip: string): string` — HMAC-SHA256 (`IP_HASH_SECRET` 사용)
-- `middleware.ts`가 주입하는 헤더 (T12 board API가 소비):
+- `middleware.ts`가 주입하는 헤더 (T12 board API가 소비). **IP 미상(빈 문자열) 시 3종 모두 미주입** → 라우트의 "식별 헤더 없음" 400 가드 작동(fail-closed):
   - `x-client-ip` (원본 IP)
-  - `x-client-ip-masked` (게시글 표시용)
-  - `x-client-ip-hash` (추천 dedup용)
+  - `x-client-ip-masked` (게시글 표시용 — 미주입 시 라우트가 `0.0.*.*` 기본값)
+  - `x-client-ip-hash` (추천/신고 dedup용)
 - 적용 경로: `/board/*`, `/api/board/*`, `/api/community/*`
+
+### post-edit-auth 모듈 (HIGH-1 2026-06-20)
+- `lib/community/post-edit-auth.ts` (server-only)
+  - `verifyEditPermission(postId: string, guestPassword: string): Promise<EditPermissionResult>` — 게시글 수정/삭제 권한 검증 SSOT. PATCH·DELETE·verify-edit 라우트가 공유. 회원=세션 author_id 일치 / 익명=bcrypt 비번 일치.
+  - `EditPermissionResult = { ok: boolean; reason?: string; status?: number; row?: { author_id: string|null; guest_password_hash: string|null } }`
 
 ### NewsSentiment / NewsCategory / ClassifyResult (R1 2026-05-23, T05)
 - 파일: `lib/news/classifier.ts`, `lib/news/keyword-dict.ts`
