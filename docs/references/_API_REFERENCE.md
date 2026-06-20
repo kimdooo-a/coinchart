@@ -101,7 +101,25 @@
   - `500`: `{ "error": "Failed to fetch data", "details": "..." }`
 - **인증**: 불필요
 - **데이터 소스**: Binance API + Bithumb API + ExchangeRate API
-- **비고**: 환율 API 실패 시 기본 환율 1450원/USD 사용 (fallback)
+- **비고**: 환율 API 실패 시 마지막 성공값(모듈 캐시) 폴백, 무캐시 시에만 1450 기본값 (R-D)
+
+---
+
+### GET /api/calendar
+- **파일**: `app/api/calendar/route.ts`
+- **설명**: 경제 일정 크롤링 API. faireconomy(ForexFactory 호환) 공개 JSON 피드(this/next week)를 fetch·매핑하여 캘린더 페이지에 실데이터 제공. ISR 1시간 캐시.
+- **파라미터**: 없음
+- **응답 (200)**:
+  ```json
+  { "events": [ { "date": "2026-06-22", "titleEn": "FOMC Statement", "titleKo": "FOMC Statement", "impact": "high", "country": "USD" } ] }
+  ```
+  - `impact`: high/medium/low (피드 High/Medium/Low/Holiday 매핑, 빈 영향도 제외)
+  - `titleKo`: 크롤 소스에 한글 번역 없어 영문 제목 재사용
+- **에러 응답**:
+  - `502`: `{ "events": [], "error": "Feed unavailable" }` (양 피드 모두 실패)
+  - `500`: `{ "events": [], "error": "Failed to fetch calendar" }`
+- **인증**: 불필요
+- **데이터 소스**: `nfs.faireconomy.media/ff_calendar_{thisweek,nextweek}.json`
 
 ---
 
@@ -638,6 +656,7 @@
 | GET | `/api/klines` | 암호화폐 캔들스틱 데이터 조회 | 불필요 |
 | GET | `/api/price` | 암호화폐 현재가 조회 (Binance) | 불필요 |
 | GET | `/api/kimchi` | 김치 프리미엄 조회 | 불필요 |
+| GET | `/api/calendar` | 경제 일정 크롤링 조회 (faireconomy) | 불필요 |
 | GET | `/api/signals` | 시장 매매 시그널 스캔 | 불필요 |
 | GET | `/api/news` | 뉴스 목록 조회 | 불필요 |
 | POST | `/api/contact` | 문의 이메일 전송 | 불필요 |

@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
-import Link from 'next/link';
 // CRYPTO ANALYSIS ONLY - DO NOT ADD STOCK IMPORTS
 // import { CryptoChart } from '@/components/Chart/CryptoChart'; // REMOVED for SSOT
 import { DetailedChart } from '@/components/DetailedChart'; // SSOT Compliant
@@ -22,23 +21,15 @@ export default function AnalysisPage() {
     const { lang } = useLanguage();
 
     // Default symbol based on type
+    // DetailedChart에 전달할 일봉 데이터 (time=YYYY-MM-DD 문자열 + OHLCV)
+    type HistoryCandle = { time: string; open: number; high: number; low: number; close: number; volume: number };
     const [symbol, setSymbol] = useState('BTCUSDT');
-    const [interval, setInterval] = useState('1d');
-    const [historyData, setHistoryData] = useState<any[]>([]);
+    const [historyData, setHistoryData] = useState<HistoryCandle[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Indicator State (Visual only for DetailedChart if supported, currently DetailedChart is simple)
-    // DetailedChart is simple candle chart. Indicators are not fully supported props yet but that's fine for SSOT goal.
-    const [showRSI, setShowRSI] = useState(false);
-    const [showBB, setShowBB] = useState(false);
-    const [showMACD, setShowMACD] = useState(false);
-    const [showVolume, setShowVolume] = useState(false);
+    // 지표 오버레이 토글 — DetailedChart 가격 페인 공유(MA7/25/99·볼린저밴드)
     const [showMA, setShowMA] = useState(false);
-
-    const intervals = ['1m', '5m', '15m', '1h', '4h', '1d'];
-
-    // Toggle Handler
-
+    const [showBB, setShowBB] = useState(false);
 
     const t = {
         subtitle: lang === 'ko' ? '바이낸스 실시간 데이터' : 'Market Data by Binance',
@@ -134,6 +125,26 @@ export default function AnalysisPage() {
                             <h2 className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-on-surface to-on-surface-variant">{symbol} {t.chartTitle} (Snapshot)</h2>
                             <p className="text-xs text-on-surface-variant font-mono">Powered by Supabase DB (SSOT) & Advanced Algorithm</p>
                         </div>
+
+                        {/* 지표 오버레이 토글 (MA·BB) */}
+                        <div className="flex gap-2 flex-none">
+                            {([
+                                { key: 'ma', label: 'MA', on: showMA, toggle: () => setShowMA(v => !v) },
+                                { key: 'bb', label: 'BB', on: showBB, toggle: () => setShowBB(v => !v) },
+                            ] as const).map(ind => (
+                                <button
+                                    key={ind.key}
+                                    onClick={ind.toggle}
+                                    aria-pressed={ind.on}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${ind.on
+                                        ? 'bg-primary text-on-primary border-primary shadow-sm'
+                                        : 'bg-surface-container/80 text-on-surface-variant border-outline-variant hover:text-on-surface hover:border-outline'
+                                        }`}
+                                >
+                                    {ind.label}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     <div className="flex-1 w-full min-h-0 relative">
@@ -151,8 +162,8 @@ export default function AnalysisPage() {
                             <DetailedChart
                                 data={historyData}
                                 symbol={symbol}
-                            // DetailedChart currently doesn't support extensive indicators props like showRSI yet
-                            // but matches the SSOT requirement.
+                                showMA={showMA}
+                                showBB={showBB}
                             />
                         )}
                     </div>

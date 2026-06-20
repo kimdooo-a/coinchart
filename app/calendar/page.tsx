@@ -1,110 +1,40 @@
 'use client';
 
-import React, { useState } from 'react';
-import Link from 'next/link';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { TRANSLATIONS } from '@/lib/translations';
 
-// Comprehensive 2025 Economic & Crypto Events
-const EVENTS = [
-    // January
-    { date: '2025-01-15', titleEn: 'US CPI Release (Dec Data)', titleKo: '미국 CPI 발표 (12월 데이터)', impact: 'high', country: 'USA' },
-    { date: '2025-01-20', titleEn: 'US Inauguration Day', titleKo: '미국 대통령 취임식', impact: 'medium', country: 'USA' },
-    { date: '2025-01-28', titleEn: 'FOMC Meeting Starts', titleKo: 'FOMC 회의 시작', impact: 'medium', country: 'USA' },
-    { date: '2025-01-29', titleEn: 'FOMC Rate Decision', titleKo: 'FOMC 금리 결정', impact: 'high', country: 'USA' },
-
-    // February
-    { date: '2025-02-12', titleEn: 'US CPI Release', titleKo: '미국 CPI 발표', impact: 'high', country: 'USA' },
-    { date: '2025-02-23', titleEn: 'ETHDenver 2025 Starts', titleKo: 'ETHDenver 2025 시작', impact: 'medium', country: 'Global' },
-
-    // March
-    { date: '2025-03-12', titleEn: 'US CPI Release', titleKo: '미국 CPI 발표', impact: 'high', country: 'USA' },
-    { date: '2025-03-18', titleEn: 'FOMC Meeting Starts', titleKo: 'FOMC 회의 시작', impact: 'medium', country: 'USA' },
-    { date: '2025-03-19', titleEn: 'FOMC Rate Decision + SEP', titleKo: 'FOMC 금리 결정 + 경제 전망', impact: 'high', country: 'USA' },
-
-    // April
-    { date: '2025-04-10', titleEn: 'US CPI Release', titleKo: '미국 CPI 발표', impact: 'high', country: 'USA' },
-
-    // May
-    { date: '2025-05-06', titleEn: 'FOMC Meeting Starts', titleKo: 'FOMC 회의 시작', impact: 'medium', country: 'USA' },
-    { date: '2025-05-07', titleEn: 'FOMC Rate Decision', titleKo: 'FOMC 금리 결정', impact: 'high', country: 'USA' },
-    { date: '2025-05-13', titleEn: 'US CPI Release', titleKo: '미국 CPI 발표', impact: 'high', country: 'USA' },
-    { date: '2025-05-20', titleEn: 'Projected: BTC New ATH?', titleKo: '예상: 비트코인 신고가 갱신?', impact: 'low', country: 'Global' },
-
-    // June
-    { date: '2025-06-11', titleEn: 'US CPI Release', titleKo: '미국 CPI 발표', impact: 'high', country: 'USA' },
-    { date: '2025-06-17', titleEn: 'FOMC Meeting Starts', titleKo: 'FOMC 회의 시작', impact: 'medium', country: 'USA' },
-    { date: '2025-06-18', titleEn: 'FOMC Rate Decision + SEP', titleKo: 'FOMC 금리 결정 + 경제 전망', impact: 'high', country: 'USA' },
-
-    // July
-    { date: '2025-07-15', titleEn: 'US CPI Release', titleKo: '미국 CPI 발표', impact: 'high', country: 'USA' },
-    { date: '2025-07-29', titleEn: 'FOMC Meeting Starts', titleKo: 'FOMC 회의 시작', impact: 'medium', country: 'USA' },
-    { date: '2025-07-30', titleEn: 'FOMC Rate Decision', titleKo: 'FOMC 금리 결정', impact: 'high', country: 'USA' },
-    { date: '2025-07-30', titleEn: 'Ethereum 10th Birthday', titleKo: '이더리움 10주년', impact: 'medium', country: 'Global' },
-
-    // August
-    { date: '2025-08-12', titleEn: 'US CPI Release', titleKo: '미국 CPI 발표', impact: 'high', country: 'USA' },
-
-    // September
-    { date: '2025-09-11', titleEn: 'US CPI Release', titleKo: '미국 CPI 발표', impact: 'high', country: 'USA' },
-    { date: '2025-09-16', titleEn: 'FOMC Meeting Starts', titleKo: 'FOMC 회의 시작', impact: 'medium', country: 'USA' },
-    { date: '2025-09-17', titleEn: 'FOMC Rate Decision + SEP', titleKo: 'FOMC 금리 결정 + 경제 전망', impact: 'high', country: 'USA' },
-    { date: '2025-09-20', titleEn: 'Solana @ All-In Summit', titleKo: '솔라나 @ All-In Summit', impact: 'low', country: 'Global' },
-
-    // October
-    { date: '2025-10-24', titleEn: 'US CPI Release', titleKo: '미국 CPI 발표', impact: 'high', country: 'USA' },
-    { date: '2025-10-28', titleEn: 'FOMC Meeting Starts', titleKo: 'FOMC 회의 시작', impact: 'medium', country: 'USA' },
-    { date: '2025-10-29', titleEn: 'FOMC Rate Decision', titleKo: 'FOMC 금리 결정', impact: 'high', country: 'USA' },
-
-    // November
-    { date: '2025-11-05', titleEn: 'US Election Day (Anniversary)', titleKo: '미국 선거일 (1주년)', impact: 'medium', country: 'USA' },
-
-    // December
-    { date: '2025-12-03', titleEn: 'ETH Fusaka Upgrade', titleKo: '이더리움 Fusaka 업그레이드', impact: 'high', country: 'Global' },
-    { date: '2025-12-09', titleEn: 'FOMC Meeting Starts', titleKo: 'FOMC 회의 시작', impact: 'medium', country: 'USA' },
-    { date: '2025-12-10', titleEn: 'FOMC Rate Decision + SEP', titleKo: 'FOMC 금리 결정 + 경제 전망', impact: 'high', country: 'USA' },
-    { date: '2025-12-18', titleEn: 'US CPI Release', titleKo: '미국 CPI 발표', impact: 'high', country: 'USA' },
-    { date: '2025-12-25', titleEn: 'Christmas', titleKo: '크리스마스', impact: 'low', country: 'Global' },
-
-    // --- 2026 Events ---
-    // Q1 2026
-    { date: '2026-01-27', titleEn: 'FOMC Meeting Starts', titleKo: '2026 첫 FOMC 회의 시작', impact: 'medium', country: 'USA' },
-    { date: '2026-01-28', titleEn: 'FOMC Rate Decision', titleKo: 'FOMC 금리 결정', impact: 'high', country: 'USA' },
-    { date: '2026-03-17', titleEn: 'FOMC Meeting Starts', titleKo: 'FOMC 회의 시작', impact: 'medium', country: 'USA' },
-    { date: '2026-03-18', titleEn: 'FOMC Rate Decision + SEP', titleKo: 'FOMC 금리 결정 + 경제 전망', impact: 'high', country: 'USA' },
-    { date: '2026-03-31', titleEn: 'Projected: US Market Structure Bill', titleKo: '예상: 미국 가상자산 시장 구조 법안 통과', impact: 'high', country: 'USA' },
-
-    // Q2 2026
-    { date: '2026-04-28', titleEn: 'FOMC Meeting Starts', titleKo: 'FOMC 회의 시작', impact: 'medium', country: 'USA' },
-    { date: '2026-04-29', titleEn: 'FOMC Rate Decision', titleKo: 'FOMC 금리 결정', impact: 'high', country: 'USA' },
-    { date: '2026-06-16', titleEn: 'FOMC Meeting Starts', titleKo: 'FOMC 회의 시작', impact: 'medium', country: 'USA' },
-    { date: '2026-06-17', titleEn: 'FOMC Rate Decision + SEP', titleKo: 'FOMC 금리 결정 + 경제 전망', impact: 'high', country: 'USA' },
-    { date: '2026-06-30', titleEn: 'Solana Firedancer Mainnet (Projected)', titleKo: '솔라나 파이어댄서 메인넷 (예상)', impact: 'high', country: 'Global' },
-
-    // Q3 2026
-    { date: '2026-07-28', titleEn: 'FOMC Meeting Starts', titleKo: 'FOMC 회의 시작', impact: 'medium', country: 'USA' },
-    { date: '2026-07-29', titleEn: 'FOMC Rate Decision', titleKo: 'FOMC 금리 결정', impact: 'high', country: 'USA' },
-    { date: '2026-08-31', titleEn: 'ETH Glamsterdam Upgrade (Projected)', titleKo: '이더리움 Glamsterdam 업그레이드 (예상)', impact: 'high', country: 'Global' },
-    { date: '2026-09-15', titleEn: 'FOMC Meeting Starts', titleKo: 'FOMC 회의 시작', impact: 'medium', country: 'USA' },
-    { date: '2026-09-16', titleEn: 'FOMC Rate Decision + SEP', titleKo: 'FOMC 금리 결정 + 경제 전망', impact: 'high', country: 'USA' },
-
-    // Q4 2026
-    { date: '2026-10-27', titleEn: 'FOMC Meeting Starts', titleKo: 'FOMC 회의 시작', impact: 'medium', country: 'USA' },
-    { date: '2026-10-28', titleEn: 'FOMC Rate Decision', titleKo: 'FOMC 금리 결정', impact: 'high', country: 'USA' },
-    { date: '2026-12-08', titleEn: 'FOMC Meeting Starts', titleKo: 'FOMC 회의 시작', impact: 'medium', country: 'USA' },
-    { date: '2026-12-09', titleEn: 'FOMC Rate Decision + SEP', titleKo: 'FOMC 금리 결정 + 경제 전망', impact: 'high', country: 'USA' },
-    { date: '2026-12-15', titleEn: 'G20 Summit in Miami', titleKo: '마이애미 G20 정상회의 (가상자산 규제 논의)', impact: 'medium', country: 'Global' },
-];
+// 경제 일정 — /api/calendar(faireconomy 크롤링 피드)에서 실데이터 fetch
+interface CalendarEvent {
+    date: string;        // YYYY-MM-DD
+    titleEn: string;
+    titleKo: string;
+    impact: 'high' | 'medium' | 'low';
+    country: string;
+}
 
 export default function CalendarPage() {
     const { lang } = useLanguage();
     const t = TRANSLATIONS[lang];
     const [currentDate, setCurrentDate] = useState(new Date());
+    const [events, setEvents] = useState<CalendarEvent[]>([]);
+
+    // 경제 일정 실데이터 fetch (faireconomy 크롤링 피드 경유)
+    useEffect(() => {
+        let cancelled = false;
+        fetch('/api/calendar')
+            .then(res => res.json())
+            .then((data: { events?: CalendarEvent[] }) => {
+                if (!cancelled && Array.isArray(data.events)) setEvents(data.events);
+            })
+            .catch(err => console.error('일정 로딩 실패:', err));
+        return () => { cancelled = true; };
+    }, []);
 
     const getMonthEvents = (date: Date) => {
         const year = date.getFullYear();
         const month = date.getMonth();
-        return EVENTS.filter(e => {
+        return events.filter(e => {
             const d = new Date(e.date);
             return d.getFullYear() === year && d.getMonth() === month;
         });
@@ -165,7 +95,7 @@ export default function CalendarPage() {
                     {days.map((d, i) => {
                         if (!d) return <div key={i} className="aspect-square"></div>;
                         const dateStr = d.toISOString().split('T')[0];
-                        const dayEvents = EVENTS.filter(e => e.date === dateStr);
+                        const dayEvents = events.filter(e => e.date === dateStr);
                         const isToday = new Date().toDateString() === d.toDateString();
 
                         return (

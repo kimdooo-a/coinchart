@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from 'react'
 import { createChart, IChartApi, CandlestickSeries, LineSeries } from 'lightweight-charts'
 import { getChartTheme, getCandleColors, getIndicatorColors } from '@/lib/chart/theme'
+import { calculateSMA, calculateBollingerBands } from '@/lib/indicators'
 
 // 라이트 테마 + 한국식(빨↑/파↓) 캔들 — lib/chart/theme.ts SSOT (R1/T08)
 const CHART_THEME = getChartTheme('light')
@@ -22,9 +23,13 @@ interface DetailedChartProps {
     data: ChartData[]
     avgPrice?: number
     symbol: string
+    /** 이동평균선(MA7/25/99) 오버레이 — 가격 페인 공유 */
+    showMA?: boolean
+    /** 볼린저밴드(상·중·하) 오버레이 — 가격 페인 공유 */
+    showBB?: boolean
 }
 
-export const DetailedChart = ({ data, avgPrice, symbol }: DetailedChartProps) => {
+export const DetailedChart = ({ data, avgPrice, symbol, showMA = false, showBB = false }: DetailedChartProps) => {
     const chartContainerRef = useRef<HTMLDivElement>(null)
     const chartRef = useRef<IChartApi | null>(null)
 
@@ -56,6 +61,48 @@ export const DetailedChart = ({ data, avgPrice, symbol }: DetailedChartProps) =>
 
         candlestickSeries.setData(data)
 
+        // 지표 오버레이 — 가격 페인 공유(MA·BB). 색은 lib/chart/theme.ts SSOT(IND) 식별색.
+        const closes = data.map(d => d.close)
+
+        if (showMA) {
+            const maDefs = [
+                { period: 7, color: IND.ma7, width: 1, title: 'MA7' },
+                { period: 25, color: IND.ma25, width: 1, title: 'MA25' },
+                { period: 99, color: IND.ma99, width: 2, title: 'MA99' },
+            ] as const
+            for (const def of maDefs) {
+                const sma = calculateSMA(closes, def.period)
+                const line = chart.addSeries(LineSeries, {
+                    color: def.color, lineWidth: def.width, title: def.title,
+                    priceLineVisible: false, lastValueVisible: false,
+                })
+                const pts: { time: string; value: number }[] = []
+                data.forEach((d, i) => { if (sma[i] !== null) pts.push({ time: d.time, value: sma[i]! }) })
+                line.setData(pts)
+            }
+        }
+
+        if (showBB) {
+            const bb = calculateBollingerBands(closes)
+            const upper: { time: string; value: number }[] = []
+            const lower: { time: string; value: number }[] = []
+            const middle: { time: string; value: number }[] = []
+            data.forEach((d, i) => {
+                const band = bb[i]
+                if (band && !isNaN(band.upper) && !isNaN(band.lower) && !isNaN(band.middle)) {
+                    upper.push({ time: d.time, value: band.upper })
+                    lower.push({ time: d.time, value: band.lower })
+                    middle.push({ time: d.time, value: band.middle })
+                }
+            })
+            const mkBand = (color: string, width: 1 | 2) => chart.addSeries(LineSeries, {
+                color, lineWidth: width, priceLineVisible: false, lastValueVisible: false,
+            })
+            mkBand(IND.bbBand, 1).setData(upper)
+            mkBand(IND.bbBand, 1).setData(lower)
+            mkBand(IND.bbBasis, 1).setData(middle)
+        }
+
         // Avg Price Line (v5 Syntax)
         if (avgPrice) {
             const avgLine = chart.addSeries(LineSeries, {
@@ -78,15 +125,15 @@ export const DetailedChart = ({ data, avgPrice, symbol }: DetailedChartProps) =>
             window.removeEventListener('resize', handleResize)
             chart.remove()
         }
-    }, [data, avgPrice])
+    }, [data, avgPrice, showMA, showBB])
 
     return (
         <div className="w-full h-full relative">
             <div className="absolute top-4 left-4 z-10 bg-surface/80 p-2 rounded backdrop-blur-sm border border-outline-variant">
                 <h3 className="text-on-surface font-bold">{symbol} Analysis</h3>
-                <p className="text-xs text-gray-400">Daily Candles (3 Years)</p>
+                <p className="text-xs text-on-surface-variant">Daily Candles (3 Years)</p>
             </div>
-            <div ref={chartContainerRef} className="w-full h-full rounded-xl overflow-hidden border border-gray-800 shadow-2xl" />
+            <div ref={chartContainerRef} className="w-full h-full rounded-xl overflow-hidden border border-outline-variant shadow-2xl" />
         </div>
     )
 }
