@@ -73,6 +73,10 @@ const SYNTH_IP_HASH = `SMOKE_REPORT_${Date.now().toString(36).toUpperCase()}`;
 // 합성 target_id — community_reports.target_id 는 FK 없음, 자유 UUID 사용 가능
 const SYNTH_TARGET_ID = "00000000-0000-4000-b000-000000000099";
 
+// 스크랩 라운드트립에서 확보한 (user_id, post_id) — cleanup() 안전망에서 참조
+let resolvedScrapUserId: string | null = null;
+let resolvedScrapPostId: string | null = null;
+
 type Status = "PASS" | "FAIL" | "SKIP";
 interface CheckResult {
   name: string;
@@ -239,6 +243,10 @@ async function checkScrapRoundTrip(): Promise<void> {
     record(name, "SKIP", "유효 post_id 없음 — scrap 라운드트립 생략");
     return;
   }
+
+  // 모듈 레벨에 캐싱 — cleanup() 안전망에서 비정상 종료 시 잔여 행 제거에 사용
+  resolvedScrapUserId = userId;
+  resolvedScrapPostId = postId;
 
   const userMask = `${userId.slice(0, 8)}…`;
   const postMask = `${postId.slice(0, 8)}…`;
@@ -412,12 +420,22 @@ async function checkReportRoundTrip(): Promise<void> {
 // 안전망 정리: 합성 데이터 잔여 행 제거
 // ---------------------------------------------
 async function cleanup(): Promise<void> {
+  // community_reports: 합성 IP 해시 기준 전량 삭제 (정상 흐름 이중 삭제 무해)
   await supabase
     .from("community_reports")
     .delete()
     .eq("reporter_ip_hash", SYNTH_IP_HASH);
-  // community_post_scraps 합성 행은 resolveUserId/resolvePostId 결과에 따라
-  // checkScrapRoundTrip 내부에서 이미 정리되므로 여기서는 reports만 재차 정리.
+
+  // community_post_scraps: 비정상 종료(INSERT 이후 내부 delete 이전 예외) 시 잔여 행 제거 안전망.
+  // checkScrapRoundTrip에서 캐싱한 (user_id, post_id)로 catch-all 삭제.
+  // 정상 흐름에서 이미 내부 정리됐더라도 중복 삭제는 무해.
+  if (resolvedScrapUserId && resolvedScrapPostId) {
+    await supabase
+      .from("community_post_scraps")
+      .delete()
+      .eq("user_id", resolvedScrapUserId)
+      .eq("post_id", resolvedScrapPostId);
+  }
 }
 
 async function main(): Promise<void> {
