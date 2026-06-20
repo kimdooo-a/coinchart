@@ -28,6 +28,13 @@ export default function CommentSection({ postId, initialComments }: CommentSecti
   // 추천 처리 중인 댓글 id 집합 — 진행 중 중복 클릭 가드 (PostVoteButtons의 likeBusy 패턴)
   const [likeBusyIds, setLikeBusyIds] = useState<Set<string>>(new Set());
 
+  // 답글 상태 — 최상위 폼과 분리하여 입력 충돌 방지
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyInput, setReplyInput] = useState("");
+  const [replyNick, setReplyNick] = useState("");
+  const [replyPwd, setReplyPwd] = useState("");
+  const [replyBusy, setReplyBusy] = useState(false);
+
   const handleCommentSubmit = async () => {
     if (!commentInput.trim() || commentBusy) return;
     setCommentBusy(true);
@@ -46,6 +53,31 @@ export default function CommentSection({ postId, initialComments }: CommentSecti
       alert(e instanceof Error ? e.message : "댓글 등록에 실패했습니다.");
     } finally {
       setCommentBusy(false);
+    }
+  };
+
+  // 답글 제출 — parentId는 항상 최상위 댓글(c.id)로 고정하여 1depth 평면화
+  const handleReplySubmit = async (parentId: string) => {
+    if (!replyInput.trim() || replyBusy) return;
+    setReplyBusy(true);
+    try {
+      const created = await createComment({
+        postId,
+        content: replyInput.trim(),
+        parentId,
+        postAsAnonymous: replyNick.trim().length > 0,
+        guestNickname: replyNick.trim() || undefined,
+        guestPassword: replyPwd || undefined,
+      });
+      setComments((prev) => [...prev, created]);
+      setReplyInput("");
+      setReplyNick("");
+      setReplyPwd("");
+      setReplyingTo(null);
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : "답글 등록에 실패했습니다.");
+    } finally {
+      setReplyBusy(false);
     }
   };
 
@@ -167,7 +199,13 @@ export default function CommentSection({ postId, initialComments }: CommentSecti
                   <ThumbsUp className="w-3 h-3" />
                   {c.likes}
                 </button>
-                <button className="hover:text-primary">답글</button>
+                <button
+                  type="button"
+                  onClick={() => setReplyingTo(replyingTo === c.id ? null : c.id)}
+                  className="hover:text-primary"
+                >
+                  답글
+                </button>
                 <button className="hover:text-error">신고</button>
               </div>
 
@@ -190,10 +228,74 @@ export default function CommentSection({ postId, initialComments }: CommentSecti
                       <ThumbsUp className="w-3 h-3" />
                       {cc.likes}
                     </button>
-                    <button className="hover:text-primary">답글</button>
+                    {/* 대댓글의 답글도 parentId는 최상위 c.id로 고정(1depth 평면화) */}
+                    <button
+                      type="button"
+                      onClick={() => setReplyingTo(replyingTo === c.id ? null : c.id)}
+                      className="hover:text-primary"
+                    >
+                      답글
+                    </button>
                   </div>
                 </div>
               ))}
+
+              {/* 인라인 답글 폼 — replyingTo가 이 댓글일 때만 렌더 */}
+              {replyingTo === c.id && (
+                <div className="ml-6 mt-3 border-l-2 border-primary pl-3">
+                  <div className="border border-outline-variant rounded-md p-3">
+                    <div className="grid grid-cols-2 gap-2 mb-2">
+                      <input
+                        type="text"
+                        placeholder="닉네임 (비회원)"
+                        value={replyNick}
+                        onChange={(e) => setReplyNick(e.target.value)}
+                        className="border border-outline-variant rounded text-body-sm px-2 py-1.5 focus:outline-none focus:border-primary"
+                      />
+                      <input
+                        type="password"
+                        placeholder="비밀번호 (수정/삭제 시)"
+                        value={replyPwd}
+                        onChange={(e) => setReplyPwd(e.target.value)}
+                        className="border border-outline-variant rounded text-body-sm px-2 py-1.5 focus:outline-none focus:border-primary"
+                      />
+                    </div>
+                    <textarea
+                      placeholder="답글을 입력하세요..."
+                      value={replyInput}
+                      onChange={(e) => setReplyInput(e.target.value)}
+                      rows={2}
+                      maxLength={2000}
+                      className="w-full text-body-sm bg-transparent focus:outline-none resize-none"
+                    />
+                    <div className="flex justify-between items-center mt-1">
+                      <span className="text-meta text-on-surface-variant">{replyInput.length}/2000</span>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setReplyingTo(null);
+                            setReplyInput("");
+                            setReplyNick("");
+                            setReplyPwd("");
+                          }}
+                          className="text-label-bold px-3 py-1.5 rounded-md border border-outline-variant hover:bg-surface-container text-on-surface-variant"
+                        >
+                          취소
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleReplySubmit(c.id)}
+                          className="bg-primary text-on-primary text-label-bold px-4 py-1.5 rounded-md hover:bg-primary-container disabled:opacity-50"
+                          disabled={!replyInput.trim() || replyBusy}
+                        >
+                          {replyBusy ? "등록 중..." : "등록"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </li>
           ))}
         </ul>
