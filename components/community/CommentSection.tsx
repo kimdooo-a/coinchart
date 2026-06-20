@@ -12,6 +12,7 @@ import {
   toggleCommentLike,
   type BoardCommentItem,
 } from "@/lib/community/board-queries";
+import ReportModal from "@/components/community/ReportModal";
 
 interface CommentSectionProps {
   postId: string;
@@ -27,6 +28,9 @@ export default function CommentSection({ postId, initialComments }: CommentSecti
   const [commentBusy, setCommentBusy] = useState(false);
   // 추천 처리 중인 댓글 id 집합 — 진행 중 중복 클릭 가드 (PostVoteButtons의 likeBusy 패턴)
   const [likeBusyIds, setLikeBusyIds] = useState<Set<string>>(new Set());
+
+  // 신고 모달 상태 — 신고 대상 댓글 id (null이면 닫힘)
+  const [reportingCommentId, setReportingCommentId] = useState<string | null>(null);
 
   // 답글 상태 — 최상위 폼과 분리하여 입력 충돌 방지
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
@@ -206,7 +210,13 @@ export default function CommentSection({ postId, initialComments }: CommentSecti
                 >
                   답글
                 </button>
-                <button className="hover:text-error">신고</button>
+                <button
+                  type="button"
+                  onClick={() => setReportingCommentId(c.id)}
+                  className="hover:text-error"
+                >
+                  신고
+                </button>
               </div>
 
               {/* 대댓글 */}
@@ -299,6 +309,16 @@ export default function CommentSection({ postId, initialComments }: CommentSecti
             </li>
           ))}
         </ul>
+      )}
+
+      {/* 신고 모달 — 최상위 댓글 신고 버튼과 연결 */}
+      {reportingCommentId !== null && (
+        <ReportModal
+          open={true}
+          targetType="comment"
+          targetId={reportingCommentId}
+          onClose={() => setReportingCommentId(null)}
+        />
       )}
     </section>
   );

@@ -6,6 +6,7 @@
 import { useState } from "react";
 import { ThumbsUp, ThumbsDown, Bookmark, Flag } from "lucide-react";
 import { togglePostLike } from "@/lib/community/board-queries";
+import ReportModal from "@/components/community/ReportModal";
 
 interface PostVoteButtonsProps {
   postId: string;
@@ -24,6 +25,7 @@ export default function PostVoteButtons({
   const [likes, setLikes] = useState(initialLikes);
   const [dislikes, setDislikes] = useState(initialDislikes);
   const [likeBusy, setLikeBusy] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
 
   const handleLike = async () => {
     if (likeBusy) return;
@@ -89,9 +91,19 @@ export default function PostVoteButtons({
       <button type="button" className="inline-flex items-center gap-1 px-3 py-2 rounded-md text-body-sm text-on-surface-variant hover:bg-surface-container">
         <Bookmark className="w-4 h-4" />스크랩
       </button>
-      <button type="button" className="inline-flex items-center gap-1 px-3 py-2 rounded-md text-body-sm text-on-surface-variant hover:bg-surface-container">
+      <button
+        type="button"
+        onClick={() => setReportOpen(true)}
+        className="inline-flex items-center gap-1 px-3 py-2 rounded-md text-body-sm text-on-surface-variant hover:bg-surface-container"
+      >
         <Flag className="w-4 h-4" />신고
       </button>
+      <ReportModal
+        open={reportOpen}
+        targetType="post"
+        targetId={postId}
+        onClose={() => setReportOpen(false)}
+      />
     </div>
   );
 }
