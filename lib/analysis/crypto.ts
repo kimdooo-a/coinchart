@@ -2,6 +2,9 @@
 // CRYPTO ANALYSIS ONLY - Orchestrator for Crypto signals & probability
 // Source: MUST be from @/lib/supabase/crypto (market_prices)
 
+// analyzeMarket 재수출 — 코인룸 등 crypto SSOT 컨텍스트에서 @/lib/analysis/crypto 경유 사용
+export { analyzeMarket } from '../analysis';
+
 import { calculateProbability } from '@/lib/probability/engine';
 import { calculateMetrics } from '@/lib/backtest/metrics';
 import { generateExplanation } from '@/lib/explanation/generator';

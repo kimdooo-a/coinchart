@@ -66,7 +66,7 @@ export default async function CoinRoomPage({
     if (!meta) notFound();
 
     const data = await fetchCoinRoomData(meta);
-    const { coin, tickerItems, hotIssues, fng, officialPosts } = data;
+    const { coin, tickerItems, hotIssues, fng, officialPosts, analysisSignal } = data;
 
     return (
         <main className="flex-1 bg-surface-container-low">
@@ -162,30 +162,40 @@ export default async function CoinRoomPage({
                             </table>
                         </SidebarWidget>
 
-                        {/* AI 시그널 — 시그널 API 미연동(후속 트랙). 정적 placeholder */}
-                        <SidebarWidget title="🤖 AI 차트 시그널">
-                            <div className="space-y-2">
-                                <div className="flex items-center justify-between text-body-sm">
-                                    <span className="text-on-surface-variant">시그널</span>
-                                    <span className="text-[var(--color-positive)] font-bold">매수 권장</span>
+                        {/* AI 시그널 — analyzeMarket 실데이터 (단일 코인만, altcoin/kimp는 숨김) */}
+                        {analysisSignal ? (
+                            <SidebarWidget title="🤖 AI 차트 시그널">
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between text-body-sm">
+                                        <span className="text-on-surface-variant">시그널</span>
+                                        <span className={`font-bold ${
+                                            analysisSignal.signal === '매수'
+                                                ? 'text-[var(--color-positive)]'
+                                                : analysisSignal.signal === '매도'
+                                                ? 'text-[var(--color-negative)]'
+                                                : 'text-on-surface'
+                                        }`}>
+                                            {analysisSignal.signal}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-body-sm">
+                                        <span className="text-on-surface-variant">신뢰도</span>
+                                        <span className="font-bold">{analysisSignal.confidence.toFixed(1)}%</span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-body-sm">
+                                        <span className="text-on-surface-variant">시장 상태</span>
+                                        <span className="font-bold">{analysisSignal.marketState}</span>
+                                    </div>
+                                    <Link
+                                        href={`/analysis/${coin.symbol.toLowerCase()}`}
+                                        className="mt-2 w-full inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-md bg-primary-fixed text-primary text-label-bold hover:bg-primary hover:text-on-primary transition-colors"
+                                    >
+                                        <Activity className="w-3.5 h-3.5" />
+                                        상세 분석 보기
+                                    </Link>
                                 </div>
-                                <div className="flex items-center justify-between text-body-sm">
-                                    <span className="text-on-surface-variant">신뢰도</span>
-                                    <span className="font-bold">75%</span>
-                                </div>
-                                <div className="flex items-center justify-between text-body-sm">
-                                    <span className="text-on-surface-variant">시장 상태</span>
-                                    <span className="font-bold">강한 상승추세</span>
-                                </div>
-                                <Link
-                                    href={`/analysis/${coin.symbol.toLowerCase()}`}
-                                    className="mt-2 w-full inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-md bg-primary-fixed text-primary text-label-bold hover:bg-primary hover:text-on-primary transition-colors"
-                                >
-                                    <Activity className="w-3.5 h-3.5" />
-                                    상세 분석 보기
-                                </Link>
-                            </div>
-                        </SidebarWidget>
+                            </SidebarWidget>
+                        ) : null}
 
                         {tickerItems.length > 0 && <PriceTickerWidget items={tickerItems} />}
                         {fng && <FngGaugeWidget value={fng.value} label={fng.label} prevValue={fng.prevValue} />}

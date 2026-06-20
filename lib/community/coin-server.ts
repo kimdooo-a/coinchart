@@ -15,7 +15,8 @@
 //   시세(Binance)·FNG는 외부 API 모듈을 직접 호출하고 .catch로 격리한다(전체 페이지 500 방지).
 
 import { createClient as createAnonClient } from "@supabase/supabase-js";
-import { fetchCommunityTickers } from "@/lib/supabase/crypto";
+import { fetchCommunityTickers, fetchCryptoMarketPrices } from "@/lib/supabase/crypto";
+import { analyzeMarket } from "@/lib/analysis/crypto";
 import { fetchFng } from "@/lib/community/fng";
 import { categoryLabel } from "@/lib/community/news-queries";
 import {
@@ -59,6 +60,8 @@ export interface CoinRoomData {
   fng: FngView | null;
   /** 사이드바 공식글 (블로그 published 3) */
   officialPosts: OfficialPost[];
+  /** AI 시그널 (단일 코인 only; altcoin/kimp 또는 캔들 부족 시 null) */
+  analysisSignal: { signal: '매수' | '매도' | '중립'; confidence: number; marketState: string } | null;
 }
 
 // 게시글 SELECT 컬럼 (CoinBoardPost 소비분 — community_posts 실컬럼명)
@@ -164,6 +167,15 @@ function makeAnonClient() {
   );
 }
 
+// MarketState → 한국어 레이블
+const MARKET_STATE_LABEL: Record<string, string> = {
+  TRENDING_UP: "상승추세",
+  TRENDING_DOWN: "하락추세",
+  RANGING: "횡보",
+  VOLATILE: "고변동성",
+  UNCERTAIN: "불확실",
+};
+
 // ─────────────────────────────────────────────────────────────
 // 단일 진입점 — 시세·게시글·뉴스·핫이슈·FNG·공식글 병렬 fetch
 // ─────────────────────────────────────────────────────────────
@@ -182,6 +194,35 @@ export async function fetchCoinRoomData(meta: CoinRoomMeta): Promise<CoinRoomDat
     console.error("[coin] fetchFng 실패:", e);
     return null;
   });
+
+  // 2-1. AI 시그널 — 단일 코인(isAggregate=false)만 분석, altcoin/kimp는 null
+  type SignalResult = { signal: '매수' | '매도' | '중립'; confidence: number; marketState: string } | null;
+  const analysisSignalP: Promise<SignalResult> = (!meta.isAggregate && meta.binanceSymbol)
+    ? fetchCryptoMarketPrices(meta.binanceSymbol).then((prices) => {
+        if (!prices || prices.length < 60) return null;
+        // fetchCryptoMarketPrices가 이미 ascending 정렬로 반환 → analyzeMarket 바로 사용 가능
+        const candles = prices.map((p) => ({
+          time: p.time,
+          open: p.open,
+          high: p.high,
+          low: p.low,
+          close: p.close,
+          volume: p.volume,
+        }));
+        const result = analyzeMarket(candles, { lang: 'ko' });
+        const recCode = result.meta?.recCode ?? 'NEUTRAL';
+        const signalLabel: '매수' | '매도' | '중립' =
+          recCode === 'BUY' ? '매수' : recCode === 'SELL' ? '매도' : '중립';
+        return {
+          signal: signalLabel,
+          confidence: result.winRate,
+          marketState: MARKET_STATE_LABEL[result.marketState] ?? result.marketState,
+        };
+      }).catch((e) => {
+        console.error("[coin] AI 시그널 분석 실패:", e);
+        return null;
+      })
+    : Promise.resolve(null);
 
   // 3. 게시판 공지글 (board_slug 일치, 항상 상단)
   const noticeP = supabase
@@ -227,7 +268,7 @@ export async function fetchCoinRoomData(meta: CoinRoomMeta): Promise<CoinRoomDat
     .order("created_at", { ascending: false })
     .limit(3);
 
-  const [tickers, fng, noticeRes, postsRes, newsRes, hotRes, officialRes] = await Promise.all([
+  const [tickers, fng, noticeRes, postsRes, newsRes, hotRes, officialRes, analysisSignal] = await Promise.all([
     tickersP,
     fngP,
     noticeP,
@@ -235,6 +276,7 @@ export async function fetchCoinRoomData(meta: CoinRoomMeta): Promise<CoinRoomDat
     newsQuery,
     hotP,
     officialP,
+    analysisSignalP,
   ]);
 
   // 정적 메타 + 실시세 병합 (집계형 altcoin/kimp는 ticker 미존재 → 정적 폴백 유지)
@@ -274,5 +316,6 @@ export async function fetchCoinRoomData(meta: CoinRoomMeta): Promise<CoinRoomDat
     hotIssues: hotIssues.slice(0, 5),
     fng: fng ? { value: fng.value, label: fng.classification, prevValue: fng.prevValue } : null,
     officialPosts,
+    analysisSignal,
   };
 }
