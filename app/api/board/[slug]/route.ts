@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { hashGuestPassword, validateGuestNickname } from "@/lib/community/auth";
+import { sanitizeHtml } from "@/lib/blog-sanitize";
 
 const VALID_SLUGS = new Set([
   "free", "market", "info",
@@ -123,7 +124,8 @@ export async function POST(
   const insertRow: Record<string, unknown> = {
     board_slug: slug,
     title,
-    content_html: contentHtml,
+    // 저장형 XSS 방어: 클라(TipTap) 출력을 신뢰하지 않고 서버에서 sanitize (블로그 경로와 동일 정책)
+    content_html: sanitizeHtml(contentHtml),
     category,
     tags,
     coin_symbol: coinSymbol,

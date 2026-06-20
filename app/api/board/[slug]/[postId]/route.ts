@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyGuestPassword } from "@/lib/community/auth";
+import { sanitizeHtml } from "@/lib/blog-sanitize";
 
 const VALID_SLUGS = new Set([
   "free", "market", "info",
@@ -161,7 +162,8 @@ export async function PATCH(
     updates.title = t;
   }
   if (typeof body.contentHtml === "string" && body.contentHtml.length > 0) {
-    updates.content_html = body.contentHtml;
+    // 저장형 XSS 방어: 수정 본문도 서버에서 sanitize (생성 경로·블로그와 동일 정책)
+    updates.content_html = sanitizeHtml(body.contentHtml);
   }
   if (typeof body.category === "string" && body.category.trim()) {
     updates.category = body.category.trim();

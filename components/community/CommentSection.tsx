@@ -39,6 +39,16 @@ export default function CommentSection({ postId, initialComments }: CommentSecti
   const [replyPwd, setReplyPwd] = useState("");
   const [replyBusy, setReplyBusy] = useState(false);
 
+  // 답글 폼 토글 — 다른 댓글로 전환 시 입력값을 초기화해 이월 제출 버그 방지
+  const toggleReply = (commentId: string) => {
+    if (replyingTo !== commentId) {
+      setReplyInput("");
+      setReplyNick("");
+      setReplyPwd("");
+    }
+    setReplyingTo(replyingTo === commentId ? null : commentId);
+  };
+
   const handleCommentSubmit = async () => {
     if (!commentInput.trim() || commentBusy) return;
     setCommentBusy(true);
@@ -205,7 +215,7 @@ export default function CommentSection({ postId, initialComments }: CommentSecti
                 </button>
                 <button
                   type="button"
-                  onClick={() => setReplyingTo(replyingTo === c.id ? null : c.id)}
+                  onClick={() => toggleReply(c.id)}
                   className="hover:text-primary"
                 >
                   답글
@@ -241,7 +251,7 @@ export default function CommentSection({ postId, initialComments }: CommentSecti
                     {/* 대댓글의 답글도 parentId는 최상위 c.id로 고정(1depth 평면화) */}
                     <button
                       type="button"
-                      onClick={() => setReplyingTo(replyingTo === c.id ? null : c.id)}
+                      onClick={() => toggleReply(c.id)}
                       className="hover:text-primary"
                     >
                       답글
