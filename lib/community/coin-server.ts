@@ -198,7 +198,7 @@ export async function fetchCoinRoomData(meta: CoinRoomMeta): Promise<CoinRoomDat
   // 2-1. AI 시그널 — 단일 코인(isAggregate=false)만 분석, altcoin/kimp는 null
   type SignalResult = { signal: '매수' | '매도' | '중립'; confidence: number; marketState: string } | null;
   const analysisSignalP: Promise<SignalResult> = (!meta.isAggregate && meta.binanceSymbol)
-    ? fetchCryptoMarketPrices(meta.binanceSymbol).then((prices) => {
+    ? fetchCryptoMarketPrices(meta.binanceSymbol, 300).then((prices) => {
         if (!prices || prices.length < 60) return null;
         // fetchCryptoMarketPrices가 이미 ascending 정렬로 반환 → analyzeMarket 바로 사용 가능
         const candles = prices.map((p) => ({
