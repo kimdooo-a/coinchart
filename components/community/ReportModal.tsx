@@ -4,7 +4,7 @@
 // props: open, targetType, targetId, onClose
 // 접근성: role="dialog", aria-modal, ESC 닫기, 라디오 그룹
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import {
   REPORT_REASON_LABELS,
@@ -29,16 +29,10 @@ export default function ReportModal({
   const [detail, setDetail] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ text: string; isError: boolean } | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  // ESC 닫기
-  useEffect(() => {
-    if (!open) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
-  }, [open, onClose]);
+  // 언마운트 시 타이머 cleanup
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
 
   // 상태 초기화는 닫기 핸들러에서 처리
   const handleClose = () => {
@@ -48,6 +42,17 @@ export default function ReportModal({
     setMessage(null);
     onClose();
   };
+
+  // ESC 닫기 (상태 리셋을 위해 handleClose 경유)
+  useEffect(() => {
+    if (!open) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") handleClose();
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, onClose]);
 
   if (!open) return null;
 
@@ -59,7 +64,7 @@ export default function ReportModal({
     setBusy(false);
     if (result.ok) {
       setMessage({ text: "신고가 접수되었습니다. 검토 후 처리됩니다.", isError: false });
-      setTimeout(handleClose, 1500);
+      timerRef.current = setTimeout(handleClose, 1500);
     } else if (result.status === 409) {
       setMessage({ text: "이미 신고한 콘텐츠입니다.", isError: true });
     } else {
@@ -78,7 +83,7 @@ export default function ReportModal({
       {/* 다이얼로그 */}
       <div
         role="dialog"
-        aria-modal="true"
+        aria-modal={true}
         aria-labelledby="report-modal-title"
         className="bg-surface border border-outline-variant rounded-md w-full max-w-md mx-4 p-5 shadow-xl"
       >
