@@ -66,7 +66,7 @@ export default function PostEditPage({
                 const { post } = await fetchBoardPost(boardSlug, postId);
                 setTitle(post.title);
                 setContent(post.contentHtml ?? "");
-                setCategory(post.category ?? meta.categories[1] ?? "잡담");
+                setCategory(post.category || meta.categories[1] || "잡담");
                 setTags(post.tags ?? []);
                 setCoinSymbol(post.coinSymbol ?? "");
 
@@ -267,7 +267,7 @@ export default function PostEditPage({
                     {/* 본문 (TipTap 에디터) */}
                     <label className="text-label-bold text-on-surface-variant block mb-1">본문</label>
                     <div className="mb-4">
-                        <BlogEditor content={content} onChange={setContent} tone="light" />
+                        <BlogEditor key={postId} content={content} onChange={setContent} tone="light" />
                     </div>
 
                     {/* 태그 */}
