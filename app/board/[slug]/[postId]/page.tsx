@@ -22,6 +22,7 @@ import {
   getPostRecord,
   summarizeHtml,
 } from "@/lib/community/board-server";
+import { createClient } from "@/lib/supabase/server";
 
 const VALID_SLUGS: BoardSlug[] = ["free", "market", "info"];
 
@@ -83,6 +84,26 @@ export default async function PostDetailPage({
   }
 
   const { post, comments } = data;
+
+  // 로그인 사용자의 스크랩 여부 — SSR에서 서버측 계산(비회원 false)
+  let initialScrapped = false;
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      const { data: scrapRow } = await supabase
+        .from("community_post_scraps")
+        .select("post_id")
+        .eq("user_id", user.id)
+        .eq("post_id", post.id)
+        .maybeSingle();
+      initialScrapped = scrapRow !== null;
+    }
+  } catch {
+    // 스크랩 조회 실패 시 기본값 false 유지
+  }
 
   // 같은 게시판 글(최신 30) — 이전/다음 + 다른 글 미니표 도출
   const siblingsRes = await fetchBoardListServer(boardSlug, { limit: 30, sort: "latest" }).catch(
@@ -156,11 +177,12 @@ export default async function PostDetailPage({
             )}
           </article>
 
-          {/* 추천·공유 바 (클라 인터랙션) — 초기 추천/비추는 SSR 분리 집계값 */}
+          {/* 추천·공유 바 (클라 인터랙션) — 초기 추천/비추는 SSR 분리 집계값, 스크랩은 로그인 사용자 기준 SSR */}
           <PostVoteButtons
             postId={post.id}
             initialLikes={post.likes}
             initialDislikes={post.dislikes}
+            initialScrapped={initialScrapped}
           />
 
           {/* 댓글 영역 (클라 인터랙션, 초기 댓글은 SSR) */}

@@ -1,11 +1,12 @@
 "use client";
 
 // 게시글 추천·공유 바 (추천/비추/스크랩/신고) — R3/T02 상세 SSR 전환 시 인터랙션부 분리
-// 추천/비추는 board-queries의 togglePostLike(클라 fetch) 사용. 스크랩/신고는 후속(미연결).
+// 추천/비추는 board-queries의 togglePostLike(클라 fetch) 사용. 스크랩: Task 9 결선.
 
 import { useState } from "react";
 import { ThumbsUp, ThumbsDown, Bookmark, Flag } from "lucide-react";
 import { togglePostLike } from "@/lib/community/board-queries";
+import { toggleScrap } from "@/lib/community/scrap-queries";
 import ReportModal from "@/components/community/ReportModal";
 
 interface PostVoteButtonsProps {
@@ -13,18 +14,23 @@ interface PostVoteButtonsProps {
   initialLikes: number;
   /** 초기 비추 수(분리 집계). 상세 페이지가 community_post_like_counts 실값을 전달(R5/#2). 미전달 시 0. */
   initialDislikes?: number;
+  /** 초기 스크랩 여부(SSR에서 로그인 사용자 기준으로 계산). 비회원/미전달 시 false. */
+  initialScrapped?: boolean;
 }
 
 export default function PostVoteButtons({
   postId,
   initialLikes,
   initialDislikes = 0,
+  initialScrapped = false,
 }: PostVoteButtonsProps) {
   const [liked, setLiked] = useState(false);
   const [disliked, setDisliked] = useState(false);
   const [likes, setLikes] = useState(initialLikes);
   const [dislikes, setDislikes] = useState(initialDislikes);
   const [likeBusy, setLikeBusy] = useState(false);
+  const [scrapped, setScrapped] = useState(initialScrapped);
+  const [scrapBusy, setScrapBusy] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
 
   const handleLike = async () => {
@@ -60,6 +66,30 @@ export default function PostVoteButtons({
     }
   };
 
+  const handleScrap = async () => {
+    if (scrapBusy) return;
+    setScrapBusy(true);
+    try {
+      const result = await toggleScrap(postId);
+      if ("status" in result) {
+        // 에러 응답
+        if (result.status === 401) {
+          if (confirm("스크랩하려면 로그인이 필요합니다. 로그인 페이지로 이동할까요?")) {
+            window.location.href = "/auth/login";
+          }
+        } else {
+          alert(result.error || "스크랩 처리에 실패했습니다.");
+        }
+      } else {
+        setScrapped(result.scrapped);
+      }
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : "스크랩 처리에 실패했습니다.");
+    } finally {
+      setScrapBusy(false);
+    }
+  };
+
   return (
     <div className="flex flex-wrap items-center justify-center gap-3 py-6 mb-4">
       <button
@@ -88,8 +118,17 @@ export default function PostVoteButtons({
         <ThumbsDown className="w-4 h-4" />
         <span className="font-bold">비추 {dislikes}</span>
       </button>
-      <button type="button" className="inline-flex items-center gap-1 px-3 py-2 rounded-md text-body-sm text-on-surface-variant hover:bg-surface-container">
-        <Bookmark className="w-4 h-4" />스크랩
+      <button
+        type="button"
+        onClick={handleScrap}
+        disabled={scrapBusy}
+        className={`inline-flex items-center gap-1 px-3 py-2 rounded-md text-body-sm transition-colors disabled:opacity-60 ${
+          scrapped
+            ? "text-primary bg-primary/10 hover:bg-primary/20"
+            : "text-on-surface-variant hover:bg-surface-container"
+        }`}
+      >
+        <Bookmark className={`w-4 h-4 ${scrapped ? "fill-current" : ""}`} />스크랩
       </button>
       <button
         type="button"

@@ -64,7 +64,22 @@ export async function GET(
     .order("created_at", { ascending: true })
     .limit(100);
 
-  return NextResponse.json({ post, comments: comments ?? [] });
+  // 로그인 사용자의 스크랩 여부 — additive 필드(비회원 false, 기존 호출 무해)
+  let scrapped = false;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) {
+    const { data: scrapRow } = await supabase
+      .from("community_post_scraps")
+      .select("post_id")
+      .eq("user_id", user.id)
+      .eq("post_id", postId)
+      .maybeSingle();
+    scrapped = scrapRow !== null;
+  }
+
+  return NextResponse.json({ post, comments: comments ?? [], scrapped });
 }
 
 interface UpdateBody {
