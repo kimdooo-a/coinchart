@@ -1,6 +1,6 @@
 # Component Map
 
-> 최종 업데이트: 2026-05-30 (R13 — AccountMenu·WatchlistNotice 신규, 시세 컴포넌트 useDisplaySettings 구독)
+> 최종 업데이트: 2026-06-20 (R-B — ReportModal 신규, /scraps·/board/.../edit·/admin/reports 페이지, scrap-queries·report-client SSOT 추가)
 >
 > 각 컴포넌트의 사용 페이지, lib 의존성, 컴포넌트 간 의존 관계를 정리한 문서입니다.
 
@@ -91,6 +91,30 @@
 | `ColorPicker` | `EditorToolbar` | 없음 | 없음 |
 | `useAutoSave` (훅) | `app/admin/blog/new/`, `app/admin/blog/edit/` | 없음 (localStorage) | 없음 |
 
+### Community (R-B 2026-06-20 추가)
+
+| 컴포넌트 | 사용 페이지 | lib 의존성 | 컴포넌트 의존성 |
+|----------|-----------|------------|----------------|
+| `community/ReportModal` | `board/[slug]/[postId]` — `PostVoteButtons`·`CommentSection` 내부 | `lib/community/report-client` (`submitReport`, `REPORT_REASON_LABELS`, `ReportReason`) | 없음 |
+
+> **R-B 신규 SSOT 모듈**
+
+| 모듈 | 경로 | 역할 | 소비처 |
+|------|------|------|--------|
+| `scrap-queries` | `lib/community/scrap-queries.ts` | 스크랩 토글 클라이언트 함수 `toggleScrap(postId)` — `/api/community/scrap` POST 래퍼 | `PostVoteButtons`(스크랩 버튼), `app/scraps/page.tsx` |
+| `report-client` | `lib/community/report-client.ts` | 신고 제출 `submitReport()`, 사유 레이블 `REPORT_REASON_LABELS`, 타입 `ReportReason`(5종) | `ReportModal` |
+| `board-queries.updateBoardPost` | `lib/community/board-queries.ts` (기존 파일 확장) | 게시글 수정 API 래퍼 `updateBoardPost()` | `app/board/[slug]/[postId]/edit/page.tsx` |
+| `coin-server.analysisSignal` | `lib/community/coin-server.ts` (기존 파일 확장) | 코인룸 시그널 서버 함수 `analysisSignal()` | `app/coin/[symbol]/page.tsx` |
+| `analysis/crypto.analyzeMarket` | `lib/analysis/crypto.ts` | `analyzeMarket` 재수출 — 코인룸 시그널 공급 | `lib/community/coin-server.ts` |
+
+> **R-B 페이지별 결선 컴포넌트**
+
+| 컴포넌트 | 역할 변경 |
+|----------|-----------|
+| `CommentSection` | 대댓글 + 댓글 신고 버튼(→ReportModal) 추가 |
+| `PostVoteButtons` | 스크랩 버튼(→scrap-queries.toggleScrap) + 게시글 신고 버튼(→ReportModal) 추가 |
+| `PostActions` | 수정 링크(→/board/[slug]/[postId]/edit) 추가 |
+
 ### Common
 
 | 컴포넌트 | 사용 페이지 | lib 의존성 | 컴포넌트 의존성 |
@@ -149,6 +173,9 @@
 | `app/admin/blog/page.tsx` | 없음 (독립 구현) |
 | `app/admin/blog/new/page.tsx` | `BlogEditor` |
 | `app/admin/blog/edit/[id]/page.tsx` | `BlogEditor` |
+| `app/scraps/page.tsx` (R-B) | 스크랩 목록 (BoardRow 패턴, `lib/community/scrap-queries` SSOT) |
+| `app/board/[slug]/[postId]/edit/page.tsx` (R-B) | 게시글 수정 폼, `lib/community/board-queries.updateBoardPost` |
+| `app/admin/reports/page.tsx` (R-B) | 신고 검토 대시보드, `GET/PATCH /api/admin/reports` |
 
 ---
 

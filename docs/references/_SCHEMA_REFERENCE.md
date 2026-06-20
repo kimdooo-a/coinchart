@@ -1,6 +1,6 @@
 # Schema Reference (Supabase)
 
-> 마지막 갱신: 2026-06-03 (PGRST205 해소 — batch_runs/batch_analysis_results/alert_history 추가)
+> 마지막 갱신: 2026-06-20 (R-B — community_post_scraps·community_reports 추가)
 > 소스: `supabase/migrations/` SQL 파일 기반
 
 ## 테이블 목록
@@ -20,6 +20,8 @@
 | `batch_runs` | daily-cron 배치 실행 메타 | O (service_role) | 20260603 |
 | `batch_analysis_results` | 배치 심볼별 분석 결과 | O (service_role) | 20260603 |
 | `alert_history` | 배치 알림 발송 이력 | O (service_role) | 20260603 |
+| `community_post_scraps` | 게시글 스크랩(회원 북마크) | O (본인 select/insert/delete) | 20260614 |
+| `community_reports` | 게시글·댓글 신고 접수 | O (insert 공개, select/update service_role) | 20260614 |
 
 ---
 
@@ -495,4 +497,53 @@ OR (guest_nickname IS NOT NULL
 
 > 3개 테이블 모두 `ENABLE ROW LEVEL SECURITY`. service_role은 RLS를 우회하므로 배치는 정책 없이도 동작하나, 의도 명시 목적으로 full-access 정책을 둠. anon/authenticated 정책 없음 → 기본 차단.
 > **운영 DB 적용**: ✅ 완료 (2026-06-03, 세션 47 — Management API `database/query` 트랜잭션 적용). 검증: 3테이블 생성·컬럼(11/6/10)·인덱스·RLS 정책·FK(2) 확인 + `NOTIFY pgrst, 'reload schema'`로 PostgREST 캐시 리로드 → PGRST205 종료. `schema_migrations` version `20260603000001` backfill 완료.
+
+---
+
+## community_post_scraps (R-B 2026-06-14 추가)
+
+> 회원 게시글 스크랩(북마크). 회원 전용 — 익명은 지원하지 않음.
+> 마이그레이션: `supabase/migrations/20260614000001_create_scraps_reports.sql`
+
+| 컬럼 | 타입 | NULL | 기본값 | 설명 |
+|---|---|---|---|---|
+| `id` | UUID | N (PK) | `gen_random_uuid()` | |
+| `user_id` | UUID | N (FK→auth.users, ON DELETE CASCADE) | - | 스크랩 회원 |
+| `post_id` | UUID | N (FK→community_posts, ON DELETE CASCADE) | - | 스크랩 대상 게시글 |
+| `created_at` | TIMESTAMPTZ | N | `now()` | |
+
+**제약**: `UNIQUE (user_id, post_id)` — 중복 스크랩 방지
+**인덱스**: `idx_post_scraps_user_created (user_id, created_at DESC)` — 내 스크랩 목록 조회
+**RLS**: 본인(`auth.uid() = user_id`)만 SELECT / INSERT / DELETE (3정책)
+**SSOT 접근**: `lib/community/scrap-queries.ts` → `toggleScrap()`
+**운영 DB 적용**: 미적용 — 토큰 확보 후 예정 (Task 2 보류)
+
+---
+
+## community_reports (R-B 2026-06-14 추가)
+
+> 게시글·댓글 신고 접수. 회원(reporter_user_id) 또는 익명(reporter_ip_hash) 둘 중 하나 필수.
+> 마이그레이션: `supabase/migrations/20260614000001_create_scraps_reports.sql`
+
+| 컬럼 | 타입 | NULL | 기본값 | 설명 |
+|---|---|---|---|---|
+| `id` | UUID | N (PK) | `gen_random_uuid()` | |
+| `target_type` | TEXT | N | - | CHECK IN (`post`, `comment`) |
+| `target_id` | UUID | N | - | 신고 대상 게시글 또는 댓글 UUID |
+| `reason` | TEXT | N | - | CHECK IN (`spam`, `abuse`, `sexual`, `fraud`, `etc`) |
+| `detail` | TEXT | Y | - | 상세 사유 (max 500자) |
+| `reporter_user_id` | UUID | Y (FK→auth.users, ON DELETE SET NULL) | - | 회원 신고 시 |
+| `reporter_ip_hash` | TEXT | Y | - | 익명 신고 시 sha256 해시 |
+| `status` | TEXT | N | `pending` | CHECK IN (`pending`, `reviewed`, `dismissed`) |
+| `created_at` | TIMESTAMPTZ | N | `now()` | |
+
+**CHECK 제약**: `reporter_user_id IS NOT NULL OR reporter_ip_hash IS NOT NULL` — 신고자 식별 필수
+**UNIQUE 부분 인덱스** (중복 신고 방지):
+- `uniq_reports_user (target_type, target_id, reporter_user_id) WHERE reporter_user_id IS NOT NULL`
+- `uniq_reports_iphash (target_type, target_id, reporter_ip_hash) WHERE reporter_ip_hash IS NOT NULL`
+**인덱스**: `idx_reports_status_created (status, created_at DESC)` — 관리자 신고 목록 조회
+**RLS**:
+- INSERT: 모두 허용 (회원/익명 신고 접수)
+- SELECT / UPDATE: service_role 전용 (관리자 검토)
+**운영 DB 적용**: 미적용 — 토큰 확보 후 예정 (Task 2 보류)
 

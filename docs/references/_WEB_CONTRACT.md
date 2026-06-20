@@ -2,7 +2,7 @@
 
 > **이 파일은 kdyweb 스킬이 관리하는 단일 진실의 원천입니다.**
 > 수동 편집 시 계약 무결성이 깨질 수 있으므로 kdyweb을 통해 갱신하세요.
-> 생성일: 2026-02-20 | 최종 갱신: 2026-05-29 (R11-T01 라우트 레지스트리 전수 정합) | 계약 버전: 5
+> 생성일: 2026-02-20 | 최종 갱신: 2026-06-20 (R-B — /scraps·/board/[slug]/[postId]/edit·/admin/reports 3라우트 추가) | 계약 버전: 6
 
 ---
 
@@ -63,6 +63,9 @@
 | R-033 | /board/[slug]/write | 게시글 작성 | form | app/board/[slug]/write/page.tsx | RootLayout | 아니오 (익명 작성: 게스트 닉/PW) | GNB(글쓰기 버튼 /board/free/write), /board/[slug] 글쓰기, /coin/[symbol] 히어로 | /board/[slug]/[postId](등록 성공), /board/[slug](취소) | API(/api/board/[slug]) | ✅ 활성 |
 | R-034 | /board/[slug]/[postId] | 게시글 상세 | detail | app/board/[slug]/[postId]/page.tsx | RootLayout | 아니오 | /board/[slug] BoardRow, 이전/다음, /coin/[symbol] | /board/[slug] | API(/api/board/[slug]/[postId], /api/community/comment, /api/community/like), meta(dynamic) | ✅ 활성 |
 | R-035 | /coin/[symbol] | 코인룸(코인별 토론·시세) | detail | app/coin/[symbol]/page.tsx | RootLayout | 아니오 | GNB(코인룸>BTC·ETH·XRP·SOL·알트코인·김치프리미엄) | /analysis/[symbol], /board/free/write | meta(SSG: generateStaticParams 6종, dynamicParams=false) | ✅ 활성 |
+| R-036 | /scraps | 내 스크랩 목록 | list | app/scraps/page.tsx | RootLayout | 예 (미들웨어) | AuthButton 드롭다운 또는 직접URL | /board/[slug]/[postId] | API(/api/community/scrap) | ✅ 활성 |
+| R-037 | /board/[slug]/[postId]/edit | 게시글 수정 | form | app/board/[slug]/[postId]/edit/page.tsx | RootLayout | 아니오 (회원=세션, 익명=비번 검증) | /board/[slug]/[postId] PostActions '수정' 버튼 | /board/[slug]/[postId](저장), /board/[slug](취소) | API(/api/board/[slug]/[postId] PATCH) | ✅ 활성 |
+| R-038 | /admin/reports | 신고 검토 대시보드 | dashboard | app/admin/reports/page.tsx | RootLayout | 예 (이메일 게이트 Admin) | /admin에서 링크 | /admin | API(/api/admin/reports) | ✅ 활성 |
 <!-- 새 라우트는 이 줄 위에 추가 -->
 
 **유형 값:** `auth`, `dashboard`, `list`, `detail`, `form`, `static`, `error` (7종)
@@ -216,6 +219,9 @@
 | R-033 | BlogEditor(동적) | FooterSection | - |
 | R-034 | BoardRow, CommunityBadge, BoardSidebar, PostActions, PostVoteButtons, CommentSection | FooterSection | - |
 | R-035 | CoinHero, CoinRoomTabs, SidebarWidget, PriceTickerWidget, HotIssueWidget, FngGaugeWidget, OfficialPostsWidget | FooterSection | - |
+| R-036 | 스크랩 목록 (BoardRow 패턴) | GlobalHeader | - |
+| R-037 | BlogEditor(동적) — 게시글 수정용 | - | - |
+| R-038 | 신고 목록 테이블 (status 필터) | GlobalHeader | - |
 <!-- 새 컴포넌트 매핑은 이 줄 위에 추가 -->
 
 ---
@@ -224,18 +230,18 @@
 
 | 항목 | 결과 |
 |------|------|
-| 최종 검증일 | 2026-05-29 (R11-T01, `npm run build` green 출력 기준) |
+| 최종 검증일 | 2026-06-20 (R-B, `npm run build` green 출력 기준) |
 | 검증 범위 | 전체 (빌드 라우트 전수 추출 ↔ 레지스트리 1:1) |
-| 빌드 라우트 총계 | **71 엔트리** (Route(app) 표) = 페이지 35 + API 31 + auth/callback 1 + 메타 3(feed.xml·robots.txt·sitemap.xml) + _not-found 1. 정적 프리렌더 카운터 = 54/54 |
-| 등록 라우트(페이지) | **35개** (R-001~R-035) — 빌드 페이지 라우트와 1:1, 누락 0 |
-| 활성 라우트 | **33개** (개발중 2 제외) |
+| 빌드 라우트 총계 | **80 엔트리 (추정)** = 페이지 38 + API 37 + auth/callback 1 + 메타 3(feed.xml·robots.txt·sitemap.xml) + _not-found 1. (R-B 빌드 기준 갱신) |
+| 등록 라우트(페이지) | **38개** (R-001~R-038) — R-B 3개 추가(R-036 /scraps·R-037 /board/.../edit·R-038 /admin/reports) |
+| 활성 라우트 | **36개** (개발중 2 제외: R-022 privacy·R-023 pricing) |
 | 🔴 Critical | 0개 |
 | 🟡 Important | 0개 |
 | 🔵 Minor | 1개 — `/stock-market` nav 진입점 소실(v2.0 GNB 피벗, 직접 URL만 도달) |
-| 판정 결과 | 빌드 페이지 라우트 35 ↔ 레지스트리 35 완전 일치 |
-| 상태 | ✅ 정상 (개발중 2: R-022 privacy·R-023 pricing / nav-less 1: R-011 stock-market). R12: settings·watchlist 활성화 + nav 진입점 확보 + 미들웨어 보호 해제(익명 우선) |
+| 판정 결과 | 빌드 페이지 라우트 38 ↔ 레지스트리 38 완전 일치 (R-B 기준) |
+| 상태 | ✅ 정상 (개발중 2: R-022 privacy·R-023 pricing / nav-less 1: R-011 stock-market). R-B: /scraps·/board/.../edit·/admin/reports 3라우트 추가 |
 
-**API 라우트(31, 레지스트리 비등록 — 페이지 동반 파일 컬럼에서 추적):** `/api/admin/{board,cleanup-data,market-data,news-crawl,users}`, `/api/analysis/[symbol]`, `/api/analysis/stock/[symbol]`, `/api/blog`(+`[id]`·`categories`·`search`·`slug/[slug]`·`tags`·`upload`·`view/[id]`), `/api/board/[slug]`(+`[postId]`), `/api/coins/{hot-issues,ticker}`, `/api/community/{comment,like}`, `/api/contact`, `/api/fng`, `/api/kimchi`, `/api/klines`, `/api/news`, `/api/price`, `/api/signals`, `/api/stock/{history,quote,time-series}`
+**API 라우트(37, 레지스트리 비등록 — 페이지 동반 파일 컬럼에서 추적):** `/api/admin/{board,cleanup-data,market-data,news-crawl,reports,users}`, `/api/analysis/[symbol]`, `/api/analysis/stock/[symbol]`, `/api/blog`(+`[id]`·`categories`·`search`·`slug/[slug]`·`tags`·`upload`·`view/[id]`), `/api/board/[slug]`(+`[postId]`), `/api/coins/{hot-issues,ticker}`, `/api/community/{comment,like,report,scrap}`, `/api/contact`, `/api/fng`, `/api/kimchi`, `/api/klines`, `/api/news`, `/api/price`, `/api/signals`, `/api/stock/{history,quote,time-series}`
 
 **특수 라우트(4):** `/auth/callback`(OAuth 콜백 route handler), `/feed.xml`·`/robots.txt`·`/sitemap.xml`(메타데이터 route)
 
@@ -262,6 +268,7 @@
 
 | 버전 | 날짜 | 변경 내용 | 모드 |
 |------|------|----------|------|
+| 6 | 2026-06-20 | R-B 커뮤니티 인터랙션 3라우트 추가: R-036 /scraps(내 스크랩)·R-037 /board/[slug]/[postId]/edit(게시글 수정)·R-038 /admin/reports(신고 검토). §8 카운트 38/36 + API 37건 갱신. | reconcile |
 | 5 | 2026-05-29 | R11-T01 라우트 레지스트리 전수 정합: `npm run build`(green) 출력으로 빌드 71엔트리 추출 → 페이지 라우트 35 ↔ 레지스트리 1:1. 미등록 5건 추가(R-031 /admin/board·R-032 /board/[slug]·R-033 /board/[slug]/write·R-034 /board/[slug]/[postId]·R-035 /coin/[symbol]). 진입점 전수 정합(GNB §3-1·Footer 실코드 기준), §3-3 Footer를 커뮤니티/정보 그룹으로 갱신, /blog Footer 공식글 진입점 확정(고아 아님), §7 신규 5행, §8 카운트 35/31 + 빌드 분류 명시, /settings·/stock-market nav-less 등재 | reconcile |
 | 4 | 2026-05-29 | R9-T03 정합: HeroSection 레지스트리·R-001 매핑 제거(R9-T01 dead 삭제 반영), GNB를 v2.0 실구조(1차 5 + 코인룸 6 + 도구 8, /history 포함 — R9-T02)로 정합, InvestmentQuotes 홈 사용 표기 제거(코드 근거) | reconcile |
 | 2 | 2026-02-20 | 검증 이슈 수정: /pricing 생성, /settings·/watchlist GNB 연결, 총 23개 라우트 | verify |

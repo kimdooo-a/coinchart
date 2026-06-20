@@ -1,9 +1,9 @@
 # API Reference
 
 ## 개요
-총 33개 엔드포인트 (공개 9개 + 블로그 6개 + SEO 3개, 관리자 4개 + 블로그 5개, 주식 분석 2개, 사용자 데이터 4개 포함)
+총 37개 엔드포인트 (공개 9개 + 블로그 6개 + SEO 3개, 관리자 5개 + 블로그 5개, 주식 분석 2개, 사용자 데이터 4개 포함, R-B 스크랩·신고 3개 추가)
 
-최종 업데이트: 2026-05-30 (R13 watchlist reorder PATCH·벌크 clear DELETE?all 2개 추가)
+최종 업데이트: 2026-06-20 (R-B — scrap POST/GET·report POST·admin/reports GET/PATCH·board scrapped 필드 추가)
 
 ---
 
@@ -14,6 +14,7 @@
 4. [뉴스/기타](#뉴스기타)
 5. [사용자 데이터](#사용자-데이터)
 6. [관리자 전용](#관리자-전용)
+7. [커뮤니티 스크랩·신고 (R-B)](#커뮤니티-스크랩신고-r-b)
 
 ---
 
@@ -650,6 +651,11 @@
 | GET | `/api/admin/board` | 보드별 공지+최근글 조회 | Admin |
 | POST | `/api/admin/board` | 공지 작성 (is_notice) | Admin |
 | PATCH | `/api/admin/board` | is_notice 토글 (승격/해제) | Admin |
+| GET | `/api/admin/reports` | 신고 목록 조회 (status 필터) | Admin |
+| PATCH | `/api/admin/reports` | 신고 상태 변경 (reviewed/dismissed) | Admin |
+| POST | `/api/community/scrap` | 스크랩 토글 (추가/취소) | 회원 전용 |
+| GET | `/api/community/scrap` | 내 스크랩 목록 조회 | 회원 전용 |
+| POST | `/api/community/report` | 게시글·댓글 신고 접수 | 불필요 (회원/익명) |
 | GET | `/api/blog` | 블로그 포스트 목록 | 불필요 |
 | POST | `/api/blog` | 블로그 포스트 생성 | Admin |
 | GET | `/api/blog/[id]` | 포스트 상세 (관리자) | Admin |
@@ -792,10 +798,11 @@ v2.0 커뮤니티 피벗(자유/시세/정보 + 코인룸 6종)을 위한 게시
 - **응답 (200)**:
   ```json
   {
-    "post":     { /* community_posts row */ },
+    "post":     { /* community_posts row, scrapped: boolean (R-B 추가) */ },
     "comments": [ /* community_comments row[] (max 100, created_at ASC) */ ]
   }
   ```
+  - `scrapped`: 현재 로그인 회원이 이 게시글을 스크랩했는지 여부 (미로그인=false)
 - **에러**: `400`(invalid uuid) / `404`(not found 또는 deleted)
 - **부수 효과**: `view_count += 1` (비동기, 응답 차단 안 함)
 
@@ -945,3 +952,96 @@ R1 (2026-05-23) 추가. 메인페이지 사이드바 `HotIssueWidget` 실데이�
 - **인증**: 불필요 (RPC는 `anon` / `authenticated` 모두 EXECUTE 가능)
 - **사용처**: 메인페이지 사이드바 `HotIssueWidget` (T15에서 연동)
 - **의존 마이그레이션**: `supabase/migrations/20260523_create_hot_issues_rpc.sql` (`community_posts` 선행)
+
+---
+
+## 커뮤니티 스크랩·신고 (R-B)
+
+> R-B 2026-06-14 추가. 스크랩(북마크)·신고 기능 API.
+> DB: `community_post_scraps` / `community_reports` (`supabase/migrations/20260614000001_create_scraps_reports.sql`)
+
+---
+
+### POST /api/community/scrap
+
+게시글 스크랩 토글 (추가/취소).
+
+- **파일**: `app/api/community/scrap/route.ts`
+- **인증**: 회원 전용 (`auth.getUser()` — 미인증 401)
+- **Body**: `{ postId: string }` (uuid)
+- **동작**: `community_post_scraps`에 행 있으면 DELETE(취소), 없으면 INSERT(추가). 원자적 토글.
+- **응답 (200)**: `{ scrapped: boolean }` — 최종 상태 (true=스크랩됨, false=취소됨)
+- **에러**: `400`(invalid postId) / `401`(미인증) / `404`(게시글 없음) / `500`
+
+---
+
+### GET /api/community/scrap
+
+내 스크랩 목록 조회.
+
+- **파일**: `app/api/community/scrap/route.ts`
+- **인증**: 회원 전용
+- **쿼리 파라미터**: `page`(기본 1), `limit`(기본 30, max 100)
+- **응답 (200)**:
+  ```json
+  {
+    "scraps": [ /* community_posts row[] — 스크랩한 게시글 */ ],
+    "total": 42,
+    "page": 1,
+    "limit": 30
+  }
+  ```
+- **에러**: `401`(미인증) / `500`
+
+---
+
+### POST /api/community/report
+
+게시글·댓글 신고 접수.
+
+- **파일**: `app/api/community/report/route.ts`
+- **인증**: 불필요 (회원·익명 모두 신고 가능). 회원이면 `reporter_user_id`, 익명이면 `reporter_ip_hash`로 적재.
+- **Body**:
+  ```ts
+  {
+    targetType: 'post' | 'comment',
+    targetId:   string,   // uuid
+    reason:     'spam' | 'abuse' | 'sexual' | 'fraud' | 'etc',
+    detail?:    string    // max 500자
+  }
+  ```
+- **응답 (201)**: `{ ok: true }`
+- **에러**: `400`(검증) / `409`(이미 신고함 — dedup) / `500`
+- **dedup**: `reporter_user_id` 또는 `reporter_ip_hash` 기준 동일 대상 중복 신고 방지 (부분 UNIQUE 인덱스)
+- **헤더 사용**: `x-client-ip-hash` (middleware 주입, 익명 신고 dedup용)
+
+---
+
+### GET /api/admin/reports
+
+신고 목록 조회 (관리자 전용).
+
+- **파일**: `app/api/admin/reports/route.ts`
+- **인증**: Admin (`requireAdmin` — `smartkdy7@gmail.com`)
+- **쿼리 파라미터**: `status`(`pending`|`reviewed`|`dismissed`, 기본 전체)
+- **응답 (200)**:
+  ```json
+  {
+    "reports": [ /* community_reports row[] */ ],
+    "total": 5
+  }
+  ```
+- **에러**: `401`(미인증) / `403`(비관리자) / `500`
+- **정렬**: `created_at DESC` (인덱스 `idx_reports_status_created` 활용)
+
+---
+
+### PATCH /api/admin/reports
+
+신고 상태 변경 (관리자 전용).
+
+- **파일**: `app/api/admin/reports/route.ts`
+- **인증**: Admin
+- **Body**: `{ reportId: string, status: 'reviewed' | 'dismissed' }`
+- **응답 (200)**: `{ ok: true, status: string }`
+- **에러**: `400`(검증) / `401`(미인증) / `403`(비관리자) / `404`(없음) / `500`
