@@ -7,6 +7,7 @@
 
 | # | 날짜 | 세션 | handover |
 |---|------|------|----------|
+| 52 | 2026-06-20 | R-B 구현 — 커뮤니티 인터랙션 완성 + 코인룸 시그널 실데이터화 (subagent-driven 14task) | [→](./2026-06-20-session52-rb-community-interactions.md) |
 | 51 | 2026-06-14 | 기능 완성도 점검 연구 + R-A 보안 핫픽스 + R-B 설계/계획 | [→](./2026-06-14-session51-completeness-ra-rb.md) |
 | 50 | 2026-06-13 | git main 통합 — r9-gap-verify 스테일 브랜치 선별 회수 | [→](./2026-06-13-session50-git-main-integration.md) |
 | 49 | 2026-06-03 | 양평 통지 송신 + R17 잔여 마감 (watchlist sync E2E 스모크) | [→](./2026-06-03-session49-watchlist-sync-e2e.md) |
