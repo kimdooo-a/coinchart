@@ -65,18 +65,22 @@ export async function GET(
     .limit(100);
 
   // 로그인 사용자의 스크랩 여부 — additive 필드(비회원 false, 기존 호출 무해)
+  // community_post_scraps 테이블 부재/네트워크 오류 시 500 방지 (운영 전제: 테이블 미존재 가능)
   let scrapped = false;
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (user) {
-    const { data: scrapRow } = await supabase
-      .from("community_post_scraps")
-      .select("post_id")
-      .eq("user_id", user.id)
-      .eq("post_id", postId)
-      .maybeSingle();
-    scrapped = scrapRow !== null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user;
+    if (user) {
+      const { data: scrapRow } = await supabase
+        .from("community_post_scraps")
+        .select("post_id")
+        .eq("user_id", user.id)
+        .eq("post_id", postId)
+        .maybeSingle();
+      scrapped = scrapRow !== null;
+    }
+  } catch {
+    // 테이블 부재/네트워크 오류 시 false 유지
   }
 
   return NextResponse.json({ post, comments: comments ?? [], scrapped });
