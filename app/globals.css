@@ -93,6 +93,7 @@
   --color-popover-foreground: var(--color-on-surface);
   --color-muted: var(--color-surface-container);
   --color-muted-foreground: var(--color-on-surface-variant);
+  --color-primary-foreground: var(--color-on-primary); /* shadcn 호환 — 누락 시 text-primary-foreground 무음 실패 */
   --color-accent: var(--color-primary);
   --color-accent-foreground: var(--color-on-primary);
   --color-destructive: var(--color-error);

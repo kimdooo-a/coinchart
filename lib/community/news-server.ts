@@ -55,6 +55,12 @@ export interface NewsFngData {
   prevValue?: number;
 }
 
+/** 사이드바 "코인별 뉴스(오늘)" 위젯용 — symbol별 오늘 뉴스 건수 */
+export interface CoinNewsCount {
+  symbol: string;
+  count: number;
+}
+
 export interface NewsPageData {
   /** 필터 적용 목록 (누적 page*PER_PAGE개) */
   news: NewsListItem[];
@@ -67,6 +73,8 @@ export interface NewsPageData {
   hotIssues: HotIssue[];
   fng: NewsFngData | null;
   officialPosts: OfficialPost[];
+  /** 오늘(KST) 코인별 뉴스 건수 상위 (집계 결과 없으면 빈 배열) */
+  coinCounts: CoinNewsCount[];
 }
 
 export const NEWS_PER_PAGE = 20;
@@ -130,6 +138,32 @@ function makeAnonClient() {
   );
 }
 
+// KST(UTC+9) 기준 "오늘 00:00"을 UTC ISO 문자열로 반환 (코인별 집계 window 하한)
+function kstTodayStartIso(): string {
+  const KST_OFFSET = 9 * 60 * 60 * 1000;
+  const kstNow = new Date(Date.now() + KST_OFFSET);
+  const kstMidnightUtcMs =
+    Date.UTC(kstNow.getUTCFullYear(), kstNow.getUTCMonth(), kstNow.getUTCDate()) - KST_OFFSET;
+  return new Date(kstMidnightUtcMs).toISOString();
+}
+
+// symbol 행 배열 → 상위 N개 코인별 건수 (null·'ALL' 제외, 내림차순)
+function aggregateCoinCounts(
+  rows: { symbol: string | null }[],
+  topN = 5
+): CoinNewsCount[] {
+  const counts = new Map<string, number>();
+  for (const r of rows) {
+    const sym = r.symbol;
+    if (!sym || sym === "ALL") continue;
+    counts.set(sym, (counts.get(sym) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([symbol, count]) => ({ symbol, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, topN);
+}
+
 // ─────────────────────────────────────────────────────────────
 // 단일 진입점 — 목록(4차원 서버 필터) + 헤드라인 + 사이드바 위젯 병렬 fetch
 // ─────────────────────────────────────────────────────────────
@@ -189,14 +223,24 @@ export async function fetchNewsPageData(filters: NewsFilters): Promise<NewsPageD
     .order("created_at", { ascending: false })
     .limit(3);
 
-  const [listRes, headlineRes, tickers, fng, hotRes, officialRes] = await Promise.all([
-    listQuery,
-    headlinesQuery,
-    tickersP,
-    fngP,
-    hotP,
-    officialP,
-  ]);
+  // 코인별 뉴스(오늘 KST) — symbol만 조회 후 JS 집계(Supabase JS는 GROUP BY 미지원)
+  const coinCountP = supabase
+    .from("news")
+    .select("symbol")
+    .gte("pub_date", kstTodayStartIso())
+    .not("symbol", "is", null)
+    .limit(2000);
+
+  const [listRes, headlineRes, tickers, fng, hotRes, officialRes, coinCountRes] =
+    await Promise.all([
+      listQuery,
+      headlinesQuery,
+      tickersP,
+      fngP,
+      hotP,
+      officialP,
+      coinCountP,
+    ]);
 
   // 사이드바 시세 — ticker 실데이터 + COIN_META 브랜드 메타
   const tickerItems: TickerItem[] = tickers.map((t) => {
@@ -227,6 +271,10 @@ export async function fetchNewsPageData(filters: NewsFilters): Promise<NewsPageD
     date: (p.created_at ?? "").slice(0, 10),
   }));
 
+  const coinCounts = aggregateCoinCounts(
+    (coinCountRes.data ?? []) as { symbol: string | null }[]
+  );
+
   return {
     news: ((listRes.data ?? []) as NewsRow[]).map(mapNewsRow),
     total: listRes.count ?? (listRes.data?.length ?? 0),
@@ -235,5 +283,6 @@ export async function fetchNewsPageData(filters: NewsFilters): Promise<NewsPageD
     hotIssues,
     fng: fng ? { value: fng.value, prevValue: fng.prevValue } : null,
     officialPosts,
+    coinCounts,
   };
 }

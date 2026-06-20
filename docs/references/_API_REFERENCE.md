@@ -95,7 +95,8 @@
   }
   ```
   - `premium`: 김치 프리미엄 비율 (%, 소수점 2자리)
-  - 지원 코인: BTC, ETH, SOL, XRP, BCH, DOGE, ADA, AVAX, DOT (9종, `SUPPORTED_COINS` SSOT)
+  - 지원 코인: BTC, ETH, SOL, XRP, BCH, DOGE (route.ts 하드코딩 6종)
+  - `exchangeRate`: USD/KRW. exchangerate-api 실패 시 **마지막 성공값(모듈 캐시) 폴백**, 콜드스타트 전 무캐시 시에만 1450 기본값 (R-D)
 - **에러 응답**:
   - `500`: `{ "error": "Failed to fetch data", "details": "..." }`
 - **인증**: 불필요
@@ -329,13 +330,15 @@
     "message": "문의 내용"
   }
   ```
-  - 모든 필드 필수
+  - 모든 필드 필수. 서버 검증(R-C/R-D): 필드별 최대 길이(name 100·email 254·subject 200·message 5000), 이메일 형식 정규식, 이메일/제목/발신표시명 개행 제거(헤더 인젝션 차단). HTML 본문은 사용자 입력 escape(메일 인젝션 차단).
 - **응답 (200)**:
   ```json
   { "message": "Email sent successfully" }
   ```
 - **에러 응답**:
-  - `400`: `{ "message": "Missing required fields" }`
+  - `400`: `{ "message": "Missing required fields" }` (필수값 누락)
+  - `400`: `{ "message": "Input exceeds allowed length" }` (길이 초과)
+  - `400`: `{ "message": "Invalid email format" }` (이메일 형식 오류)
   - `500`: `{ "message": "Failed to send email", "error": "..." }`
 - **인증**: 불필요
 - **환경변수**:

@@ -4,6 +4,9 @@ import React, { useMemo, useEffect, useState } from 'react';
 import { aggregateCandles } from '@/lib/analysis/aggregation';
 import { generateSignals } from '@/lib/analysis/signals';
 import { calculateBollingerBands } from '@/lib/indicators';
+import { detectRegime } from '@/lib/probability/regime';
+import { calculateProbability } from '@/lib/probability/engine';
+import type { IndicatorSignal } from '@/types/probability';
 
 export type CandleData = {
     time: number;
@@ -37,15 +40,26 @@ const getIndicatorStatus = (val: number, type: 'RSI' | 'CCI' | 'Stoch' | 'Will' 
     return { status, label, color };
 };
 
-// Mock Rise Probability based on signal (since we don't have real-time 500-candle backtest per indicator in frontend)
-const getRiseProb = (val: number, type: string) => {
-    // Randomized slightly around 50% for Neutral, higher for Buy signals
-    let base = 50;
-    // Heuristic
-    if (type === 'RSI' && val < 30) base = 65;
-    if (type === 'RSI' && val > 70) base = 35;
-    // ...
-    return Math.min(99, Math.max(1, base + Math.floor(Math.random() * 6) - 3));
+const clampProb = (p: number) => Math.min(85, Math.max(15, Math.round(p)));
+
+// 지표별 "상승 우호도" — 결정론적 매핑(난수 제거: 기존 Math.random은 렌더마다 값이 바뀌어
+// SSR/CSR 하이드레이션 불일치를 유발했음). 모멘텀 오실레이터는 값 기반(과매도일수록 상승 우호),
+// 방향성 지표(MACD/ADX 등)는 generateSignals가 산출한 실제 BUY/SELL 시그널 기반으로 환산한다.
+const getRiseProb = (val: number, type: string, sig?: IndicatorSignal): number => {
+    switch (type) {
+        case 'RSI':   // 0~100, 낮을수록(과매도) 상승 우호
+        case 'Stoch': // 0~100
+            return clampProb(100 - val);
+        case 'CCI':   // 대략 -200~+200, 음수일수록 상승 우호
+            return clampProb(50 - val / 4);
+        case 'Will':  // -100~0, 더 음수(과매도)일수록 상승 우호
+            return clampProb(-val);
+        default:
+            // 시그널 기반 환산(MACD/ADX 등): BUY→상승 우호, SELL→하락 우호, 강도(strength) 반영
+            if (!sig || sig.signal === 'NEUTRAL') return 50;
+            const dir = sig.signal === 'BUY' ? 1 : -1;
+            return clampProb(50 + dir * Math.min(35, (sig.strength || 0.5) * 30));
+    }
 };
 
 export const ChartAnalysisPanel: React.FC<Props> = ({ symbol, lang, apiEndpoint = '/api/klines' }) => {
@@ -87,16 +101,40 @@ export const ChartAnalysisPanel: React.FC<Props> = ({ symbol, lang, apiEndpoint 
 
     const analysis = useMemo(() => {
         if (!candles || candles.length < 50) return null;
-        const { rawIndicators, supportResistance } = generateSignals(candles);
-        return { raw: rawIndicators, sr: supportResistance };
+        const md = generateSignals(candles);
+        // 레짐 분류 → 가중 확률 엔진(SSOT) 연결: 헤더 상승/하락 확률을 실 가중 점수로 산출
+        const { regime } = detectRegime({
+            adx: md.adxValue,
+            bbWidth: md.bbWidth,
+            plusDI: md.plusDI,
+            minusDI: md.minusDI,
+        });
+        const probability = calculateProbability({
+            signals: md.signals,
+            regime,
+            adxValue: md.adxValue,
+            volumeRatio: md.volumeRatio,
+            atrValue: md.atrValue,
+            avgAtrValue: md.avgAtrValue,
+            bbWidth: md.bbWidth,
+        });
+        return { raw: md.rawIndicators, sr: md.supportResistance, signals: md.signals, probability };
     }, [candles]);
 
     // Render Logic
     if (isLoading) return <div className="bg-card rounded-xl p-6 border border-border animate-pulse h-96"></div>;
     if (!analysis) return <div className="bg-card rounded-xl p-6 border border-border text-center text-on-surface-variant">Insufficient Data</div>;
 
-    const { raw, sr } = analysis;
+    const { raw, sr, signals, probability } = analysis;
     const currentPrice = sr?.current || 0;
+
+    // 헤더 상승/하락 확률 — 확률 엔진(가중 점수) 실값
+    const riseProb = probability.probability;       // 0~100 (엔진에서 15~85로 클램프)
+    const dropProb = 100 - riseProb;
+
+    // 지표명 → 시그널 조회(MACD/ADX 등 방향성 지표의 결정론적 확률 환산용)
+    const sigByName = (name: string): IndicatorSignal | undefined =>
+        signals.find((s) => s.name === name);
 
     // Strategy Logic
     const entry1 = sr ? (sr.current < sr.resistance ? sr.resistance * 1.005 : sr.current) : 0; // Breakout
@@ -161,9 +199,9 @@ export const ChartAnalysisPanel: React.FC<Props> = ({ symbol, lang, apiEndpoint 
         { name: 'Stoch (14,3)', val: `${raw.StochK.toFixed(0)}/${raw.StochD.toFixed(0)}`, ...getIndicatorStatus(raw.StochK, 'Stoch', lang), prob: getRiseProb(raw.StochK, 'Stoch') },
         { name: 'CCI (20)', val: raw.CCI.toFixed(0), ...getIndicatorStatus(raw.CCI, 'CCI', lang), prob: getRiseProb(raw.CCI, 'CCI') },
         { name: 'Will %R', val: raw.WillR.toFixed(1), ...getIndicatorStatus(raw.WillR, 'Will', lang), prob: getRiseProb(raw.WillR, 'Will') },
-        { name: 'MACD', val: raw.MACD.toFixed(4), ...getIndicatorStatus(raw.MACD, 'MACD', lang), prob: getRiseProb(raw.MACD, 'MACD') }, // Logic simplified
+        { name: 'MACD', val: raw.MACD.toFixed(4), ...getIndicatorStatus(raw.MACD, 'MACD', lang), prob: getRiseProb(raw.MACD, 'MACD', sigByName('MACD')) },
         { name: 'Bollinger', val: `%B ${bbPercentB.toFixed(2)}`, ...bbStatus, prob: bbProb },
-        { name: 'ADX', val: raw.ADX.toFixed(1), ...getIndicatorStatus(raw.ADX, 'ADX', lang), prob: 50 },
+        { name: 'ADX', val: raw.ADX.toFixed(1), ...getIndicatorStatus(raw.ADX, 'ADX', lang), prob: getRiseProb(raw.ADX, 'ADX', sigByName('ADX')) },
     ];
 
     return (
@@ -191,11 +229,11 @@ export const ChartAnalysisPanel: React.FC<Props> = ({ symbol, lang, apiEndpoint 
                     <div className="flex gap-4">
                         <div className="bg-surface-container rounded-lg p-3 text-center min-w-[100px]">
                             <div className="text-xs text-on-surface-variant mb-1">{t.rise}</div>
-                            <div className="text-xl font-bold text-green-500">50%</div>
+                            <div className="text-xl font-bold text-green-500">{riseProb}%</div>
                         </div>
                         <div className="bg-surface-container rounded-lg p-3 text-center min-w-[100px]">
                             <div className="text-xs text-on-surface-variant mb-1">{t.drop}</div>
-                            <div className="text-xl font-bold text-red-500">50%</div>
+                            <div className="text-xl font-bold text-red-500">{dropProb}%</div>
                         </div>
                     </div>
                 </div>

@@ -190,30 +190,30 @@ export default async function NewsPage({ searchParams }: PageProps) {
                         <HotIssueWidget items={data.hotIssues} />
                         {data.fng && <FngGaugeWidget value={data.fng.value} prevValue={data.fng.prevValue} />}
 
-                        {/* 코인별 뉴스 랭킹 — 정적 데모 (집계 소스 없음, R2 후속 과제) */}
+                        {/* 코인별 뉴스 랭킹 — 오늘(KST) symbol 집계 실데이터 (R-C) */}
                         <SidebarWidget title="📊 코인별 뉴스 (오늘)">
-                            <ol className="space-y-1.5">
-                                {[
-                                    { coin: "BTC", count: 124 },
-                                    { coin: "ETH", count: 87 },
-                                    { coin: "SOL", count: 42 },
-                                    { coin: "XRP", count: 31 },
-                                    { coin: "ALT", count: 56 },
-                                ].map((it, i) => (
-                                    <li
-                                        key={it.coin}
-                                        className="flex items-center justify-between text-body-sm"
-                                    >
-                                        <span>
-                                            <span className={cn("font-bold mr-2", i < 3 ? "text-primary" : "text-on-surface-variant")}>
-                                                {i + 1}
+                            {data.coinCounts.length === 0 ? (
+                                <p className="text-body-sm text-on-surface-variant py-1">
+                                    오늘 집계된 코인별 뉴스가 없습니다.
+                                </p>
+                            ) : (
+                                <ol className="space-y-1.5">
+                                    {data.coinCounts.map((it, i) => (
+                                        <li
+                                            key={it.symbol}
+                                            className="flex items-center justify-between text-body-sm"
+                                        >
+                                            <span>
+                                                <span className={cn("font-bold mr-2", i < 3 ? "text-primary" : "text-on-surface-variant")}>
+                                                    {i + 1}
+                                                </span>
+                                                {it.symbol}
                                             </span>
-                                            {it.coin}
-                                        </span>
-                                        <span className="text-on-surface-variant tabular-nums">{it.count}건</span>
-                                    </li>
-                                ))}
-                            </ol>
+                                            <span className="text-on-surface-variant tabular-nums">{it.count}건</span>
+                                        </li>
+                                    ))}
+                                </ol>
+                            )}
                         </SidebarWidget>
 
                         <OfficialPostsWidget posts={data.officialPosts} />
