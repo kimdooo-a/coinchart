@@ -5,7 +5,7 @@
 // 모바일: 거래량 생략·등락률 강조 1줄 축약.
 
 import Link from 'next/link';
-import { Star } from 'lucide-react';
+import { Star, ChevronUp, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { WatchlistItem } from '@/components/hooks/useWatchlist';
 import type { WatchlistQuote } from '@/components/hooks/useWatchlistQuotes';
@@ -26,14 +26,18 @@ interface WatchlistTableProps {
     rows: WatchlistRow[];
     lang: 'ko' | 'en';
     onRemove: (item: WatchlistItem) => void;
+    /** 순서 이동 활성화 (추가순 정렬 + 전체 탭에서만 — row 인덱스가 sortOrder와 1:1) */
+    reorderable?: boolean;
+    onMoveUp?: (idx: number) => void;
+    onMoveDown?: (idx: number) => void;
 }
 
 const T = {
-    ko: { symbol: '종목', price: '현재가', change: '등락률', volume: '거래량', actions: '관리', chart: '차트분석', room: '코인룸', remove: '관심해제' },
-    en: { symbol: 'Symbol', price: 'Price', change: '24h', volume: 'Volume', actions: '', chart: 'Analysis', room: 'Room', remove: 'Remove' },
+    ko: { symbol: '종목', price: '현재가', change: '등락률', volume: '거래량', actions: '관리', chart: '차트분석', room: '코인룸', remove: '관심해제', up: '위로', down: '아래로' },
+    en: { symbol: 'Symbol', price: 'Price', change: '24h', volume: 'Volume', actions: '', chart: 'Analysis', room: 'Room', remove: 'Remove', up: 'Move up', down: 'Move down' },
 } as const;
 
-export default function WatchlistTable({ rows, lang, onRemove }: WatchlistTableProps) {
+export default function WatchlistTable({ rows, lang, onRemove, reorderable = false, onMoveUp, onMoveDown }: WatchlistTableProps) {
     const t = T[lang];
     // 표시 환경설정 구독 (R12 / T-E / S2) — 통화(USD↔KRW)·등락 색(한국식↔글로벌) 전역 전환.
     const { formatPrice, changeColorClass } = useDisplaySettings();
@@ -46,7 +50,7 @@ export default function WatchlistTable({ rows, lang, onRemove }: WatchlistTableP
                 <div className="w-32 text-right">{t.price}</div>
                 <div className="w-24 text-right">{t.change}</div>
                 <div className="w-32 text-right">{t.volume}</div>
-                <div className="w-[120px] text-right">{t.actions}</div>
+                <div className={cn('text-right', reorderable ? 'w-[170px]' : 'w-[120px]')}>{t.actions}</div>
             </div>
 
             {/* 행 */}
@@ -102,7 +106,31 @@ export default function WatchlistTable({ rows, lang, onRemove }: WatchlistTableP
                             </div>
 
                             {/* 액션 */}
-                            <div className="w-auto md:w-[120px] flex items-center justify-end gap-1">
+                            <div className={cn('flex items-center justify-end gap-1', reorderable ? 'w-auto md:w-[170px]' : 'w-auto md:w-[120px]')}>
+                                {reorderable && (
+                                    <>
+                                        <button
+                                            type="button"
+                                            onClick={() => onMoveUp?.(idx)}
+                                            disabled={idx === 0}
+                                            className="p-1.5 rounded-md hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                                            title={t.up}
+                                            aria-label={`${base} ${t.up}`}
+                                        >
+                                            <ChevronUp className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => onMoveDown?.(idx)}
+                                            disabled={idx === rows.length - 1}
+                                            className="p-1.5 rounded-md hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                                            title={t.down}
+                                            aria-label={`${base} ${t.down}`}
+                                        >
+                                            <ChevronDown className="w-4 h-4" />
+                                        </button>
+                                    </>
+                                )}
                                 <Link
                                     href={chartHref}
                                     className="p-1.5 rounded-md hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors"

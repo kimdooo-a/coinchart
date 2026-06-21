@@ -66,7 +66,7 @@ export default function WatchlistView() {
     const { lang } = useLanguage();
     const t = T[lang === 'en' ? 'en' : 'ko'];
 
-    const { items, limit, count, isFull, has, add, remove, clear, notice, dismissNotice } =
+    const { items, limit, count, isFull, has, add, remove, reorder, clear, notice, dismissNotice } =
         useWatchlist();
     const { quotes, loading, refresh } = useWatchlistQuotes(items);
 
@@ -218,7 +218,15 @@ export default function WatchlistView() {
                         {tab === 'CRYPTO' ? t.crypto : t.stock} —
                     </div>
                 ) : (
-                    <WatchlistTable rows={rows} lang={lang === 'en' ? 'en' : 'ko'} onRemove={handleRemove} />
+                    <WatchlistTable
+                        rows={rows}
+                        lang={lang === 'en' ? 'en' : 'ko'}
+                        onRemove={handleRemove}
+                        // 순서 이동은 '추가순' 정렬 + '전체' 탭에서만 — 이때 row 인덱스가 sortOrder와 1:1.
+                        reorderable={tab === 'ALL' && sort === 'added'}
+                        onMoveUp={(i) => reorder(i, i - 1)}
+                        onMoveDown={(i) => reorder(i, i + 1)}
+                    />
                 )}
             </div>
         </main>

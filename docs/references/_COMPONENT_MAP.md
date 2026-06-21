@@ -148,6 +148,8 @@
 > **R9-T01(2026-05-29)**: 구 다크 랜딩의 닫힌 dead 트리 `hero-section`·`hero-chart`·`news-rotator` 3종 **삭제**(`git rm`). `hero-section`이 `app/page.tsx`에서 미사용(import 0)이고 `hero-chart`·`news-rotator`는 `hero-section`에서만 쓰여 연쇄 dead. 위 레지스트리/요약/다이어그램에서 제거 완료. `app/page.tsx` 홈은 커뮤니티 SSR 9종 트리(아래 요약 참조).
 >
 > **R13(2026-05-30, display-rollout)**: ① `account/AccountMenu` 신규 — `AuthButton`의 인라인 아이콘 4종(관리자·설정·아바타·로그아웃)을 아바타→드롭다운(포트폴리오·관심종목·설정·관리자조건부·로그아웃)으로 재구성(접근성 roving tabindex·aria·Esc). ② `Watchlist/WatchlistNotice` 신규 — `WatchlistView`가 `useWatchlist().notice`/`dismissNotice`를 구독하는 경량 배너(limit·sync-skipped 안내). ③ **시세 컴포넌트 `useDisplaySettings()` 구독 전역화**: `community/CoinHero`(서버→클라 전환)·`community/widgets/PriceTickerWidget`·`Chart/Ticker`·`Chart/StockTicker`가 통화(USD↔KRW)·등락색(KR↔GLOBAL)을 R12 표시설정 SSOT(`lib/config/display-settings.tsx`)에 구독. `Market/KimchiPremium`·`community/BoardSidebar`는 도메인 사유로 무변경(handover 근거). 레퍼런스 구현은 `Watchlist/WatchlistTable`. ④ **Tailwind 핫픽스**: `app/globals.css`에 `@source not "../docs"` — docs/ 문서의 코드 예시 클래스 문자열이 v4 content 스캐너에 오인 추출되어 dev CSS 파서를 깨던 것 차단.
+>
+> **R-D(2026-06-21, watchlist reorder UI)**: `Watchlist/WatchlistTable`에 순서 이동 props(`reorderable`·`onMoveUp`·`onMoveDown`) + 행별 ▲▼ 버튼(경계 disabled) 추가. `WatchlistView`가 `useWatchlist().reorder`를 구독하되 **'추가순' 정렬 + '전체' 탭에서만 활성**(이때 row 인덱스가 sortOrder와 1:1, 회원은 PATCH로 DB 영속화). 기존 훅 `reorder`·`PATCH /api/watchlist`는 존재했고 UI 진입점만 부재였음(audit P2).
 
 ---
 
