@@ -54,7 +54,7 @@ export const InvestmentQuotes = ({ size = 'normal' }: Props) => {
                         className="flex flex-col gap-2"
                     >
                         <p className={`font-medium text-foreground italic leading-relaxed ${isSmall ? 'text-base md:text-lg' : 'text-xl md:text-2xl'}`}>
-                            "{lang === 'ko' ? currentQuote.textKo : currentQuote.text}"
+                            &quot;{lang === 'ko' ? currentQuote.textKo : currentQuote.text}&quot;
                         </p>
                         {!isSmall && <div className="w-12 h-1 bg-primary mx-auto rounded-full opacity-50 my-2"></div>}
                         <p className={`text-on-surface-variant font-bold tracking-wider uppercase ${isSmall ? 'text-xs md:text-sm mt-1' : 'text-sm md:text-base'}`}>

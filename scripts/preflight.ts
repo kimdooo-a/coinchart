@@ -12,6 +12,7 @@
 
 import dotenv from 'dotenv';
 import path from 'path';
+import { execSync } from 'child_process';
 import { createLogger } from '../lib/logger';
 import { getFeatureGates } from '../lib/config/gates';
 
@@ -156,7 +157,7 @@ async function checkNodeEnvironment(): Promise<boolean> {
 
     try {
         const nodeVersion = process.version;
-        const npmVersion = require('child_process').execSync('npm --version').toString().trim();
+        const npmVersion = execSync('npm --version').toString().trim();
 
         logger.info(`  Node.js: ${nodeVersion}`);
         logger.info(`  npm: ${npmVersion}`);

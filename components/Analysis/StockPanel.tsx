@@ -2,7 +2,7 @@
 
 import React, { useMemo, useEffect, useState } from 'react';
 // STOCK ANALYSIS ONLY - NO CRYPTO IMPORTS
-import { fetchStockPrices } from '@/lib/supabase/stock';
+import { fetchStockPrices, type StockPriceData } from '@/lib/supabase/stock';
 import { generateStockSignals } from '@/lib/analysis/stock-signals';
 import { analyzeStock } from '@/lib/analysis/stock';
 import { PremiumLock } from '@/components/PremiumLock';
@@ -13,7 +13,7 @@ interface Props {
 }
 
 export const StockPanel: React.FC<Props> = ({ symbol, lang }) => {
-    const [candles, setCandles] = useState<any[]>([]);
+    const [candles, setCandles] = useState<StockPriceData[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [period, setPeriod] = useState('1d');
     const [error, setError] = useState<string | null>(null);

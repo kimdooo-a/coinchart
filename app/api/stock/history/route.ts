@@ -13,12 +13,14 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        let { data, error } = await supabaseAdmin
+        const { data: stockData, error } = await supabaseAdmin
             .from('stock_prices')
             .select('time, open, high, low, close, volume, symbol, currency, source')
             .eq('symbol', symbol.toUpperCase())
             .order('time', { ascending: false })
             .limit(limit);
+
+        let data = stockData;
 
         if (error) {
             console.error('[Stock API] Supabase Error (stock_prices):', error);

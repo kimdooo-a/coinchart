@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { analyzeMarket } from '@/lib/analysis';
+import { analyzeMarket, type AnalysisResult } from '@/lib/analysis';
 import { getCache, setCache } from '@/lib/cache/supabase-kv';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
@@ -27,7 +27,7 @@ export async function GET(
     const cacheKey = `analysis:${symbol}:${interval}:${lang}`;
 
     // 1. 캐시 체크
-    const cached = await getCache<any>(cacheKey);
+    const cached = await getCache<AnalysisResult>(cacheKey);
     if (cached) {
       return NextResponse.json({
         ...cached,

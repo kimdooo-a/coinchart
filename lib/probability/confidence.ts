@@ -83,7 +83,7 @@ export function calculateConfidence(input: ConfidenceInput): ConfidenceResult {
     }
 
     // Sum Raw Score
-    let rawScore = scoreAgreement + scoreTrend + scoreVolume + scoreHistory + scoreVolatility;
+    const rawScore = scoreAgreement + scoreTrend + scoreVolume + scoreHistory + scoreVolatility;
 
     // 6. Data Quality Multipliers
     let multiplier = 1.0;

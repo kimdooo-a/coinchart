@@ -116,7 +116,7 @@ export function performAnalysis(input: AnalysisInput): AnalysisResult {
     }
 
     // 4. Backtest Metrics
-    let backtest = calculateMetrics(input.trades || []);
+    const backtest = calculateMetrics(input.trades || []);
 
     // 4.5. 롤링 윈도우 분석 (전략 유효성 변화 감지)
     if (input.trades && input.trades.length >= 10) {

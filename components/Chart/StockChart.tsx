@@ -84,7 +84,7 @@ export const StockChart: React.FC<Props> = ({
     // Resize Observer using generic resize logic
     useEffect(() => {
         const resizeObserver = new ResizeObserver((entries) => {
-            for (let entry of entries) {
+            for (const entry of entries) {
                 const { width, height } = entry.contentRect;
                 if (entry.target === chartContainerRef.current && chartRef.current) {
                     chartRef.current.applyOptions({ width, height });

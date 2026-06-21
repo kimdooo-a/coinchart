@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import type { User } from '@supabase/supabase-js'
 import { motion } from 'framer-motion'
 import { TradeModal } from '@/components/TradeModal'
 import { useLanguage } from '@/context/LanguageContext'
@@ -31,7 +32,7 @@ export default function PortfolioPage() {
     const { lang, setLang } = useLanguage()
     const t = TRANSLATIONS[lang]
 
-    const [user, setUser] = useState<any>(null)
+    const [user, setUser] = useState<User | null>(null)
     const [trades, setTrades] = useState<Trade[]>([])
     const [holdings, setHoldings] = useState<Holding[]>([])
     const [isTradeModalOpen, setIsTradeModalOpen] = useState(false)
@@ -45,41 +46,8 @@ export default function PortfolioPage() {
 
     const supabase = createClient()
 
-    // 1. Fetch User & Trades
-    useEffect(() => {
-        const initData = async () => {
-            const { data: { user } } = await supabase.auth.getUser()
-            setUser(user)
-            if (user) {
-                await fetchTrades(user.id)
-            }
-        }
-        initData()
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null)
-        })
-        return () => subscription.unsubscribe()
-    }, [])
-
-    // 2. Fetch Trades
-    const fetchTrades = async (userId: string) => {
-        setIsLoading(true)
-        const { data, error } = await supabase
-            .from('trades')
-            .select('*')
-            .eq('user_id', userId)
-            .order('executed_at', { ascending: false })
-
-        if (!error && data) {
-            setTrades(data)
-            await calculatePortfolio(data) // Trigger calculation
-        }
-        setIsLoading(false)
-    }
-
     // 3. Calculate Portfolio (Holdings & Prices)
-    const calculatePortfolio = async (tradeList: Trade[]) => {
+    const calculatePortfolio = useCallback(async (tradeList: Trade[]) => {
         // A. Aggregate Trades into Holdings
         const tempHoldings: Record<string, { qty: number, cost: number }> = {}
 
@@ -102,7 +70,7 @@ export default function PortfolioPage() {
         // B. Fetch Latest Prices for held symbols (Live + DB Fallback)
         const symbols = Object.keys(tempHoldings).filter(s => tempHoldings[s].qty > 0.00000001) // Filter out sold/empty
 
-        let marketPrices: Record<string, number> = {}
+        const marketPrices: Record<string, number> = {}
 
         if (symbols.length > 0) {
             // 1. Fetch from DB first (Base layer)
@@ -178,7 +146,40 @@ export default function PortfolioPage() {
         setTotalInvested(calcTotalInvested)
         setTotalPnL(calcTotalValue - calcTotalInvested)
         setTotalPnLPercent(calcTotalInvested > 0 ? ((calcTotalValue - calcTotalInvested) / calcTotalInvested) * 100 : 0)
-    }
+    }, [supabase])
+
+    // 2. Fetch Trades
+    const fetchTrades = useCallback(async (userId: string) => {
+        setIsLoading(true)
+        const { data, error } = await supabase
+            .from('trades')
+            .select('*')
+            .eq('user_id', userId)
+            .order('executed_at', { ascending: false })
+
+        if (!error && data) {
+            setTrades(data)
+            await calculatePortfolio(data) // Trigger calculation
+        }
+        setIsLoading(false)
+    }, [supabase, calculatePortfolio])
+
+    // 1. Fetch User & Trades
+    useEffect(() => {
+        const initData = async () => {
+            const { data: { user } } = await supabase.auth.getUser()
+            setUser(user)
+            if (user) {
+                await fetchTrades(user.id)
+            }
+        }
+        initData()
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null)
+        })
+        return () => subscription.unsubscribe()
+    }, [])
 
     const handleTradeAdded = () => {
         if (user) fetchTrades(user.id)
@@ -361,7 +362,7 @@ export default function PortfolioPage() {
                 onSuccess={() => {
                     if (user) fetchTrades(user.id)
                 }}
-                userId={user?.id}
+                userId={user?.id as string}
             />
         </div>
     )

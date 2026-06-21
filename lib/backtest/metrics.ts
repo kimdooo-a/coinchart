@@ -106,7 +106,7 @@ export function calculateMetrics(trades: Trade[], initialCapital: number = 10000
 
     let ddStartTime = 0;
     let inDrawdown = false;
-    let currentDDDepth = 0;
+    const currentDDDepth = 0;
 
     // Returns for Sharpe (Percentage returns per trade)
     const returns: number[] = sortedTrades.map(t => (t.pnl / initialCapital) * 100);

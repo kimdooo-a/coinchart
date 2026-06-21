@@ -70,7 +70,7 @@ export function generateExplanation(input: GeneratorInput): ExplanationOutput {
     // Free: Brief (Template default is already concise, but we can truncate if needed)
     // Pro: Full detail + Backtest
 
-    let finalSections = rendered.sections;
+    const finalSections = rendered.sections;
 
     if (userTier === 'free') {
         // Free tier limitations? Template is already 3-line structure. 

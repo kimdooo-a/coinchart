@@ -7,6 +7,13 @@ import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
 import { TRANSLATIONS } from '@/lib/translations';
 
+interface AdminUser {
+    id: string;
+    email: string;
+    created_at: string;
+    last_sign_in_at: string | null;
+}
+
 export default function AdminPage() {
     const { lang } = useLanguage();
     const t = TRANSLATIONS[lang];
@@ -16,7 +23,7 @@ export default function AdminPage() {
     const [authorized, setAuthorized] = useState(false);
 
     // Data State
-    const [users, setUsers] = useState<any[]>([]);
+    const [users, setUsers] = useState<AdminUser[]>([]);
     const [crawlResult, setCrawlResult] = useState<string | null>(null);
     const [marketResult, setMarketResult] = useState<string | null>(null);
     const [cleanupResult, setCleanupResult] = useState<string | null>(null);

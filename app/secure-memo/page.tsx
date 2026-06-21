@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import type { User } from '@supabase/supabase-js'
 import { motion } from 'framer-motion'
 import { useLanguage } from '@/context/LanguageContext'
 import { TRANSLATIONS } from '@/lib/translations'
@@ -25,7 +26,7 @@ export default function SecureMemoPage() {
     const { lang } = useLanguage()
     const t = TRANSLATIONS[lang]
 
-    const [user, setUser] = useState<any>(null)
+    const [user, setUser] = useState<User | null>(null)
     const [memos, setMemos] = useState<SecureMemo[]>([])
     const [isLoading, setIsLoading] = useState(true)
 
@@ -35,6 +36,20 @@ export default function SecureMemoPage() {
     const [viewingMemo, setViewingMemo] = useState<{ memo: SecureMemo; content: string } | null>(null)
 
     const supabase = createClient()
+
+    const fetchMemos = useCallback(async (userId: string) => {
+        setIsLoading(true)
+        const { data, error } = await supabase
+            .from('secure_memos')
+            .select('*')
+            .eq('user_id', userId)
+            .order('updated_at', { ascending: false })
+
+        if (!error && data) {
+            setMemos(data)
+        }
+        setIsLoading(false)
+    }, [supabase])
 
     useEffect(() => {
         const initData = async () => {
@@ -51,20 +66,6 @@ export default function SecureMemoPage() {
         })
         return () => subscription.unsubscribe()
     }, [])
-
-    const fetchMemos = async (userId: string) => {
-        setIsLoading(true)
-        const { data, error } = await supabase
-            .from('secure_memos')
-            .select('*')
-            .eq('user_id', userId)
-            .order('updated_at', { ascending: false })
-
-        if (!error && data) {
-            setMemos(data)
-        }
-        setIsLoading(false)
-    }
 
     const handleDelete = async (memoId: string) => {
         if (!confirm(t.secureMemo.deleteConfirm)) return
@@ -183,7 +184,7 @@ export default function SecureMemoPage() {
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
                 onSuccess={handleMemoCreated}
-                userId={user?.id}
+                userId={user?.id as string}
                 t={{
                     newMemo: t.secureMemo.newMemo,
                     memoTitle: t.secureMemo.memoTitle,
