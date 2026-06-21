@@ -4,6 +4,7 @@
 
 // analyzeMarket 재수출 — 코인룸 등 crypto SSOT 컨텍스트에서 @/lib/analysis/crypto 경유 사용
 export { analyzeMarket } from '../analysis';
+export type { AnalysisResult } from '../analysis';
 
 import { calculateProbability } from '@/lib/probability/engine';
 import { calculateMetrics } from '@/lib/backtest/metrics';

@@ -19,6 +19,18 @@ import { analyzeStock } from '@/lib/analysis/stock';
 import { generateStockSignals } from '@/lib/analysis/stock-signals'; // Stock signals only
 ```
 
+#### 자산-중립 범용 분석 모듈 (crypto/stock 양쪽에서 사용 가능)
+`lib/analysis/` 하위 범용 모듈은 특정 자산에 종속되지 않으므로 crypto·stock 컨텍스트 모두에서 직접 import 허용한다.
+```typescript
+import { performAnalysis } from '@/lib/analysis/orchestrator';   // 범용 분석 오케스트레이터
+import { generateSignals } from '@/lib/analysis/signals';        // 범용 캔들→시그널 (CandleData)
+import { aggregateCandles } from '@/lib/analysis/aggregation';   // 범용 시간프레임 집계
+// 그 외 범용: mtf, divergence, candlestick
+```
+> crypto↔stock **데이터** 혼선은 `@/lib/supabase/*` 규칙이 별도 차단한다. analysis 레이어 규칙이 막는 것은
+> `@/lib/analysis` 부모 직접 import(아래 FORBIDDEN)와 화이트리스트 미등록 신규 모듈뿐이다.
+> eslint 규칙은 `eslint.config.mjs`의 `no-restricted-imports` patterns 화이트리스트로 집행한다.
+
 ### ❌ FORBIDDEN
 
 #### Cross-asset imports

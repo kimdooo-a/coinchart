@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { analyzeMarket, type AnalysisResult } from '@/lib/analysis';
+import { analyzeMarket, type AnalysisResult } from '@/lib/analysis/crypto';
 import { getCache, setCache } from '@/lib/cache/supabase-kv';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
