@@ -7,6 +7,7 @@
 
 | # | 날짜 | 세션 | handover |
 |---|------|------|----------|
+| 55 | 2026-06-21 | functional-completeness audit(R-C/R-D) 전량 마감 + watchlist reorder UI | [→](./2026-06-21-session55-rc-rd-audit-closure.md) |
 | 54 | 2026-06-21 | 에러 바운더리 3종 신규 도입 (error·loading·not-found) | [→](./2026-06-21-session54-error-boundaries.md) |
 | 53 | 2026-06-20 | DB 블로커 해소 + 통합 리뷰 + 병렬 수정 swarm + 배포 | [→](./2026-06-20-session53-db-unblock-review-fixes.md) |
 | 52 | 2026-06-20 | R-B 구현 — 커뮤니티 인터랙션 완성 + 코인룸 시그널 실데이터화 (subagent-driven 14task) | [→](./2026-06-20-session52-rb-community-interactions.md) |

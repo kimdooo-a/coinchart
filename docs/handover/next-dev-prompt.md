@@ -4,6 +4,7 @@
 
 ## 최근 완료된 작업
 
+- **세션 55 (2026-06-21)**: **functional-completeness audit(R-C/R-D) 전량 마감 + watchlist reorder UI (단독, 자율주행)**. audit(R-A~R-D) 전체 종료. **R-C**: 상승확률 엔진 연결(`ChartAnalysisPanel` 헤더 하드코딩 50/50→`detectRegime`+`calculateProbability` 실값, `getRiseProb` Math.random=하이드레이션 버그 제거→결정론적 매핑)·뉴스 코인별 집계 실데이터(오늘 KST symbol 집계)·캘린더 크롤링(`/api/calendar` faireconomy this/next week 피드, 하드코딩 2025 EVENTS 제거, 피드 실검증 104건). **R-D**: globals.css `--color-primary-foreground` alias 추가(`text-primary-foreground` 무음실패 16곳·badge.tsx 포함 일괄 해소·세션54 로컬회피의 SSOT 정답)·contact 검증+HTML escape·kimchi 동적환율 폴백·/api/price→crypto SSOT(`fetchBinanceTickers`) 경유·DetailedChart MA/BB 오버레이. **+watchlist 순서이동 UI**(▲▼ 버튼, 추가순+전체탭 한정). **blog/search 고아=audit false positive** 확정(`BlogPageClient:53` 검색UI 연결됨). tsc0·변경파일eslint0·vitest33·build0(3배치). 커밋 `adf6cf2`·`e17447f`·`4d459bc` push. ⚠️ **prod URL `coinchart.vercel.app`이 무관한 CRA 서빙 발견**(실배포 도메인 불명→실환경 미검증, 메모리 기록). handover `2026-06-21-session55-rc-rd-audit-closure.md`, solution `2026-06-21-stale-prod-url-serves-unrelated-app.md`.
 - **세션 54 (2026-06-21)**: **에러 바운더리 3종 신규 도입 (단독)**. App Router에 전혀 없던 전역 폴백 도입 — `app/error.tsx`(클라, `reset()` 재시도+홈+`digest` 노출+`console.error` 기록)·`app/loading.tsx`(서버 Suspense 스피너+aria)·`app/not-found.tsx`(서버 404+홈 Link). Material 3 라이트 토큰 일관, GlobalHeader 고정 공간(`min-h-[70vh] py-24`) 확보. **부수 발견**: 미정의 토큰 `primary-foreground`(contact 페이지 파란버튼 텍스트색 누락 잠재버그) → 정의된 `on-primary`(#fff) 사용(신규 파일만, contact 자체는 미수정). test 아티팩트 `/playwright-report`·`/test-results` `.gitignore` 등록. tsc0·eslint0·build0(58/58, `/_not-found` ○ 커스텀)·vitest33/33. handover `2026-06-21-session54-error-boundaries.md`, solution `2026-06-21-undefined-tailwind-token-silent-noop.md`.
 - **세션 53 (2026-06-20)**: **DB 블로커 해소 + 통합 리뷰 + 병렬 수정 swarm + 배포 (단독)**. 세션52 트리아지 4종 전량 처리. 🔴 Task 2 DB 블로커가 실은 해소 상태임을 규명(토큰명 단수 오인·PostgREST 404 오판 — 2테이블 적용+`schema_migrations` 기록 완료, 스모크 `--write` 6/6 PASS). `15185cc..HEAD` 통합 리뷰로 소실된 findings 재생성 → 4 disjoint 번들 병렬 swarm 8건 수정(H-1 코인룸 ISR우회·H-2 게스트비번 URL평문·M-1 익명글 수정게이트 버그·M-2·M-3·N-1·N-2·N-4). 백업 브랜치 삭제(분석상 안전). tsc0·eslint0·vitest33·build0. `868f6d9` push→Vercel 배포. handover `2026-06-20-session53-db-unblock-review-fixes.md`.
 - **세션 52 (2026-06-20)**: **R-B 구현 — 커뮤니티 인터랙션 완성 + 코인룸 시그널 실데이터화 (subagent-driven 14task, 단독)**. 세션 시작 `git pull`에서 로컬(세션9 stale, 8커밋)·원격(세션51, 78커밋) 대규모 분기 발견 → `backup/session9-local-20260620` 백업 후 `git reset --hard origin/main`. 세션51의 R-B 14task 계획을 **subagent-driven-development**로 전량 실행(task별 fresh 구현→`review-package`→독립 리뷰어[spec+quality]→Critical/Important 수정→재리뷰). **산출**: 신규 마이그(`community_post_scraps`·`community_reports`)·API 4종(`/api/community/scrap`·`/report`·`/api/admin/reports`·board GET scrapped)·페이지 3종(`/scraps`·`/board/[slug]/[postId]/edit`·`/admin/reports`)·결선(CommentSection 답글 1depth+신고·PostVoteButtons 스크랩+신고·PostActions 수정)·코인룸 `analyzeMarket(candles)` 실시그널(`analyzeCrypto`는 사전구성 signals 요구라 부적합)·레퍼런스 4종. **베이스라인**: bcryptjs/@types 미설치로 tsc 오류 3건 → `npm install`(`bfc256a`). 19커밋(`b2de576`~`55f2bff`)·25파일·+2355/-49·최종 build EXIT 0(58/58 정적). **🔴 Task 2(운영 DB 적용) 보류**: `.env.local`에 Management API 토큰 부재 → 2테이블 미적용(코드만 완성, 런타임 미작동). (handover `2026-06-20-session52-rb-community-interactions.md`)
@@ -74,10 +75,14 @@
 ### ✅ R-A 완료 (세션 51 — admin 보안 핫픽스)
 - admin API 인증 가드 일괄 추가 + `requireAdmin()` 공통 추출(`lib/supabase/admin-guard.ts`). **admin/users P0 해소**(익명 회원 조회·삭제 차단), market-data 브라우저 클라→service_role 정상화. tsc/eslint/build 0. solution `2026-06-14-admin-api-auth-guard-browser-client-misuse.md`.
 
-### 🟡 audit 잔여 (R-C/R-D — 세션 51 연구에서 도출)
-- **R-C(데이터)**: 캘린더 실데이터화(현재 정적 EVENTS·2025 과거일정 노출), 뉴스 사이드바 코인별 집계, 상승확률 엔진 연결(ChartAnalysisPanel heuristic).
-- **R-D(정리)**: blog/search 고아 API, `/api/price` SSOT 검토(Binance 직접), DetailedChart 지표 오버레이, kimchi 환율 폴백, contact 입력 검증.
+### ✅ audit 잔여 (R-C/R-D — 세션 55 전량 마감)
+- ~~**R-C(데이터)**: 캘린더 실데이터화, 뉴스 코인별 집계, 상승확률 엔진 연결~~ → **✅ 세션 55 완료**: 캘린더 `/api/calendar`(faireconomy 크롤링)·뉴스 오늘 KST symbol 집계·`ChartAnalysisPanel` `detectRegime`+`calculateProbability` 연결(Math.random 하이드레이션 버그 제거).
+- ~~**R-D(정리)**: blog/search 고아 API, `/api/price` SSOT, DetailedChart 지표, kimchi 폴백, contact 검증~~ → **✅ 세션 55 완료**: primary-foreground alias·contact 검증+escape·kimchi 동적폴백·/api/price SSOT 경유·DetailedChart MA/BB. **blog/search는 false positive**(검색UI 연결됨, 조치불요).
+- **잔여 후속(선택)**: 캘린더 DB 누적(장기 horizon)·`scripts/` eslint ~52 error 정리·Giscus/이미지업로드 E2E.
 - 출처: `docs/handover/2026-06-13-functional-completeness-audit.md`
+
+### 🔴 prod 배포 도메인 확인 (세션 55 발견 — 우선)
+- `coinchart.vercel.app`이 이 Next 프로젝트가 아닌 **무관한 create-react-app**을 서빙 중(세션40 이후 도메인 재할당 추정). repo `kimdooo-a/coinchart` push·로컬 build는 정상이나 **실환경 스모크 검증 불가**. → 실제 Vercel 배포 도메인 확인 후 신규 라우트(`/api/calendar`·`/api/price`·`/calendar`)+상승확률 헤더 실환경 검증. 메모리 `prod-url-coinchart-vercel-stale`.
 
 ### ✅ R16 완료 (세션 43, 2026-06-02 — type-cleanup)
 
